@@ -5,7 +5,6 @@
 #include "WndManager.h"
 
 Wnd::Wnd(FLOAT width, FLOAT height, FLOAT x, FLOAT y) :
-	m_isValid{ TRUE },
 	m_isFocus{ FALSE },
 	m_isPick{ FALSE },
 	m_pickDelta{ 0.0f, 0.0f }
@@ -32,25 +31,10 @@ Wnd::~Wnd()
 	
 }
 
-void Wnd::OnMouseEvent(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
+void Wnd::OnMouseEvent(HWND hWnd, UINT message, INT x, INT y)
 {
-	if (!m_isValid)
-		return;
-
-	// 이 경우엔 무조건 픽이 풀린다.
-	if (message == WM_LBUTTONUP)
-		SetPick(FALSE);
-	
-	// ui 객체로 이벤트를 넘겨준다.
-	// 마우스 좌표는 클라이언트 좌표계 -> 부모 윈도우 좌표계로 바꿔서 전달한다.
-	POINT mouse;
-	GetCursorPos(&mouse);
-	ScreenToClient(NytApp::GetInstance()->GetHwnd(), &mouse);
-	mouse.x -= static_cast<LONG>(m_position.x - m_size.x / 2.0f);
-	mouse.y -= static_cast<LONG>(m_position.y - m_size.y / 2.0f);
-
 	for (const auto& ui : m_ui)
-		ui->OnMouseEvent(hWnd, message, mouse.x, mouse.y);
+		ui->OnMouseEvent(hWnd, message, x, y);
 }
 
 void Wnd::OnKeyboardEvent(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
@@ -91,54 +75,29 @@ void Wnd::Render(const ComPtr<ID2D1HwndRenderTarget>& renderTarget)
 {
 	if (!m_isValid) return;
 
-	ID2D1SolidColorBrush* brush{};
+	ComPtr<ID2D1SolidColorBrush> brush{};
 	renderTarget->CreateSolidColorBrush(D2D1::ColorF{ D2D1::ColorF::Black }, &brush);
 	renderTarget->SetTransform(D2D1::Matrix3x2F::Translation(m_position.x, m_position.y));
 
-	// 포커스 되어있다면 테두리
+	// 포커스 되어있다면 테두리를 그린다.
 	if (m_isFocus)
 	{
 		ID2D1SolidColorBrush* focusBrush;
 		renderTarget->CreateSolidColorBrush(D2D1::ColorF{ D2D1::ColorF::Aqua }, &focusBrush);
-		renderTarget->DrawRectangle(
-			D2D1::RectF(-1 * m_size.x / 2.0f, -m_size.y / 2.0f, m_size.x / 2.0f, m_size.y / 2.0f),
-			focusBrush,
-			10.0f
-		);
+		renderTarget->DrawRectangle(D2D1::RectF(0.0f, 0.0f, m_size.x, m_size.y), focusBrush, 10.0f);
 	}
 
 	// 창
-	renderTarget->FillRectangle(
-		D2D1::RectF(-m_size.x / 2.0f, -m_size.y / 2.0f, m_size.x / 2.0f, m_size.y / 2.0f),
-		brush
-	);
-	brush->Release();
+	renderTarget->FillRectangle(D2D1::RectF(0.0f, 0.0f, m_size.x, m_size.y), brush.Get());
 
 	// 타이틀
-	ID2D1SolidColorBrush* titleBrush{};
+	ComPtr<ID2D1SolidColorBrush> titleBrush{};
 	renderTarget->CreateSolidColorBrush(D2D1::ColorF{ D2D1::ColorF::CadetBlue }, &titleBrush);
-	renderTarget->FillRectangle(
-		D2D1::RectF(-m_size.x / 2.0f, -m_size.y / 2.0f, m_size.x / 2.0f, -m_size.y / 2.0f + 15.0f),
-		titleBrush
-	);
-	titleBrush->Release();
+	renderTarget->FillRectangle(D2D1::RectF(0.0f, 0.0f, m_size.x, 15.0f), titleBrush.Get());
 
 	// 버튼
 	for (const auto& b : m_ui)
 		b->Render(renderTarget);
-}
-
-void Wnd::Destroy()
-{
-	m_isValid = FALSE;
-}
-
-template <typename T>
-void Wnd::AddUI(std::unique_ptr<T>& ui)
-{
-	std::unique_ptr<UI> _ui{ static_cast<UI*>(ui.release()) };
-	_ui->SetParent(this);
-	m_ui.push_back(std::move(_ui));
 }
 
 void Wnd::SetFocus(BOOL isFocus)

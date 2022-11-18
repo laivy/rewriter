@@ -21,7 +21,5 @@ public:
 
 protected:
 	FLOAT2 m_size; // 가로, 세로
-
-private:
 	Wnd* m_parent; // 부모 윈도우
 };

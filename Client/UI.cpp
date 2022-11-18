@@ -34,7 +34,5 @@ RECTF UI::GetRect() const
 	FLOAT2 pos{ m_position };
 	if (m_parent)
 		pos += m_parent->GetPosition();
-	FLOAT hx{ m_size.x / 2.0f };
-	FLOAT hy{ m_size.y / 2.0f };
-	return RECTF{ pos.x - hx, pos.y - hy, pos.x + hx, pos.y + hy };
+	return RECTF{ pos.x, pos.y, pos.x + m_size.x, pos.y + m_size.y };
 }

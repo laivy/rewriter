@@ -1,7 +1,6 @@
 ﻿#pragma once
 #include "GameObject.h"
-
-class Wnd;
+#include "Wnd.h"
 
 class WndManager : public TSingleton<WndManager>
 {
@@ -15,7 +14,15 @@ public:
 	virtual void Update(FLOAT deltaTime);
 	virtual void Render(const ComPtr<ID2D1HwndRenderTarget>& renderTarget);
 
-	void AddWnd(std::unique_ptr<Wnd>& wnd);
+	template <typename T>
+	void AddWnd(std::unique_ptr<T>& wnd)
+	{
+		std::unique_ptr<Wnd> _wnd{ static_cast<Wnd*>(wnd.release()) };
+		for (const auto& w : m_wnds)
+			w->SetFocus(FALSE);
+		_wnd->SetFocus(TRUE);
+		m_wnds.push_back(std::move(_wnd));
+	}
 
 	void SetTopWnd(const Wnd* const wnd);
 

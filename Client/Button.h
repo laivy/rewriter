@@ -14,9 +14,6 @@ public:
 	virtual void Update(FLOAT deltaTime) { }
 	virtual void Render(const ComPtr<ID2D1HwndRenderTarget>& renderTarget) const;
 
-	virtual RECTF GetRect() const;
-
-	void SetPosition(const FLOAT2& position);
-
-	FLOAT2 GetPosition() const;
+private:
+	D2D1::ColorF m_color;
 };

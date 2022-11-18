@@ -5,15 +5,15 @@
 
 void WndManager::OnMouseEvent(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
+	POINT mouse;
+	GetCursorPos(&mouse);
+	ScreenToClient(NytApp::GetInstance()->GetHwnd(), &mouse);
+
 	// 어떤 창이 선택됐는지 체크한다.
 	switch (message)
 	{
 	case WM_LBUTTONDOWN:
 	{
-		POINT mouse;
-		GetCursorPos(&mouse);
-		ScreenToClient(NytApp::GetInstance()->GetHwnd(), &mouse);
-
 		Wnd* focusWnd{ nullptr };
 		Wnd* pickWnd{ nullptr };
 		for (const auto& w : m_wnds)
@@ -42,12 +42,24 @@ void WndManager::OnMouseEvent(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPa
 			pickWnd->SetPick(TRUE);
 		break;
 	}
-	default:
+	case WM_LBUTTONUP:
+		for (const auto& w : m_wnds)
+			w->SetPick(FALSE);
 		break;
 	}
 
 	for (const auto& w : m_wnds)
-		w->OnMouseEvent(hWnd, message, wParam, lParam);
+	{
+		if (!w->GetIsValid())
+			continue;
+
+		// 윈도우 객체들에게는 클라이언트 좌표계 -> 해당 윈도우 좌표계로 바꿔서 전달한다.
+		POINT clientPos{ mouse };
+		FLOAT2 wndPos{ w->GetPosition() };
+		clientPos.x -= static_cast<LONG>(wndPos.x);
+		clientPos.y -= static_cast<LONG>(wndPos.y);
+		w->OnMouseEvent(hWnd, message, clientPos.x, clientPos.y);
+	}
 }
 
 void WndManager::OnKeyboardEvent(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
@@ -79,6 +91,8 @@ void WndManager::Render(const ComPtr<ID2D1HwndRenderTarget>& renderTarget)
 
 void WndManager::SetTopWnd(const Wnd* const wnd)
 {
+	// 이미 락을 잡고 들어온다.
+
 	if (!wnd)
 		return;
 
@@ -90,10 +104,3 @@ void WndManager::SetTopWnd(const Wnd* const wnd)
 	m_wnds.erase(it);
 }
 
-void WndManager::AddWnd(std::unique_ptr<Wnd>& wnd)
-{
-	for (const auto& w : m_wnds)
-		w->SetFocus(FALSE);
-	wnd->SetFocus(TRUE);
-	m_wnds.push_back(std::move(wnd));
-}

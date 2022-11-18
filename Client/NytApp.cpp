@@ -1,7 +1,4 @@
-﻿#include <thread>
-#include <mutex>
-#include <functional>
-#include "Stdafx.h"
+﻿#include "Stdafx.h"
 #include "NytApp.h"
 #include "Timer.h"
 #include "WndManager.h"

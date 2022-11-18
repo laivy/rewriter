@@ -13,6 +13,10 @@
 #include <string>
 #include <vector>
 #include <list>
+#include <ranges>
+#include <thread>
+#include <mutex>
+#include <functional>
 
 #pragma comment(lib, "d2d1.lib")
 #pragma comment(lib, "dwrite.lib")
