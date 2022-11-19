@@ -2,16 +2,9 @@
 #include "UI.h"
 #include "Wnd.h"
 
-UI::UI() :
-	m_size{ 0.0f, 0.0f },
-	m_parent{ nullptr }
+UI::UI() : m_parent{ nullptr }
 {
 
-}
-
-void UI::SetSize(const FLOAT2& size)
-{
-	m_size = size;
 }
 
 void UI::SetParent(Wnd* wnd)
@@ -22,11 +15,6 @@ void UI::SetParent(Wnd* wnd)
 Wnd* const UI::GetParent() const
 {
 	return m_parent;
-}
-
-FLOAT2 UI::GetSize() const
-{
-	return m_size;
 }
 
 RECTF UI::GetRect() const

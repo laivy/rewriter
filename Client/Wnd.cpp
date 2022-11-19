@@ -12,12 +12,9 @@ Wnd::Wnd(FLOAT width, FLOAT height, FLOAT x, FLOAT y) :
 	static bool isFirst{ TRUE };
 	if (isFirst)
 	{
-		// UI 객체의 좌표계는 부모 윈도우 좌표계이다.
-		auto button1{ std::make_unique<Button>(80.0f, 20.0f, 0.0f, height * 0.3f) };
-		AddUI(button1);
-
-		auto button2{ std::make_unique<Button>(80.0f, 20.0f, 0.0f, height * 0.4f) };
-		AddUI(button2);
+		auto button{ std::make_unique<Button>(150.0f, 20.0f) };
+		button->SetPosition(width / 2.0f, height * 0.9f, Pivot::CENTER);
+		AddUI(button);
 
 		isFirst = FALSE;
 	}
