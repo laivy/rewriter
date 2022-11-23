@@ -1,8 +1,10 @@
 ﻿#include "Stdafx.h"
 #include "Wnd.h"
-#include "Button.h"
-#include "NytApp.h"
 #include "WndManager.h"
+#include "NytApp.h"
+
+#include "Button.h"
+#include "EditCtrl.h"
 
 Wnd::Wnd(FLOAT width, FLOAT height, FLOAT x, FLOAT y) :
 	m_isFocus{ FALSE },
@@ -15,6 +17,10 @@ Wnd::Wnd(FLOAT width, FLOAT height, FLOAT x, FLOAT y) :
 		auto button{ std::make_unique<Button>(150.0f, 20.0f) };
 		button->SetPosition(width / 2.0f, height * 0.9f, Pivot::CENTER);
 		AddUI(button);
+
+		auto editctrl{ std::make_unique<EditCtrl>(150.0f, 40.0f) };
+		editctrl->SetPosition(width / 2.0f, height * 0.5f, Pivot::CENTER);
+		AddUI(editctrl);
 
 		isFirst = FALSE;
 	}
@@ -92,9 +98,9 @@ void Wnd::Render(const ComPtr<ID2D1HwndRenderTarget>& renderTarget)
 	renderTarget->CreateSolidColorBrush(D2D1::ColorF{ D2D1::ColorF::CadetBlue }, &titleBrush);
 	renderTarget->FillRectangle(D2D1::RectF(0.0f, 0.0f, m_size.x, 15.0f), titleBrush.Get());
 
-	// 버튼
-	for (const auto& b : m_ui)
-		b->Render(renderTarget);
+	// UI
+	for (const auto& ui : m_ui)
+		ui->Render(renderTarget);
 }
 
 void Wnd::SetFocus(BOOL isFocus)
@@ -125,17 +131,17 @@ std::mutex& Wnd::GetLock()
 	return m_mutex;
 }
 
-BOOL Wnd::GetIsValid() const
+BOOL Wnd::IsValid() const
 {
 	return m_isValid;
 }
 
-BOOL Wnd::GetIsFocus() const
+BOOL Wnd::IsFocus() const
 {
 	return m_isFocus;
 }
 
-BOOL Wnd::GetIsPick() const
+BOOL Wnd::IsPick() const
 {
 	return m_isPick;
 }

@@ -63,6 +63,12 @@
     <ClCompile Include="UI.cpp">
       <Filter>소스 파일\Interface</Filter>
     </ClCompile>
+    <ClCompile Include="Util.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="FontPool.cpp">
+      <Filter>소스 파일\UI</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="NytApp.h">
@@ -86,9 +92,6 @@
     <ClInclude Include="Util.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
-    <ClInclude Include="Defines.h">
-      <Filter>헤더 파일</Filter>
-    </ClInclude>
     <ClInclude Include="Button.h">
       <Filter>헤더 파일\UI</Filter>
     </ClInclude>
@@ -106,6 +109,9 @@
     </ClInclude>
     <ClInclude Include="UI.h">
       <Filter>헤더 파일\Interface</Filter>
+    </ClInclude>
+    <ClInclude Include="FontPool.h">
+      <Filter>헤더 파일\UI</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

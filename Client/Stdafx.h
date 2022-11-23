@@ -27,7 +27,6 @@
 
 #include "Singleton.h"
 #include "Util.h"
-#include "Defines.h"
 
 using Microsoft::WRL::ComPtr;
 

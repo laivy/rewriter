@@ -50,7 +50,7 @@ void WndManager::OnMouseEvent(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPa
 
 	for (const auto& w : m_wnds)
 	{
-		if (!w->GetIsValid())
+		if (!w->IsValid())
 			continue;
 
 		// 윈도우 객체들에게는 클라이언트 좌표계 -> 해당 윈도우 좌표계로 바꿔서 전달한다.
@@ -74,7 +74,7 @@ void WndManager::Update(FLOAT deltaTime)
 	for (const auto& w : m_wnds)
 		w->Update(deltaTime);
 
-	auto removeCount{ m_wnds.remove_if([](const std::unique_ptr<Wnd>& w) { return !w->GetIsValid(); }) };
+	auto removeCount{ m_wnds.remove_if([](const std::unique_ptr<Wnd>& w) { return !w->IsValid(); }) };
 	if (removeCount > 0 && m_wnds.size() > 0)
 	{
 		m_wnds.back()->SetFocus(TRUE);

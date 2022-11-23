@@ -8,7 +8,7 @@ public:
 	~EditCtrl() = default;
 
 	virtual void Update(FLOAT deltaTime) { }
-	virtual void Render(const ComPtr<ID2D1RenderTarget>& renderTarget);
+	virtual void Render(const ComPtr<ID2D1HwndRenderTarget>& renderTarget) const;
 	virtual RECTF GetRect() const;
 
 private:

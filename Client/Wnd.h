@@ -26,9 +26,9 @@ public:
 	void SetPick(BOOL isPick);
 
 	std::mutex& GetLock();
-	BOOL GetIsValid() const;
-	BOOL GetIsFocus() const;
-	BOOL GetIsPick() const;
+	BOOL IsValid() const;
+	BOOL IsFocus() const;
+	BOOL IsPick() const;
 	FLOAT2 GetPickedDelta() const;
 
 private:
