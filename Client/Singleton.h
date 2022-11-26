@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 #include <memory>
 
 template <class T>
@@ -10,12 +10,6 @@ public:
 	{
 		if (m_instance) return;
 		m_instance = std::make_unique<T>(args...);
-	}
-
-	static void Instantiate()
-	{
-		if (m_instance) return;
-		m_instance = std::make_unique<T>();
 	}
 
 	static void Destroy()

@@ -1,11 +1,6 @@
 ﻿#pragma once
 
-template<class T>
-class TSingleton;
-
 class Timer;
-class Wnd;
-class WndManager;
 
 class NytApp : public TSingleton<NytApp>
 {
@@ -13,8 +8,12 @@ public:
 	NytApp();
 	~NytApp();
 
+	void OnCreate();
+
 	void Run();
-	HWND GetHwnd() const { return m_hwnd; }
+
+	HWND GetHwnd() const;
+	ComPtr<IDWriteFactory5> GetDwriteFactory() const;
 
 private:
 	HRESULT InitD2D();
@@ -28,9 +27,9 @@ private:
 
 private:
 	HWND								m_hwnd;
-	ComPtr<ID2D1Factory>				m_D2DFactory;
-	ComPtr<IWICImagingFactory>			m_WICFactory;
-	ComPtr<IDWriteFactory>				m_DWriteFactory;
+	ComPtr<ID2D1Factory>				m_d2dFactory;
+	ComPtr<IWICImagingFactory>			m_wicFactory;
+	ComPtr<IDWriteFactory5>				m_dwriteFactory;
 	ComPtr<ID2D1HwndRenderTarget>		m_renderTarget;
 	ComPtr<IDWriteTextFormat>			m_textFormat;
 	ComPtr<ID2D1PathGeometry>			m_pathGeometry;

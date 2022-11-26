@@ -3,6 +3,7 @@
 #include "Timer.h"
 #include "WndManager.h"
 #include "Wnd.h"
+#include "FontPool.h"
 #include "MouseWorkerThread.h"
 #include "KeyWorkerThread.h"
 
@@ -18,7 +19,16 @@ NytApp::NytApp() : m_hwnd{ NULL }, m_timer{ new Timer }
 		hr = CreateDeviceResources();
 
 	assert(SUCCEEDED(hr));
+}
 
+NytApp::~NytApp()
+{
+
+}
+
+void NytApp::OnCreate()
+{
+	FontPool::Instantiate();
 	WndManager::Instantiate();
 	if (WndManager::IsInstanced())
 	{
@@ -31,14 +41,8 @@ NytApp::NytApp() : m_hwnd{ NULL }, m_timer{ new Timer }
 		auto wnd3{ std::make_unique<Wnd>(150.0f, 400.0f, 400.0f, 400.0f) };
 		WndManager::GetInstance()->AddWnd(wnd3);
 	}
-
 	MouseWorkerThread::Instantiate();
 	KeyboardWorkerThread::Instantiate();
-}
-
-NytApp::~NytApp()
-{
-
 }
 
 void NytApp::Run()
@@ -50,7 +54,6 @@ void NytApp::Run()
 		{
 			if (msg.message == WM_QUIT)
 				break;
-
 			TranslateMessage(&msg);
 			DispatchMessage(&msg);
 		}
@@ -62,28 +65,38 @@ void NytApp::Run()
 	}
 }
 
+HWND NytApp::GetHwnd() const
+{
+	return m_hwnd;
+}
+
+ComPtr<IDWriteFactory5> NytApp::GetDwriteFactory() const
+{
+	return m_dwriteFactory;
+}
+
 HRESULT NytApp::InitD2D()
 {
 	HRESULT hr{ S_OK };
 	hr = CoInitialize(NULL);
 
 	if (SUCCEEDED(hr))
-		hr = D2D1CreateFactory(D2D1_FACTORY_TYPE_SINGLE_THREADED, m_D2DFactory.GetAddressOf());
+		hr = D2D1CreateFactory(D2D1_FACTORY_TYPE_SINGLE_THREADED, m_d2dFactory.GetAddressOf());
 
 	if (SUCCEEDED(hr))
-		hr = CoCreateInstance(CLSID_WICImagingFactory, NULL, CLSCTX_INPROC_SERVER, IID_PPV_ARGS(&m_WICFactory));
+		hr = CoCreateInstance(CLSID_WICImagingFactory, NULL, CLSCTX_INPROC_SERVER, IID_PPV_ARGS(&m_wicFactory));
 
 	if (SUCCEEDED(hr))
 		hr = DWriteCreateFactory(
 			DWRITE_FACTORY_TYPE_SHARED,
-			__uuidof(m_DWriteFactory),
-			reinterpret_cast<IUnknown**>(m_DWriteFactory.GetAddressOf())
+			__uuidof(m_dwriteFactory),
+			reinterpret_cast<IUnknown**>(m_dwriteFactory.GetAddressOf())
 		);
 
 	static const WCHAR msc_fontName[] = L"Verdana";
 	static const FLOAT msc_fontSize = 50;
 	if (SUCCEEDED(hr))
-		hr = m_DWriteFactory->CreateTextFormat(
+		hr = m_dwriteFactory->CreateTextFormat(
 			msc_fontName,
 			NULL,
 			DWRITE_FONT_WEIGHT_NORMAL,
@@ -98,7 +111,7 @@ HRESULT NytApp::InitD2D()
 	{
 		m_textFormat->SetTextAlignment(DWRITE_TEXT_ALIGNMENT_CENTER);
 		m_textFormat->SetParagraphAlignment(DWRITE_PARAGRAPH_ALIGNMENT_FAR);
-		hr = m_D2DFactory->CreatePathGeometry(m_pathGeometry.GetAddressOf());
+		hr = m_d2dFactory->CreatePathGeometry(m_pathGeometry.GetAddressOf());
 	}
 
 	ID2D1GeometrySink* pSink{ NULL };
@@ -245,7 +258,7 @@ HRESULT NytApp::CreateDeviceResources()
 	) };
 
 	// Create a Direct2D render target.
-	hr = m_D2DFactory->CreateHwndRenderTarget(
+	hr = m_d2dFactory->CreateHwndRenderTarget(
 		D2D1::RenderTargetProperties(),
 		D2D1::HwndRenderTargetProperties(m_hwnd, size),
 		&m_renderTarget

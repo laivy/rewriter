@@ -8,5 +8,8 @@ int WINAPI WinMain(_In_		HINSTANCE hInstance,
 {
 	NytApp::Instantiate();
 	if (NytApp::IsInstanced())
+	{
+		NytApp::GetInstance()->OnCreate();
 		NytApp::GetInstance()->Run();
+	}
 }

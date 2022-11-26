@@ -10,6 +10,7 @@
 #include <cassert>
 #include <chrono>
 #include <memory>
+#include <set>
 #include <string>
 #include <vector>
 #include <list>
@@ -23,6 +24,7 @@
 #include <d2d1.h>
 #include <d2d1helper.h>
 #include <dwrite.h>
+#include <dwrite_3.h>
 #include <wincodec.h>
 
 #include "Singleton.h"

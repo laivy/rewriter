@@ -1,6 +1,8 @@
 ﻿#pragma once
 #include "UI.h"
 
+enum class FontType;
+
 class EditCtrl : public UI
 {
 public:
@@ -11,6 +13,11 @@ public:
 	virtual void Render(const ComPtr<ID2D1HwndRenderTarget>& renderTarget) const;
 	virtual RECTF GetRect() const;
 
-private:
+	void SetText(const std::wstring& text);
+	void SetFont(FontType fontType);
 
+private:
+	ComPtr<IDWriteTextLayout> m_textLayout;
+	ComPtr<IDWriteTextFormat> m_textFormat;
+	std::wstring m_text;
 };
