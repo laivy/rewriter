@@ -1,9 +1,10 @@
 ﻿#include "Stdafx.h"
 #include "EditCtrl.h"
-#include "NytApp.h"
-#include "Wnd.h"
+#include "BrushPool.h"
 #include "FontPool.h"
+#include "NytApp.h"
 #include "TextUtil.h"
+#include "Wnd.h"
 
 EditCtrl::EditCtrl(FLOAT width, FLOAT height, FLOAT x, FLOAT y)
 {
@@ -18,6 +19,30 @@ EditCtrl::EditCtrl(FLOAT width, FLOAT height, FLOAT x, FLOAT y)
 	SetText(text.c_str());
 }
 
+void EditCtrl::OnMouseEvent(HWND hWnd, UINT message, INT x, INT y)
+{
+	if (message == WM_MOUSEMOVE)
+	{
+		if (!m_textLayout) return;
+
+		BOOL isTrailingHit{};
+		BOOL isInside{};
+		DWRITE_HIT_TEST_METRICS hitTestMetrics{};
+		std::unique_lock lock{ m_mutex };
+		m_textLayout->HitTestPoint(x - m_position.x, y - m_position.y, &isTrailingHit, &isInside, &hitTestMetrics);
+
+		if (isInside)
+		{
+			static DWRITE_TEXT_RANGE lastHitTextRange{ -1, -1 };
+
+			if (lastHitTextRange.startPosition != -1)
+				m_textLayout->SetDrawingEffect(BrushPool::GetInstance()->GetBrush(BrushType::WHITE).Get(), lastHitTextRange);
+			m_textLayout->SetDrawingEffect(BrushPool::GetInstance()->GetBrush(BrushType::BLUE).Get(), DWRITE_TEXT_RANGE{ hitTestMetrics.textPosition, hitTestMetrics.length });
+			lastHitTextRange = DWRITE_TEXT_RANGE{ hitTestMetrics.textPosition, hitTestMetrics.length };
+		}
+	}
+}
+
 void EditCtrl::Render(const ComPtr<ID2D1HwndRenderTarget>& renderTarget) const
 {
 	if (!m_parent) return;
@@ -28,12 +53,14 @@ void EditCtrl::Render(const ComPtr<ID2D1HwndRenderTarget>& renderTarget) const
 	ComPtr<ID2D1SolidColorBrush> brush{};
 	renderTarget->CreateSolidColorBrush(D2D1::ColorF{ D2D1::ColorF::Purple }, &brush);
 	renderTarget->SetTransform(D2D1::Matrix3x2F::Translation(position.x, position.y));
-	renderTarget->FillRectangle(D2D1::RectF(0.0f, 0.0f, m_size.x, m_size.y), brush.Get());
+	renderTarget->FillRectangle(RECTF{ 0.0f, 0.0f, m_size.x, m_size.y }, brush.Get());
 
 	if (m_textLayout)
 	{
 		ComPtr<ID2D1SolidColorBrush> textBrush{};
 		renderTarget->CreateSolidColorBrush(D2D1::ColorF{ D2D1::ColorF::White }, &textBrush);
+
+		std::unique_lock lock{ m_mutex };
 		renderTarget->DrawTextLayout(FLOAT2{ 0.0f, 0.0f }, m_textLayout.Get(), textBrush.Get(), D2D1_DRAW_TEXT_OPTIONS_CLIP);
 	}
 }

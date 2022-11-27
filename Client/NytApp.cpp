@@ -1,11 +1,12 @@
 ﻿#include "Stdafx.h"
 #include "NytApp.h"
+#include "BrushPool.h"
 #include "Timer.h"
+#include "FontPool.h"
+#include "KeyWorkerThread.h"
+#include "MouseWorkerThread.h"
 #include "WndManager.h"
 #include "Wnd.h"
-#include "FontPool.h"
-#include "MouseWorkerThread.h"
-#include "KeyWorkerThread.h"
 
 NytApp::NytApp() : m_hwnd{ NULL }, m_timer{ new Timer }
 {
@@ -29,6 +30,7 @@ NytApp::~NytApp()
 void NytApp::OnCreate()
 {
 	FontPool::Instantiate();
+	BrushPool::Instantiate(m_renderTarget);
 	WndManager::Instantiate();
 	if (WndManager::IsInstanced())
 	{
