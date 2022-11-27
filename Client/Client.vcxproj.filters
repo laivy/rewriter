@@ -25,6 +25,12 @@
     <Filter Include="소스 파일\Interface">
       <UniqueIdentifier>{16e06589-d80f-471b-a466-5e7168e9355a}</UniqueIdentifier>
     </Filter>
+    <Filter Include="소스 파일\Util">
+      <UniqueIdentifier>{b7990f5a-354e-4bfb-98b3-27eeaf60dcd2}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="헤더 파일\Util">
+      <UniqueIdentifier>{ac245af0-89aa-47bf-9274-5d499ef9140f}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="_Start.cpp">
@@ -63,11 +69,14 @@
     <ClCompile Include="UI.cpp">
       <Filter>소스 파일\Interface</Filter>
     </ClCompile>
-    <ClCompile Include="Util.cpp">
-      <Filter>소스 파일</Filter>
-    </ClCompile>
     <ClCompile Include="FontPool.cpp">
       <Filter>소스 파일\UI</Filter>
+    </ClCompile>
+    <ClCompile Include="Util.cpp">
+      <Filter>소스 파일\Util</Filter>
+    </ClCompile>
+    <ClCompile Include="TextUtil.cpp">
+      <Filter>소스 파일\Util</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -87,9 +96,6 @@
       <Filter>헤더 파일</Filter>
     </ClInclude>
     <ClInclude Include="Timer.h">
-      <Filter>헤더 파일</Filter>
-    </ClInclude>
-    <ClInclude Include="Util.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
     <ClInclude Include="Button.h">
@@ -112,6 +118,12 @@
     </ClInclude>
     <ClInclude Include="FontPool.h">
       <Filter>헤더 파일\UI</Filter>
+    </ClInclude>
+    <ClInclude Include="Util.h">
+      <Filter>헤더 파일\Util</Filter>
+    </ClInclude>
+    <ClInclude Include="TextUtil.h">
+      <Filter>헤더 파일\Util</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

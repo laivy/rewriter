@@ -3,7 +3,7 @@
 enum class FontType
 {
 	DEFAULT,
-	MORRIS12
+	MORRIS,
 };
 
 class FontPool : public TSingleton<FontPool>

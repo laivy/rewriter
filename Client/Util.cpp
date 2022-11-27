@@ -39,17 +39,6 @@ void operator-=(FLOAT2& lhs, const FLOAT2& rhs)
 	lhs = lhs - rhs;
 }
 
-namespace Util
-{
-	BOOL IsContain(const RECTF& rect, const POINT& point)
-	{
-		if (rect.left <= point.x && point.x <= rect.right &&
-			rect.top <= point.y && point.y <= rect.bottom)
-			return TRUE;
-		return FALSE;
-	}
-}
-
 RECTF::RECTF()
 {
 	left = 0.0f;
@@ -64,4 +53,15 @@ RECTF::RECTF(FLOAT left, FLOAT top, FLOAT right, FLOAT bottom)
 	this->top = top;
 	this->right = right;
 	this->bottom = bottom;
+}
+
+namespace Util
+{
+	BOOL IsContain(const RECTF& rect, const POINT& point)
+	{
+		if (rect.left <= point.x && point.x <= rect.right &&
+			rect.top <= point.y && point.y <= rect.bottom)
+			return TRUE;
+		return FALSE;
+	}
 }

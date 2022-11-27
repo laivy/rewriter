@@ -150,6 +150,9 @@
     <ClCompile Include="MouseWorkerThread.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Use</PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="TextUtil.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Use</PrecompiledHeader>
+    </ClCompile>
     <ClCompile Include="UI.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Use</PrecompiledHeader>
     </ClCompile>
@@ -182,6 +185,7 @@
     <ClInclude Include="MouseWorkerThread.h" />
     <ClInclude Include="Singleton.h" />
     <ClInclude Include="Stdafx.h" />
+    <ClInclude Include="TextUtil.h" />
     <ClInclude Include="Timer.h" />
     <ClInclude Include="UI.h" />
     <ClInclude Include="Util.h" />

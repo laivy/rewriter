@@ -3,6 +3,7 @@
 #include "NytApp.h"
 #include "Wnd.h"
 #include "FontPool.h"
+#include "TextUtil.h"
 
 EditCtrl::EditCtrl(FLOAT width, FLOAT height, FLOAT x, FLOAT y)
 {
@@ -10,8 +11,11 @@ EditCtrl::EditCtrl(FLOAT width, FLOAT height, FLOAT x, FLOAT y)
 	SetPosition(FLOAT2{ x, y });
 
 	if (FontPool::IsInstanced())
-		m_textFormat = FontPool::GetInstance()->GetFont(FontType::MORRIS12);
-	SetText(TEXT("안녕하세요"));
+		m_textFormat = FontPool::GetInstance()->GetFont(FontType::MORRIS);
+	
+	std::wstring text{};
+	text += TEXT("<big>안녕하세요</big> <b>볼드텍스트응애!</b> 그냥텍스트응애!");
+	SetText(text.c_str());
 }
 
 void EditCtrl::Render(const ComPtr<ID2D1HwndRenderTarget>& renderTarget) const
@@ -43,8 +47,26 @@ void EditCtrl::SetText(const std::wstring& text)
 {
 	m_text = text;
 
+	// 태그를 통해 레이아웃 변경 정보를 가져오고 텍스트에서 태그 제거
+	auto layoutChangeInfoList{ TextUtil::ApplyTextTag(m_text) };
+
+	// 레이아웃 생성
 	auto dwriteFactory{ NytApp::GetInstance()->GetDwriteFactory() };
 	dwriteFactory->CreateTextLayout(m_text.c_str(), static_cast<UINT32>(m_text.length()), m_textFormat.Get(), m_size.x, m_size.y, &m_textLayout);
+
+	// 레이아웃에 태그 적용
+	for (const auto& info : layoutChangeInfoList)
+	{
+		switch (info.changeType)
+		{
+		case LayoutChangeType::SIZE:
+			m_textLayout->SetFontSize(info.fontSize, info.textRange);
+			break;
+		case LayoutChangeType::WEIGHT:
+			m_textLayout->SetFontWeight(info.fontWeight, info.textRange);
+			break;
+		}
+	}
 }
 
 void EditCtrl::SetFont(FontType fontType)

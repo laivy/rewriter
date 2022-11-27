@@ -18,7 +18,7 @@ Wnd::Wnd(FLOAT width, FLOAT height, FLOAT x, FLOAT y) :
 		button->SetPosition(width / 2.0f, height * 0.9f, Pivot::CENTER);
 		AddUI(button);
 
-		auto editctrl{ std::make_unique<EditCtrl>(150.0f, 40.0f) };
+		auto editctrl{ std::make_unique<EditCtrl>(500.0f, 150.0f) };
 		editctrl->SetPosition(width / 2.0f, height * 0.5f, Pivot::CENTER);
 		AddUI(editctrl);
 

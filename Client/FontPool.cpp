@@ -7,7 +7,7 @@ FontPool::FontPool()
 	// 로딩할 폰트 개수
 	constexpr size_t LOAD_FONT_COUNT = 1;
 
-	// 로딩할 폰트 파일 경로와 해당 폰트로 만들 포맷 정보 구조체
+	// 로딩한 폰트로 만들 포멧 정보 구조체
 	struct TextFormatInfo
 	{
 		DWRITE_FONT_WEIGHT fontWeight;
@@ -17,14 +17,22 @@ FontPool::FontPool()
 		std::wstring localeName;
 		IDWriteTextFormat** textFormat;
 	};
+
+	// 폰트 파일 경로와 폰트 하나 당 만들 포멧 정보 구조체
 	struct FontLoadInfo
 	{
 		std::wstring fontPath;
 		std::vector<TextFormatInfo> textFormatInfoList;
 	};
+
 	const std::array<FontLoadInfo, LOAD_FONT_COUNT> fontLoadInfoList
 	{ 
-		{ TEXT("Data/morris9.ttf"), { { DWRITE_FONT_WEIGHT_NORMAL, DWRITE_FONT_STYLE_NORMAL, DWRITE_FONT_STRETCH_NORMAL, 12.0f, TEXT(""), &m_pool[static_cast<int>(FontType::MORRIS12)] } } }
+		{
+			TEXT("Data/morris9.ttf"),
+			{
+				{ DWRITE_FONT_WEIGHT_NORMAL, DWRITE_FONT_STYLE_NORMAL, DWRITE_FONT_STRETCH_NORMAL, 12.0f, TEXT(""), &m_pool[static_cast<int>(FontType::MORRIS)] }
+			}
+		}
 	};
 
 	// 폰트 로딩
