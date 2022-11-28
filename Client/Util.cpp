@@ -55,9 +55,17 @@ RECTF::RECTF(FLOAT left, FLOAT top, FLOAT right, FLOAT bottom)
 	this->bottom = bottom;
 }
 
+void RECTF::Offset(FLOAT x, FLOAT y)
+{
+	left += x;
+	top += y;
+	right += x;
+	bottom += y;
+}
+
 namespace Util
 {
-	BOOL IsContain(const RECTF& rect, const POINT& point)
+	BOOL IsContain(const RECTF& rect, const FLOAT2& point)
 	{
 		if (rect.left <= point.x && point.x <= rect.right &&
 			rect.top <= point.y && point.y <= rect.bottom)

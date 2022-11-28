@@ -17,11 +17,12 @@ public:
 	template <typename T>
 	void AddWnd(std::unique_ptr<T>& wnd)
 	{
+		std::unique_lock lock{ m_addWndsMutex };
 		std::unique_ptr<Wnd> _wnd{ static_cast<Wnd*>(wnd.release()) };
 		for (const auto& w : m_wnds)
 			w->SetFocus(FALSE);
 		_wnd->SetFocus(TRUE);
-		m_wnds.push_back(std::move(_wnd));
+		m_addWnds.push_back(std::move(_wnd));
 	}
 
 	void SetTopWnd(const Wnd* const wnd);
@@ -31,4 +32,8 @@ public:
 private:
 	std::mutex m_mutex;
 	std::list<std::unique_ptr<Wnd>>	m_wnds;
+
+	// 다음 업데이트 때 추가될 윈도우 객체
+	std::mutex m_addWndsMutex;
+	std::vector<std::unique_ptr<Wnd>> m_addWnds;
 };

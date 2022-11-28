@@ -31,12 +31,15 @@ void EditCtrl::OnMouseEvent(HWND hWnd, UINT message, INT x, INT y)
 		std::unique_lock lock{ m_mutex };
 		m_textLayout->HitTestPoint(x - m_position.x, y - m_position.y, &isTrailingHit, &isInside, &hitTestMetrics);
 
+		static DWRITE_TEXT_RANGE lastHitTextRange{ 0, 0 };
+		if (lastHitTextRange.length != 0)
+		{
+			m_textLayout->SetDrawingEffect(BrushPool::GetInstance()->GetBrush(BrushType::WHITE).Get(), lastHitTextRange);
+			lastHitTextRange.startPosition = 0;
+			lastHitTextRange.length = 0;
+		}
 		if (isInside)
 		{
-			static DWRITE_TEXT_RANGE lastHitTextRange{ -1, -1 };
-
-			if (lastHitTextRange.startPosition != -1)
-				m_textLayout->SetDrawingEffect(BrushPool::GetInstance()->GetBrush(BrushType::WHITE).Get(), lastHitTextRange);
 			m_textLayout->SetDrawingEffect(BrushPool::GetInstance()->GetBrush(BrushType::BLUE).Get(), DWRITE_TEXT_RANGE{ hitTestMetrics.textPosition, hitTestMetrics.length });
 			lastHitTextRange = DWRITE_TEXT_RANGE{ hitTestMetrics.textPosition, hitTestMetrics.length };
 		}

@@ -19,9 +19,11 @@ class RECTF : public D2D1_RECT_F
 public:
 	RECTF();
 	RECTF(FLOAT left, FLOAT top, FLOAT right, FLOAT bottom);
+
+	void Offset(FLOAT x, FLOAT y);
 };
 
 namespace Util
 {
-	BOOL IsContain(const RECTF& rect, const POINT& point);
+	BOOL IsContain(const RECTF& rect, const FLOAT2& point);
 }

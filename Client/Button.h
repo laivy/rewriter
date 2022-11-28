@@ -11,9 +11,11 @@ public:
 
 	virtual void OnMouseEvent(HWND hWnd, UINT message, INT x, INT y);
 
-	virtual void Update(FLOAT deltaTime) { }
+	virtual void Update(FLOAT deltaTime);
 	virtual void Render(const ComPtr<ID2D1HwndRenderTarget>& renderTarget) const;
 
 private:
 	D2D1::ColorF m_color;
+	BOOL m_isMouseOver;
+	BOOL m_isMouseDown;
 };

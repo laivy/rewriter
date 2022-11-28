@@ -57,6 +57,9 @@ void Wnd::OnKeyboardEvent(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 void Wnd::OnButtonClicked(INT id)
 {
 	OutputDebugString((std::to_wstring(id) + L"\n").c_str());
+
+	auto wnd{ std::make_unique<Wnd>(150.0f, 400.0f, 400.0f, 400.0f) };
+	WndManager::GetInstance()->AddWnd(wnd);
 }
 
 void Wnd::Update(FLOAT deltaTime)
@@ -72,6 +75,9 @@ void Wnd::Update(FLOAT deltaTime)
 		ScreenToClient(NytApp::GetInstance()->GetHwnd(), &mouse);
 		SetPosition(FLOAT2{ static_cast<FLOAT>(mouse.x + delta.x), static_cast<FLOAT>(mouse.y + delta.y) });
 	}
+
+	for (const auto& ui : m_ui)
+		ui->Update(deltaTime);
 }
 
 void Wnd::Render(const ComPtr<ID2D1HwndRenderTarget>& renderTarget)

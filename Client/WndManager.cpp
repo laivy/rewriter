@@ -16,16 +16,18 @@ void WndManager::OnMouseEvent(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPa
 	{
 		Wnd* focusWnd{ nullptr };
 		Wnd* pickWnd{ nullptr };
+		FLOAT2 pos{ static_cast<FLOAT>(mouse.x), static_cast<FLOAT>(mouse.y) };
+
 		for (const auto& w : m_wnds)
 		{
 			// 창의 어디든 클릭됐는지 확인한다.
 			RECTF rect{ w->GetRect() };
-			if (Util::IsContain(rect, mouse))
+			if (Util::IsContain(rect, pos))
 				focusWnd = w.get();
 
 			// 이 창의 타이틀 부분이 클릭됐는지 확인한다.
 			rect.bottom = rect.top + 15.0f;
-			if (Util::IsContain(rect, mouse))
+			if (Util::IsContain(rect, pos))
 				pickWnd = w.get();
 
 			w->SetFocus(FALSE);
@@ -35,7 +37,7 @@ void WndManager::OnMouseEvent(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPa
 		if (focusWnd)
 		{
 			focusWnd->SetFocus(TRUE);
-			std::unique_lock lock{ GetLock() };
+			std::unique_lock lock{ m_mutex };
 			SetTopWnd(focusWnd);
 		}
 		if (pickWnd)
@@ -70,7 +72,8 @@ void WndManager::OnKeyboardEvent(HWND hWnd, UINT message, WPARAM wParam, LPARAM 
 
 void WndManager::Update(FLOAT deltaTime)
 {
-	std::unique_lock lock{ GetLock() };
+	std::unique_lock lock{ m_mutex };
+
 	for (const auto& w : m_wnds)
 		w->Update(deltaTime);
 
@@ -80,11 +83,18 @@ void WndManager::Update(FLOAT deltaTime)
 		m_wnds.back()->SetFocus(TRUE);
 		SetTopWnd(m_wnds.back().get());
 	}
+
+	// 윈도우 객체 추가
+	if (!m_addWnds.empty())
+	{
+		std::ranges::move(m_addWnds, std::back_inserter(m_wnds));
+		m_addWnds.clear();
+	}
 }
 
 void WndManager::Render(const ComPtr<ID2D1HwndRenderTarget>& renderTarget)
 {
-	std::unique_lock lock{ GetLock() };
+	std::unique_lock lock{ m_mutex };
 	for (const auto& w : m_wnds)
 		w->Render(renderTarget);
 }

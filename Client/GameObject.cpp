@@ -20,8 +20,6 @@ void GameObject::Destroy()
 	m_isValid = FALSE;
 }
 
-
-
 void GameObject::SetPosition(const FLOAT2& position, Pivot pivot)
 {
 	m_position = position;
