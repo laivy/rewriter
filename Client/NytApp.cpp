@@ -1,6 +1,7 @@
 ﻿#include "Stdafx.h"
 #include "NytApp.h"
 #include "BrushPool.h"
+#include "ImageLoader.h"
 #include "Timer.h"
 #include "FontPool.h"
 #include "KeyWorkerThread.h"
@@ -29,8 +30,11 @@ NytApp::~NytApp()
 
 void NytApp::OnCreate()
 {
+	// 풀 생성
 	FontPool::Instantiate();
 	BrushPool::Instantiate(m_renderTarget);
+
+	// UI 생성
 	WndManager::Instantiate();
 	if (WndManager::IsInstanced())
 	{
@@ -43,8 +47,11 @@ void NytApp::OnCreate()
 		auto wnd3{ std::make_unique<Wnd>(150.0f, 400.0f, 400.0f, 400.0f) };
 		WndManager::GetInstance()->AddWnd(wnd3);
 	}
-	MouseWorkerThread::Instantiate();
+	ImageLoader::Instantiate();
+
+	// 쓰레드 생성
 	KeyboardWorkerThread::Instantiate();
+	MouseWorkerThread::Instantiate();
 }
 
 void NytApp::Run()
@@ -75,6 +82,11 @@ HWND NytApp::GetHwnd() const
 ComPtr<IDWriteFactory5> NytApp::GetDwriteFactory() const
 {
 	return m_dwriteFactory;
+}
+
+ComPtr<ID2D1HwndRenderTarget> NytApp::GetRenderTarget() const
+{
+	return m_renderTarget;
 }
 
 HRESULT NytApp::InitD2D()

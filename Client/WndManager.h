@@ -1,5 +1,4 @@
 ﻿#pragma once
-#include "GameObject.h"
 #include "Wnd.h"
 
 class WndManager : public TSingleton<WndManager>
@@ -20,6 +19,8 @@ public:
 		std::unique_lock lock{ m_addWndsMutex };
 		std::unique_ptr<Wnd> _wnd{ static_cast<Wnd*>(wnd.release()) };
 		for (const auto& w : m_wnds)
+			w->SetFocus(FALSE);
+		for (const auto& w : m_addWnds)
 			w->SetFocus(FALSE);
 		_wnd->SetFocus(TRUE);
 		m_addWnds.push_back(std::move(_wnd));

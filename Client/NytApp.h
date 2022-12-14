@@ -14,6 +14,7 @@ public:
 
 	HWND GetHwnd() const;
 	ComPtr<IDWriteFactory5> GetDwriteFactory() const;
+	ComPtr<ID2D1HwndRenderTarget> GetRenderTarget() const;
 
 private:
 	HRESULT InitD2D();
