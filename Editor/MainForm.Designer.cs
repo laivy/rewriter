@@ -1,0 +1,134 @@
+﻿namespace Editor
+{
+    partial class MainForm
+    {
+        /// <summary>
+        /// 필수 디자이너 변수입니다.
+        /// </summary>
+        private System.ComponentModel.IContainer components = null;
+
+        /// <summary>
+        /// 사용 중인 모든 리소스를 정리합니다.
+        /// </summary>
+        /// <param name="disposing">관리되는 리소스를 삭제해야 하면 true이고, 그렇지 않으면 false입니다.</param>
+        protected override void Dispose(bool disposing)
+        {
+            if (disposing && (components != null))
+            {
+                components.Dispose();
+            }
+            base.Dispose(disposing);
+        }
+
+        #region Windows Form 디자이너에서 생성한 코드
+
+        /// <summary>
+        /// 디자이너 지원에 필요한 메서드입니다. 
+        /// 이 메서드의 내용을 코드 편집기로 수정하지 마세요.
+        /// </summary>
+        private void InitializeComponent()
+        {
+            this.Menu = new System.Windows.Forms.MenuStrip();
+            this.Menu_File = new System.Windows.Forms.ToolStripMenuItem();
+            this.Menu_File_Open = new System.Windows.Forms.ToolStripMenuItem();
+            this.Menu_File_Save = new System.Windows.Forms.ToolStripMenuItem();
+            this.Menu_File_SaveAs = new System.Windows.Forms.ToolStripMenuItem();
+            this.Menu_Edit = new System.Windows.Forms.ToolStripMenuItem();
+            this.Menu_Edit_Add = new System.Windows.Forms.ToolStripMenuItem();
+            this.FileTreeView = new System.Windows.Forms.TreeView();
+            this.Menu.SuspendLayout();
+            this.SuspendLayout();
+            // 
+            // Menu
+            // 
+            this.Menu.BackColor = System.Drawing.SystemColors.Window;
+            this.Menu.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.Menu_File,
+            this.Menu_Edit});
+            this.Menu.Location = new System.Drawing.Point(0, 0);
+            this.Menu.Name = "Menu";
+            this.Menu.Size = new System.Drawing.Size(800, 24);
+            this.Menu.TabIndex = 1;
+            this.Menu.Text = "menuStrip2";
+            // 
+            // Menu_File
+            // 
+            this.Menu_File.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.Menu_File_Open,
+            this.Menu_File_Save,
+            this.Menu_File_SaveAs});
+            this.Menu_File.Name = "Menu_File";
+            this.Menu_File.Size = new System.Drawing.Size(43, 20);
+            this.Menu_File.Text = "파일";
+            // 
+            // Menu_File_Open
+            // 
+            this.Menu_File_Open.Name = "Menu_File_Open";
+            this.Menu_File_Open.Size = new System.Drawing.Size(178, 22);
+            this.Menu_File_Open.Text = "열기";
+            this.Menu_File_Open.Click += new System.EventHandler(this.Menu_File_Open_Click);
+            // 
+            // Menu_File_Save
+            // 
+            this.Menu_File_Save.Name = "Menu_File_Save";
+            this.Menu_File_Save.Size = new System.Drawing.Size(178, 22);
+            this.Menu_File_Save.Text = "저장";
+            // 
+            // Menu_File_SaveAs
+            // 
+            this.Menu_File_SaveAs.Name = "Menu_File_SaveAs";
+            this.Menu_File_SaveAs.Size = new System.Drawing.Size(178, 22);
+            this.Menu_File_SaveAs.Text = "다른 이름으로 저장";
+            this.Menu_File_SaveAs.Click += new System.EventHandler(this.Menu_File_SaveAs_Click);
+            // 
+            // Menu_Edit
+            // 
+            this.Menu_Edit.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.Menu_Edit_Add});
+            this.Menu_Edit.Name = "Menu_Edit";
+            this.Menu_Edit.Size = new System.Drawing.Size(43, 20);
+            this.Menu_Edit.Text = "편집";
+            // 
+            // Menu_Edit_Add
+            // 
+            this.Menu_Edit_Add.Name = "Menu_Edit_Add";
+            this.Menu_Edit_Add.Size = new System.Drawing.Size(98, 22);
+            this.Menu_Edit_Add.Text = "추가";
+            this.Menu_Edit_Add.Click += new System.EventHandler(this.Menu_Edit_Add_Click);
+            // 
+            // FileTreeView
+            // 
+            this.FileTreeView.Location = new System.Drawing.Point(0, 27);
+            this.FileTreeView.Name = "FileTreeView";
+            this.FileTreeView.Size = new System.Drawing.Size(136, 423);
+            this.FileTreeView.TabIndex = 2;
+            this.FileTreeView.AfterSelect += new System.Windows.Forms.TreeViewEventHandler(this.FileTreeView_AfterSelect);
+            // 
+            // MainForm
+            // 
+            this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 12F);
+            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+            this.ClientSize = new System.Drawing.Size(800, 450);
+            this.Controls.Add(this.FileTreeView);
+            this.Controls.Add(this.Menu);
+            this.Name = "MainForm";
+            this.Text = "Nyaight Editor 1.0v";
+            this.Menu.ResumeLayout(false);
+            this.Menu.PerformLayout();
+            this.ResumeLayout(false);
+            this.PerformLayout();
+
+        }
+
+		#endregion
+		private System.Windows.Forms.MenuStrip Menu;
+		private System.Windows.Forms.ToolStripMenuItem Menu_File;
+		private System.Windows.Forms.ToolStripMenuItem Menu_File_Open;
+		private System.Windows.Forms.ToolStripMenuItem Menu_File_Save;
+		private System.Windows.Forms.ToolStripMenuItem Menu_File_SaveAs;
+		private System.Windows.Forms.ToolStripMenuItem Menu_Edit;
+		private System.Windows.Forms.TreeView FileTreeView;
+		private System.Windows.Forms.ToolStripMenuItem Menu_Edit_Add;
+	}
+}
+
