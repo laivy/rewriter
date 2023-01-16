@@ -3,10 +3,12 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
 using System.Drawing;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using Editor.Nyt;
 
 namespace Editor
 {
@@ -54,7 +56,46 @@ namespace Editor
 
 		private void addButton_Click(object sender, EventArgs e)
 		{
-			OnAddNode(new Tuple<int, string, string>(typeComboBox.SelectedIndex, nameTextBox.Text, valueTextBox.Text), null);
+			// 타입에 따른 값 체크
+			DataType type = (DataType)typeComboBox.SelectedIndex;
+			switch (type)
+			{
+				case DataType.GROUP:
+					break;
+				case DataType.INT:
+					try
+					{
+						int.Parse(valueTextBox.Text);
+					}
+					catch (Exception exception)
+					{
+						MessageBox.Show(exception.Message);
+						return;
+					}
+					break;
+				case DataType.FLOAT:
+					try
+					{ 
+						float.Parse(valueTextBox.Text);
+					}
+					catch (Exception exception)
+					{
+						MessageBox.Show(exception.Message);
+						return;
+					}
+					break;
+				case DataType.IMAGE:
+					FileInfo fileInfo = new FileInfo(valueTextBox.Text);
+					if (!fileInfo.Exists)
+					{
+						MessageBox.Show("해당 이미지 파일을 찾을 수 없습니다.");
+						return;
+					}
+					break;
+			}
+
+			// 메인 다이얼로그에 이벤트 전달
+			OnAddNode(new NytTreeNodeInfo(typeComboBox.SelectedIndex, nameTextBox.Text, valueTextBox.Text), null);
 			Close();
 		}
 

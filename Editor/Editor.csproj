@@ -35,6 +35,7 @@
   <ItemGroup>
     <Reference Include="System" />
     <Reference Include="System.Core" />
+    <Reference Include="System.DirectoryServices" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="Microsoft.CSharp" />
@@ -46,24 +47,38 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="AddNodeForm.cs">
+    <Compile Include="Common\NytCommon.cs" />
+    <Compile Include="Form\AddNodeForm.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="AddNodeForm.Designer.cs">
+    <Compile Include="Form\AddNodeForm.Designer.cs">
       <DependentUpon>AddNodeForm.cs</DependentUpon>
     </Compile>
-    <Compile Include="MainForm.cs">
+    <Compile Include="NytTreeView\NytTreeNode.cs" />
+    <Compile Include="NytTreeView\NytTreeView.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="NytTreeView\NytTreeViewForm.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="MainForm.Designer.cs">
+    <Compile Include="NytTreeView\NytTreeViewForm.Designer.cs">
+      <DependentUpon>NytTreeViewForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Form\MainForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Form\MainForm.Designer.cs">
       <DependentUpon>MainForm.cs</DependentUpon>
     </Compile>
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <EmbeddedResource Include="AddNodeForm.resx">
+    <EmbeddedResource Include="Form\AddNodeForm.resx">
       <DependentUpon>AddNodeForm.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="MainForm.resx">
+    <EmbeddedResource Include="NytTreeView\NytTreeViewForm.resx">
+      <DependentUpon>NytTreeViewForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Form\MainForm.resx">
       <DependentUpon>MainForm.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Properties\Resources.resx">
@@ -88,5 +103,6 @@
   <ItemGroup>
     <None Include="App.config" />
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

@@ -1,19 +1,13 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
 using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
+using Editor.Nyt;
 
 namespace Editor
 {
 	public partial class MainForm : Form
 	{
-		private TreeView fileTreeView;
+		private NytTreeView _treeView;
 
 		public MainForm()
 		{
@@ -23,7 +17,10 @@ namespace Editor
 
 		private void Initialize()
 		{
-			fileTreeView = Controls.Find("FileTreeView", false)[0] as TreeView;
+			NytTreeViewForm fileViewForm = new NytTreeViewForm();
+			fileViewForm.MdiParent = this;
+			fileViewForm.Show();
+			_treeView = fileViewForm.Controls.Find("NytTreeView", false)[0] as NytTreeView;
 		}
 
 		private void Menu_File_Open_Click(object sender, EventArgs e)
@@ -51,8 +48,8 @@ namespace Editor
 			if (saveFileDialog.ShowDialog() == DialogResult.OK)
 			{
 				filePath = saveFileDialog.FileName;
+				Save(filePath);
 			}
-			Console.WriteLine(filePath);
 		}
 
 		private void Menu_Edit_Add_Click(object sender, EventArgs e)
@@ -64,18 +61,30 @@ namespace Editor
 
 		private void NodeAddForm_OnAddNode(object sender, EventArgs e)
 		{
-			Tuple<int, string, string> tuple = (Tuple<int, string, string>)sender;
-			TreeNode node = new TreeNode(tuple.Item2);
-
-			if (fileTreeView.SelectedNode == null)
-				fileTreeView.Nodes.Add(node);
+			// 노드 추가
+			NytTreeNode node = new NytTreeNode((NytTreeNodeInfo)sender);
+			if (_treeView.SelectedNode == null)
+				_treeView.Nodes.Add(node);
 			else
-				fileTreeView.SelectedNode.Nodes.Add(node);
+				_treeView.SelectedNode.Nodes.Add(node);
+			_treeView.SelectedNode = node;
 		}
 
 		private void FileTreeView_AfterSelect(object sender, TreeViewEventArgs e)
 		{
-			Console.WriteLine(fileTreeView.SelectedNode.ToString());
+			
+		}
+
+		private void Save(string filePath)
+		{
+			//FileStream fileStream = new FileStream(filePath, FileMode.OpenOrCreate);
+			//BinaryWriter binaryWriter = new BinaryWriter(fileStream);
+			_treeView.Save();
+		}
+
+		private void Menu_File_Save_Click(object sender, EventArgs e)
+		{
+			_treeView.Save();
 		}
 	}
 }
