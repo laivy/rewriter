@@ -1,90 +1,87 @@
 ﻿using System;
-using System.IO;
 using System.Windows.Forms;
-using Editor.Nyt;
 
 namespace Editor
 {
 	public partial class MainForm : Form
 	{
-		private NytTreeView _treeView;
+		private NytTreeViewForm _treeViewForm;	// 활성화 상태인 트리뷰폼
 
 		public MainForm()
 		{
 			InitializeComponent();
-			Initialize();
 		}
 
-		private void Initialize()
-		{
-			NytTreeViewForm fileViewForm = new NytTreeViewForm();
-			fileViewForm.MdiParent = this;
-			fileViewForm.Show();
-			_treeView = fileViewForm.Controls.Find("NytTreeView", false)[0] as NytTreeView;
-		}
-
-		private void Menu_File_Open_Click(object sender, EventArgs e)
-		{
-			OpenFileDialog openFileDialog = new OpenFileDialog();
-			//fileDialog.Filter = "nyt files (*.nyt)|*.nyt";
-			openFileDialog.Filter = "All files (*.*)|*.*";
-			openFileDialog.Title = "불러올 파일을 선택해주세요.";
-
-			string filePath = string.Empty;
-			if (openFileDialog.ShowDialog() == DialogResult.OK)
-			{
-				filePath = openFileDialog.FileName;
-			}
-			Console.WriteLine(filePath);
-		}
-
-		private void Menu_File_SaveAs_Click(object sender, EventArgs e)
+		private void Menu_File_New_Click(object sender, EventArgs e)
 		{
 			SaveFileDialog saveFileDialog = new SaveFileDialog();
 			saveFileDialog.Filter = "nyt files (*.nyt)|*.nyt";
 			saveFileDialog.Title = "저장할 파일 위치를 선택해주세요.";
-
-			string filePath = string.Empty;
-			if (saveFileDialog.ShowDialog() == DialogResult.OK)
+			if (saveFileDialog.ShowDialog() != DialogResult.OK)
 			{
-				filePath = saveFileDialog.FileName;
-				Save(filePath);
+				MessageBox.Show("해당 파일을 열 수 없습니다.");
+				return;
 			}
+			_treeViewForm = new NytTreeViewForm(saveFileDialog.FileName);
+			_treeViewForm.Activated += TreeViewForm_Activated;
+			_treeViewForm.MdiParent = this;
+			_treeViewForm.Show();
 		}
 
-		private void Menu_Edit_Add_Click(object sender, EventArgs e)
+		private void Menu_File_Open_Click(object sender, EventArgs e)
 		{
-			AddNodeForm nodeAddForm = new AddNodeForm();
-			nodeAddForm.OnAddNode += NodeAddForm_OnAddNode;
-			nodeAddForm.ShowDialog();
-		}
+			OpenFileDialog openFileDialog = new OpenFileDialog
+			{
+				Filter = "nyt files (*.nyt)|*.nyt",
+				Title = "불러올 파일을 선택해주세요."
+			};
+			if (openFileDialog.ShowDialog() != DialogResult.OK)
+			{
+				MessageBox.Show("해당 파일을 열 수 없습니다.");
+				return;
+			}
 
-		private void NodeAddForm_OnAddNode(object sender, EventArgs e)
-		{
-			// 노드 추가
-			NytTreeNode node = new NytTreeNode((NytTreeNodeInfo)sender);
-			if (_treeView.SelectedNode == null)
-				_treeView.Nodes.Add(node);
-			else
-				_treeView.SelectedNode.Nodes.Add(node);
-			_treeView.SelectedNode = node;
-		}
-
-		private void FileTreeView_AfterSelect(object sender, TreeViewEventArgs e)
-		{
-			
-		}
-
-		private void Save(string filePath)
-		{
-			//FileStream fileStream = new FileStream(filePath, FileMode.OpenOrCreate);
-			//BinaryWriter binaryWriter = new BinaryWriter(fileStream);
-			_treeView.Save();
+			_treeViewForm = new NytTreeViewForm(openFileDialog.FileName);
+			_treeViewForm.Activated += TreeViewForm_Activated;
+			_treeViewForm.MdiParent = this;
+			_treeViewForm.LoadFile();
+			_treeViewForm.Show();
 		}
 
 		private void Menu_File_Save_Click(object sender, EventArgs e)
 		{
-			_treeView.Save();
+			_treeViewForm?.SaveFile();
+		}
+
+		private void Menu_File_SaveAs_Click(object sender, EventArgs e)
+		{
+			if (_treeViewForm == null)
+				return;
+
+			SaveFileDialog saveFileDialog = new SaveFileDialog();
+			saveFileDialog.Filter = "nyt files (*.nyt)|*.nyt";
+			saveFileDialog.Title = "저장할 파일 위치를 선택해주세요.";
+			if (saveFileDialog.ShowDialog() != DialogResult.OK)
+			{
+				MessageBox.Show("해당 파일을 열 수 없습니다.");
+				return;
+			}
+			_treeViewForm.SaveFile(saveFileDialog.FileName);
+		}
+
+		private void Menu_Edit_Add_Click(object sender, EventArgs e)
+		{
+			if (_treeViewForm == null)
+				return;
+
+			AddNodeForm nodeAddForm = new AddNodeForm();
+			nodeAddForm.OnAddNode += _treeViewForm.OnAddNode;
+			nodeAddForm.ShowDialog();
+		}
+
+		private void TreeViewForm_Activated(object sender, EventArgs e)
+		{
+			_treeViewForm = (NytTreeViewForm)sender;
 		}
 	}
 }

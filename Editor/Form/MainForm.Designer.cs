@@ -67,6 +67,7 @@
             this.Menu_File_New.Name = "Menu_File_New";
             this.Menu_File_New.Size = new System.Drawing.Size(180, 22);
             this.Menu_File_New.Text = "새로 만들기";
+            this.Menu_File_New.Click += new System.EventHandler(this.Menu_File_New_Click);
             // 
             // Menu_File_Open
             // 

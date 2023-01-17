@@ -32,6 +32,70 @@ namespace Editor.Nyt
 			}
 		}
 
+		public NytTreeNode(StreamReader streamReader)
+		{
+#if DEBUG
+			string line = streamReader.ReadLine();
+			string[] info = line.Split(',');
+
+			if (info[0] == "GROUP")
+			{
+				_type = NytDataType.GROUP;
+				_name = info[1];
+			}
+			else if (info[0] == "INT")
+			{
+				_type = NytDataType.INT;
+				_name = info[1];
+				_value = info[2];
+			}
+			else if (info[0] == "FLOAT")
+			{
+				_type = NytDataType.FLOAT;
+				_name = info[1];
+				_value = info[2];
+			}
+			else if (info[0] == "STRING")
+			{
+				_type = NytDataType.STRING;
+				_name = info[1];
+				_value = info[2];
+			}
+			else if (info[0] == "IMAGE")
+			{
+				_type = NytDataType.IMAGE;
+				_name = info[1];
+				_value = info[2];
+			}
+#else
+
+#endif
+			switch (_type)
+			{
+				case NytDataType.GROUP:
+					Text = _name;
+					break;
+				case NytDataType.IMAGE:
+					Text = _name;
+					_data = File.ReadAllBytes(_value);
+					break;
+				default:
+					Text = $"{_name} : {_value}";
+					break;
+			}
+
+#if DEBUG
+			int childNodeCount = int.Parse(streamReader.ReadLine());
+			for (int i = 0; i < childNodeCount; i++)
+			{
+				NytTreeNode node = new NytTreeNode(streamReader);
+				Nodes.Add(node);
+			}
+#else
+
+#endif
+		}
+
 		public void Save(StreamWriter streamWriter, int depth = 0)
 		{
 #if DEBUG
@@ -44,16 +108,13 @@ namespace Editor.Nyt
 			switch (_type )
 			{
 				case NytDataType.GROUP:
-					value += _name;
+					value += $"{_type}, {_name}";
 					break;
 				default:
 					value += $"{_type}, {_name}, {_value}";
 					break;
 			}
 			streamWriter.WriteLine(value);
-
-			if (Nodes.Count == 0)
-				return;
 
 			// 하위 노드 개수, 순회
 			streamWriter.WriteLine($"{intent}    {Nodes.Count}");

@@ -8,28 +8,29 @@ namespace Editor.Nyt
 	{
 		public NytTreeView()
 		{
-			MouseDown += NytTreeView_MouseDown;
+			MouseDown += OnMouseDown;
 		}
 
-		private void NytTreeView_MouseDown(object sender, MouseEventArgs e)
+		private void OnMouseDown(object sender, MouseEventArgs e)
 		{
 			if (GetNodeAt(e.X, e.Y) == null)
 				SelectedNode = null;
 		}
 
-		public void Save()
+		public void Add(NytTreeNode node)
 		{
-			/*
-			저장 방식
-			루트 노드 개수
-			  └ 노드 타입, 이름, 값
-			  └ 하위 노드 개수
-			    └ ...
-			*/
+			if (SelectedNode == null)
+				Nodes.Add(node);
+			else
+				SelectedNode.Nodes.Add(node);
+			SelectedNode = node;
+		}
+
+		public void Save(string filePath)
+		{
 #if DEBUG
-			string filePath = "test.nyt";
 			StreamWriter streamWriter = new StreamWriter(filePath);
-			streamWriter.WriteLine($"{Nodes.Count}");
+			streamWriter.WriteLine(Nodes.Count);
 
 			IEnumerator iter = Nodes.GetEnumerator();
 			while (iter.MoveNext())
@@ -41,6 +42,21 @@ namespace Editor.Nyt
 #else
 			FileStream fileStream = new FileStream(filePath, FileMode.OpenOrCreate);
 			BinaryWriter binaryWriter = new BinaryWriter(fileStream);
+#endif
+		}
+
+		internal void Load(string filePath)
+		{
+#if DEBUG
+			StreamReader streamReader = new StreamReader(filePath);
+			int nodeCount = int.Parse(streamReader.ReadLine());
+			for (int i = 0; i < nodeCount; i++)
+			{
+				Add(new NytTreeNode(streamReader));
+			}
+			streamReader.Close();
+#else
+
 #endif
 		}
 	}
