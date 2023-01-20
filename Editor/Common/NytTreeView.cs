@@ -40,8 +40,7 @@ namespace Editor.Nyt
 			}
 			streamWriter.Close();
 #else
-			FileStream fileStream = new FileStream(filePath, FileMode.OpenOrCreate);
-			BinaryWriter binaryWriter = new BinaryWriter(fileStream);
+
 #endif
 		}
 
@@ -53,6 +52,7 @@ namespace Editor.Nyt
 			for (int i = 0; i < nodeCount; i++)
 			{
 				Add(new NytTreeNode(streamReader));
+				SelectedNode = null; // 이렇게 해야 최상위 노드로 추가됨
 			}
 			streamReader.Close();
 #else

@@ -4,21 +4,19 @@ using System.Windows.Forms;
 
 namespace Editor
 {
-	public partial class NytTreeViewForm : Form
+	public partial class FileViewForm : Form
 	{
-		private NytTreeView _treeView;
 		private string _filePath;
 
-		public NytTreeViewForm(string filePath)
+		public FileViewForm(string filePath)
 		{
 			InitializeComponent();
-			_treeView = Controls.Find("NytTreeView", false)[0] as NytTreeView;
 			_filePath = Text = filePath;
 		}
 
 		public void OnAddNode(object sender, EventArgs e)
 		{
-			_treeView.Add(new NytTreeNode((NytTreeNodeInfo)sender));
+			NytTreeView.Add(new NytTreeNode((NytTreeNodeInfo)sender));
 		}
 
 		public void SaveFile(string filePath)
@@ -29,13 +27,20 @@ namespace Editor
 
 		public void SaveFile()
 		{
-			_treeView.Save(_filePath);
+			NytTreeView.Save(_filePath);
 			MessageBox.Show("저장 완료");
 		}
 
 		public void LoadFile()
 		{
-			_treeView.Load(_filePath);
+			NytTreeView.Load(_filePath);
+		}
+
+		public NytTreeNode GetSelectedNode()
+		{
+			if (NytTreeView.SelectedNode != null)
+				return (NytTreeNode)NytTreeView.SelectedNode;
+			return null;
 		}
 	}
 }

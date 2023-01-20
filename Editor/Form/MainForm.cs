@@ -1,59 +1,72 @@
-﻿using System;
+﻿using Editor.Nyt;
+using System;
 using System.Windows.Forms;
 
 namespace Editor
 {
 	public partial class MainForm : Form
 	{
-		private NytTreeViewForm _treeViewForm;	// 활성화 상태인 트리뷰폼
+		private FileViewForm _treeViewForm;	// 활성화 상태인 트리뷰폼
 
 		public MainForm()
 		{
 			InitializeComponent();
 		}
 
-		private void Menu_File_New_Click(object sender, EventArgs e)
+		private void OnActivated(object sender, EventArgs e)
 		{
-			SaveFileDialog saveFileDialog = new SaveFileDialog();
-			saveFileDialog.Filter = "nyt files (*.nyt)|*.nyt";
-			saveFileDialog.Title = "저장할 파일 위치를 선택해주세요.";
-			if (saveFileDialog.ShowDialog() != DialogResult.OK)
+			_treeViewForm = (FileViewForm)sender;
+		}
+
+		private void OnNewFileMenuClick(object sender, EventArgs e)
+		{
+			SaveFileDialog saveFileDialog = new SaveFileDialog
 			{
-				MessageBox.Show("해당 파일을 열 수 없습니다.");
+				Filter = "nyt files (*.nyt)|*.nyt",
+				Title = "저장할 파일 위치를 선택해주세요."
+			};
+
+			DialogResult dialogResult = saveFileDialog.ShowDialog();
+			if (dialogResult != DialogResult.Cancel && dialogResult != DialogResult.OK)
+			{
+				MessageBox.Show("해당 경로에 저장할 수 없습니다.");
 				return;
 			}
-			_treeViewForm = new NytTreeViewForm(saveFileDialog.FileName);
-			_treeViewForm.Activated += TreeViewForm_Activated;
+
+			_treeViewForm = new FileViewForm(saveFileDialog.FileName);
+			_treeViewForm.Activated += OnActivated;
 			_treeViewForm.MdiParent = this;
 			_treeViewForm.Show();
 		}
 
-		private void Menu_File_Open_Click(object sender, EventArgs e)
+		private void OnFileOpenMenuClick(object sender, EventArgs e)
 		{
 			OpenFileDialog openFileDialog = new OpenFileDialog
 			{
 				Filter = "nyt files (*.nyt)|*.nyt",
 				Title = "불러올 파일을 선택해주세요."
 			};
-			if (openFileDialog.ShowDialog() != DialogResult.OK)
+
+			DialogResult dialogResult = openFileDialog.ShowDialog();
+			if (dialogResult != DialogResult.Cancel && dialogResult != DialogResult.OK)
 			{
 				MessageBox.Show("해당 파일을 열 수 없습니다.");
 				return;
 			}
 
-			_treeViewForm = new NytTreeViewForm(openFileDialog.FileName);
-			_treeViewForm.Activated += TreeViewForm_Activated;
+			_treeViewForm = new FileViewForm(openFileDialog.FileName);
+			_treeViewForm.Activated += OnActivated;
 			_treeViewForm.MdiParent = this;
 			_treeViewForm.LoadFile();
 			_treeViewForm.Show();
 		}
 
-		private void Menu_File_Save_Click(object sender, EventArgs e)
+		private void OnFileSaveMenuClick(object sender, EventArgs e)
 		{
 			_treeViewForm?.SaveFile();
 		}
 
-		private void Menu_File_SaveAs_Click(object sender, EventArgs e)
+		private void OnFileSaveAsMenuClick(object sender, EventArgs e)
 		{
 			if (_treeViewForm == null)
 				return;
@@ -69,19 +82,28 @@ namespace Editor
 			_treeViewForm.SaveFile(saveFileDialog.FileName);
 		}
 
-		private void Menu_Edit_Add_Click(object sender, EventArgs e)
+		private void OnAddNodeMenuClick(object sender, EventArgs e)
 		{
 			if (_treeViewForm == null)
 				return;
 
-			AddNodeForm nodeAddForm = new AddNodeForm();
-			nodeAddForm.OnAddNode += _treeViewForm.OnAddNode;
+			NodeForm nodeAddForm = new NodeForm();
+			nodeAddForm._OnAddNode += _treeViewForm.OnAddNode;
 			nodeAddForm.ShowDialog();
 		}
 
-		private void TreeViewForm_Activated(object sender, EventArgs e)
+		private void OnModifyNodeMenuClick(object sender, EventArgs e)
 		{
-			_treeViewForm = (NytTreeViewForm)sender;
+			if (_treeViewForm == null)
+				return;
+
+			NytTreeNode node = _treeViewForm.GetSelectedNode();
+			if (node == null)
+				return;
+
+			NodeForm nodeAddForm = new NodeForm(node);
+			nodeAddForm._OnAddNode += _treeViewForm.OnAddNode;
+			nodeAddForm.ShowDialog();
 		}
 	}
 }

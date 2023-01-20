@@ -1,6 +1,6 @@
 ﻿namespace Editor
 {
-	partial class NytTreeViewForm
+	partial class FileViewForm
 	{
 		/// <summary>
 		/// Required designer variable.
@@ -34,19 +34,20 @@
             // NytTreeView
             // 
             this.NytTreeView.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.NytTreeView.LabelEdit = true;
             this.NytTreeView.Location = new System.Drawing.Point(0, 0);
             this.NytTreeView.Name = "NytTreeView";
             this.NytTreeView.ShowNodeToolTips = true;
             this.NytTreeView.Size = new System.Drawing.Size(207, 561);
             this.NytTreeView.TabIndex = 0;
             // 
-            // NytTreeViewForm
+            // FileViewForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(207, 561);
             this.Controls.Add(this.NytTreeView);
-            this.Name = "NytTreeViewForm";
+            this.Name = "FileViewForm";
             this.Text = "NytTreeView";
             this.ResumeLayout(false);
 

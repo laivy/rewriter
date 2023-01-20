@@ -47,22 +47,22 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Common\NytCommon.cs" />
-    <Compile Include="Form\AddNodeForm.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="Form\AddNodeForm.Designer.cs">
-      <DependentUpon>AddNodeForm.cs</DependentUpon>
-    </Compile>
-    <Compile Include="NytTreeView\NytTreeNode.cs" />
-    <Compile Include="NytTreeView\NytTreeView.cs">
+    <Compile Include="Common\NytTreeNodeInfo.cs" />
+    <Compile Include="Common\NytTreeView.cs">
       <SubType>Component</SubType>
     </Compile>
-    <Compile Include="NytTreeView\NytTreeViewForm.cs">
+    <Compile Include="Form\NodeForm.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="NytTreeView\NytTreeViewForm.Designer.cs">
-      <DependentUpon>NytTreeViewForm.cs</DependentUpon>
+    <Compile Include="Form\NodeForm.Designer.cs">
+      <DependentUpon>NodeForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Common\NytTreeNode.cs" />
+    <Compile Include="Form\FileViewForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Form\FileViewForm.Designer.cs">
+      <DependentUpon>FileViewForm.cs</DependentUpon>
     </Compile>
     <Compile Include="Form\MainForm.cs">
       <SubType>Form</SubType>
@@ -72,11 +72,11 @@
     </Compile>
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <EmbeddedResource Include="Form\AddNodeForm.resx">
-      <DependentUpon>AddNodeForm.cs</DependentUpon>
+    <EmbeddedResource Include="Form\NodeForm.resx">
+      <DependentUpon>NodeForm.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="NytTreeView\NytTreeViewForm.resx">
-      <DependentUpon>NytTreeViewForm.cs</DependentUpon>
+    <EmbeddedResource Include="Form\FileViewForm.resx">
+      <DependentUpon>FileViewForm.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Form\MainForm.resx">
       <DependentUpon>MainForm.cs</DependentUpon>

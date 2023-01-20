@@ -6,10 +6,10 @@ namespace Editor.Nyt
 {
 	public class NytTreeNode : TreeNode
 	{
-		private NytDataType _type;
-		private string _name;
-		private string _value;
-		private byte[] _data;
+		public NytDataType _type { get; set; }
+		public string _name { get; set; }
+		public string _value { get; set; }
+		public byte[] _data { get; set; }
 
 		public NytTreeNode(NytTreeNodeInfo info)
 		{
@@ -37,6 +37,10 @@ namespace Editor.Nyt
 #if DEBUG
 			string line = streamReader.ReadLine();
 			string[] info = line.Split(',');
+			for (int i = 0; i < info.Length; ++i)
+			{
+				info[i] = info[i].Trim();
+			}
 
 			if (info[0] == "GROUP")
 			{

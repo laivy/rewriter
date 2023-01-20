@@ -1,6 +1,6 @@
 ﻿namespace Editor
 {
-	partial class AddNodeForm
+	partial class NodeForm
 	{
 		/// <summary>
 		/// Required designer variable.
@@ -52,34 +52,34 @@
             this.typeComboBox.Name = "typeComboBox";
             this.typeComboBox.Size = new System.Drawing.Size(156, 20);
             this.typeComboBox.TabIndex = 0;
-            this.typeComboBox.SelectedIndexChanged += new System.EventHandler(this.typeComboBox_SelectedIndexChanged);
+            this.typeComboBox.SelectedIndexChanged += new System.EventHandler(this.OnTypeComboBoxSelectedIndexChange);
             // 
             // valueTextBox
             // 
             this.valueTextBox.Location = new System.Drawing.Point(47, 59);
             this.valueTextBox.Name = "valueTextBox";
             this.valueTextBox.Size = new System.Drawing.Size(156, 21);
-            this.valueTextBox.TabIndex = 1;
+            this.valueTextBox.TabIndex = 2;
             // 
             // addButton
             // 
             this.addButton.Location = new System.Drawing.Point(47, 86);
             this.addButton.Name = "addButton";
             this.addButton.Size = new System.Drawing.Size(75, 23);
-            this.addButton.TabIndex = 2;
+            this.addButton.TabIndex = 3;
             this.addButton.Text = "추가";
             this.addButton.UseVisualStyleBackColor = true;
-            this.addButton.Click += new System.EventHandler(this.addButton_Click);
+            this.addButton.Click += new System.EventHandler(this.OnAddButtonClick);
             // 
             // cancleButton
             // 
             this.cancleButton.Location = new System.Drawing.Point(128, 86);
             this.cancleButton.Name = "cancleButton";
             this.cancleButton.Size = new System.Drawing.Size(75, 23);
-            this.cancleButton.TabIndex = 3;
+            this.cancleButton.TabIndex = 4;
             this.cancleButton.Text = "취소";
             this.cancleButton.UseVisualStyleBackColor = true;
-            this.cancleButton.Click += new System.EventHandler(this.cancleButton_Click);
+            this.cancleButton.Click += new System.EventHandler(this.OnCancleButtonClick);
             // 
             // label1
             // 
@@ -104,7 +104,7 @@
             this.nameTextBox.Location = new System.Drawing.Point(47, 32);
             this.nameTextBox.Name = "nameTextBox";
             this.nameTextBox.Size = new System.Drawing.Size(156, 21);
-            this.nameTextBox.TabIndex = 6;
+            this.nameTextBox.TabIndex = 1;
             // 
             // label3
             // 
