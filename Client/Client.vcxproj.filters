@@ -101,9 +101,6 @@
     <ClInclude Include="Stdafx.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
-    <ClInclude Include="Singleton.h">
-      <Filter>헤더 파일</Filter>
-    </ClInclude>
     <ClInclude Include="KeyWorkerThread.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
@@ -148,6 +145,9 @@
     </ClInclude>
     <ClInclude Include="ImageLoader.h">
       <Filter>헤더 파일\Data</Filter>
+    </ClInclude>
+    <ClInclude Include="Singleton.h">
+      <Filter>헤더 파일\Interface</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

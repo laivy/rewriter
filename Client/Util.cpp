@@ -68,7 +68,7 @@ namespace Util
 	BOOL IsContain(const RECTF& rect, const FLOAT2& point)
 	{
 		if (rect.left <= point.x && point.x <= rect.right &&
-			rect.top <= point.y && point.y <= rect.bottom)
+			rect.top  <= point.y && point.y <= rect.bottom)
 			return TRUE;
 		return FALSE;
 	}

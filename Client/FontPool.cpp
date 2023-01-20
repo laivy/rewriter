@@ -26,10 +26,10 @@ FontPool::FontPool()
 	};
 
 	const std::array<FontLoadInfo, LOAD_FONT_COUNT> fontLoadInfoList
-	{ 
-		{
-			TEXT("Data/morris9.ttf"),
-			{
+	{
+		{ 
+			TEXT("Data/morris9.ttf"), 
+			{ 
 				{ DWRITE_FONT_WEIGHT_NORMAL, DWRITE_FONT_STYLE_NORMAL, DWRITE_FONT_STRETCH_NORMAL, 12.0f, TEXT(""), &m_pool[static_cast<int>(FontType::MORRIS)] }
 			}
 		}

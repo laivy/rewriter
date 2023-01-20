@@ -7,7 +7,7 @@ UI::UI() : m_parent{ nullptr }
 
 }
 
-void UI::SetParent(Wnd* wnd)
+void UI::SetParent(Wnd* const wnd)
 {
 	m_parent = wnd;
 }

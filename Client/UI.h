@@ -12,7 +12,7 @@ public:
 
 	virtual void OnMouseEvent(HWND hWnd, UINT message, INT x, INT y) { }
 
-	void SetParent(Wnd* wnd);
+	void SetParent(Wnd* const wnd);
 
 	RECTF GetRect() const;
 	Wnd* const GetParent() const;
