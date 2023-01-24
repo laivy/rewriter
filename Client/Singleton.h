@@ -5,10 +5,10 @@ class TSingleton
 {
 public:
 	template <class... Args>
-	static void Instantiate(Args... args)
+	static void Instantiate(Args&&... args)
 	{
 		if (m_instance) return;
-		m_instance = std::make_unique<T>(args...);
+		m_instance = std::make_unique<T>(std::forward<Args>(args)...);
 	}
 
 	static void Destroy()
