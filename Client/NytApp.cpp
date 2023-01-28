@@ -1,8 +1,9 @@
 ﻿#include "Stdafx.h"
 #include "NytApp.h"
 #include "NytLoader.h"
+#include "NytImage.h"
+#include "NytProperty.h"
 #include "BrushPool.h"
-#include "ImageLoader.h"
 #include "Timer.h"
 #include "FontPool.h"
 #include "KeyWorkerThread.h"
@@ -48,7 +49,6 @@ void NytApp::OnCreate()
 		auto wnd3{ std::make_unique<Wnd>(150.0f, 400.0f, 400.0f, 400.0f) };
 		WndManager::GetInstance()->AddWnd(wnd3);
 	}
-	ImageLoader::Instantiate();
 	NytLoader::Instantiate();
 
 	// 쓰레드 생성
@@ -255,6 +255,14 @@ void NytApp::Render()
 
 	if (WndManager::IsInstanced())
 		WndManager::GetInstance()->Render(m_renderTarget);
+
+	static NytImage paimon{ nullptr };
+	if (NytLoader::IsInstanced())
+	{
+		auto& root = NytLoader::GetInstance()->Load("Login.nyt");
+		paimon = root.Get<NytImage>("Group1/paimon");
+	}
+	paimon.Render(m_renderTarget);
 
 	m_renderTarget->EndDraw();
 }

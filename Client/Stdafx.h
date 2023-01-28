@@ -29,6 +29,7 @@
 #include <dwrite_3.h>
 #include <wincodec.h>
 
+#include "NytDataType.h"
 #include "Singleton.h"
 #include "StringTable.h"
 #include "Util.h"

@@ -5,9 +5,6 @@
 #include "Button.h"
 #include "EditCtrl.h"
 
-#include "Image.h"
-#include "ImageLoader.h"
-
 Wnd::Wnd(FLOAT width, FLOAT height, FLOAT x, FLOAT y) :
 	m_isFocus{ FALSE },
 	m_isPick{ FALSE },

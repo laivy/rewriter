@@ -145,12 +145,6 @@
     <ClCompile Include="GameObject.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Use</PrecompiledHeader>
     </ClCompile>
-    <ClCompile Include="Image.cpp">
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Use</PrecompiledHeader>
-    </ClCompile>
-    <ClCompile Include="ImageLoader.cpp">
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Use</PrecompiledHeader>
-    </ClCompile>
     <ClCompile Include="NytApp.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Use</PrecompiledHeader>
     </ClCompile>
@@ -160,8 +154,14 @@
     <ClCompile Include="MouseWorkerThread.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Use</PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="NytImage.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Use</PrecompiledHeader>
+    </ClCompile>
     <ClCompile Include="NytLoader.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Use</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="NytProperty.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Use</PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="TextUtil.cpp">
@@ -194,13 +194,14 @@
     <ClInclude Include="Button.h" />
     <ClInclude Include="EditCtrl.h" />
     <ClInclude Include="FontPool.h" />
-    <ClInclude Include="Image.h" />
-    <ClInclude Include="ImageLoader.h" />
     <ClInclude Include="NytApp.h" />
     <ClInclude Include="GameObject.h" />
     <ClInclude Include="KeyWorkerThread.h" />
     <ClInclude Include="MouseWorkerThread.h" />
+    <ClInclude Include="NytDataType.h" />
+    <ClInclude Include="NytImage.h" />
     <ClInclude Include="NytLoader.h" />
+    <ClInclude Include="NytProperty.h" />
     <ClInclude Include="Singleton.h" />
     <ClInclude Include="Stdafx.h" />
     <ClInclude Include="StringTable.h" />

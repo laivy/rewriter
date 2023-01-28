@@ -1,5 +1,15 @@
 ﻿#include "stdafx.h"
+#include "NytApp.h"
 #include "NytLoader.h"
+#include "NytProperty.h"
+#include "NytImage.h"
+
+NytLoader::NytLoader()
+{
+	HRESULT hr{ E_FAIL };
+	hr = CoCreateInstance(CLSID_WICImagingFactory, NULL, CLSCTX_INPROC_SERVER, IID_PPV_ARGS(&m_WICIFactory));
+	assert(SUCCEEDED(hr));
+}
 
 NytProperty& NytLoader::Load(const std::string& filePath)
 {
@@ -28,61 +38,41 @@ NytProperty& NytLoader::Load(const std::string& filePath)
 
 void NytLoader::Load(std::ifstream& fs, NytProperty& root)
 {
-	auto ReadString = [&]() -> std::string
-	{
-		char length{};
-		char buffer[50]{};
-		fs.read(&length, sizeof(char));
-		fs.read(buffer, length);
-		return std::string{ buffer };
-	};
+	NytDataType type{ Read<BYTE>(fs) };
+	std::string name{ Read<std::string>(fs) };
 
-	NytDataType type{};
-	fs.read(reinterpret_cast<char*>(&type), sizeof(byte));
-
-	std::string name{ ReadString() };
 	std::any data{};
-
 	switch (type)
 	{
 	case NytDataType::GROUP:
 		break;
 	case NytDataType::INT:
 	{
-		int buffer{};
-		fs.read(reinterpret_cast<char*>(&buffer), sizeof(int));
-		data = buffer;
+		data = Read<int>(fs);
 		break;
 	}
 	case NytDataType::FLOAT:
 	{
-		float buffer{};
-		fs.read(reinterpret_cast<char*>(&buffer), sizeof(float));
-		data = buffer;
+		data = Read<float>(fs);
 		break;
 	}
 	case NytDataType::STRING:
-		data = ReadString();
+		data = Read<std::string>(fs);
 		break;
 	case NytDataType::IMAGE:
 	{
-		int len{};
-		std::unique_ptr<char> buffer{ new char[10 * 1024] };
-		fs.read(reinterpret_cast<char*>(&len), sizeof(int));
-		fs.read(buffer.get(), len);
-		data = std::string{ buffer.get() };
+		data = Read<NytImage>(fs);
 		break;
 	}
 	default:
 		assert(false);
 	}
 
-	int childNodeCount{};
-	fs.read(reinterpret_cast<char*>(&childNodeCount), sizeof(int));
+	int childNodeCount{ Read<int>(fs) };
 
 	root.m_childNames.reserve(childNodeCount);
 	root.m_childNames.push_back(name);
-	root.m_childProps[name] = NytProperty{ type,data };
+	root.m_childProps[name] = NytProperty{ type, data };
 
 	for (int i = 0; i < childNodeCount; ++i)
 	{
@@ -90,12 +80,41 @@ void NytLoader::Load(std::ifstream& fs, NytProperty& root)
 	}
 }
 
-NytProperty::NytProperty() : m_type{ NytDataType::GROUP }, m_data{}
+template<>
+std::string NytLoader::Read(std::ifstream& fs)
 {
-
+	char length{};
+	char buffer[50]{};
+	fs.read(&length, sizeof(char));
+	fs.read(buffer, length);
+	return std::string{ buffer };
 }
 
-NytProperty::NytProperty(NytDataType type, const std::any& data) : m_type{ type }, m_data{ data }
+template<>
+NytImage NytLoader::Read(std::ifstream& fs)
 {
+	int length{ Read<int>(fs) };
 
+	std::unique_ptr<BYTE> buffer{ new BYTE[length] };
+	fs.read(reinterpret_cast<char*>(buffer.get()), length);
+
+	ComPtr<IWICBitmapDecoder> decoder;
+	ComPtr<IWICFormatConverter> converter;
+	ComPtr<IWICBitmapFrameDecode> frameDecode;
+	ComPtr<IWICStream> stream;
+	ComPtr<ID2D1Bitmap> bitmap;
+
+	HRESULT hr{ E_FAIL };
+	hr = m_WICIFactory->CreateStream(&stream);
+	hr = stream->InitializeFromMemory(buffer.get(), length);
+	hr = m_WICIFactory->CreateDecoderFromStream(stream.Get(), NULL, WICDecodeMetadataCacheOnLoad, &decoder);
+	hr = m_WICIFactory->CreateFormatConverter(&converter);
+	hr = decoder->GetFrame(0, &frameDecode);
+	hr = converter->Initialize(frameDecode.Get(), GUID_WICPixelFormat32bppPBGRA, WICBitmapDitherTypeNone, NULL, 0.0f, WICBitmapPaletteTypeMedianCut);
+
+	auto renderTarget{ NytApp::GetInstance()->GetRenderTarget() };
+	hr = renderTarget->CreateBitmapFromWicBitmap(converter.Get(), NULL, &bitmap);
+	assert(SUCCEEDED(hr));
+
+	return NytImage{ bitmap };
 }
