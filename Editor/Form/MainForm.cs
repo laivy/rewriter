@@ -27,7 +27,9 @@ namespace Editor
 			};
 
 			DialogResult dialogResult = saveFileDialog.ShowDialog();
-			if (dialogResult != DialogResult.Cancel && dialogResult != DialogResult.OK)
+			if (dialogResult == DialogResult.Cancel)
+				return;
+			if (dialogResult != DialogResult.OK)
 			{
 				MessageBox.Show("해당 경로에 저장할 수 없습니다.");
 				return;
@@ -48,7 +50,9 @@ namespace Editor
 			};
 
 			DialogResult dialogResult = openFileDialog.ShowDialog();
-			if (dialogResult != DialogResult.Cancel && dialogResult != DialogResult.OK)
+			if (dialogResult == DialogResult.Cancel)
+				return;
+			if (dialogResult != DialogResult.OK)
 			{
 				MessageBox.Show("해당 파일을 열 수 없습니다.");
 				return;
