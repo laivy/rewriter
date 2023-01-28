@@ -1,5 +1,6 @@
 ﻿#include "Stdafx.h"
 #include "NytApp.h"
+#include "NytLoader.h"
 #include "BrushPool.h"
 #include "ImageLoader.h"
 #include "Timer.h"
@@ -48,6 +49,7 @@ void NytApp::OnCreate()
 		WndManager::GetInstance()->AddWnd(wnd3);
 	}
 	ImageLoader::Instantiate();
+	NytLoader::Instantiate();
 
 	// 쓰레드 생성
 	KeyboardWorkerThread::Instantiate();

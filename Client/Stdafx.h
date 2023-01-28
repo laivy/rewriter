@@ -6,6 +6,7 @@
 #include <windows.h>
 #include <shellscalingapi.h>
 #include <wrl.h>
+#include <any>
 #include <array>
 #include <cassert>
 #include <chrono>
@@ -18,6 +19,7 @@
 #include <thread>
 #include <mutex>
 #include <functional>
+#include <fstream>
 
 #pragma comment(lib, "d2d1.lib")
 #pragma comment(lib, "dwrite.lib")
@@ -28,6 +30,7 @@
 #include <wincodec.h>
 
 #include "Singleton.h"
+#include "StringTable.h"
 #include "Util.h"
 
 using Microsoft::WRL::ComPtr;
