@@ -1,8 +1,6 @@
 ﻿using System;
 using System.IO;
-using System.Runtime.InteropServices;
 using System.Windows.Forms;
-using System.Xml.Linq;
 using Editor.Nyt;
 
 namespace Editor
@@ -53,8 +51,8 @@ namespace Editor
 					break;
 				case NytDataType.IMAGE:
 					OpenFileDialog openFileDialog = new OpenFileDialog();
-					openFileDialog.Filter = "nyt files (*.nyt)|*.nyt";
-					openFileDialog.Title = "불러올 파일을 선택해주세요.";
+					openFileDialog.Filter = "png file (*.png)|*.png";
+					openFileDialog.Title = "불러올 이미지를 선택해주세요.";
 					string filePath = string.Empty;
 					if (openFileDialog.ShowDialog() == DialogResult.OK)
 					{
