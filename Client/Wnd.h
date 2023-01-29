@@ -5,7 +5,7 @@ class Wnd : public UI
 {
 public:
 	Wnd(FLOAT width, FLOAT height, FLOAT x = 0.0f, FLOAT y = 0.0f);
-	virtual ~Wnd();
+	virtual ~Wnd() = default;
 
 	virtual void OnMouseEvent(HWND hWnd, UINT message, INT x, INT y);
 	virtual void OnKeyboardEvent(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);

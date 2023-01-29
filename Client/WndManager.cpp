@@ -92,7 +92,7 @@ void WndManager::Update(FLOAT deltaTime)
 	}
 }
 
-void WndManager::Render(const ComPtr<ID2D1HwndRenderTarget>& renderTarget)
+void WndManager::Render(const ComPtr<ID2D1HwndRenderTarget>& renderTarget) const
 {
 	std::unique_lock lock{ m_mutex };
 	for (const auto& w : m_wnds)
@@ -102,9 +102,7 @@ void WndManager::Render(const ComPtr<ID2D1HwndRenderTarget>& renderTarget)
 void WndManager::SetTopWnd(const Wnd* const wnd)
 {
 	// 이미 락을 잡고 들어온다.
-
-	if (!wnd)
-		return;
+	if (!wnd) return;
 
 	auto it = std::ranges::find_if(m_wnds, [&](const std::unique_ptr<Wnd>& e) { return e.get() == wnd; });
 	if (it == m_wnds.end())

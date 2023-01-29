@@ -10,27 +10,8 @@ Wnd::Wnd(FLOAT width, FLOAT height, FLOAT x, FLOAT y) :
 	m_isPick{ FALSE },
 	m_pickDelta{ 0.0f, 0.0f }
 {
-	static bool isFirst{ TRUE };
-	if (isFirst)
-	{
-		auto button{ std::make_unique<Button>(150.0f, 20.0f) };
-		button->SetPosition(width / 2.0f, height * 0.9f, Pivot::CENTER);
-		AddUI(button);
-
-		auto editctrl{ std::make_unique<EditCtrl>(500.0f, 150.0f) };
-		editctrl->SetPosition(width / 2.0f, height * 0.5f, Pivot::CENTER);
-		AddUI(editctrl);
-
-		isFirst = FALSE;
-	}
-
 	SetSize(FLOAT2{ width, height });
 	SetPosition(FLOAT2{ x, y });
-}
-
-Wnd::~Wnd()
-{
-	
 }
 
 void Wnd::OnMouseEvent(HWND hWnd, UINT message, INT x, INT y)

@@ -36,6 +36,12 @@ NytProperty& NytLoader::Load(const std::string& filePath)
 	return m_data[filePath];
 }
 
+void NytLoader::Unload(const std::string& filePath)
+{
+	if (m_data.contains(filePath))
+		m_data.erase(filePath);
+}
+
 void NytLoader::Load(std::ifstream& fs, NytProperty& root)
 {
 	NytDataType type{ Read<BYTE>(fs) };

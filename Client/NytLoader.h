@@ -9,6 +9,7 @@ public:
 	NytLoader();
 
 	NytProperty& Load(const std::string& filePath);
+	void Unload(const std::string& filePath);
 
 private:
 	void Load(std::ifstream& fs, NytProperty& root);

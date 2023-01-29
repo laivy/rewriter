@@ -10,10 +10,10 @@ public:
 	void OnMouseEvent(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);
 	void OnKeyboardEvent(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);
 
-	virtual void Update(FLOAT deltaTime);
-	virtual void Render(const ComPtr<ID2D1HwndRenderTarget>& renderTarget);
+	void Update(FLOAT deltaTime);
+	void Render(const ComPtr<ID2D1HwndRenderTarget>& renderTarget) const;
 
-	template <typename T>
+	template <class T>
 	void AddWnd(std::unique_ptr<T>& wnd)
 	{
 		std::unique_lock lock{ m_addWndsMutex };
@@ -31,7 +31,7 @@ public:
 	std::mutex& GetLock() { return m_mutex; }
 
 private:
-	std::mutex m_mutex;
+	mutable std::mutex m_mutex;
 	std::list<std::unique_ptr<Wnd>>	m_wnds;
 
 	// 다음 업데이트 때 추가될 윈도우 객체

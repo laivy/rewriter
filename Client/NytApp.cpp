@@ -10,50 +10,33 @@
 #include "MouseWorkerThread.h"
 #include "WndManager.h"
 #include "Wnd.h"
+#include "SceneManager.h"
 
 NytApp::NytApp() : m_hwnd{ NULL }, m_timer{ new Timer }
 {
-	HRESULT hr{};
+	HRESULT hr{ E_FAIL };
+	hr = InitWnd();
 	hr = InitD2D();
-	
-	if (SUCCEEDED(hr))
-		hr = InitWnd();
-
-	if (SUCCEEDED(hr))
-		hr = CreateDeviceResources();
-
 	assert(SUCCEEDED(hr));
-}
-
-NytApp::~NytApp()
-{
-
 }
 
 void NytApp::OnCreate()
 {
-	// 풀 생성
 	FontPool::Instantiate();
 	BrushPool::Instantiate(m_renderTarget);
-
-	// UI 생성
-	WndManager::Instantiate();
-	if (WndManager::IsInstanced())
-	{
-		auto wnd1{ std::make_unique<Wnd>(500.0f, 500.0f, 0.0f, 0.0f) };
-		WndManager::GetInstance()->AddWnd(wnd1);
-
-		auto wnd2{ std::make_unique<Wnd>(300.0f, 200.0f, 300.0f, 300.0f) };
-		WndManager::GetInstance()->AddWnd(wnd2);
-
-		auto wnd3{ std::make_unique<Wnd>(150.0f, 400.0f, 400.0f, 400.0f) };
-		WndManager::GetInstance()->AddWnd(wnd3);
-	}
 	NytLoader::Instantiate();
 
-	// 쓰레드 생성
+	WndManager::Instantiate();
+	SceneManager::Instantiate();
+
 	KeyboardWorkerThread::Instantiate();
 	MouseWorkerThread::Instantiate();
+}
+
+void NytApp::OnDestroy()
+{
+	if (SceneManager::IsInstanced())
+		SceneManager::GetInstance()->OnDestroy();
 }
 
 void NytApp::Run()
@@ -93,14 +76,11 @@ ComPtr<ID2D1HwndRenderTarget> NytApp::GetRenderTarget() const
 
 HRESULT NytApp::InitD2D()
 {
-	HRESULT hr{ S_OK };
+	HRESULT hr{ E_FAIL };
 	hr = CoInitialize(NULL);
 
 	if (SUCCEEDED(hr))
 		hr = D2D1CreateFactory(D2D1_FACTORY_TYPE_SINGLE_THREADED, m_d2dFactory.GetAddressOf());
-
-	if (SUCCEEDED(hr))
-		hr = CoCreateInstance(CLSID_WICImagingFactory, NULL, CLSCTX_INPROC_SERVER, IID_PPV_ARGS(&m_wicFactory));
 
 	if (SUCCEEDED(hr))
 		hr = DWriteCreateFactory(
@@ -109,60 +89,19 @@ HRESULT NytApp::InitD2D()
 			reinterpret_cast<IUnknown**>(m_dwriteFactory.GetAddressOf())
 		);
 
-	static const WCHAR msc_fontName[] = L"Verdana";
-	static const FLOAT msc_fontSize = 50;
-	if (SUCCEEDED(hr))
-		hr = m_dwriteFactory->CreateTextFormat(
-			msc_fontName,
-			NULL,
-			DWRITE_FONT_WEIGHT_NORMAL,
-			DWRITE_FONT_STYLE_NORMAL,
-			DWRITE_FONT_STRETCH_NORMAL,
-			msc_fontSize,
-			L"",
-			&m_textFormat
-		);
+	RECT rc;
+	GetClientRect(m_hwnd, &rc);
 
-	if (SUCCEEDED(hr))
-	{
-		m_textFormat->SetTextAlignment(DWRITE_TEXT_ALIGNMENT_CENTER);
-		m_textFormat->SetParagraphAlignment(DWRITE_PARAGRAPH_ALIGNMENT_FAR);
-		hr = m_d2dFactory->CreatePathGeometry(m_pathGeometry.GetAddressOf());
-	}
+	D2D1_SIZE_U size{
+		static_cast<UINT>(rc.right - rc.left),
+		static_cast<UINT>(rc.bottom - rc.top)
+	};
 
-	ID2D1GeometrySink* pSink{ NULL };
-	if (SUCCEEDED(hr))
-		hr = m_pathGeometry->Open(&pSink);
-
-	if (SUCCEEDED(hr))
-	{
-		pSink->SetFillMode(D2D1_FILL_MODE_ALTERNATE);
-
-		pSink->BeginFigure(D2D1::Point2F(0, 0), D2D1_FIGURE_BEGIN_FILLED);
-
-		pSink->AddLine(D2D1::Point2F(200, 0));
-
-		pSink->AddBezier(
-			D2D1::BezierSegment(
-				D2D1::Point2F(150, 50),
-				D2D1::Point2F(150, 150),
-				D2D1::Point2F(200, 200))
-		);
-
-		pSink->AddLine(D2D1::Point2F(0, 200));
-
-		pSink->AddBezier(
-			D2D1::BezierSegment(
-				D2D1::Point2F(50, 150),
-				D2D1::Point2F(50, 50),
-				D2D1::Point2F(0, 0))
-		);
-
-		pSink->EndFigure(D2D1_FIGURE_END_CLOSED);
-
-		hr = pSink->Close();
-	}
-	pSink->Release();
+	hr = m_d2dFactory->CreateHwndRenderTarget(
+		D2D1::RenderTargetProperties(),
+		D2D1::HwndRenderTargetProperties(m_hwnd, size),
+		&m_renderTarget
+	);
 
 	return hr;
 }
@@ -193,15 +132,14 @@ HRESULT NytApp::InitWnd()
 		NULL,
 		HINST_THISCOMPONENT,
 		this
-		);
+	);
 
-	HRESULT hr = m_hwnd ? S_OK : E_FAIL;
+	HRESULT hr{ m_hwnd ? S_OK : E_FAIL };
 	if (SUCCEEDED(hr))
 	{
 		ShowWindow(m_hwnd, SW_SHOWNORMAL);
 		UpdateWindow(m_hwnd);
 	}
-	
 	return hr;
 }
 
@@ -231,6 +169,7 @@ LRESULT CALLBACK NytApp::WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM 
 			KeyboardWorkerThread::GetInstance()->OnKeyboardEvent(hWnd, message, wParam, lParam);
 		break;
 	case WM_DESTROY:
+		app->OnDestroy();
 		PostQuitMessage(0);
 		break;
 	default:
@@ -244,8 +183,8 @@ void NytApp::Update()
 	m_timer->Tick();
 	FLOAT deltaTime{ m_timer->GetDeltaTime() };
 
-	if (WndManager::IsInstanced())
-		WndManager::GetInstance()->Update(deltaTime);
+	if (SceneManager::IsInstanced())
+		SceneManager::GetInstance()->Update(deltaTime);
 }
 
 void NytApp::Render()
@@ -253,16 +192,8 @@ void NytApp::Render()
 	m_renderTarget->BeginDraw();
 	m_renderTarget->Clear(D2D1::ColorF{ D2D1::ColorF::White });
 
-	if (WndManager::IsInstanced())
-		WndManager::GetInstance()->Render(m_renderTarget);
-
-	static NytImage paimon{ nullptr };
-	if (NytLoader::IsInstanced())
-	{
-		auto& root = NytLoader::GetInstance()->Load("Login.nyt");
-		paimon = root.Get<NytImage>("Group1/paimon");
-	}
-	paimon.Render(m_renderTarget);
+	if (SceneManager::IsInstanced())
+		SceneManager::GetInstance()->Render(m_renderTarget);
 
 	m_renderTarget->EndDraw();
 }
@@ -272,7 +203,6 @@ HRESULT NytApp::CreateDeviceResources()
 	if (m_renderTarget)
 		return S_OK;
 
-	HRESULT hr{ S_OK };
 	RECT rc;
 	GetClientRect(m_hwnd, &rc);
 
@@ -282,14 +212,12 @@ HRESULT NytApp::CreateDeviceResources()
 	) };
 
 	// Create a Direct2D render target.
+	HRESULT hr{ E_FAIL };
 	hr = m_d2dFactory->CreateHwndRenderTarget(
 		D2D1::RenderTargetProperties(),
 		D2D1::HwndRenderTargetProperties(m_hwnd, size),
 		&m_renderTarget
 	);
-
-	if (SUCCEEDED(hr))
-		hr = m_renderTarget->CreateSolidColorBrush(D2D1::ColorF{ D2D1::ColorF::Black }, &m_blackBrush);
 
 	return hr;
 }
