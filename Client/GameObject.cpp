@@ -87,3 +87,10 @@ FLOAT2 GameObject::GetSize() const
 {
 	return m_size;
 }
+
+MATRIX GameObject::GetMatrix() const
+{
+	MATRIX rotate{ MATRIX::Rotation(m_degree, m_position) };
+	MATRIX translate{ MATRIX::Translation(m_position) };
+	return MATRIX::Identity() * rotate * translate;
+}

@@ -14,6 +14,7 @@ public:
 	void Run();
 
 	HWND GetHwnd() const;
+	INT2 GetSize() const;
 	ComPtr<IDWriteFactory5> GetDwriteFactory() const;
 	ComPtr<ID2D1HwndRenderTarget> GetRenderTarget() const;
 
@@ -23,15 +24,13 @@ private:
 	static LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);
 
 	void Update();
-	void Render();
-
-	HRESULT CreateDeviceResources();
+	void Render() const;
 
 private:
-	HWND								m_hwnd;
-	ComPtr<ID2D1Factory>				m_d2dFactory;
-	ComPtr<IDWriteFactory5>				m_dwriteFactory;
-	ComPtr<ID2D1HwndRenderTarget>		m_renderTarget;
-
-	std::unique_ptr<Timer>				m_timer;
+	HWND m_hwnd;
+	INT2 m_size;
+	ComPtr<ID2D1Factory> m_d2dFactory;
+	ComPtr<IDWriteFactory5>	m_dwriteFactory;
+	ComPtr<ID2D1HwndRenderTarget> m_renderTarget;
+	std::unique_ptr<Timer> m_timer;
 };

@@ -89,7 +89,7 @@ FontPool::FontInfo FontPool::LoadFont(const std::wstring& filePath)
 
 	std::wstring fontFamilyName;
 	fontFamilyName.resize(LF_FACESIZE);
-	for (int i = 0; i < fontCollection->GetFontFamilyCount(); ++i)
+	for (UINT i = 0; i < fontCollection->GetFontFamilyCount(); ++i)
 	{
 		ComPtr<IDWriteFontFamily> fontFamily;
 		fontCollection->GetFontFamily(i, &fontFamily);
@@ -97,15 +97,15 @@ FontPool::FontInfo FontPool::LoadFont(const std::wstring& filePath)
 		ComPtr<IDWriteLocalizedStrings> familyName;
 		fontFamily->GetFamilyNames(&familyName);
 		
-		for (int j = 0; j < familyName->GetCount(); ++j)
+		for (UINT j = 0; j < familyName->GetCount(); ++j)
 		{
 			std::wstring localeName;
 			localeName.resize(LOCALE_NAME_MAX_LENGTH);
-			familyName->GetLocaleName(j, localeName.data(), localeName.length());
+			familyName->GetLocaleName(j, localeName.data(), static_cast<UINT32>(localeName.length()));
 
 			if (localeName.starts_with(TEXT("en-us")))
 			{
-				familyName->GetString(j, fontFamilyName.data(), fontFamilyName.length());
+				familyName->GetString(j, fontFamilyName.data(), static_cast<UINT32>(fontFamilyName.length()));
 				return FontPool::FontInfo{ fontFamilyName, fontCollection };
 			}
 		}

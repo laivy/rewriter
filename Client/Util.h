@@ -1,11 +1,28 @@
 ﻿#pragma once
 #include <d2d1.h>
 
+class INT2 : public D2D1_POINT_2L
+{
+public:
+	INT2();
+	INT2(int x, int y);
+
+	operator D2D1_SIZE_U() const;
+
+private:
+	friend INT2 operator+(const INT2& lhs, const INT2& rhs);
+	friend INT2 operator-(const INT2& lhs, const INT2& rhs);
+	friend void operator+=(INT2& lhs, const INT2& rhs);
+	friend void operator-=(INT2& lhs, const INT2& rhs);
+};
+
 class FLOAT2 : public D2D1_POINT_2F
 {
 public:
 	FLOAT2();
 	FLOAT2(FLOAT x, FLOAT y);
+
+	operator D2D1_SIZE_F() const;
 
 private:
 	friend FLOAT2 operator+(const FLOAT2& lhs, const FLOAT2& rhs);
@@ -22,6 +39,8 @@ public:
 
 	void Offset(FLOAT x, FLOAT y);
 };
+
+using MATRIX = D2D1::Matrix3x2F;
 
 namespace Util
 {

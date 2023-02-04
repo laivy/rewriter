@@ -1,6 +1,49 @@
 ﻿#include "Stdafx.h"
 #include "Util.h"
 
+INT2::INT2()
+{
+	x = 0;
+	y = 0;
+}
+
+INT2::INT2(int x, int y)
+{
+	this->x = static_cast<LONG>(x);
+	this->y = static_cast<LONG>(y);
+}
+
+INT2::operator D2D1_SIZE_U() const
+{
+	return D2D1_SIZE_U{ static_cast<UINT>(x), static_cast<UINT>(y) };
+}
+
+INT2 operator+(const INT2& lhs, const INT2& rhs)
+{
+	INT2 value{ lhs };
+	value.x += rhs.x;
+	value.y += rhs.y;
+	return value;
+}
+
+INT2 operator-(const INT2& lhs, const INT2& rhs)
+{
+	INT2 value{ lhs };
+	value.x -= rhs.x;
+	value.y -= rhs.y;
+	return value;
+}
+
+void operator+=(INT2& lhs, const INT2& rhs)
+{
+	lhs = lhs + rhs;
+}
+
+void operator-=(INT2& lhs, const INT2& rhs)
+{
+	lhs = lhs - rhs;
+}
+
 FLOAT2::FLOAT2()
 {
 	x = 0.0f;
@@ -11,6 +54,11 @@ FLOAT2::FLOAT2(FLOAT x, FLOAT y)
 {
 	this->x = x;
 	this->y = y;
+}
+
+FLOAT2::operator D2D1_SIZE_F() const
+{
+	return D2D1_SIZE_F{ x, y };
 }
 
 FLOAT2 operator+(const FLOAT2& lhs, const FLOAT2& rhs)

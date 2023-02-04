@@ -12,7 +12,7 @@
 #include "Wnd.h"
 #include "SceneManager.h"
 
-NytApp::NytApp() : m_hwnd{ NULL }, m_timer{ new Timer }
+NytApp::NytApp() : m_hwnd{ NULL }, m_size{ 1920, 1080 }, m_timer{ new Timer }
 {
 	HRESULT hr{ E_FAIL };
 	hr = InitWnd();
@@ -31,6 +31,8 @@ void NytApp::OnCreate()
 
 	KeyboardWorkerThread::Instantiate();
 	MouseWorkerThread::Instantiate();
+
+	m_timer->Tick();
 }
 
 void NytApp::OnDestroy()
@@ -64,6 +66,11 @@ HWND NytApp::GetHwnd() const
 	return m_hwnd;
 }
 
+INT2 NytApp::GetSize() const
+{
+	return m_size;
+}
+
 ComPtr<IDWriteFactory5> NytApp::GetDwriteFactory() const
 {
 	return m_dwriteFactory;
@@ -78,25 +85,17 @@ HRESULT NytApp::InitD2D()
 {
 	HRESULT hr{ E_FAIL };
 	hr = CoInitialize(NULL);
-
-	if (SUCCEEDED(hr))
-		hr = D2D1CreateFactory(D2D1_FACTORY_TYPE_SINGLE_THREADED, m_d2dFactory.GetAddressOf());
-
-	if (SUCCEEDED(hr))
-		hr = DWriteCreateFactory(
-			DWRITE_FACTORY_TYPE_SHARED,
-			__uuidof(m_dwriteFactory),
-			reinterpret_cast<IUnknown**>(m_dwriteFactory.GetAddressOf())
-		);
+	hr = D2D1CreateFactory(D2D1_FACTORY_TYPE_SINGLE_THREADED, m_d2dFactory.GetAddressOf());
+	hr = DWriteCreateFactory(
+		DWRITE_FACTORY_TYPE_SHARED,
+		__uuidof(m_dwriteFactory),
+		reinterpret_cast<IUnknown**>(m_dwriteFactory.GetAddressOf())
+	);
 
 	RECT rc;
 	GetClientRect(m_hwnd, &rc);
 
-	D2D1_SIZE_U size{
-		static_cast<UINT>(rc.right - rc.left),
-		static_cast<UINT>(rc.bottom - rc.top)
-	};
-
+	INT2 size{ rc.right - rc.left, rc.bottom - rc.top };
 	hr = m_d2dFactory->CreateHwndRenderTarget(
 		D2D1::RenderTargetProperties(),
 		D2D1::HwndRenderTargetProperties(m_hwnd, size),
@@ -126,8 +125,8 @@ HRESULT NytApp::InitWnd()
 		WS_OVERLAPPED | WS_SYSMENU | WS_BORDER,
 		CW_USEDEFAULT,
 		CW_USEDEFAULT,
-		1920,
-		1080,
+		m_size.x,
+		m_size.y,
 		NULL,
 		NULL,
 		HINST_THISCOMPONENT,
@@ -160,13 +159,13 @@ LRESULT CALLBACK NytApp::WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM 
 	case WM_LBUTTONDOWN:
 	case WM_LBUTTONUP:
 	case WM_MOUSEMOVE:
-		if (MouseWorkerThread::IsInstanced())
-			MouseWorkerThread::GetInstance()->OnMouseEvent(hWnd, message, wParam, lParam);
+		if (SceneManager::IsInstanced())
+			SceneManager::GetInstance()->OnMouseEvent(hWnd, message, wParam, lParam);
 		break;
 	case WM_KEYDOWN:
 	case WM_KEYUP:
-		if (KeyboardWorkerThread::IsInstanced())
-			KeyboardWorkerThread::GetInstance()->OnKeyboardEvent(hWnd, message, wParam, lParam);
+		if (SceneManager::IsInstanced())
+			SceneManager::GetInstance()->OnKeyboardEvent(hWnd, message, wParam, lParam);
 		break;
 	case WM_DESTROY:
 		app->OnDestroy();
@@ -187,7 +186,7 @@ void NytApp::Update()
 		SceneManager::GetInstance()->Update(deltaTime);
 }
 
-void NytApp::Render()
+void NytApp::Render() const
 {
 	m_renderTarget->BeginDraw();
 	m_renderTarget->Clear(D2D1::ColorF{ D2D1::ColorF::White });
@@ -196,28 +195,4 @@ void NytApp::Render()
 		SceneManager::GetInstance()->Render(m_renderTarget);
 
 	m_renderTarget->EndDraw();
-}
-
-HRESULT NytApp::CreateDeviceResources()
-{
-	if (m_renderTarget)
-		return S_OK;
-
-	RECT rc;
-	GetClientRect(m_hwnd, &rc);
-
-	D2D1_SIZE_U size{ D2D1::SizeU(
-		static_cast<UINT>(rc.right - rc.left),
-		static_cast<UINT>(rc.bottom - rc.top)
-	) };
-
-	// Create a Direct2D render target.
-	HRESULT hr{ E_FAIL };
-	hr = m_d2dFactory->CreateHwndRenderTarget(
-		D2D1::RenderTargetProperties(),
-		D2D1::HwndRenderTargetProperties(m_hwnd, size),
-		&m_renderTarget
-	);
-
-	return hr;
 }
