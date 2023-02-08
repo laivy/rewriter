@@ -3,6 +3,7 @@
 
 class Camera;
 class NytProperty;
+class NytImage;
 
 class LoginScene : public Scene, public TSingleton<LoginScene>
 {
@@ -20,5 +21,6 @@ public:
 
 private:
 	NytProperty* m_prop;
+	std::unique_ptr<NytImage> m_paimon;
 	std::unique_ptr<Camera> m_camera;
 };

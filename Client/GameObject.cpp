@@ -6,8 +6,10 @@ INT GameObject::s_id{ 0 };
 GameObject::GameObject() :
 	m_id{ s_id++ },
 	m_isValid{ TRUE },
-	m_position{ 0.0f, 0.0f },
-	m_size{ 0.0f, 0.0f }
+	m_size{ 0.0f, 0.0f },
+	m_scale{ 1.0f, 1.0f },
+	m_degree{ 0.0f },
+	m_position{ 0.0f, 0.0f }
 {
 	
 }
@@ -68,6 +70,16 @@ void GameObject::SetSize(const FLOAT2& size)
 	m_size = size;
 }
 
+void GameObject::SetScale(const FLOAT2& scale)
+{
+	m_scale = scale;
+}
+
+void GameObject::SetRotation(FLOAT degree)
+{
+	m_degree = degree;
+}
+
 INT GameObject::GetId() const
 {
 	return m_id;
@@ -90,7 +102,8 @@ FLOAT2 GameObject::GetSize() const
 
 MATRIX GameObject::GetMatrix() const
 {
+	MATRIX scale{ MATRIX::Scale(m_scale, m_position) };
 	MATRIX rotate{ MATRIX::Rotation(m_degree, m_position) };
 	MATRIX translate{ MATRIX::Translation(m_position) };
-	return MATRIX::Identity() * rotate * translate;
+	return MATRIX::Identity() * scale * rotate * translate;
 }

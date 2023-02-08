@@ -19,9 +19,11 @@ public:
 	virtual void Render(const ComPtr<ID2D1HwndRenderTarget>& renderTarget) const;
 	virtual void Destroy();
 
+	void SetSize(const FLOAT2& size);
+	void SetScale(const FLOAT2& scale);
+	void SetRotation(FLOAT degree);
 	void SetPosition(const FLOAT2& position, Pivot pivot = Pivot::LEFTTOP);
 	void SetPosition(FLOAT x, FLOAT y, Pivot pivot = Pivot::LEFTTOP);
-	void SetSize(const FLOAT2& size);
 
 	INT GetId() const;
 	BOOL IsValid() const;
@@ -32,6 +34,7 @@ public:
 protected:
 	BOOL m_isValid;
 	FLOAT2 m_size;
+	FLOAT2 m_scale;
 	FLOAT m_degree;
 	FLOAT2 m_position;
 

@@ -1,6 +1,7 @@
 ﻿#pragma once
+#include "GameObject.h"
 
-class NytImage
+class NytImage : public GameObject
 {
 public:
 	NytImage(const ComPtr<ID2D1Bitmap>& bitmap);

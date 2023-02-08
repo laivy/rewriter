@@ -9,7 +9,7 @@ public:
 	void Update(FLOAT deltaTime);
 
 	void SetScale(const FLOAT2& scale);
-	void SetRotation(FLOAT rotation);
+	void SetRotation(FLOAT degree);
 	void SetPosition(const FLOAT2& position);
 
 	FLOAT2 GetScale() const;

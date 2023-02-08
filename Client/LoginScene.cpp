@@ -15,6 +15,7 @@ void LoginScene::OnCreate()
 {
 	// 데이터 로딩
 	m_prop = &NytLoader::GetInstance()->Load("Login.nyt");
+	m_paimon = std::make_unique<NytImage>(m_prop->Get<NytImage>("Group1/paimon"));
 	assert(m_prop);
 
 	m_camera = std::make_unique<Camera>();
@@ -38,10 +39,6 @@ void LoginScene::OnKeyboardEvent(HWND hWnd, UINT message, WPARAM wParam, LPARAM 
 void LoginScene::Update(FLOAT deltaTime)
 {
 	WndManager::GetInstance()->Update(deltaTime);
-
-	static float scale = 1.0f;
-	scale += deltaTime * 1.0f;
-	m_camera->SetScale(FLOAT2{ scale, scale });
 }
 
 void LoginScene::Render(const ComPtr<ID2D1HwndRenderTarget>& renderTarget) const
@@ -50,8 +47,7 @@ void LoginScene::Render(const ComPtr<ID2D1HwndRenderTarget>& renderTarget) const
 
 	renderTarget->SetTransform(m_camera->GetMatrix());
 
-	auto paimon{ m_prop->Get<NytImage>("Group1/paimon") };
-	paimon.Render(renderTarget);
+	m_paimon->Render(renderTarget);
 
 	renderTarget->SetTransform(MATRIX::Identity());
 }

@@ -31,7 +31,6 @@ using Microsoft::WRL::ComPtr;
 #include <wincodec.h>
 
 #include "NytDataType.h"
-#include "NytRenderTarget.h"
 #include "Singleton.h"
 #include "StringTable.h"
 #include "Util.h"

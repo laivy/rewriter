@@ -17,9 +17,9 @@ void Camera::SetScale(const FLOAT2& scale)
 	m_scale = scale;
 }
 
-void Camera::SetRotation(FLOAT rotation)
+void Camera::SetRotation(FLOAT degree)
 {
-	m_degree = rotation;
+	m_degree = degree;
 }
 
 void Camera::SetPosition(const FLOAT2& position)
