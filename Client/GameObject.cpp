@@ -15,7 +15,7 @@ GameObject::GameObject() :
 }
 
 void GameObject::Update(FLOAT deltaTime) { }
-void GameObject::Render(const ComPtr<ID2D1HwndRenderTarget>& renderTarget) const { }
+void GameObject::Render(const ComPtr<ID2D1DeviceContext2>& renderTarget) const { }
 
 void GameObject::Destroy()
 {

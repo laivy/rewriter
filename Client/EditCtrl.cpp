@@ -46,7 +46,7 @@ void EditCtrl::OnMouseEvent(HWND hWnd, UINT message, INT x, INT y)
 	}
 }
 
-void EditCtrl::Render(const ComPtr<ID2D1HwndRenderTarget>& renderTarget) const
+void EditCtrl::Render(const ComPtr<ID2D1DeviceContext2>& renderTarget) const
 {
 	if (!m_parent) return;
 

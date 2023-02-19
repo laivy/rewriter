@@ -12,7 +12,7 @@ enum class BrushType
 class BrushPool : public TSingleton<BrushPool>
 {
 public:
-	BrushPool(const ComPtr<ID2D1HwndRenderTarget>& renderTarget);
+	BrushPool(const ComPtr<ID2D1DeviceContext2>& renderTarget);
 	~BrushPool() = default;
 
 	ComPtr<ID2D1SolidColorBrush> GetBrush(BrushType type);

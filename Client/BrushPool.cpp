@@ -1,7 +1,7 @@
 ﻿#include "Stdafx.h"
 #include "BrushPool.h"
 
-BrushPool::BrushPool(const ComPtr<ID2D1HwndRenderTarget>& renderTarget)
+BrushPool::BrushPool(const ComPtr<ID2D1DeviceContext2>& renderTarget)
 {
 	renderTarget->CreateSolidColorBrush(D2D1::ColorF{ D2D1::ColorF::Black }, &m_pool[static_cast<int>(BrushType::BLACK)]);
 	renderTarget->CreateSolidColorBrush(D2D1::ColorF{ D2D1::ColorF::White }, &m_pool[static_cast<int>(BrushType::WHITE)]);

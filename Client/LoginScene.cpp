@@ -41,7 +41,7 @@ void LoginScene::Update(FLOAT deltaTime)
 	WndManager::GetInstance()->Update(deltaTime);
 }
 
-void LoginScene::Render(const ComPtr<ID2D1HwndRenderTarget>& renderTarget) const
+void LoginScene::Render(const ComPtr<ID2D1DeviceContext2>& renderTarget) const
 {
 	WndManager::GetInstance()->Render(renderTarget);
 

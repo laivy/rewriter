@@ -12,7 +12,7 @@ public:
 	virtual void OnButtonClicked(INT id);
 
 	virtual void Update(FLOAT deltaTime);
-	virtual void Render(const ComPtr<ID2D1HwndRenderTarget>& renderTarget);
+	virtual void Render(const ComPtr<ID2D1DeviceContext2>& renderTarget);
 
 	template <typename T>
 	void AddUI(std::unique_ptr<T>& ui)

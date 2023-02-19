@@ -60,7 +60,7 @@ void Wnd::Update(FLOAT deltaTime)
 		ui->Update(deltaTime);
 }
 
-void Wnd::Render(const ComPtr<ID2D1HwndRenderTarget>& renderTarget)
+void Wnd::Render(const ComPtr<ID2D1DeviceContext2>& renderTarget)
 {
 	if (!m_isValid) return;
 

@@ -12,7 +12,7 @@ public:
 	virtual void OnMouseEvent(HWND hWnd, UINT message, INT x, INT y);
 
 	virtual void Update(FLOAT deltaTime);
-	virtual void Render(const ComPtr<ID2D1HwndRenderTarget>& renderTarget) const;
+	virtual void Render(const ComPtr<ID2D1DeviceContext2>& renderTarget) const;
 
 private:
 	D2D1::ColorF m_color;

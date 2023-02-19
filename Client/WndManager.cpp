@@ -92,7 +92,7 @@ void WndManager::Update(FLOAT deltaTime)
 	}
 }
 
-void WndManager::Render(const ComPtr<ID2D1HwndRenderTarget>& renderTarget) const
+void WndManager::Render(const ComPtr<ID2D1DeviceContext2>& renderTarget) const
 {
 	std::unique_lock lock{ m_mutex };
 	for (const auto& w : m_wnds)

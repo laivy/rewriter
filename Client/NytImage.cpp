@@ -7,7 +7,7 @@ NytImage::NytImage(const ComPtr<ID2D1Bitmap>& bitmap) : m_bitmap{ bitmap }
 	m_size.y = bitmap->GetSize().height;
 }
 
-void NytImage::Render(const ComPtr<ID2D1HwndRenderTarget>& renderTarget) const
+void NytImage::Render(const ComPtr<ID2D1DeviceContext2>& renderTarget) const
 {
 	MATRIX view{};
 	renderTarget->GetTransform(&view);

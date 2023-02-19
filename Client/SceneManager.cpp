@@ -38,7 +38,7 @@ void SceneManager::Update(FLOAT deltaTime)
 		m_scene->Update(deltaTime);
 }
 
-void SceneManager::Render(const ComPtr<ID2D1HwndRenderTarget>& renderTarget) const
+void SceneManager::Render(const ComPtr<ID2D1DeviceContext2>& renderTarget) const
 {
 	if (m_scene)
 		m_scene->Render(renderTarget);

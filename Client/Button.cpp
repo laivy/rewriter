@@ -73,7 +73,7 @@ void Button::Update(FLOAT deltaTime)
 	}
 }
 
-void Button::Render(const ComPtr<ID2D1HwndRenderTarget>& renderTarget) const
+void Button::Render(const ComPtr<ID2D1DeviceContext2>& renderTarget) const
 {
 	if (!m_parent) return;
 
