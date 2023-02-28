@@ -3,11 +3,11 @@
 template<class T>
 class TSingleton;
 
-class MouseWorkerThread : public TSingleton<MouseWorkerThread>
+class MouseThread : public TSingleton<MouseThread>
 {
 public:
-	MouseWorkerThread();
-	~MouseWorkerThread();
+	MouseThread();
+	~MouseThread();
 
 	void OnMouseEvent(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);
 

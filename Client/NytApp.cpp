@@ -1,16 +1,16 @@
 ﻿#include "Stdafx.h"
-#include "NytApp.h"
-#include "NytLoader.h"
-#include "NytImage.h"
-#include "NytProperty.h"
 #include "BrushPool.h"
-#include "Timer.h"
 #include "FontPool.h"
-#include "KeyWorkerThread.h"
-#include "MouseWorkerThread.h"
-#include "WndManager.h"
-#include "Wnd.h"
+#include "KeyboardThread.h"
+#include "MouseThread.h"
+#include "NytApp.h"
+#include "NytImage.h"
+#include "NytLoader.h"
+#include "NytProperty.h"
 #include "SceneManager.h"
+#include "Timer.h"
+#include "Wnd.h"
+#include "WndManager.h"
 
 NytApp::NytApp() : m_hWnd{ NULL }, m_size{ 1920, 1080 }, m_timer{ new Timer }
 {
@@ -22,15 +22,25 @@ NytApp::NytApp() : m_hWnd{ NULL }, m_size{ 1920, 1080 }, m_timer{ new Timer }
 
 void NytApp::OnCreate()
 {
+	m_commandList->Reset(m_commandAllocators.Get(), nullptr);
+
 	FontPool::Instantiate();
-	BrushPool::Instantiate(m_d2dDeviceContext);
+	BrushPool::Instantiate();
 	NytLoader::Instantiate();
 
 	WndManager::Instantiate();
 	SceneManager::Instantiate();
 
-	KeyboardProcessor::Instantiate();
-	MouseWorkerThread::Instantiate();
+	KeyboardThread::Instantiate();
+	MouseThread::Instantiate();
+
+	m_commandList->Close();
+	ID3D12CommandList* ppCommandList[]{ m_commandList.Get() };
+	m_commandQueue->ExecuteCommandLists(_countof(ppCommandList), ppCommandList);
+	WaitPrevFrame();
+
+	if (NytLoader::IsInstanced())
+		NytLoader::GetInstance()->ClearUploadBuffers();
 
 	m_timer->Tick();
 }
@@ -66,9 +76,19 @@ HWND NytApp::GetHwnd() const
 	return m_hWnd;
 }
 
-INT2 NytApp::GetSize() const
+INT2 NytApp::GetWindowSize() const
 {
 	return m_size;
+}
+
+ComPtr<ID3D12Device> NytApp::GetD3DDevice() const
+{
+	return m_d3dDevice;
+}
+
+ComPtr<ID3D12GraphicsCommandList> NytApp::GetCommandList() const
+{
+	return m_commandList;
 }
 
 ComPtr<IDWriteFactory5> NytApp::GetDwriteFactory() const
@@ -76,7 +96,7 @@ ComPtr<IDWriteFactory5> NytApp::GetDwriteFactory() const
 	return m_dwriteFactory;
 }
 
-ComPtr<ID2D1DeviceContext2> NytApp::GetRenderTarget() const
+ComPtr<ID2D1DeviceContext2> NytApp::GetD2DContext() const
 {
 	return m_d2dDeviceContext;
 }
@@ -199,12 +219,12 @@ void NytApp::CreateDevice()
 		DXGI_ADAPTER_DESC1 adapterDesc{};
 		hardwareAdapter->GetDesc1(&adapterDesc);
 		if (adapterDesc.Flags & DXGI_ADAPTER_FLAG_SOFTWARE) continue;
-		if (SUCCEEDED(D3D12CreateDevice(hardwareAdapter.Get(), D3D_FEATURE_LEVEL_12_0, IID_PPV_ARGS(&m_device)))) break;
+		if (SUCCEEDED(D3D12CreateDevice(hardwareAdapter.Get(), D3D_FEATURE_LEVEL_11_0, IID_PPV_ARGS(&m_d3dDevice)))) break;
 	}
-	if (!m_device)
+	if (!m_d3dDevice)
 	{
 		m_factory->EnumWarpAdapter(IID_PPV_ARGS(&hardwareAdapter));
-		DX::ThrowIfFailed(D3D12CreateDevice(hardwareAdapter.Get(), D3D_FEATURE_LEVEL_12_0, IID_PPV_ARGS(&m_device)));
+		DX::ThrowIfFailed(D3D12CreateDevice(hardwareAdapter.Get(), D3D_FEATURE_LEVEL_11_0, IID_PPV_ARGS(&m_d3dDevice)));
 	}
 }
 
@@ -213,14 +233,14 @@ void NytApp::CreateCommandQueue()
 	D3D12_COMMAND_QUEUE_DESC queueDesc{};
 	queueDesc.Flags = D3D12_COMMAND_QUEUE_FLAG_NONE;
 	queueDesc.Type = D3D12_COMMAND_LIST_TYPE_DIRECT;
-	DX::ThrowIfFailed(m_device->CreateCommandQueue(&queueDesc, IID_PPV_ARGS(&m_commandQueue)));
+	DX::ThrowIfFailed(m_d3dDevice->CreateCommandQueue(&queueDesc, IID_PPV_ARGS(&m_commandQueue)));
 }
 
 void NytApp::CreateD3D11On12Device()
 {
 	ComPtr<ID3D11Device> d3d11Device;
 	DX::ThrowIfFailed(D3D11On12CreateDevice(
-		m_device.Get(),
+		m_d3dDevice.Get(),
 		D3D11_CREATE_DEVICE_BGRA_SUPPORT,
 		nullptr,
 		0,
@@ -284,15 +304,15 @@ void NytApp::CreateRtvDsvDescriptorHeap()
 	rtvHeapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_RTV;
 	rtvHeapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_NONE;
 	rtvHeapDesc.NodeMask = NULL;
-	DX::ThrowIfFailed(m_device->CreateDescriptorHeap(&rtvHeapDesc, IID_PPV_ARGS(&m_rtvHeap)));
-	m_rtvDescriptorSize = m_device->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_RTV);
+	DX::ThrowIfFailed(m_d3dDevice->CreateDescriptorHeap(&rtvHeapDesc, IID_PPV_ARGS(&m_rtvHeap)));
+	m_rtvDescriptorSize = m_d3dDevice->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_RTV);
 
 	D3D12_DESCRIPTOR_HEAP_DESC dsvHeapDesc{};
 	dsvHeapDesc.NumDescriptors = 1;
 	dsvHeapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_DSV;
 	dsvHeapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_NONE;
 	dsvHeapDesc.NodeMask = NULL;
-	DX::ThrowIfFailed(m_device->CreateDescriptorHeap(&dsvHeapDesc, IID_PPV_ARGS(&m_dsvHeap)));
+	DX::ThrowIfFailed(m_d3dDevice->CreateDescriptorHeap(&dsvHeapDesc, IID_PPV_ARGS(&m_dsvHeap)));
 }
 
 void NytApp::CreateRenderTargetView()
@@ -311,11 +331,8 @@ void NytApp::CreateRenderTargetView()
 	{
 		// DX12
 		DX::ThrowIfFailed(m_swapChain->GetBuffer(i, IID_PPV_ARGS(&m_renderTargets[i])));
-		m_device->CreateRenderTargetView(m_renderTargets[i].Get(), nullptr, rtvHandle);
+		m_d3dDevice->CreateRenderTargetView(m_renderTargets[i].Get(), nullptr, rtvHandle);
 		rtvHandle.Offset(m_rtvDescriptorSize);
-
-		std::wstring name{ L"RenderTarget" + std::to_wstring(i) };
-		m_renderTargets[i]->SetName(name.c_str());
 
 		// D3D11on12
 		D3D11_RESOURCE_FLAGS d3d11Flags{ D3D11_BIND_RENDER_TARGET };
@@ -337,7 +354,7 @@ void NytApp::CreateRenderTargetView()
 		));
 	}
 
-	DX::ThrowIfFailed(m_device->CreateCommandAllocator(D3D12_COMMAND_LIST_TYPE_DIRECT, IID_PPV_ARGS(&m_commandAllocators)));
+	DX::ThrowIfFailed(m_d3dDevice->CreateCommandAllocator(D3D12_COMMAND_LIST_TYPE_DIRECT, IID_PPV_ARGS(&m_commandAllocators)));
 }
 
 void NytApp::CreateDepthStencilView()
@@ -359,7 +376,7 @@ void NytApp::CreateDepthStencilView()
 
 	CD3DX12_HEAP_PROPERTIES prop{ D3D12_HEAP_TYPE_DEFAULT };
 
-	DX::ThrowIfFailed(m_device->CreateCommittedResource(
+	DX::ThrowIfFailed(m_d3dDevice->CreateCommittedResource(
 		&prop,
 		D3D12_HEAP_FLAG_NONE,
 		&desc,
@@ -372,7 +389,7 @@ void NytApp::CreateDepthStencilView()
 	depthStencilViewDesc.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
 	depthStencilViewDesc.ViewDimension = D3D12_DSV_DIMENSION_TEXTURE2D;
 	depthStencilViewDesc.Flags = D3D12_DSV_FLAG_NONE;
-	m_device->CreateDepthStencilView(m_depthStencil.Get(), &depthStencilViewDesc, m_dsvHeap->GetCPUDescriptorHandleForHeapStart());
+	m_d3dDevice->CreateDepthStencilView(m_depthStencil.Get(), &depthStencilViewDesc, m_dsvHeap->GetCPUDescriptorHandleForHeapStart());
 }
 
 void NytApp::CreateRootSignature()
@@ -381,7 +398,7 @@ void NytApp::CreateRootSignature()
 	ranges[0].Init(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 1, 0, 0, D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND);
 
 	CD3DX12_ROOT_PARAMETER rootParameter[1]{};
-	rootParameter[0].InitAsConstants(16, 0, 0);
+	rootParameter[0].InitAsConstantBufferView(0);
 
 	CD3DX12_STATIC_SAMPLER_DESC samplerDesc[1]{};
 	samplerDesc[0].Init(
@@ -405,18 +422,18 @@ void NytApp::CreateRootSignature()
 
 	ComPtr<ID3DBlob> signature, error;
 	DX::ThrowIfFailed(D3D12SerializeRootSignature(&rootSignatureDesc, D3D_ROOT_SIGNATURE_VERSION_1, &signature, &error));
-	DX::ThrowIfFailed(m_device->CreateRootSignature(0, signature->GetBufferPointer(), signature->GetBufferSize(), IID_PPV_ARGS(&m_rootSignature)));
+	DX::ThrowIfFailed(m_d3dDevice->CreateRootSignature(0, signature->GetBufferPointer(), signature->GetBufferSize(), IID_PPV_ARGS(&m_rootSignature)));
 }
 
 void NytApp::CreateCommandList()
 {
-	DX::ThrowIfFailed(m_device->CreateCommandList(0, D3D12_COMMAND_LIST_TYPE_DIRECT, m_commandAllocators.Get(), nullptr, IID_PPV_ARGS(&m_commandList)));
+	DX::ThrowIfFailed(m_d3dDevice->CreateCommandList(0, D3D12_COMMAND_LIST_TYPE_DIRECT, m_commandAllocators.Get(), nullptr, IID_PPV_ARGS(&m_commandList)));
 	DX::ThrowIfFailed(m_commandList->Close());
 }
 
 void NytApp::CreateFence()
 {
-	DX::ThrowIfFailed(m_device->CreateFence(0, D3D12_FENCE_FLAG_NONE, IID_PPV_ARGS(&m_fence)));
+	DX::ThrowIfFailed(m_d3dDevice->CreateFence(0, D3D12_FENCE_FLAG_NONE, IID_PPV_ARGS(&m_fence)));
 	m_fenceEvent = CreateEvent(NULL, FALSE, FALSE, NULL);
 	++m_fenceValues[m_frameIndex];
 }
@@ -437,16 +454,19 @@ void NytApp::Render()
 
 	m_commandList->SetGraphicsRootSignature(m_rootSignature.Get());
 
-	auto barrier{ CD3DX12_RESOURCE_BARRIER::Transition(m_renderTargets[m_frameIndex].Get(), D3D12_RESOURCE_STATE_PRESENT, D3D12_RESOURCE_STATE_RENDER_TARGET) };
-	m_commandList->ResourceBarrier(1, &barrier);
+	m_commandList->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(m_renderTargets[m_frameIndex].Get(), D3D12_RESOURCE_STATE_PRESENT, D3D12_RESOURCE_STATE_RENDER_TARGET));
 
-	CD3DX12_CPU_DESCRIPTOR_HANDLE rtvHandle{ m_rtvHeap->GetCPUDescriptorHandleForHeapStart(), static_cast<INT>(m_frameIndex), m_rtvDescriptorSize };
+	CD3DX12_CPU_DESCRIPTOR_HANDLE rtvHandle{ m_rtvHeap->GetCPUDescriptorHandleForHeapStart(), static_cast<int>(m_frameIndex), m_rtvDescriptorSize };
 	CD3DX12_CPU_DESCRIPTOR_HANDLE dsvHandle{ m_dsvHeap->GetCPUDescriptorHandleForHeapStart() };
 	m_commandList->OMSetRenderTargets(1, &rtvHandle, TRUE, &dsvHandle);
 
 	constexpr FLOAT clearColor[]{ 0.15625f, 0.171875f, 0.203125f, 1.0f };
 	m_commandList->ClearRenderTargetView(rtvHandle, clearColor, 0, NULL);
 	m_commandList->ClearDepthStencilView(dsvHandle, D3D12_CLEAR_FLAG_DEPTH | D3D12_CLEAR_FLAG_STENCIL, 1.0f, 0, 0, NULL);
+
+	/*
+	DX12 렌더링
+	*/
 
 	DX::ThrowIfFailed(m_commandList->Close());
 
@@ -459,8 +479,8 @@ void NytApp::Render()
 	m_d2dDeviceContext->SetTarget(m_d2dRenderTargets[m_frameIndex].Get());
 	m_d2dDeviceContext->BeginDraw();
 
-	if (SceneManager::IsInstanced())
-		SceneManager::GetInstance()->Render(m_d2dDeviceContext);
+	//if (SceneManager::IsInstanced())
+	//	SceneManager::GetInstance()->Render(m_d2dDeviceContext);
 
 	DX::ThrowIfFailed(m_d2dDeviceContext->EndDraw());
 	m_d3d11On12Device->ReleaseWrappedResources(m_wrappedBackBuffers[m_frameIndex].GetAddressOf(), 1);

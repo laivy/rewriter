@@ -31,9 +31,11 @@ using Microsoft::WRL::ComPtr;
 #pragma comment(lib, "d3dcompiler.lib")
 #pragma comment(lib, "dwrite.lib")
 #pragma comment(lib, "dxgi.lib")
+#include <DirectXMath.h>
 #include <d2d1_3.h>
 #include <d3d11on12.h>
 #include <d3d12.h>
+#include <d3dcompiler.h>
 #include "d3dx12.h"
 #include <dwrite.h>
 #include <dwrite_3.h>
@@ -44,6 +46,7 @@ using Microsoft::WRL::ComPtr;
 #include "Singleton.h"
 #include "StringTable.h"
 #include "Util.h"
+#include "WICTextureLoader12.h"
 
 #ifndef HINST_THISCOMPONENT
 EXTERN_C IMAGE_DOS_HEADER __ImageBase;
@@ -56,7 +59,10 @@ namespace DX
 	class com_exception : public std::exception
 	{
 	public:
-		com_exception(HRESULT hr) : result(hr) { }
+		com_exception(HRESULT hr) : result(hr)
+		{
+			OutputDebugStringA(what());
+		}
 
 		const char* what() const override
 		{
@@ -74,7 +80,8 @@ namespace DX
 	{
 		if (FAILED(hr))
 		{
-			throw com_exception(hr);
+			auto exception{ com_exception{hr} };
+			throw exception;
 		}
 	}
 }

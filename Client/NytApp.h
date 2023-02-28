@@ -14,9 +14,11 @@ public:
 	void Run();
 
 	HWND GetHwnd() const;
-	INT2 GetSize() const;
+	INT2 GetWindowSize() const;
+	ComPtr<ID3D12Device> GetD3DDevice() const;
+	ComPtr<ID3D12GraphicsCommandList> GetCommandList() const;
+	ComPtr<ID2D1DeviceContext2> GetD2DContext() const;
 	ComPtr<IDWriteFactory5> GetDwriteFactory() const;
-	ComPtr<ID2D1DeviceContext2> GetRenderTarget() const;
 
 private:
 	static LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);
@@ -43,6 +45,13 @@ private:
 	void WaitPrevFrame();
 
 private:
+	struct Vertex
+	{
+		DirectX::XMFLOAT3 position;
+		DirectX::XMFLOAT4 color;
+	};
+
+private:
 	static constexpr UINT FrameCount = 3;
 
 	// Window
@@ -52,7 +61,7 @@ private:
 
 	// DirectX12
 	ComPtr<IDXGIFactory4> m_factory;
-	ComPtr<ID3D12Device> m_device;
+	ComPtr<ID3D12Device> m_d3dDevice;
 	ComPtr<IDXGISwapChain3>	m_swapChain;
 	ComPtr<ID3D12CommandQueue> m_commandQueue;
 	ComPtr<ID3D12CommandAllocator> m_commandAllocators;
@@ -61,8 +70,8 @@ private:
 	ComPtr<ID3D12Resource> m_renderTargets[FrameCount];
 	ComPtr<ID3D12DescriptorHeap> m_dsvHeap;
 	ComPtr<ID3D12Resource> m_depthStencil;
-	ComPtr<ID3D12RootSignature>	m_rootSignature;
-	ComPtr<ID3D12Fence>	m_fence;
+	ComPtr<ID3D12RootSignature> m_rootSignature;
+	ComPtr<ID3D12Fence> m_fence;
 	UINT m_frameIndex;
 	HANDLE m_fenceEvent;
 	UINT64 m_fenceValues[FrameCount];

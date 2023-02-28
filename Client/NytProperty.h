@@ -8,6 +8,8 @@ public:
 	class iterator
 	{
 	public:
+		using iterator_category = std::random_access_iterator_tag;
+
 		iterator(const NytProperty& prop, size_t index = 0) : m_root{ prop }, m_index{ index } { }
 
 		iterator& operator++()

@@ -4,13 +4,6 @@
 #include "NytProperty.h"
 #include "NytImage.h"
 
-NytLoader::NytLoader()
-{
-	HRESULT hr{ E_FAIL };
-	hr = CoCreateInstance(CLSID_WICImagingFactory, NULL, CLSCTX_INPROC_SERVER, IID_PPV_ARGS(&m_WICIFactory));
-	assert(SUCCEEDED(hr));
-}
-
 NytProperty& NytLoader::Load(const std::string& filePath)
 {
 	// 이미 로딩된 데이터인지 확인
@@ -42,6 +35,11 @@ void NytLoader::Unload(const std::string& filePath)
 		m_data.erase(filePath);
 }
 
+void NytLoader::ClearUploadBuffers()
+{
+	m_uploadBuffers.clear();
+}
+
 void NytLoader::Load(std::ifstream& fs, NytProperty& root)
 {
 	NytDataType type{ Read<BYTE>(fs) };
@@ -57,6 +55,11 @@ void NytLoader::Load(std::ifstream& fs, NytProperty& root)
 		data = Read<int>(fs);
 		break;
 	}
+	case NytDataType::INT2:
+	{
+		data = Read<INT2>(fs);
+		break;
+	}
 	case NytDataType::FLOAT:
 	{
 		data = Read<float>(fs);
@@ -65,9 +68,10 @@ void NytLoader::Load(std::ifstream& fs, NytProperty& root)
 	case NytDataType::STRING:
 		data = Read<std::string>(fs);
 		break;
+	case NytDataType::UI:
 	case NytDataType::IMAGE:
 	{
-		data = Read<NytImage>(fs);
+		data = Read(fs, type);
 		break;
 	}
 	default:
@@ -75,11 +79,9 @@ void NytLoader::Load(std::ifstream& fs, NytProperty& root)
 	}
 
 	int childNodeCount{ Read<int>(fs) };
-
 	root.m_childNames.reserve(childNodeCount);
 	root.m_childNames.push_back(name);
 	root.m_childProps[name] = NytProperty{ type, data };
-
 	for (int i = 0; i < childNodeCount; ++i)
 	{
 		Load(fs, root.m_childProps[name]);
@@ -96,31 +98,71 @@ std::string NytLoader::Read(std::ifstream& fs)
 	return std::string{ buffer };
 }
 
-template<>
-NytImage NytLoader::Read(std::ifstream& fs)
+NytImage NytLoader::Read(std::ifstream& fs, NytDataType type)
 {
 	int length{ Read<int>(fs) };
-
 	std::unique_ptr<BYTE> buffer{ new BYTE[length] };
 	fs.read(reinterpret_cast<char*>(buffer.get()), length);
+	
+	switch (type)
+	{
+	case NytDataType::UI:
+	{
+		// Direct2D
+		ComPtr<IWICImagingFactory> factory;
+		ComPtr<IWICBitmapDecoder> decoder;
+		ComPtr<IWICFormatConverter> converter;
+		ComPtr<IWICBitmapFrameDecode> frameDecode;
+		ComPtr<IWICStream> stream;
+		ComPtr<ID2D1Bitmap> bitmap;
 
-	ComPtr<IWICBitmapDecoder> decoder;
-	ComPtr<IWICFormatConverter> converter;
-	ComPtr<IWICBitmapFrameDecode> frameDecode;
-	ComPtr<IWICStream> stream;
-	ComPtr<ID2D1Bitmap> bitmap;
+		HRESULT hr{ E_FAIL };
+		hr = factory->CreateStream(&stream);
+		hr = stream->InitializeFromMemory(buffer.get(), length);
+		hr = factory->CreateDecoderFromStream(stream.Get(), NULL, WICDecodeMetadataCacheOnLoad, &decoder);
+		hr = factory->CreateFormatConverter(&converter);
+		hr = decoder->GetFrame(0, &frameDecode);
+		hr = converter->Initialize(frameDecode.Get(), GUID_WICPixelFormat32bppPBGRA, WICBitmapDitherTypeNone, NULL, 0.0f, WICBitmapPaletteTypeMedianCut);
 
-	HRESULT hr{ E_FAIL };
-	hr = m_WICIFactory->CreateStream(&stream);
-	hr = stream->InitializeFromMemory(buffer.get(), length);
-	hr = m_WICIFactory->CreateDecoderFromStream(stream.Get(), NULL, WICDecodeMetadataCacheOnLoad, &decoder);
-	hr = m_WICIFactory->CreateFormatConverter(&converter);
-	hr = decoder->GetFrame(0, &frameDecode);
-	hr = converter->Initialize(frameDecode.Get(), GUID_WICPixelFormat32bppPBGRA, WICBitmapDitherTypeNone, NULL, 0.0f, WICBitmapPaletteTypeMedianCut);
+		auto d2dContext{ NytApp::GetInstance()->GetD2DContext() };
+		hr = d2dContext->CreateBitmapFromWicBitmap(converter.Get(), &bitmap);
+		assert(SUCCEEDED(hr));
 
-	auto renderTarget{ NytApp::GetInstance()->GetRenderTarget() };
-	hr = renderTarget->CreateBitmapFromWicBitmap(converter.Get(), NULL, &bitmap);
-	assert(SUCCEEDED(hr));
+		return NytImage{ bitmap };
+	}
+	case NytDataType::IMAGE:
+	{
+		ComPtr<ID3D12Resource> bitmap, uploadBuffer;
+		auto d3dDevice{ NytApp::GetInstance()->GetD3DDevice() };
+		std::unique_ptr<uint8_t[]> decodedData;
+		D3D12_SUBRESOURCE_DATA subresource;
+		DirectX::LoadWICTextureFromMemory(
+			d3dDevice.Get(),
+			buffer.get(),
+			length,
+			&bitmap,
+			decodedData,
+			subresource
+		);
 
-	return NytImage{ bitmap };
+		UINT64 nBytes{ GetRequiredIntermediateSize(bitmap.Get(), 0, 1) };
+		nBytes += D3D12_DEFAULT_RESOURCE_PLACEMENT_ALIGNMENT;
+		DX::ThrowIfFailed(d3dDevice->CreateCommittedResource(
+			&CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_UPLOAD),
+			D3D12_HEAP_FLAG_NONE,
+			&CD3DX12_RESOURCE_DESC::Buffer(nBytes),
+			D3D12_RESOURCE_STATE_GENERIC_READ,
+			NULL,
+			IID_PPV_ARGS(&uploadBuffer)
+		));
+
+		auto commandList{ NytApp::GetInstance()->GetCommandList() };
+		UpdateSubresources(commandList.Get(), bitmap.Get(), uploadBuffer.Get(), 0, 0, 1, &subresource);
+		m_uploadBuffers.push_back(uploadBuffer);
+
+		return NytImage{ bitmap };
+	}
+	default:
+		assert(false);
+	}
 }

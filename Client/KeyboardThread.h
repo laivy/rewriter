@@ -3,11 +3,11 @@
 template<class T>
 class TSingleton;
 
-class KeyboardProcessor : public TSingleton<KeyboardProcessor>
+class KeyboardThread : public TSingleton<KeyboardThread>
 {
 public:
-	KeyboardProcessor();
-	~KeyboardProcessor();
+	KeyboardThread();
+	~KeyboardThread();
 
 	void OnKeyboardEvent(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);
 

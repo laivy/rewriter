@@ -1,13 +1,15 @@
 ﻿#include "Stdafx.h"
 #include "BrushPool.h"
+#include "NytApp.h"
 
-BrushPool::BrushPool(const ComPtr<ID2D1DeviceContext2>& renderTarget)
+BrushPool::BrushPool()
 {
-	renderTarget->CreateSolidColorBrush(D2D1::ColorF{ D2D1::ColorF::Black }, &m_pool[static_cast<int>(BrushType::BLACK)]);
-	renderTarget->CreateSolidColorBrush(D2D1::ColorF{ D2D1::ColorF::White }, &m_pool[static_cast<int>(BrushType::WHITE)]);
-	renderTarget->CreateSolidColorBrush(D2D1::ColorF{ D2D1::ColorF::Red }, &m_pool[static_cast<int>(BrushType::RED)]);
-	renderTarget->CreateSolidColorBrush(D2D1::ColorF{ D2D1::ColorF::Green }, &m_pool[static_cast<int>(BrushType::GREEN)]);
-	renderTarget->CreateSolidColorBrush(D2D1::ColorF{ D2D1::ColorF::Blue }, &m_pool[static_cast<int>(BrushType::BLUE)]);
+	auto ctx{ NytApp::GetInstance()->GetD2DContext() };
+	ctx->CreateSolidColorBrush(D2D1::ColorF{ D2D1::ColorF::Black }, &m_pool[static_cast<int>(BrushType::BLACK)]);
+	ctx->CreateSolidColorBrush(D2D1::ColorF{ D2D1::ColorF::White }, &m_pool[static_cast<int>(BrushType::WHITE)]);
+	ctx->CreateSolidColorBrush(D2D1::ColorF{ D2D1::ColorF::Red }, &m_pool[static_cast<int>(BrushType::RED)]);
+	ctx->CreateSolidColorBrush(D2D1::ColorF{ D2D1::ColorF::Green }, &m_pool[static_cast<int>(BrushType::GREEN)]);
+	ctx->CreateSolidColorBrush(D2D1::ColorF{ D2D1::ColorF::Blue }, &m_pool[static_cast<int>(BrushType::BLUE)]);
 }
 
 ComPtr<ID2D1SolidColorBrush> BrushPool::GetBrush(BrushType type)

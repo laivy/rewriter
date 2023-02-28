@@ -7,13 +7,14 @@ NytImage::NytImage(const ComPtr<ID2D1Bitmap>& bitmap) : m_bitmap{ bitmap }
 	m_size.y = bitmap->GetSize().height;
 }
 
-void NytImage::Render(const ComPtr<ID2D1DeviceContext2>& renderTarget) const
+NytImage::NytImage(const ComPtr<ID3D12Resource>& resource) : m_resource{ resource }
 {
-	MATRIX view{};
-	renderTarget->GetTransform(&view);
+	auto desc{ resource->GetDesc() };
+	m_size.x = desc.Width;
+	m_size.y = desc.Height;
+}
 
-	MATRIX world{ GetMatrix() };
-	renderTarget->SetTransform(world * view);
-	renderTarget->DrawBitmap(m_bitmap.Get(), RECTF{ 0.0f, 0.0f, m_size.x, m_size.y });
-	renderTarget->SetTransform(view);
+void NytImage::Render(const ComPtr<ID2D1DeviceContext2>& d2dContext) const
+{
+	d2dContext->DrawBitmap(m_bitmap.Get(), RECTF{ 0.0f, 0.0f, m_size.x, m_size.y });
 }

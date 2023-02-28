@@ -104,7 +104,7 @@
       <WarningLevel>Level3</WarningLevel>
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_DEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <ConformanceMode>true</ConformanceMode>
+      <ConformanceMode>false</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
     </ClCompile>
     <Link>
@@ -154,10 +154,10 @@
     <ClCompile Include="NytApp.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Use</PrecompiledHeader>
     </ClCompile>
-    <ClCompile Include="KeyWorkerThread.cpp">
+    <ClCompile Include="KeyboardThread.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Use</PrecompiledHeader>
     </ClCompile>
-    <ClCompile Include="MouseWorkerThread.cpp">
+    <ClCompile Include="MouseThread.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Use</PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="NytImage.cpp">
@@ -188,7 +188,7 @@
     <ClCompile Include="Util.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Use</PrecompiledHeader>
     </ClCompile>
-    <ClCompile Include="_Start.cpp">
+    <ClCompile Include="Main.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Use</PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="Stdafx.cpp">
@@ -197,6 +197,7 @@
     <ClCompile Include="Timer.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Use</PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="WICTextureLoader12.cpp" />
     <ClCompile Include="Wnd.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Use</PrecompiledHeader>
     </ClCompile>
@@ -208,14 +209,15 @@
     <ClInclude Include="BrushPool.h" />
     <ClInclude Include="Button.h" />
     <ClInclude Include="Camera.h" />
+    <ClInclude Include="ConstantBuffer.h" />
     <ClInclude Include="d3dx12.h" />
     <ClInclude Include="EditCtrl.h" />
     <ClInclude Include="FontPool.h" />
     <ClInclude Include="LoginScene.h" />
     <ClInclude Include="NytApp.h" />
     <ClInclude Include="GameObject.h" />
-    <ClInclude Include="KeyWorkerThread.h" />
-    <ClInclude Include="MouseWorkerThread.h" />
+    <ClInclude Include="KeyboardThread.h" />
+    <ClInclude Include="MouseThread.h" />
     <ClInclude Include="NytDataType.h" />
     <ClInclude Include="NytImage.h" />
     <ClInclude Include="NytLoader.h" />
@@ -230,11 +232,26 @@
     <ClInclude Include="Timer.h" />
     <ClInclude Include="UI.h" />
     <ClInclude Include="Util.h" />
+    <ClInclude Include="WICTextureLoader12.h" />
     <ClInclude Include="Wnd.h" />
     <ClInclude Include="WndManager.h" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="..\README.md" />
+  </ItemGroup>
+  <ItemGroup>
+    <FxCompile Include="default.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Vertex</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Vertex</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Vertex</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Vertex</ShaderType>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+    </FxCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Common.hlsli">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+    </None>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

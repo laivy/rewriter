@@ -1,19 +1,19 @@
 ﻿#include "Stdafx.h"
-#include "MouseWorkerThread.h"
+#include "MouseThread.h"
 #include "WndManager.h"
 
-MouseWorkerThread::MouseWorkerThread() : m_isRunning{ TRUE }, m_doProcess{ FALSE }
+MouseThread::MouseThread() : m_isRunning{ TRUE }, m_doProcess{ FALSE }
 {
-	m_thread = std::thread{ &MouseWorkerThread::Run, this };
+	m_thread = std::thread{ &MouseThread::Run, this };
 }
 
-MouseWorkerThread::~MouseWorkerThread()
+MouseThread::~MouseThread()
 {
 	m_isRunning = FALSE;
 	m_thread.join();
 }
 
-void MouseWorkerThread::OnMouseEvent(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
+void MouseThread::OnMouseEvent(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
 	m_hWnd = hWnd;
 	m_message = message;
@@ -22,7 +22,7 @@ void MouseWorkerThread::OnMouseEvent(HWND hWnd, UINT message, WPARAM wParam, LPA
 	m_doProcess = TRUE;
 }
 
-void MouseWorkerThread::Run()
+void MouseThread::Run()
 {
 	while (m_isRunning)
 	{

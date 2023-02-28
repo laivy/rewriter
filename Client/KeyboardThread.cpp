@@ -1,19 +1,19 @@
 ﻿#include "Stdafx.h"
-#include "KeyWorkerThread.h"
+#include "KeyboardThread.h"
 #include "WndManager.h"
 
-KeyboardProcessor::KeyboardProcessor() : m_isRunning{ TRUE }, m_doProcess{ FALSE }
+KeyboardThread::KeyboardThread() : m_isRunning{ TRUE }, m_doProcess{ FALSE }
 {
-	m_thread = std::thread{ &KeyboardProcessor::Run, this };
+	m_thread = std::thread{ &KeyboardThread::Run, this };
 }
 
-KeyboardProcessor::~KeyboardProcessor()
+KeyboardThread::~KeyboardThread()
 {
 	m_isRunning = FALSE;
 	m_thread.join();
 }
 
-void KeyboardProcessor::OnKeyboardEvent(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
+void KeyboardThread::OnKeyboardEvent(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
 	m_hWnd = hWnd;
 	m_message = message;
@@ -22,7 +22,7 @@ void KeyboardProcessor::OnKeyboardEvent(HWND hWnd, UINT message, WPARAM wParam, 
 	m_doProcess = TRUE;
 }
 
-void KeyboardProcessor::Run()
+void KeyboardThread::Run()
 {
 	while (m_isRunning)
 	{

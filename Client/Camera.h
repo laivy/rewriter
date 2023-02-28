@@ -1,4 +1,5 @@
 ﻿#pragma once
+#include "ConstantBuffer.h"
 
 class Camera
 {
@@ -10,7 +11,6 @@ public:
 
 	void SetScale(const FLOAT2& scale);
 	void SetRotation(FLOAT degree);
-	void SetPosition(const FLOAT2& position);
 
 	FLOAT2 GetScale() const;
 	FLOAT GetRotation() const;
@@ -18,7 +18,17 @@ public:
 	MATRIX GetMatrix() const;
 
 private:
+	DirectX::XMFLOAT3 m_eye;
+	DirectX::XMFLOAT3 m_at;
+	DirectX::XMFLOAT3 m_up;
+
 	FLOAT2 m_scale;
 	FLOAT m_degree;
-	FLOAT2 m_position;
+
+	struct ShaderData
+	{
+		DirectX::XMMATRIX viewMatrix;
+		DirectX::XMMATRIX projMatrix;
+	};
+	ConstantBuffer<ShaderData> m_constantBuffer;
 };
