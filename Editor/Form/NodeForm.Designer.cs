@@ -45,8 +45,10 @@
             this.typeComboBox.Items.AddRange(new object[] {
             "GROUP",
             "INT",
+            "INT2",
             "FLOAT",
             "STRING",
+            "UI",
             "IMAGE"});
             this.typeComboBox.Location = new System.Drawing.Point(47, 6);
             this.typeComboBox.Name = "typeComboBox";
@@ -115,7 +117,7 @@
             this.label3.TabIndex = 7;
             this.label3.Text = "이름";
             // 
-            // AddNodeForm
+            // NodeForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
@@ -131,7 +133,7 @@
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedDialog;
             this.MaximizeBox = false;
             this.MinimizeBox = false;
-            this.Name = "AddNodeForm";
+            this.Name = "NodeForm";
             this.ShowIcon = false;
             this.SizeGripStyle = System.Windows.Forms.SizeGripStyle.Hide;
             this.Text = "추가하기";

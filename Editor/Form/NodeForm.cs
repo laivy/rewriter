@@ -19,7 +19,7 @@ namespace Editor
 			{
 				_node = node;
 				Text = "수정하기";
-				typeComboBox.Text = $"{node._type}";
+				typeComboBox.Text = $"{ node._type }";
 				typeComboBox.SelectedIndex = (int)node._type;
 				nameTextBox.Text = node._name;
 				valueTextBox.Text = node._value;
@@ -49,6 +49,7 @@ namespace Editor
 				case NytDataType.GROUP:
 					valueTextBox.Enabled = false;
 					break;
+				case NytDataType.UI:
 				case NytDataType.IMAGE:
 					OpenFileDialog openFileDialog = new OpenFileDialog();
 					openFileDialog.Filter = "png file (*.png)|*.png";
@@ -59,7 +60,6 @@ namespace Editor
 						filePath = openFileDialog.FileName;
 					}
 					valueTextBox.Text = filePath;
-					Console.WriteLine(filePath);
 					break;
 				default:
 					break;
@@ -85,6 +85,21 @@ namespace Editor
 						return;
 					}
 					break;
+				case NytDataType.INT2:
+					try
+					{
+						string[] values = valueTextBox.Text.Split(',');
+						if (values.Length != 2)
+							throw new IndexOutOfRangeException();
+						int.Parse(values[0].Trim());
+						int.Parse(values[1].Trim());
+					}
+					catch (Exception exception)
+					{
+						MessageBox.Show(exception.Message);
+						return;
+					}
+					break;
 				case NytDataType.FLOAT:
 					try
 					{ 
@@ -96,6 +111,7 @@ namespace Editor
 						return;
 					}
 					break;
+				case NytDataType.UI:
 				case NytDataType.IMAGE:
 					FileInfo fileInfo = new FileInfo(valueTextBox.Text);
 					if (!fileInfo.Exists)
@@ -120,6 +136,7 @@ namespace Editor
 					case NytDataType.GROUP:
 						_node.Text = _node._name;
 						break;
+					case NytDataType.UI:
 					case NytDataType.IMAGE:
 						_node.Text = _node._name;
 						_node._data = File.ReadAllBytes(_node._value);

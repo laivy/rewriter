@@ -28,18 +28,6 @@ namespace Editor.Nyt
 
 		public void Save(string filePath)
 		{
-#if DEBUG
-			StreamWriter streamWriter = new StreamWriter(filePath);
-			streamWriter.WriteLine(Nodes.Count);
-
-			IEnumerator iter = Nodes.GetEnumerator();
-			while (iter.MoveNext())
-			{
-				NytTreeNode node = (NytTreeNode)iter.Current;
-				node.Save(streamWriter);
-			}
-			streamWriter.Close();
-#else
 			FileStream fileStream = new FileStream(filePath, FileMode.OpenOrCreate);
 			BinaryWriter binaryWriter = new BinaryWriter(fileStream);
 			binaryWriter.Write(Nodes.Count);
@@ -52,32 +40,22 @@ namespace Editor.Nyt
 			}
 			binaryWriter.Close();
 			fileStream.Close();
-#endif
 		}
 
 		internal void Load(string filePath)
 		{
-#if DEBUG
-			StreamReader streamReader = new StreamReader(filePath);
-			int nodeCount = int.Parse(streamReader.ReadLine());
-			for (int i = 0; i < nodeCount; ++i)
-			{
-				Add(new NytTreeNode(streamReader));
-				SelectedNode = null; // 이렇게 해야 최상위 노드로 추가됨
-			}
-			streamReader.Close();
-#else
 			FileStream fileStream = new FileStream(filePath, FileMode.Open);
 			BinaryReader binaryReader = new BinaryReader(fileStream);
 			int nodeCount = binaryReader.ReadInt32();
 			for (int i = 0; i < nodeCount; ++i)
 			{
-				Add(new NytTreeNode(binaryReader));
+				NytTreeNode node = new NytTreeNode();
+				node.Load(binaryReader);
+				Add(node);
 				SelectedNode = null;
 			}
 			binaryReader.Close();
 			fileStream.Close();
-#endif
 		}
 	}
 }

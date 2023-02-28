@@ -1,11 +1,8 @@
-﻿using System;
-using System.IO;
-
-namespace Editor.Nyt
+﻿namespace Editor.Nyt
 {
 	public enum NytDataType
 	{
-		GROUP, INT, FLOAT, STRING, IMAGE
+		GROUP, INT, INT2, FLOAT, STRING, UI, IMAGE
 	}
 
 	public class NytTreeNodeInfo
@@ -19,47 +16,6 @@ namespace Editor.Nyt
 			_type = (NytDataType)type;
 			_name = name;
 			_value = value;
-		}
-
-		public bool IsValid()
-		{
-			switch (_type)
-			{
-				case NytDataType.GROUP:
-					if (_name.Length == 0)
-						return false;
-					break;
-				case NytDataType.INT:
-					try
-					{
-						int.Parse(_value);
-					}
-					catch (Exception)
-					{
-						return false;
-					}
-					break;
-				case NytDataType.FLOAT:
-					try
-					{
-						float.Parse(_value);
-					}
-					catch (Exception)
-					{
-						return false;
-					}
-					break;
-				case NytDataType.STRING:
-					break;
-				case NytDataType.IMAGE:
-					FileInfo fileInfo = new FileInfo(_value);
-					if (!fileInfo.Exists)
-						return false;
-					break;
-				default:
-					return false;
-			}
-			return true;
 		}
 	};
 }
