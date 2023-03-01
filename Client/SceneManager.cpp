@@ -38,8 +38,14 @@ void SceneManager::Update(FLOAT deltaTime)
 		m_scene->Update(deltaTime);
 }
 
-void SceneManager::Render(const ComPtr<ID2D1DeviceContext2>& renderTarget) const
+void SceneManager::Render(const ComPtr<ID3D12GraphicsCommandList>& commandList) const
 {
 	if (m_scene)
-		m_scene->Render(renderTarget);
+		m_scene->Render(commandList);
+}
+
+void SceneManager::Render(const ComPtr<ID2D1DeviceContext2>& d2dContext) const
+{
+	if (m_scene)
+		m_scene->Render(d2dContext);
 }

@@ -53,6 +53,9 @@ EXTERN_C IMAGE_DOS_HEADER __ImageBase;
 #define HINST_THISCOMPONENT ((HINSTANCE)&__ImageBase)
 #endif
 
+// 전역 변수
+extern UINT g_cbvSrvUavDescriptorIncrementSize;
+
 namespace DX
 {
 	// Helper class for COM exceptions

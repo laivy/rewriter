@@ -12,6 +12,7 @@ public:
 	void OnKeyboardEvent(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);
 
 	void Update(FLOAT deltaTime);
+	void Render(const ComPtr<ID3D12GraphicsCommandList>& commandList) const;
 	void Render(const ComPtr<ID2D1DeviceContext2>& renderTarget) const;
 
 	template<class T>

@@ -50,19 +50,13 @@ public:
 	NytProperty(NytDataType type, const std::any& data);
 
 	template<class T>
-	T Get() const
+	T* Get()
 	{
-		return std::any_cast<T>(m_data);
-	}
-
-	template<>
-	NytProperty Get() const
-	{
-		return *this;
+		return &std::any_cast<T>(m_data);
 	}
 
 	template<class T>
-	T Get(const std::string& name) const
+	T* Get(const std::string& name)
 	{
 		// 하위 프로퍼티에서 가져옴
 		size_t pos{ name.find('/') };
@@ -79,6 +73,24 @@ public:
 			assert(false);
 
 		return m_childProps.at(name).Get<T>();
+	}
+
+	template<>
+	NytProperty* Get(const std::string& name)
+	{
+		size_t pos{ name.find('/') };
+		if (pos != std::string::npos)
+		{
+			std::string childName{ name.substr(0, pos) };
+			if (m_childProps.contains(childName))
+				return m_childProps.at(childName).Get<NytProperty>(name.substr(pos + 1));
+			assert(false);
+		}
+
+		if (!m_childProps.contains(name))
+			assert(false);
+
+		return &m_childProps.at(name);
 	}
 
 private:

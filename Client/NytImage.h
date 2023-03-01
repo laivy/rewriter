@@ -1,16 +1,16 @@
 ﻿#pragma once
-#include "GameObject.h"
 
-class NytImage : public GameObject
+class NytImage
 {
 public:
-	NytImage(const ComPtr<ID2D1Bitmap>& bitmap);
 	NytImage(const ComPtr<ID3D12Resource>& resource);
 	~NytImage() = default;
 
-	void Render(const ComPtr<ID2D1DeviceContext2>& renderTarget) const;
+	void UpdateShaderVariable(const ComPtr<ID3D12GraphicsCommandList>& commandList, UINT rootParameterIndex);
+
+	ID3D12Resource* GetResource() const;
 
 private:
-	ComPtr<ID2D1Bitmap> m_bitmap;
 	ComPtr<ID3D12Resource> m_resource;
+	FLOAT2 m_size;
 };

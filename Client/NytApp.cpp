@@ -40,7 +40,10 @@ void NytApp::OnCreate()
 	WaitPrevFrame();
 
 	if (NytLoader::IsInstanced())
+	{
+		NytLoader::GetInstance()->CreateShaderResourceView();
 		NytLoader::GetInstance()->ClearUploadBuffers();
+	}
 
 	m_timer->Tick();
 }
@@ -226,6 +229,7 @@ void NytApp::CreateDevice()
 		m_factory->EnumWarpAdapter(IID_PPV_ARGS(&hardwareAdapter));
 		DX::ThrowIfFailed(D3D12CreateDevice(hardwareAdapter.Get(), D3D_FEATURE_LEVEL_11_0, IID_PPV_ARGS(&m_d3dDevice)));
 	}
+	g_cbvSrvUavDescriptorIncrementSize = m_d3dDevice->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
 }
 
 void NytApp::CreateCommandQueue()
@@ -464,9 +468,8 @@ void NytApp::Render()
 	m_commandList->ClearRenderTargetView(rtvHandle, clearColor, 0, NULL);
 	m_commandList->ClearDepthStencilView(dsvHandle, D3D12_CLEAR_FLAG_DEPTH | D3D12_CLEAR_FLAG_STENCIL, 1.0f, 0, 0, NULL);
 
-	/*
-	DX12 렌더링
-	*/
+	if (SceneManager::IsInstanced())
+		SceneManager::GetInstance()->Render(m_commandList);
 
 	DX::ThrowIfFailed(m_commandList->Close());
 
@@ -479,8 +482,8 @@ void NytApp::Render()
 	m_d2dDeviceContext->SetTarget(m_d2dRenderTargets[m_frameIndex].Get());
 	m_d2dDeviceContext->BeginDraw();
 
-	//if (SceneManager::IsInstanced())
-	//	SceneManager::GetInstance()->Render(m_d2dDeviceContext);
+	if (SceneManager::IsInstanced())
+		SceneManager::GetInstance()->Render(m_d2dDeviceContext);
 
 	DX::ThrowIfFailed(m_d2dDeviceContext->EndDraw());
 	m_d3d11On12Device->ReleaseWrappedResources(m_wrappedBackBuffers[m_frameIndex].GetAddressOf(), 1);

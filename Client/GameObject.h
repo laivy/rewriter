@@ -16,7 +16,8 @@ public:
 	virtual ~GameObject() = default;
 
 	virtual void Update(FLOAT deltaTime);
-	virtual void Render(const ComPtr<ID2D1DeviceContext2>& renderTarget) const;
+	virtual void Render(const ComPtr<ID3D12GraphicsCommandList> commandList) const;
+	virtual void Render(const ComPtr<ID2D1DeviceContext2>& d2dContext) const;
 	virtual void Destroy();
 
 	void SetSize(const FLOAT2& size);

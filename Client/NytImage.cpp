@@ -1,11 +1,6 @@
 ﻿#include "Stdafx.h"
 #include "NytImage.h"
-
-NytImage::NytImage(const ComPtr<ID2D1Bitmap>& bitmap) : m_bitmap{ bitmap }
-{
-	m_size.x = bitmap->GetSize().width;
-	m_size.y = bitmap->GetSize().height;
-}
+#include "NytLoader.h"
 
 NytImage::NytImage(const ComPtr<ID3D12Resource>& resource) : m_resource{ resource }
 {
@@ -14,7 +9,13 @@ NytImage::NytImage(const ComPtr<ID3D12Resource>& resource) : m_resource{ resourc
 	m_size.y = desc.Height;
 }
 
-void NytImage::Render(const ComPtr<ID2D1DeviceContext2>& d2dContext) const
+void NytImage::UpdateShaderVariable(const ComPtr<ID3D12GraphicsCommandList>& commandList, UINT rootParameterIndex)
 {
-	d2dContext->DrawBitmap(m_bitmap.Get(), RECTF{ 0.0f, 0.0f, m_size.x, m_size.y });
+	auto handle{ NytLoader::GetInstance()->GetGPUDescriptorHandle(m_resource.Get()) };
+	commandList->SetGraphicsRootDescriptorTable(rootParameterIndex, handle);
+}
+
+ID3D12Resource* NytImage::GetResource() const
+{
+	return m_resource.Get();
 }
