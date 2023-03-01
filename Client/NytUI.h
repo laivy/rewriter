@@ -1,14 +1,14 @@
 ﻿#pragma once
-#include "GameObject.h"
 
-class NytUI : public GameObject
+class NytUI
 {
 public:
-	NytUI(const ComPtr<ID2D1Bitmap>& bitmap);
+	NytUI(ID2D1Bitmap* bitmap);
 	~NytUI() = default;
 
 	void Render(const ComPtr<ID2D1DeviceContext2>& d2dContext) const;
 
 private:
 	ComPtr<ID2D1Bitmap> m_bitmap;
+	FLOAT2 m_size;
 };

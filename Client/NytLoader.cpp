@@ -9,7 +9,7 @@ NytProperty* NytLoader::Load(const std::string& filePath)
 {
 	// 이미 로딩된 데이터인지 확인
 	if (m_data.contains(filePath))
-		return &m_data[filePath];
+		return m_data[filePath].get();
 
 	std::ifstream ifstream{ StringTable::DATA_FOLDER_PATH + filePath, std::ifstream::binary };
 	assert(ifstream);
@@ -19,15 +19,15 @@ NytProperty* NytLoader::Load(const std::string& filePath)
 	ifstream.read(reinterpret_cast<char*>(&nodeCount), sizeof(int));
 
 	// 순회하며 모든 프로퍼티 로딩
-	NytProperty root{};
+	std::unique_ptr<NytProperty> root{ new NytProperty };
 	for (int i = 0; i < nodeCount; ++i)
 	{
-		Load(ifstream, root);
+		Load(ifstream, root.get());
 	}
 
 	// 저장 후 반환
 	m_data[filePath] = std::move(root);
-	return &m_data[filePath];
+	return m_data[filePath].get();
 }
 
 void NytLoader::Unload(const std::string& filePath)
@@ -56,7 +56,7 @@ void NytLoader::CreateShaderResourceView()
 		srvDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
 		srvDesc.Texture2D.MipLevels = -1;
 		srvDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
-		d3dDevice->CreateShaderResourceView(resource.Get(), &srvDesc, srvDescriptorHandle);
+		d3dDevice->CreateShaderResourceView(resource, &srvDesc, srvDescriptorHandle);
 		srvDescriptorHandle.Offset(g_cbvSrvUavDescriptorIncrementSize);
 	}
 }
@@ -78,7 +78,7 @@ CD3DX12_GPU_DESCRIPTOR_HANDLE NytLoader::GetGPUDescriptorHandle(ID3D12Resource* 
 	return handle;
 }
 
-void NytLoader::Load(std::ifstream& fs, NytProperty& root)
+void NytLoader::Load(std::ifstream& fs, NytProperty* root)
 {
 	NytDataType type{ Read<BYTE>(fs) };
 	std::string name{ Read<std::string>(fs) };
@@ -89,34 +89,34 @@ void NytLoader::Load(std::ifstream& fs, NytProperty& root)
 	case NytDataType::GROUP:
 		break;
 	case NytDataType::INT:
-		data = std::make_any<int>(Read<int>(fs));
+		data = new int{ Read<int>(fs) };
 		break;
 	case NytDataType::INT2:
-		data = std::make_any<INT2>(Read<INT2>(fs));
+		data = new INT2{ Read<INT2>(fs) };
 		break;
 	case NytDataType::FLOAT:
-		data = std::make_any<float>(Read<float>(fs));
+		data = new float{ Read<float>(fs) };
 		break;
 	case NytDataType::STRING:
-		data = std::make_any<std::string>(Read<std::string>(fs));
+		data = new std::string{ Read<std::string>(fs) };
 		break;
 	case NytDataType::UI:
-		data = std::make_any<NytUI>(Read<NytUI>(fs));
+		data = new NytUI{ Read<NytUI>(fs) };
 		break;
 	case NytDataType::IMAGE:
-		data = std::make_any<NytImage>(Read<NytImage>(fs));
+		data = new NytImage{ Read<NytImage>(fs) };
 		break;
 	default:
 		assert(false);
 	}
 
 	int childNodeCount{ Read<int>(fs) };
-	root.m_childNames.reserve(childNodeCount);
-	root.m_childNames.push_back(name);
-	root.m_childProps.insert(std::make_pair(name, NytProperty{ type, data }));
+	root->m_childNames.reserve(childNodeCount);
+	root->m_childNames.push_back(name);
+	root->m_childProps[name] = std::make_unique<NytProperty>(type, data);
 	for (int i = 0; i < childNodeCount; ++i)
 	{
-		Load(fs, root.m_childProps[name]);
+		Load(fs, root->m_childProps[name].get());
 	}
 }
 
@@ -142,7 +142,7 @@ NytUI NytLoader::Read(std::ifstream& fs)
 	ComPtr<IWICFormatConverter> converter;
 	ComPtr<IWICBitmapFrameDecode> frameDecode;
 	ComPtr<IWICStream> stream;
-	ComPtr<ID2D1Bitmap> bitmap;
+	ID2D1Bitmap* bitmap;
 
 	HRESULT hr{ E_FAIL };
 	hr = CoCreateInstance(CLSID_WICImagingFactory, NULL, CLSCTX_INPROC_SERVER, IID_PPV_ARGS(&factory));
@@ -167,7 +167,8 @@ NytImage NytLoader::Read(std::ifstream& fs)
 	std::unique_ptr<BYTE> buffer{ new BYTE[length] };
 	fs.read(reinterpret_cast<char*>(buffer.get()), length);
 
-	ComPtr<ID3D12Resource> bitmap, uploadBuffer;
+	ID3D12Resource* bitmap;
+	ComPtr<ID3D12Resource> uploadBuffer;
 	auto d3dDevice{ NytApp::GetInstance()->GetD3DDevice() };
 	std::unique_ptr<uint8_t[]> decodedData;
 	D3D12_SUBRESOURCE_DATA subresource;
@@ -180,7 +181,7 @@ NytImage NytLoader::Read(std::ifstream& fs)
 		subresource
 	);
 
-	UINT64 nBytes{ GetRequiredIntermediateSize(bitmap.Get(), 0, 1) };
+	UINT64 nBytes{ GetRequiredIntermediateSize(bitmap, 0, 1) };
 	nBytes += D3D12_DEFAULT_RESOURCE_PLACEMENT_ALIGNMENT;
 	DX::ThrowIfFailed(d3dDevice->CreateCommittedResource(
 		&CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_UPLOAD),
@@ -192,7 +193,7 @@ NytImage NytLoader::Read(std::ifstream& fs)
 	));
 
 	auto commandList{ NytApp::GetInstance()->GetCommandList() };
-	UpdateSubresources(commandList.Get(), bitmap.Get(), uploadBuffer.Get(), 0, 0, 1, &subresource);
+	UpdateSubresources(commandList.Get(), bitmap, uploadBuffer.Get(), 0, 0, 1, &subresource);
 
 	// GPU 메모리에 복사가 끝난 뒤에 해제해야함
 	m_uploadBuffers.push_back(uploadBuffer);

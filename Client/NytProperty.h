@@ -18,11 +18,11 @@ public:
 			return *this;
 		}
 
-		std::pair<std::string, NytProperty> operator*() const
+		std::pair<std::string, NytProperty*> operator*() const
 		{
 			return std::make_pair(
 				m_root.m_childNames[m_index],
-				m_root.m_childProps.at(m_root.m_childNames[m_index])
+				m_root.m_childProps.at(m_root.m_childNames[m_index]).get()
 			);
 		}
 
@@ -48,15 +48,16 @@ public:
 public:
 	NytProperty();
 	NytProperty(NytDataType type, const std::any& data);
+	~NytProperty();
 
 	template<class T>
-	T* Get()
+	T* Get() const
 	{
-		return &std::any_cast<T>(m_data);
+		return std::any_cast<T*>(m_data);
 	}
 
 	template<class T>
-	T* Get(const std::string& name)
+	T* Get(const std::string& name) const
 	{
 		// 하위 프로퍼티에서 가져옴
 		size_t pos{ name.find('/') };
@@ -64,7 +65,7 @@ public:
 		{
 			std::string childName{ name.substr(0, pos) };
 			if (m_childProps.contains(childName))
-				return m_childProps.at(childName).Get<T>(name.substr(pos + 1));
+				return m_childProps.at(childName)->Get<T>(name.substr(pos + 1));
 			assert(false);
 		}
 
@@ -72,25 +73,10 @@ public:
 		if (!m_childProps.contains(name))
 			assert(false);
 
-		return m_childProps.at(name).Get<T>();
-	}
+		if constexpr (std::is_same_v<T, NytProperty>)
+			return m_childProps.at(name).get();
 
-	template<>
-	NytProperty* Get(const std::string& name)
-	{
-		size_t pos{ name.find('/') };
-		if (pos != std::string::npos)
-		{
-			std::string childName{ name.substr(0, pos) };
-			if (m_childProps.contains(childName))
-				return m_childProps.at(childName).Get<NytProperty>(name.substr(pos + 1));
-			assert(false);
-		}
-
-		if (!m_childProps.contains(name))
-			assert(false);
-
-		return &m_childProps.at(name);
+		return m_childProps.at(name)->Get<T>();
 	}
 
 private:
@@ -98,5 +84,5 @@ private:
 	std::any m_data;
 
 	std::vector<std::string> m_childNames;
-	std::unordered_map<std::string, NytProperty> m_childProps;
+	std::unordered_map<std::string, std::unique_ptr<NytProperty>> m_childProps;
 };

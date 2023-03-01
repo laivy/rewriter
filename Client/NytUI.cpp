@@ -1,7 +1,7 @@
 ﻿#include "Stdafx.h"
 #include "NytUI.h"
 
-NytUI::NytUI(const ComPtr<ID2D1Bitmap>& bitmap) : m_bitmap{ bitmap }
+NytUI::NytUI(ID2D1Bitmap* bitmap) : m_bitmap{ bitmap }
 {
 	m_size.x = bitmap->GetSize().width;
 	m_size.y = bitmap->GetSize().height;

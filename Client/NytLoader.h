@@ -19,7 +19,7 @@ public:
 	CD3DX12_GPU_DESCRIPTOR_HANDLE GetGPUDescriptorHandle(ID3D12Resource* resource);
 
 private:
-	void Load(std::ifstream& fs, NytProperty& root);
+	void Load(std::ifstream& fs, NytProperty* root);
 
 	template<class T>
 	T Read(std::ifstream& fs)
@@ -41,9 +41,9 @@ private:
 private:
 	// DX12 리소스 관리를 위한 멤버 변수
 	ComPtr<ID3D12DescriptorHeap> m_srvHeap;
-	std::set<ComPtr<ID3D12Resource>> m_srvData;
+	std::set<ID3D12Resource*> m_srvData;
 	std::vector<ComPtr<ID3D12Resource>> m_uploadBuffers;
 
 	// 로딩한 데이터
-	std::unordered_map<std::string, NytProperty> m_data;
+	std::unordered_map<std::string, std::unique_ptr<NytProperty>> m_data;
 };

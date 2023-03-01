@@ -16,7 +16,8 @@ void LoginScene::OnCreate()
 {
 	// 데이터 로딩
 	m_prop = NytLoader::GetInstance()->Load("Main.nyt");
-	m_paimon = m_prop->Get<NytImage>("UIStatus/background");
+	auto UIStatus = m_prop->Get<NytProperty>("UIStatus");
+	auto ui = m_prop->Get<NytUI>("UIStatus/ui");
 	assert(m_prop);
 
 	m_camera = std::make_unique<Camera>();

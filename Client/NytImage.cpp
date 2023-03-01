@@ -2,7 +2,7 @@
 #include "NytImage.h"
 #include "NytLoader.h"
 
-NytImage::NytImage(const ComPtr<ID3D12Resource>& resource) : m_resource{ resource }
+NytImage::NytImage(ID3D12Resource* resource) : m_resource{ resource }
 {
 	auto desc{ resource->GetDesc() };
 	m_size.x = desc.Width;
