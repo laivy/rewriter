@@ -22,6 +22,5 @@ public:
 
 private:
 	NytProperty* m_prop;
-	NytImage* m_paimon;
 	std::unique_ptr<Camera> m_camera;
 };

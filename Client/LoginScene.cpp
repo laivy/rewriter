@@ -14,12 +14,7 @@ LoginScene::LoginScene() : m_prop{}, m_camera{}
 
 void LoginScene::OnCreate()
 {
-	// 데이터 로딩
 	m_prop = NytLoader::GetInstance()->Load("Main.nyt");
-	auto UIStatus = m_prop->Get<NytProperty>("UIStatus");
-	auto ui = m_prop->Get<NytUI>("UIStatus/ui");
-	assert(m_prop);
-
 	m_camera = std::make_unique<Camera>();
 }
 
@@ -51,4 +46,6 @@ void LoginScene::Render(const ComPtr<ID3D12GraphicsCommandList> commandList) con
 void LoginScene::Render(const ComPtr<ID2D1DeviceContext2>& d2dContext) const
 {
 	WndManager::GetInstance()->Render(d2dContext);
+
+	m_prop->Get<NytUI>("UIStatus/ui")->Render(d2dContext);
 }

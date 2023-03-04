@@ -1,16 +1,7 @@
 ﻿#pragma once
 
-enum class Pivot
-{
-	LEFTTOP,	CENTERTOP,	RIGHTTOP,
-	LEFTCENTER,	CENTER,		RIGHTCENTER,
-	LEFTBOT,	CENTERBOT,	RIGHTBOT
-};
-
 class GameObject abstract
 {
-public:
-
 public:
 	GameObject();
 	virtual ~GameObject() = default;

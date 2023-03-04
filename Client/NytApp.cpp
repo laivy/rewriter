@@ -42,7 +42,7 @@ void NytApp::OnCreate()
 	if (NytLoader::IsInstanced())
 	{
 		NytLoader::GetInstance()->CreateShaderResourceView();
-		NytLoader::GetInstance()->ClearUploadBuffers();
+		NytLoader::GetInstance()->ReleaseUploadBuffers();
 	}
 
 	m_timer->Tick();

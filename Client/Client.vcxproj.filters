@@ -52,6 +52,12 @@
     <Filter Include="셰이더 파일">
       <UniqueIdentifier>{575ec016-e395-412a-9db5-51f9b09c6e14}</UniqueIdentifier>
     </Filter>
+    <Filter Include="헤더 파일\GameObject">
+      <UniqueIdentifier>{457fa958-c2af-48f2-bbe2-7d318ad525ab}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="소스 파일\GameObject">
+      <UniqueIdentifier>{030e7fab-bc3d-4ad6-a2ee-c4823fda6ed1}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Main.cpp">
@@ -131,6 +137,12 @@
     </ClCompile>
     <ClCompile Include="NytUI.cpp">
       <Filter>소스 파일\Data</Filter>
+    </ClCompile>
+    <ClCompile Include="Player.cpp">
+      <Filter>소스 파일\GameObject</Filter>
+    </ClCompile>
+    <ClCompile Include="Mesh.cpp">
+      <Filter>소스 파일\Framework</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -223,6 +235,15 @@
     </ClInclude>
     <ClInclude Include="NytUI.h">
       <Filter>헤더 파일\Data</Filter>
+    </ClInclude>
+    <ClInclude Include="Player.h">
+      <Filter>헤더 파일\GameObject</Filter>
+    </ClInclude>
+    <ClInclude Include="Mesh.h">
+      <Filter>헤더 파일\Framework</Filter>
+    </ClInclude>
+    <ClInclude Include="Common.h">
+      <Filter>헤더 파일</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

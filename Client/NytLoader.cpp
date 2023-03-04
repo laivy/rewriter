@@ -61,7 +61,7 @@ void NytLoader::CreateShaderResourceView()
 	}
 }
 
-void NytLoader::ClearUploadBuffers()
+void NytLoader::ReleaseUploadBuffers()
 {
 	m_uploadBuffers.clear();
 }

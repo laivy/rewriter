@@ -42,6 +42,7 @@ using Microsoft::WRL::ComPtr;
 #include <dxgi1_6.h>
 
 // Nyaight
+#include "Common.h"
 #include "NytDataType.h"
 #include "Singleton.h"
 #include "StringTable.h"

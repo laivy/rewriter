@@ -14,7 +14,7 @@ public:
 	void Unload(const std::string& filePath);
 
 	void CreateShaderResourceView();
-	void ClearUploadBuffers();
+	void ReleaseUploadBuffers();
 
 	CD3DX12_GPU_DESCRIPTOR_HANDLE GetGPUDescriptorHandle(ID3D12Resource* resource);
 
