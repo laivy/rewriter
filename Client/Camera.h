@@ -25,10 +25,10 @@ private:
 	FLOAT2 m_scale;
 	FLOAT m_degree;
 
-	struct ShaderData
+	struct cbCamera
 	{
 		DirectX::XMMATRIX viewMatrix;
 		DirectX::XMMATRIX projMatrix;
 	};
-	ConstantBuffer<ShaderData> m_constantBuffer;
+	ConstantBuffer<cbCamera> m_cbCamera;
 };

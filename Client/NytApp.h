@@ -9,6 +9,7 @@ public:
 	~NytApp() = default;
 
 	void OnCreate();
+	void OnResize(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);
 	void OnDestroy();
 
 	void Run();
@@ -17,6 +18,7 @@ public:
 	INT2 GetWindowSize() const;
 	ComPtr<ID3D12Device> GetD3DDevice() const;
 	ComPtr<ID3D12GraphicsCommandList> GetCommandList() const;
+	ID3D12RootSignature* GetRootSignature() const;
 	ComPtr<ID2D1DeviceContext2> GetD2DContext() const;
 	ComPtr<IDWriteFactory5> GetDwriteFactory() const;
 
@@ -43,6 +45,7 @@ private:
 	void Render();
 
 	void WaitPrevFrame();
+	void WaitForGPU();
 
 private:
 	struct Vertex
@@ -72,6 +75,8 @@ private:
 	ComPtr<ID3D12Resource> m_depthStencil;
 	ComPtr<ID3D12RootSignature> m_rootSignature;
 	ComPtr<ID3D12Fence> m_fence;
+	D3D12_VIEWPORT m_viewport;
+	D3D12_RECT m_scissorRect;
 	UINT m_frameIndex;
 	HANDLE m_fenceEvent;
 	UINT64 m_fenceValues[FrameCount];

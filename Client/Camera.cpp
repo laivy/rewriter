@@ -6,8 +6,9 @@ Camera::Camera() : m_eye{ 0.0f, 0.0f, 0.0f }, m_at{ 0.0f, 0.0f, 1.0f }, m_up{ 0.
 {
 	auto [width, height] { NytApp::GetInstance()->GetWindowSize() };
 
-	m_constantBuffer->viewMatrix = DirectX::XMMatrixIdentity();
-	m_constantBuffer->projMatrix = DirectX::XMMatrixTranspose(DirectX::XMMatrixOrthographicLH(static_cast<float>(width), static_cast<float>(height), 0.0f, 1.0f));
+	m_cbCamera.Init();
+	m_cbCamera->viewMatrix = DirectX::XMMatrixIdentity();
+	m_cbCamera->projMatrix = DirectX::XMMatrixTranspose(DirectX::XMMatrixOrthographicLH(static_cast<float>(width), static_cast<float>(height), 0.0f, 1.0f));
 }
 
 void Camera::Update(FLOAT deltaTime)
@@ -15,8 +16,8 @@ void Camera::Update(FLOAT deltaTime)
 	auto eye{ DirectX::XMLoadFloat3(&m_eye) };
 	auto at{ DirectX::XMVectorSet(m_eye.x + m_at.x, m_eye.y + m_at.y, m_eye.z + m_at.z, 1.0f) };
 	auto up{ DirectX::XMLoadFloat3(&m_up) };
-	m_constantBuffer->viewMatrix = DirectX::XMMatrixTranspose(DirectX::XMMatrixLookAtLH(eye, at, up));
-	NytApp::GetInstance()->GetCommandList()->SetGraphicsRootConstantBufferView(0, m_constantBuffer.GetGPUVirtualAddress());
+	m_cbCamera->viewMatrix = DirectX::XMMatrixTranspose(DirectX::XMMatrixLookAtLH(eye, at, up));
+	NytApp::GetInstance()->GetCommandList()->SetGraphicsRootConstantBufferView(RootParamIndex::CAMERA, m_cbCamera.GetGPUVirtualAddress());
 }
 
 void Camera::SetScale(const FLOAT2& scale)

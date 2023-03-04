@@ -1,6 +1,8 @@
 ﻿#pragma once
 #include "GameObject.h"
 
+class NytImage;
+
 class Player : public GameObject
 {
 public:
@@ -11,5 +13,5 @@ public:
 	virtual void Render(const ComPtr<ID3D12GraphicsCommandList> commandList) const;
 
 private:
-
+	NytImage* m_image;
 };

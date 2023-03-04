@@ -9,10 +9,10 @@ public:
 	};
 
 public:
-	Shader(const ComPtr<ID3D12Device>& device, const ComPtr<ID3D12RootSignature>& rootSignature);
+	Shader();
 	~Shader() = default;
 
-	ComPtr<ID3D12PipelineState> GetPipelineState() const;
+	ID3D12PipelineState* GetPipelineState() const;
 
 private:
 	ComPtr<ID3D12PipelineState>	m_pipelineState;

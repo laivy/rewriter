@@ -1,10 +1,12 @@
 ﻿#include "Stdafx.h"
 #include "Mesh.h"
+#include "NytApp.h"
 
-Mesh::Mesh(const ComPtr<ID3D12Device>& d3dDevice, const ComPtr<ID3D12GraphicsCommandList>& commandList) :
-	m_primitiveTopology{ D3D_PRIMITIVE_TOPOLOGY_POINTLIST },
-	m_nVertices{ 1 }
+Mesh::Mesh() : m_primitiveTopology{ D3D_PRIMITIVE_TOPOLOGY_POINTLIST }, m_nVertices{ 1 }
 {
+	auto d3dDevice{ NytApp::GetInstance()->GetD3DDevice() };
+	auto commandList{ NytApp::GetInstance()->GetCommandList() };
+
 	struct Vertex
 	{
 		float x, y, z;

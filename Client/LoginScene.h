@@ -2,8 +2,7 @@
 #include "Scene.h"
 
 class Camera;
-class NytProperty;
-class NytImage;
+class Player;
 
 class LoginScene : public Scene, public TSingleton<LoginScene>
 {
@@ -17,10 +16,10 @@ public:
 	virtual void OnKeyboardEvent(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);
 
 	virtual void Update(FLOAT deltaTime);
-	virtual void Render(const ComPtr<ID3D12GraphicsCommandList> commandList) const;
+	virtual void Render(const ComPtr<ID3D12GraphicsCommandList>& commandList) const;
 	virtual void Render(const ComPtr<ID2D1DeviceContext2>& d2dContext) const;
 
 private:
-	NytProperty* m_prop;
 	std::unique_ptr<Camera> m_camera;
+	std::unique_ptr<Player> m_player;
 };

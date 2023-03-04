@@ -9,7 +9,7 @@ public:
 	};
 
 public:
-	Mesh(const ComPtr<ID3D12Device>& d3dDevice, const ComPtr<ID3D12GraphicsCommandList>& commandList);
+	Mesh();
 	~Mesh() = default;
 
 	void Render(const ComPtr<ID3D12GraphicsCommandList>& commandList);

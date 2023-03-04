@@ -4,6 +4,6 @@ root = true
 charset = utf-8-bom
 indent_style = tab
 
-[*.{hlsl, hlsli}]
+[*.{hlsl,hlsli}]
 charset = utf-8
 indent_style = tab

@@ -38,7 +38,8 @@ void NytLoader::Unload(const std::string& filePath)
 
 void NytLoader::CreateShaderResourceView()
 {
-	m_srvHeap.Reset();
+	if (m_srvData.empty())
+		return;
 
 	auto d3dDevice{ NytApp::GetInstance()->GetD3DDevice() };
 
@@ -64,6 +65,13 @@ void NytLoader::CreateShaderResourceView()
 void NytLoader::ReleaseUploadBuffers()
 {
 	m_uploadBuffers.clear();
+}
+
+ID3D12DescriptorHeap* const* NytLoader::GetSrvDescriptorHeap() const
+{
+	if (m_srvHeap)
+		return m_srvHeap.GetAddressOf();
+	return nullptr;
 }
 
 CD3DX12_GPU_DESCRIPTOR_HANDLE NytLoader::GetGPUDescriptorHandle(ID3D12Resource* resource)

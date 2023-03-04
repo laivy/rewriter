@@ -6,7 +6,14 @@ template <class T>
 class ConstantBuffer
 {
 public:
-	ConstantBuffer()
+	ConstantBuffer() : m_data{ nullptr } { }
+	~ConstantBuffer()
+	{
+		if (m_buffer)
+			m_buffer->Unmap(0, nullptr);
+	}
+
+	void Init()
 	{
 		auto device{ NytApp::GetInstance()->GetD3DDevice() };
 
@@ -25,10 +32,9 @@ public:
 		DX::ThrowIfFailed(m_buffer->Map(0, nullptr, reinterpret_cast<void**>(&m_data)));
 	}
 
-	~ConstantBuffer()
+	BOOL IsValid() const
 	{
-		if (m_buffer)
-			m_buffer->Unmap(0, nullptr);
+		return m_data ? TRUE : FALSE;
 	}
 
 	T* operator->()
@@ -36,7 +42,7 @@ public:
 		return m_data;
 	}
 
-	D3D12_GPU_VIRTUAL_ADDRESS GetGPUVirtualAddress()
+	D3D12_GPU_VIRTUAL_ADDRESS GetGPUVirtualAddress() const
 	{
 		return m_buffer->GetGPUVirtualAddress();
 	}

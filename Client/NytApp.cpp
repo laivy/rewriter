@@ -7,6 +7,7 @@
 #include "NytImage.h"
 #include "NytLoader.h"
 #include "NytProperty.h"
+#include "ResourceManager.h"
 #include "SceneManager.h"
 #include "Timer.h"
 #include "Wnd.h"
@@ -27,6 +28,7 @@ void NytApp::OnCreate()
 	FontPool::Instantiate();
 	BrushPool::Instantiate();
 	NytLoader::Instantiate();
+	ResourceManager::Instantiate();
 
 	WndManager::Instantiate();
 	SceneManager::Instantiate();
@@ -46,6 +48,14 @@ void NytApp::OnCreate()
 	}
 
 	m_timer->Tick();
+}
+
+void NytApp::OnResize(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
+{
+	UINT width{ LOWORD(lParam) };
+	UINT height{ HIWORD(lParam) };
+	m_viewport = D3D12_VIEWPORT{ 0.0f, 0.0f, static_cast<float>(width), static_cast<float>(height), 0.0f, 1.0f };
+	m_scissorRect = D3D12_RECT{ 0, 0, static_cast<long>(width), static_cast<long>(height) };
 }
 
 void NytApp::OnDestroy()
@@ -94,6 +104,11 @@ ComPtr<ID3D12GraphicsCommandList> NytApp::GetCommandList() const
 	return m_commandList;
 }
 
+ID3D12RootSignature* NytApp::GetRootSignature() const
+{
+	return m_rootSignature.Get();
+}
+
 ComPtr<IDWriteFactory5> NytApp::GetDwriteFactory() const
 {
 	return m_dwriteFactory;
@@ -118,6 +133,9 @@ LRESULT CALLBACK NytApp::WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM 
 	app = reinterpret_cast<NytApp*>(GetWindowLongPtr(hWnd, GWLP_USERDATA));
 	switch (message)
 	{
+	case WM_SIZE:
+		app->OnResize(hWnd, message, wParam, lParam);
+		break;
 	case WM_LBUTTONDOWN:
 	case WM_LBUTTONUP:
 	case WM_MOUSEMOVE:
@@ -401,8 +419,11 @@ void NytApp::CreateRootSignature()
 	CD3DX12_DESCRIPTOR_RANGE ranges[1]{};
 	ranges[0].Init(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 1, 0, 0, D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND);
 
-	CD3DX12_ROOT_PARAMETER rootParameter[1]{};
+	CD3DX12_ROOT_PARAMETER rootParameter[4]{};
 	rootParameter[0].InitAsConstantBufferView(0);
+	rootParameter[1].InitAsConstantBufferView(1);
+	rootParameter[2].InitAsConstantBufferView(2);
+	rootParameter[3].InitAsDescriptorTable(1, &ranges[0], D3D12_SHADER_VISIBILITY_PIXEL);
 
 	CD3DX12_STATIC_SAMPLER_DESC samplerDesc[1]{};
 	samplerDesc[0].Init(
@@ -444,6 +465,10 @@ void NytApp::CreateFence()
 
 void NytApp::Update()
 {
+	DX::ThrowIfFailed(m_commandAllocators->Reset());
+	DX::ThrowIfFailed(m_commandList->Reset(m_commandAllocators.Get(), nullptr));
+	m_commandList->SetGraphicsRootSignature(m_rootSignature.Get());
+
 	m_timer->Tick();
 	FLOAT deltaTime{ m_timer->GetDeltaTime() };
 
@@ -453,20 +478,20 @@ void NytApp::Update()
 
 void NytApp::Render()
 {
-	DX::ThrowIfFailed(m_commandAllocators->Reset());
-	DX::ThrowIfFailed(m_commandList->Reset(m_commandAllocators.Get(), nullptr));
-
-	m_commandList->SetGraphicsRootSignature(m_rootSignature.Get());
-
 	m_commandList->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(m_renderTargets[m_frameIndex].Get(), D3D12_RESOURCE_STATE_PRESENT, D3D12_RESOURCE_STATE_RENDER_TARGET));
 
 	CD3DX12_CPU_DESCRIPTOR_HANDLE rtvHandle{ m_rtvHeap->GetCPUDescriptorHandleForHeapStart(), static_cast<int>(m_frameIndex), m_rtvDescriptorSize };
 	CD3DX12_CPU_DESCRIPTOR_HANDLE dsvHandle{ m_dsvHeap->GetCPUDescriptorHandleForHeapStart() };
 	m_commandList->OMSetRenderTargets(1, &rtvHandle, TRUE, &dsvHandle);
+	m_commandList->RSSetViewports(1, &m_viewport);
+	m_commandList->RSSetScissorRects(1, &m_scissorRect);
 
 	constexpr FLOAT clearColor[]{ 0.15625f, 0.171875f, 0.203125f, 1.0f };
 	m_commandList->ClearRenderTargetView(rtvHandle, clearColor, 0, NULL);
 	m_commandList->ClearDepthStencilView(dsvHandle, D3D12_CLEAR_FLAG_DEPTH | D3D12_CLEAR_FLAG_STENCIL, 1.0f, 0, 0, NULL);
+
+	if (auto srvDescHeap{ NytLoader::GetInstance()->GetSrvDescriptorHeap() })
+		m_commandList->SetDescriptorHeaps(1, srvDescHeap);
 
 	if (SceneManager::IsInstanced())
 		SceneManager::GetInstance()->Render(m_commandList);
@@ -492,9 +517,6 @@ void NytApp::Render()
 	// ------------
 
 	DX::ThrowIfFailed(m_swapChain->Present(1, 0));
-
-	// ------------
-
 	WaitPrevFrame();
 }
 
@@ -511,4 +533,12 @@ void NytApp::WaitPrevFrame()
 
 	m_frameIndex = m_swapChain->GetCurrentBackBufferIndex();
 	m_fenceValues[m_frameIndex] = currentFenceValue + 1;
+}
+
+void NytApp::WaitForGPU()
+{
+	DX::ThrowIfFailed(m_commandQueue->Signal(m_fence.Get(), m_fenceValues[m_frameIndex]));
+	DX::ThrowIfFailed(m_fence->SetEventOnCompletion(m_fenceValues[m_frameIndex], m_fenceEvent));
+	WaitForSingleObjectEx(m_fenceEvent, INFINITE, FALSE);
+	++m_fenceValues[m_frameIndex];
 }

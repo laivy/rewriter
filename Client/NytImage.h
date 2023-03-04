@@ -1,4 +1,5 @@
 ﻿#pragma once
+#include "ConstantBuffer.h"
 
 class NytImage
 {
@@ -12,5 +13,10 @@ public:
 
 private:
 	ComPtr<ID3D12Resource> m_resource;
-	FLOAT2 m_size;
+	struct cbImage
+	{
+		FLOAT2 size;
+		FLOAT2 dummy;
+	};
+	ConstantBuffer<cbImage> m_cbImage;
 };

@@ -1,5 +1,7 @@
 ﻿#include "Stdafx.h"
 #include "GameObject.h"
+#include "Shader.h"
+#include "Mesh.h"
 
 INT GameObject::s_id{ 0 };
 
@@ -9,13 +11,21 @@ GameObject::GameObject() :
 	m_size{ 0.0f, 0.0f },
 	m_scale{ 1.0f, 1.0f },
 	m_degree{ 0.0f },
-	m_position{ 0.0f, 0.0f }
+	m_position{ 0.0f, 0.0f },
+	m_shader{ nullptr },
+	m_mesh{ nullptr }
 {
 	
 }
 
 void GameObject::Update(FLOAT deltaTime) { }
-void GameObject::Render(const ComPtr<ID3D12GraphicsCommandList> commandList) const { }
+void GameObject::Render(const ComPtr<ID3D12GraphicsCommandList> commandList) const
+{
+	if (m_shader)
+		commandList->SetPipelineState(m_shader->GetPipelineState());
+	if (m_mesh)
+		m_mesh->Render(commandList);
+}
 
 void GameObject::Destroy()
 {
@@ -63,6 +73,16 @@ void GameObject::SetPosition(const FLOAT2& position, Pivot pivot)
 void GameObject::SetPosition(FLOAT x, FLOAT y, Pivot pivot)
 {
 	SetPosition(FLOAT2{ x, y }, pivot);
+}
+
+void GameObject::SetShader(Shader* shader)
+{
+	m_shader = shader;
+}
+
+void GameObject::SetMesh(Mesh* mesh)
+{
+	m_mesh = mesh;
 }
 
 void GameObject::SetSize(const FLOAT2& size)

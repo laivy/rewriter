@@ -16,6 +16,7 @@ public:
 	void CreateShaderResourceView();
 	void ReleaseUploadBuffers();
 
+	ID3D12DescriptorHeap* const* GetSrvDescriptorHeap() const;
 	CD3DX12_GPU_DESCRIPTOR_HANDLE GetGPUDescriptorHandle(ID3D12Resource* resource);
 
 private:

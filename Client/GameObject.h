@@ -1,4 +1,8 @@
 ﻿#pragma once
+#include "ConstantBuffer.h"
+
+class Shader;
+class Mesh;
 
 class GameObject abstract
 {
@@ -15,6 +19,8 @@ public:
 	void SetRotation(FLOAT degree);
 	void SetPosition(const FLOAT2& position, Pivot pivot = Pivot::LEFTTOP);
 	void SetPosition(FLOAT x, FLOAT y, Pivot pivot = Pivot::LEFTTOP);
+	void SetShader(Shader* shader);
+	void SetMesh(Mesh* mesh);
 
 	INT GetId() const;
 	BOOL IsValid() const;
@@ -28,6 +34,15 @@ protected:
 	FLOAT2 m_scale;
 	FLOAT m_degree;
 	FLOAT2 m_position;
+
+	Shader* m_shader;
+	Mesh* m_mesh;
+
+	struct cbGameObject
+	{
+		DirectX::XMFLOAT4X4 worldMatrix;
+	};
+	ConstantBuffer<cbGameObject> m_cbGameObject;
 
 private:
 	static INT s_id;

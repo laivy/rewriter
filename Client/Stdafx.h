@@ -63,7 +63,7 @@ namespace DX
 	class com_exception : public std::exception
 	{
 	public:
-		com_exception(HRESULT hr) : result(hr)
+		com_exception(HRESULT hr) : result{ hr }
 		{
 			OutputDebugStringA(what());
 		}
@@ -71,7 +71,7 @@ namespace DX
 		const char* what() const override
 		{
 			static char s_str[64]{};
-			sprintf_s(s_str, "Failure with HRESULT of %08X", static_cast<unsigned int>(result));
+			sprintf_s(s_str, "Failure with HRESULT of %08X", static_cast<UINT>(result));
 			return s_str;
 		}
 
@@ -83,9 +83,6 @@ namespace DX
 	inline void ThrowIfFailed(HRESULT hr)
 	{
 		if (FAILED(hr))
-		{
-			auto exception{ com_exception{hr} };
-			throw exception;
-		}
+			throw com_exception{ hr };
 	}
 }
