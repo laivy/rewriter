@@ -26,7 +26,7 @@ public:
 	BOOL IsValid() const;
 	FLOAT2 GetSize() const;
 	FLOAT2 GetPosition() const;
-	MATRIX GetMatrix() const;
+	DirectX::XMFLOAT4X4 GetWorldMatrix() const;
 
 protected:
 	BOOL m_isValid;
@@ -41,6 +41,9 @@ protected:
 	struct cbGameObject
 	{
 		DirectX::XMFLOAT4X4 worldMatrix;
+		FLOAT alpha;
+		BOOL isFliped;
+		FLOAT2 dummy;
 	};
 	ConstantBuffer<cbGameObject> m_cbGameObject;
 

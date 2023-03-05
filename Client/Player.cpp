@@ -10,13 +10,8 @@
 Player::Player()
 {
 	m_cbGameObject.Init();
-	m_cbGameObject->worldMatrix = 
-	{
-		1.0f, 0.0f, 0.0f, 0.0f,
-		0.0f, 1.0f, 0.0f, 0.0f,
-		0.0f, 0.0f, 1.0f, 0.0f,
-		0.0f, 0.0f, 0.0f, 1.0f
-	};
+	m_cbGameObject->alpha = 1.0f;
+	m_cbGameObject->isFliped = TRUE;
 
 	m_mesh = ResourceManager::GetInstance()->GetMesh(Mesh::Type::DEFAULT);
 	m_shader = ResourceManager::GetInstance()->GetShader(Shader::Type::DEFAULT);
@@ -27,7 +22,9 @@ Player::Player()
 
 void Player::Update(FLOAT deltaTime)
 {
-
+	static float degree = 0.0f;
+	SetRotation(degree += deltaTime);
+	m_cbGameObject->worldMatrix = GetWorldMatrix();
 }
 
 void Player::Render(const ComPtr<ID3D12GraphicsCommandList> commandList) const

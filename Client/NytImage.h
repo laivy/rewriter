@@ -7,7 +7,7 @@ public:
 	NytImage(ID3D12Resource* resource);
 	~NytImage() = default;
 
-	void UpdateShaderVariable(const ComPtr<ID3D12GraphicsCommandList>& commandList, UINT rootParameterIndex);
+	void UpdateShaderVariable(const ComPtr<ID3D12GraphicsCommandList>& commandList, RootParamIndex rootParameterIndex);
 
 	ID3D12Resource* GetResource() const;
 

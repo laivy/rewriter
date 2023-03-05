@@ -52,8 +52,8 @@ void NytApp::OnCreate()
 
 void NytApp::OnResize(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
-	UINT width{ LOWORD(lParam) };
-	UINT height{ HIWORD(lParam) };
+	UINT width{ 1920 };
+	UINT height{ 1080 };
 	m_viewport = D3D12_VIEWPORT{ 0.0f, 0.0f, static_cast<float>(width), static_cast<float>(height), 0.0f, 1.0f };
 	m_scissorRect = D3D12_RECT{ 0, 0, static_cast<long>(width), static_cast<long>(height) };
 }
@@ -465,10 +465,6 @@ void NytApp::CreateFence()
 
 void NytApp::Update()
 {
-	DX::ThrowIfFailed(m_commandAllocators->Reset());
-	DX::ThrowIfFailed(m_commandList->Reset(m_commandAllocators.Get(), nullptr));
-	m_commandList->SetGraphicsRootSignature(m_rootSignature.Get());
-
 	m_timer->Tick();
 	FLOAT deltaTime{ m_timer->GetDeltaTime() };
 
@@ -478,6 +474,10 @@ void NytApp::Update()
 
 void NytApp::Render()
 {
+	DX::ThrowIfFailed(m_commandAllocators->Reset());
+	DX::ThrowIfFailed(m_commandList->Reset(m_commandAllocators.Get(), nullptr));
+	m_commandList->SetGraphicsRootSignature(m_rootSignature.Get());
+
 	m_commandList->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(m_renderTargets[m_frameIndex].Get(), D3D12_RESOURCE_STATE_PRESENT, D3D12_RESOURCE_STATE_RENDER_TARGET));
 
 	CD3DX12_CPU_DESCRIPTOR_HANDLE rtvHandle{ m_rtvHeap->GetCPUDescriptorHandleForHeapStart(), static_cast<int>(m_frameIndex), m_rtvDescriptorSize };

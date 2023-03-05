@@ -50,6 +50,8 @@ void LoginScene::Update(FLOAT deltaTime)
 
 void LoginScene::Render(const ComPtr<ID3D12GraphicsCommandList>& commandList) const
 {
+	if (m_camera)
+		m_camera->UpdateShaderVariable(commandList);
 	if (m_player)
 		m_player->Render(commandList);
 }

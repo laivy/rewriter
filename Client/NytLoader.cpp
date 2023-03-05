@@ -53,7 +53,7 @@ void NytLoader::CreateShaderResourceView()
 	for (const auto& resource : m_srvData)
 	{
 		D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc{};
-		srvDesc.Format = DXGI_FORMAT_B8G8R8A8_UNORM_SRGB;
+		srvDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
 		srvDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
 		srvDesc.Texture2D.MipLevels = -1;
 		srvDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
@@ -180,10 +180,13 @@ NytImage NytLoader::Read(std::ifstream& fs)
 	auto d3dDevice{ NytApp::GetInstance()->GetD3DDevice() };
 	std::unique_ptr<uint8_t[]> decodedData;
 	D3D12_SUBRESOURCE_DATA subresource;
-	DirectX::LoadWICTextureFromMemory(
+	DirectX::LoadWICTextureFromMemoryEx(
 		d3dDevice.Get(),
 		buffer.get(),
 		length,
+		0,
+		D3D12_RESOURCE_FLAG_NONE,
+		DirectX::WIC_LOADER_FORCE_RGBA32,
 		&bitmap,
 		decodedData,
 		subresource

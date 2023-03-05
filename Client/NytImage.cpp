@@ -11,7 +11,7 @@ NytImage::NytImage(ID3D12Resource* resource) : m_resource{ resource }
 	m_cbImage->size.y = desc.Height;
 }
 
-void NytImage::UpdateShaderVariable(const ComPtr<ID3D12GraphicsCommandList>& commandList, UINT rootParameterIndex)
+void NytImage::UpdateShaderVariable(const ComPtr<ID3D12GraphicsCommandList>& commandList, RootParamIndex rootParameterIndex)
 {
 	auto handle{ NytLoader::GetInstance()->GetGPUDescriptorHandle(m_resource.Get()) };
 	commandList->SetGraphicsRootDescriptorTable(rootParameterIndex, handle);

@@ -8,6 +8,7 @@ public:
 	~Camera() = default;
 
 	void Update(FLOAT deltaTime);
+	void UpdateShaderVariable(const ComPtr<ID3D12GraphicsCommandList>& commandList);
 
 	void SetScale(const FLOAT2& scale);
 	void SetRotation(FLOAT degree);

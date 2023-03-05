@@ -120,10 +120,14 @@ FLOAT2 GameObject::GetSize() const
 	return m_size;
 }
 
-MATRIX GameObject::GetMatrix() const
+DirectX::XMFLOAT4X4 GameObject::GetWorldMatrix() const
 {
-	MATRIX scale{ MATRIX::Scale(m_scale, m_position) };
-	MATRIX rotate{ MATRIX::Rotation(m_degree, m_position) };
-	MATRIX translate{ MATRIX::Translation(m_position) };
-	return MATRIX::Identity() * scale * rotate * translate;
+	using namespace DirectX;
+	XMMATRIX scale{ XMMatrixScaling(m_scale.x, m_scale.y, 1.0f) };
+	XMMATRIX rotate{ XMMatrixRotationRollPitchYaw(0.0f, 0.0f, XMConvertToRadians(m_degree)) };
+	XMMATRIX translate{ XMMatrixTranslation(m_position.x, m_position.y, 0.0f) };
+	
+	XMFLOAT4X4 worldMatrix{};
+	XMStoreFloat4x4(&worldMatrix, XMMatrixTranspose(scale * rotate * translate));
+	return worldMatrix;
 }

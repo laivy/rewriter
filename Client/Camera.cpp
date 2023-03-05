@@ -17,7 +17,11 @@ void Camera::Update(FLOAT deltaTime)
 	auto at{ DirectX::XMVectorSet(m_eye.x + m_at.x, m_eye.y + m_at.y, m_eye.z + m_at.z, 1.0f) };
 	auto up{ DirectX::XMLoadFloat3(&m_up) };
 	m_cbCamera->viewMatrix = DirectX::XMMatrixTranspose(DirectX::XMMatrixLookAtLH(eye, at, up));
-	NytApp::GetInstance()->GetCommandList()->SetGraphicsRootConstantBufferView(RootParamIndex::CAMERA, m_cbCamera.GetGPUVirtualAddress());
+}
+
+void Camera::UpdateShaderVariable(const ComPtr<ID3D12GraphicsCommandList>& commandList)
+{
+	commandList->SetGraphicsRootConstantBufferView(RootParamIndex::CAMERA, m_cbCamera.GetGPUVirtualAddress());
 }
 
 void Camera::SetScale(const FLOAT2& scale)

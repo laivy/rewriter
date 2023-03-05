@@ -20,7 +20,6 @@ struct PS_INPUT
 GS_INPUT VS(VS_INPUT input)
 {
 	GS_INPUT output = (GS_INPUT) 0;
-	output.positionW = mul(input.position, g_worldMatrix);
 	return output;
 }
 
@@ -40,17 +39,17 @@ void GS(point GS_INPUT input[1], inout TriangleStream<PS_INPUT> triangleStream)
 	
 	float2 uv[4] =
 	{
-		float2(0.0f, 1.0f),
-		float2(0.0f, 0.0f),
-		float2(1.0f, 1.0f),
-		float2(1.0f, 0.0f)
+		float2(g_isFliped - 0.0f, 1.0f),
+		float2(g_isFliped - 0.0f, 0.0f),
+		float2(g_isFliped - 1.0f, 1.0f),
+		float2(g_isFliped - 1.0f, 0.0f)
 	};
 
 	PS_INPUT output;
 	[unroll]
 	for (int i = 0; i < 4; ++i)
 	{
-		output.positionW = position[i];
+		output.positionW = mul(position[i], g_worldMatrix);
 		output.positionH = mul(mul(output.positionW, g_viewMatrix), g_projMatrix);
 		output.uv = uv[i];
 		triangleStream.Append(output);
@@ -59,5 +58,7 @@ void GS(point GS_INPUT input[1], inout TriangleStream<PS_INPUT> triangleStream)
 
 float4 PS(PS_INPUT input) : SV_TARGET
 {
-	return g_texture.Sample(g_sampler, input.uv);
+	float4 color = g_texture.Sample(g_sampler, input.uv);
+	color.a = g_alpha;
+	return color;
 }
