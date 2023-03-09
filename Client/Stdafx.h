@@ -40,10 +40,13 @@ using Microsoft::WRL::ComPtr;
 #include <dwrite.h>
 #include <dwrite_3.h>
 #include <dxgi1_6.h>
+#ifdef _DEBUG
+#include <dxgidebug.h>
+#endif
 
 // Nyaight
 #include "Common.h"
-#include "NytDataType.h"
+#include "NytType.h"
 #include "Singleton.h"
 #include "StringTable.h"
 #include "Util.h"

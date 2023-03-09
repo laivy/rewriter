@@ -5,7 +5,6 @@
 #include "MouseThread.h"
 #include "NytApp.h"
 #include "NytImage.h"
-#include "NytLoader.h"
 #include "NytProperty.h"
 #include "ResourceManager.h"
 #include "SceneManager.h"
@@ -17,17 +16,27 @@ NytApp::NytApp() : m_hWnd{ NULL }, m_size{ 1920, 1080 }, m_timer{ new Timer }
 {
 	HRESULT hr{ E_FAIL };
 	hr = InitWnd();
-	hr = InitDirectX();
+	hr |= InitDirectX();
 	assert(SUCCEEDED(hr));
+}
+
+NytApp::~NytApp()
+{
+#ifdef _DEBUG
+	ComPtr<IDXGIDebug1> dxgiDebug;
+	if (SUCCEEDED(DXGIGetDebugInterface1(0, IID_PPV_ARGS(&dxgiDebug))))
+	{
+		dxgiDebug->ReportLiveObjects(DXGI_DEBUG_ALL, DXGI_DEBUG_RLO_FLAGS(DXGI_DEBUG_RLO_SUMMARY | DXGI_DEBUG_RLO_IGNORE_INTERNAL));
+	}
+#endif
 }
 
 void NytApp::OnCreate()
 {
-	m_commandList->Reset(m_commandAllocators.Get(), nullptr);
+	ResetCommandList();
 
 	FontPool::Instantiate();
 	BrushPool::Instantiate();
-	NytLoader::Instantiate();
 	ResourceManager::Instantiate();
 
 	WndManager::Instantiate();
@@ -36,15 +45,13 @@ void NytApp::OnCreate()
 	KeyboardThread::Instantiate();
 	MouseThread::Instantiate();
 
-	m_commandList->Close();
-	ID3D12CommandList* ppCommandList[]{ m_commandList.Get() };
-	m_commandQueue->ExecuteCommandLists(_countof(ppCommandList), ppCommandList);
-	WaitPrevFrame();
+	ExecuteCommandList();
+	WaitForGPU();
 
-	if (NytLoader::IsInstanced())
+	if (auto rm{ ResourceManager::GetInstance() })
 	{
-		NytLoader::GetInstance()->CreateShaderResourceView();
-		NytLoader::GetInstance()->ReleaseUploadBuffers();
+		rm->CreateShaderResourceView();
+		rm->ReleaseUploadBuffers();
 	}
 
 	m_timer->Tick();
@@ -94,14 +101,14 @@ INT2 NytApp::GetWindowSize() const
 	return m_size;
 }
 
-ComPtr<ID3D12Device> NytApp::GetD3DDevice() const
+ID3D12Device* NytApp::GetD3DDevice() const
 {
-	return m_d3dDevice;
+	return m_d3dDevice.Get();
 }
 
-ComPtr<ID3D12GraphicsCommandList> NytApp::GetCommandList() const
+ID3D12GraphicsCommandList* NytApp::GetCommandList() const
 {
-	return m_commandList;
+	return m_commandList.Get();
 }
 
 ID3D12RootSignature* NytApp::GetRootSignature() const
@@ -109,14 +116,14 @@ ID3D12RootSignature* NytApp::GetRootSignature() const
 	return m_rootSignature.Get();
 }
 
-ComPtr<IDWriteFactory5> NytApp::GetDwriteFactory() const
+IDWriteFactory5* NytApp::GetDwriteFactory() const
 {
-	return m_dwriteFactory;
+	return m_dwriteFactory.Get();
 }
 
-ComPtr<ID2D1DeviceContext2> NytApp::GetD2DContext() const
+ID2D1DeviceContext2* NytApp::GetD2DContext() const
 {
-	return m_d2dDeviceContext;
+	return m_d2dDeviceContext.Get();
 }
 
 LRESULT CALLBACK NytApp::WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
@@ -474,10 +481,9 @@ void NytApp::Update()
 
 void NytApp::Render()
 {
-	DX::ThrowIfFailed(m_commandAllocators->Reset());
-	DX::ThrowIfFailed(m_commandList->Reset(m_commandAllocators.Get(), nullptr));
-	m_commandList->SetGraphicsRootSignature(m_rootSignature.Get());
+	ResetCommandList();
 
+	m_commandList->SetGraphicsRootSignature(m_rootSignature.Get());
 	m_commandList->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(m_renderTargets[m_frameIndex].Get(), D3D12_RESOURCE_STATE_PRESENT, D3D12_RESOURCE_STATE_RENDER_TARGET));
 
 	CD3DX12_CPU_DESCRIPTOR_HANDLE rtvHandle{ m_rtvHeap->GetCPUDescriptorHandleForHeapStart(), static_cast<int>(m_frameIndex), m_rtvDescriptorSize };
@@ -490,16 +496,13 @@ void NytApp::Render()
 	m_commandList->ClearRenderTargetView(rtvHandle, clearColor, 0, NULL);
 	m_commandList->ClearDepthStencilView(dsvHandle, D3D12_CLEAR_FLAG_DEPTH | D3D12_CLEAR_FLAG_STENCIL, 1.0f, 0, 0, NULL);
 
-	if (auto srvDescHeap{ NytLoader::GetInstance()->GetSrvDescriptorHeap() })
+	if (auto srvDescHeap{ ResourceManager::GetInstance()->GetSrvDescriptorHeap() })
 		m_commandList->SetDescriptorHeaps(1, srvDescHeap);
 
 	if (SceneManager::IsInstanced())
 		SceneManager::GetInstance()->Render(m_commandList);
 
-	DX::ThrowIfFailed(m_commandList->Close());
-
-	ID3D12CommandList* ppCommandList[]{ m_commandList.Get() };
-	m_commandQueue->ExecuteCommandLists(_countof(ppCommandList), ppCommandList);
+	ExecuteCommandList();
 
 	// ------------
 
@@ -518,6 +521,19 @@ void NytApp::Render()
 
 	DX::ThrowIfFailed(m_swapChain->Present(1, 0));
 	WaitPrevFrame();
+}
+
+void NytApp::ResetCommandList()
+{
+	DX::ThrowIfFailed(m_commandAllocators->Reset());
+	DX::ThrowIfFailed(m_commandList->Reset(m_commandAllocators.Get(), nullptr));
+}
+
+void NytApp::ExecuteCommandList()
+{
+	DX::ThrowIfFailed(m_commandList->Close());
+	ID3D12CommandList* ppCommandList[]{ m_commandList.Get() };
+	m_commandQueue->ExecuteCommandLists(_countof(ppCommandList), ppCommandList);
 }
 
 void NytApp::WaitPrevFrame()

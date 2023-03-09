@@ -3,7 +3,7 @@
 class NytProperty
 {
 public:
-	friend class NytLoader;
+	friend class ResourceManager;
 
 	class iterator
 	{
@@ -47,7 +47,7 @@ public:
 
 public:
 	NytProperty();
-	NytProperty(NytDataType type, const std::any& data);
+	NytProperty(NytType type, const std::any& data);
 	~NytProperty();
 
 	template<class T>
@@ -80,7 +80,7 @@ public:
 	}
 
 private:
-	NytDataType m_type;
+	NytType m_type;
 	std::any m_data;
 
 	std::vector<std::string> m_childNames;

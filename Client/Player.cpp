@@ -2,7 +2,6 @@
 #include "Player.h"
 #include "Mesh.h"
 #include "NytImage.h"
-#include "NytLoader.h"
 #include "NytProperty.h"
 #include "ResourceManager.h"
 #include "Shader.h"
@@ -16,7 +15,7 @@ Player::Player()
 	m_mesh = ResourceManager::GetInstance()->GetMesh(Mesh::Type::DEFAULT);
 	m_shader = ResourceManager::GetInstance()->GetShader(Shader::Type::DEFAULT);
 
-	auto prop{ NytLoader::GetInstance()->Load("Main.nyt") };
+	auto prop{ ResourceManager::GetInstance()->Load("Main.nyt") };
 	m_image = prop->Get<NytImage>("UIStatus/background");
 }
 
@@ -34,7 +33,7 @@ void Player::Render(const ComPtr<ID3D12GraphicsCommandList> commandList) const
 	if (m_shader)
 		commandList->SetPipelineState(m_shader->GetPipelineState());
 	if (m_image)
-		m_image->UpdateShaderVariable(commandList, RootParamIndex::TEXTURE0);
+		m_image->UpdateShaderVariable(commandList);
 	if (m_mesh)
 		m_mesh->Render(commandList);
 }

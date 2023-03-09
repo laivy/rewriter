@@ -3,8 +3,8 @@
 #include "NytUI.h"
 #include "NytImage.h"
 
-NytProperty::NytProperty() : m_type{ NytDataType::GROUP }, m_data{} { }
-NytProperty::NytProperty(NytDataType type, const std::any& data) : m_type{ type }
+NytProperty::NytProperty() : m_type{ NytType::GROUP }, m_data{} { }
+NytProperty::NytProperty(NytType type, const std::any& data) : m_type{ type }
 {
 	m_data = std::move(data);
 }
@@ -13,22 +13,22 @@ NytProperty::~NytProperty()
 {
 	switch (m_type)
 	{
-	case NytDataType::INT:
+	case NytType::INT:
 		delete std::any_cast<int*>(m_data);
 		break;
-	case NytDataType::INT2:
+	case NytType::INT2:
 		delete std::any_cast<INT2*>(m_data);
 		break;
-	case NytDataType::FLOAT:
+	case NytType::FLOAT:
 		delete std::any_cast<float*>(m_data);
 		break;
-	case NytDataType::STRING:
+	case NytType::STRING:
 		delete std::any_cast<std::string*>(m_data);
 		break;
-	case NytDataType::UI:
+	case NytType::UI:
 		delete std::any_cast<NytUI*>(m_data);
 		break;
-	case NytDataType::IMAGE:
+	case NytType::IMAGE:
 		delete std::any_cast<NytImage*>(m_data);
 		break;
 	}

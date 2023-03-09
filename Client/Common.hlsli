@@ -18,6 +18,6 @@ cbuffer cbCamera : register(b1)
 
 cbuffer cbImage : register(b2)
 {
-	float2 g_size;
+	uint2 g_size;
 	float2 _dummy;
 }

@@ -166,10 +166,6 @@
     <ClCompile Include="NytImage.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Use</PrecompiledHeader>
     </ClCompile>
-    <ClCompile Include="NytLoader.cpp">
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Use</PrecompiledHeader>
-    </ClCompile>
     <ClCompile Include="NytProperty.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Use</PrecompiledHeader>
     </ClCompile>
@@ -232,9 +228,8 @@
     <ClInclude Include="GameObject.h" />
     <ClInclude Include="KeyboardThread.h" />
     <ClInclude Include="MouseThread.h" />
-    <ClInclude Include="NytDataType.h" />
+    <ClInclude Include="NytType.h" />
     <ClInclude Include="NytImage.h" />
-    <ClInclude Include="NytLoader.h" />
     <ClInclude Include="NytProperty.h" />
     <ClInclude Include="NytUI.h" />
     <ClInclude Include="Player.h" />

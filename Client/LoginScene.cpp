@@ -2,7 +2,6 @@
 #include "Camera.h"
 #include "LoginScene.h"
 #include "Mesh.h"
-#include "NytLoader.h"
 #include "NytImage.h"
 #include "NytProperty.h"
 #include "NytUI.h"
@@ -18,7 +17,6 @@ LoginScene::LoginScene()
 
 void LoginScene::OnCreate()
 {
-	ResourceManager::GetInstance()->AddShader(Shader::Type::DEFAULT, new Shader);
 	ResourceManager::GetInstance()->AddMesh(Mesh::Type::DEFAULT, new Mesh);
 	m_camera = std::make_unique<Camera>();
 	m_player = std::make_unique<Player>();
@@ -26,7 +24,7 @@ void LoginScene::OnCreate()
 
 void LoginScene::OnDestory()
 {
-	NytLoader::GetInstance()->Unload("Login.nyt");
+	ResourceManager::GetInstance()->Unload("Login.nyt");
 }
 
 void LoginScene::OnMouseEvent(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)

@@ -19,7 +19,7 @@ GameObject::GameObject() :
 }
 
 void GameObject::Update(FLOAT deltaTime) { }
-void GameObject::Render(const ComPtr<ID3D12GraphicsCommandList> commandList) const
+void GameObject::Render(const ComPtr<ID3D12GraphicsCommandList>& commandList) const
 {
 	if (m_shader)
 		commandList->SetPipelineState(m_shader->GetPipelineState());

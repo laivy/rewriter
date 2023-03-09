@@ -6,24 +6,25 @@ class NytApp : public TSingleton<NytApp>
 {
 public:
 	NytApp();
-	~NytApp() = default;
+	~NytApp();
 
 	void OnCreate();
-	void OnResize(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);
-	void OnDestroy();
 
 	void Run();
 
 	HWND GetHwnd() const;
 	INT2 GetWindowSize() const;
-	ComPtr<ID3D12Device> GetD3DDevice() const;
-	ComPtr<ID3D12GraphicsCommandList> GetCommandList() const;
+	ID3D12Device* GetD3DDevice() const;
+	ID3D12GraphicsCommandList* GetCommandList() const;
 	ID3D12RootSignature* GetRootSignature() const;
-	ComPtr<ID2D1DeviceContext2> GetD2DContext() const;
-	ComPtr<IDWriteFactory5> GetDwriteFactory() const;
+	ID2D1DeviceContext2* GetD2DContext() const;
+	IDWriteFactory5* GetDwriteFactory() const;
 
 private:
 	static LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);
+
+	void OnResize(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);
+	void OnDestroy();
 
 	HRESULT InitWnd();
 	HRESULT InitDirectX();
@@ -44,15 +45,11 @@ private:
 	void Update();
 	void Render();
 
+	void ResetCommandList();
+	void ExecuteCommandList();
+
 	void WaitPrevFrame();
 	void WaitForGPU();
-
-private:
-	struct Vertex
-	{
-		DirectX::XMFLOAT3 position;
-		DirectX::XMFLOAT4 color;
-	};
 
 private:
 	static constexpr UINT FrameCount = 3;
