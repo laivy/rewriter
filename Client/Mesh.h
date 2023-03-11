@@ -3,7 +3,7 @@
 class Mesh
 {
 public:
-	enum class Type
+	enum Type
 	{
 		DEFAULT
 	};

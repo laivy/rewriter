@@ -9,15 +9,13 @@ public:
 
 	void UpdateShaderVariable(const ComPtr<ID3D12GraphicsCommandList>& commandList, RootParamIndex rootParameterIndex = RootParamIndex::TEXTURE0);
 
-	ID3D12Resource* GetResource() const;
-
 private:
 	ComPtr<ID3D12Resource> m_resource;
-	struct cbImage
+	struct cbTexture
 	{
 		UINT width;
 		UINT height;
 		FLOAT2 dummy;
 	};
-	ConstantBuffer<cbImage> m_cbImage;
+	ConstantBuffer<cbTexture> m_cbTexture;
 };

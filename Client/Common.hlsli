@@ -5,9 +5,10 @@ SamplerState g_sampler : register(s0);
 cbuffer cbGameObject : register(b0)
 {
 	matrix g_worldMatrix;
+	float g_layer;
 	float g_alpha;
 	bool g_isFliped;
-	float2 dummy;
+	float dummy;
 }
 
 cbuffer cbCamera : register(b1)
@@ -16,7 +17,7 @@ cbuffer cbCamera : register(b1)
 	matrix g_projMatrix;
 }
 
-cbuffer cbImage : register(b2)
+cbuffer cbTexture : register(b2)
 {
 	uint2 g_size;
 	float2 _dummy;

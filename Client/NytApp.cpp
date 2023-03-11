@@ -50,7 +50,6 @@ void NytApp::OnCreate()
 
 	if (auto rm{ ResourceManager::GetInstance() })
 	{
-		rm->CreateShaderResourceView();
 		rm->ReleaseUploadBuffers();
 	}
 
@@ -427,11 +426,11 @@ void NytApp::CreateRootSignature()
 	ranges[0].Init(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 1, 0, 0, D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND);
 
 	CD3DX12_ROOT_PARAMETER rootParameter[4]{};
-	rootParameter[0].InitAsConstantBufferView(0);
-	rootParameter[1].InitAsConstantBufferView(1);
-	rootParameter[2].InitAsConstantBufferView(2);
-	rootParameter[3].InitAsDescriptorTable(1, &ranges[0], D3D12_SHADER_VISIBILITY_PIXEL);
-
+	rootParameter[RootParamIndex::GAMEOBJECT].InitAsConstantBufferView(RootParamIndex::GAMEOBJECT);
+	rootParameter[RootParamIndex::CAMERA].InitAsConstantBufferView(RootParamIndex::CAMERA);
+	rootParameter[RootParamIndex::TEXTURE].InitAsConstantBufferView(RootParamIndex::TEXTURE);
+	rootParameter[RootParamIndex::TEXTURE0].InitAsDescriptorTable(1, &ranges[0], D3D12_SHADER_VISIBILITY_PIXEL);
+	
 	CD3DX12_STATIC_SAMPLER_DESC samplerDesc[1]{};
 	samplerDesc[0].Init(
 		0,

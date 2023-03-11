@@ -75,6 +75,11 @@ void GameObject::SetPosition(FLOAT x, FLOAT y, Pivot pivot)
 	SetPosition(FLOAT2{ x, y }, pivot);
 }
 
+void GameObject::SetLayer(Layer layer)
+{
+	m_layer = layer;
+}
+
 void GameObject::SetShader(Shader* shader)
 {
 	m_shader = shader;

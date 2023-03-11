@@ -19,6 +19,7 @@ public:
 	void SetRotation(FLOAT degree);
 	void SetPosition(const FLOAT2& position, Pivot pivot = Pivot::LEFTTOP);
 	void SetPosition(FLOAT x, FLOAT y, Pivot pivot = Pivot::LEFTTOP);
+	void SetLayer(Layer layer);
 	void SetShader(Shader* shader);
 	void SetMesh(Mesh* mesh);
 
@@ -34,6 +35,7 @@ protected:
 	FLOAT2 m_scale;
 	FLOAT m_degree;
 	FLOAT2 m_position;
+	Layer m_layer;
 
 	Shader* m_shader;
 	Mesh* m_mesh;
@@ -41,9 +43,10 @@ protected:
 	struct cbGameObject
 	{
 		DirectX::XMFLOAT4X4 worldMatrix;
+		FLOAT layer;
 		FLOAT alpha;
 		BOOL isFliped;
-		FLOAT2 dummy;
+		FLOAT dummy;
 	};
 	ConstantBuffer<cbGameObject> m_cbGameObject;
 

@@ -31,10 +31,10 @@ void GS(point GS_INPUT input[1], inout TriangleStream<PS_INPUT> triangleStream)
 	
 	float4 position[4] =
 	{
-		float4(input[0].positionW.x - hx, input[0].positionW.y - hy, 0.0f, 1.0f),
-		float4(input[0].positionW.x - hx, input[0].positionW.y + hy, 0.0f, 1.0f),
-		float4(input[0].positionW.x + hx, input[0].positionW.y - hy, 0.0f, 1.0f),
-		float4(input[0].positionW.x + hx, input[0].positionW.y + hy, 0.0f, 1.0f)
+		float4(input[0].positionW.x - hx, input[0].positionW.y - hy, g_layer, 1.0f),
+		float4(input[0].positionW.x - hx, input[0].positionW.y + hy, g_layer, 1.0f),
+		float4(input[0].positionW.x + hx, input[0].positionW.y - hy, g_layer, 1.0f),
+		float4(input[0].positionW.x + hx, input[0].positionW.y + hy, g_layer, 1.0f)
 	};
 	
 	float2 uv[4] =

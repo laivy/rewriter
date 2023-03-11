@@ -6,6 +6,9 @@
 
 ResourceManager::ResourceManager()
 {
+	m_shaderResources.reserve(SRV_HEAP_COUNT);
+
+	CreateSRVHeap();
 	CreateShaders();
 }
 
@@ -44,39 +47,32 @@ ID3D12DescriptorHeap* const* ResourceManager::GetSrvDescriptorHeap() const
 
 CD3DX12_GPU_DESCRIPTOR_HANDLE ResourceManager::GetGPUDescriptorHandle(ID3D12Resource* const resource)
 {
-	auto it{ m_shaderResources.find(resource) };
-	if (it == m_shaderResources.end())
+	if (!m_shaderResources.contains(resource))
 		assert(false);
 
-	UINT index{ static_cast<UINT>(std::distance(m_shaderResources.begin(), it)) };
 	CD3DX12_GPU_DESCRIPTOR_HANDLE handle{ m_srvHeap->GetGPUDescriptorHandleForHeapStart() };
-	return handle.Offset(index, g_cbvSrvUavDescriptorIncrementSize);
+	return handle.Offset(m_shaderResources[resource], g_cbvSrvUavDescriptorIncrementSize);
 }
 
-void ResourceManager::CreateShaderResourceView()
+void ResourceManager::CreateShaderResourceView(ID3D12Resource* const resource)
 {
-	if (m_shaderResources.empty())
+	if (m_shaderResources.contains(resource))
 		return;
 
 	auto d3dDevice{ NytApp::GetInstance()->GetD3DDevice() };
-
-	D3D12_DESCRIPTOR_HEAP_DESC srvHeapDesc{};
-	srvHeapDesc.NumDescriptors = static_cast<UINT>(m_shaderResources.size());
-	srvHeapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
-	srvHeapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;
-	d3dDevice->CreateDescriptorHeap(&srvHeapDesc, IID_PPV_ARGS(&m_srvHeap));
+	auto index{ static_cast<int>(m_shaderResources.size()) };
 
 	CD3DX12_CPU_DESCRIPTOR_HANDLE srvDescriptorHandle{ m_srvHeap->GetCPUDescriptorHandleForHeapStart() };
-	for (const auto& resource : m_shaderResources)
-	{
-		D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc{};
-		srvDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
-		srvDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
-		srvDesc.Texture2D.MipLevels = -1;
-		srvDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
-		d3dDevice->CreateShaderResourceView(resource, &srvDesc, srvDescriptorHandle);
-		srvDescriptorHandle.Offset(g_cbvSrvUavDescriptorIncrementSize);
-	}
+	srvDescriptorHandle.Offset(index, g_cbvSrvUavDescriptorIncrementSize);
+
+	D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc{};
+	srvDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+	srvDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
+	srvDesc.Texture2D.MipLevels = -1;
+	srvDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
+	d3dDevice->CreateShaderResourceView(resource, &srvDesc, srvDescriptorHandle);
+
+	m_shaderResources[resource] = index;
 }
 
 void ResourceManager::ReleaseUploadBuffers()
@@ -103,9 +99,20 @@ Shader* ResourceManager::GetShader(Shader::Type key) const
 	return nullptr;
 }
 
+void ResourceManager::CreateSRVHeap()
+{
+	auto d3dDevice{ NytApp::GetInstance()->GetD3DDevice() };
+
+	D3D12_DESCRIPTOR_HEAP_DESC srvHeapDesc{};
+	srvHeapDesc.NumDescriptors = static_cast<UINT>(SRV_HEAP_COUNT);
+	srvHeapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
+	srvHeapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;
+	d3dDevice->CreateDescriptorHeap(&srvHeapDesc, IID_PPV_ARGS(&m_srvHeap));
+}
+
 void ResourceManager::CreateShaders()
 {
-	m_shaders.emplace(Shader::Type::DEFAULT, new Shader);
+	m_shaders.emplace(Shader::DEFAULT, new Shader);
 }
 
 void ResourceManager::Load(std::ifstream& fs, NytProperty* root)

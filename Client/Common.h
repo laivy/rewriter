@@ -19,3 +19,15 @@ enum RootParamIndex
 
 	COUNT
 };
+
+// 앞에 선언되있을 수록 위에 그려짐
+enum Layer
+{
+	LOCALPLAYER,
+	REMOTEPLAYER,
+	MONSTER,
+	TERRAIN,
+	BACKGROUND1,
+	BACKGROUND2,
+	BACKGROUND3,
+};

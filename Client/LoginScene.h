@@ -22,4 +22,5 @@ public:
 private:
 	std::unique_ptr<Camera> m_camera;
 	std::unique_ptr<Player> m_player;
+	std::unique_ptr<Player> m_player2;
 };

@@ -17,7 +17,7 @@ public:
 
 	ID3D12DescriptorHeap* const* GetSrvDescriptorHeap() const;
 	CD3DX12_GPU_DESCRIPTOR_HANDLE GetGPUDescriptorHandle(ID3D12Resource* const resource);
-	void CreateShaderResourceView();
+	void CreateShaderResourceView(ID3D12Resource* const resource);
 	void ReleaseUploadBuffers();
 
 	void AddMesh(Mesh::Type key, Mesh* value);
@@ -26,6 +26,7 @@ public:
 	Shader* GetShader(Shader::Type key) const;
 
 private:
+	void CreateSRVHeap();
 	void CreateShaders();
 
 	void Load(std::ifstream& fs, NytProperty* root);
@@ -121,8 +122,8 @@ private:
 		// GPU 메모리에 복사가 끝난 뒤에 해제해야함
 		m_uploadBuffers.push_back(uploadBuffer);
 
-		// 나중에 SRV 만들 때 사용됨
-		m_shaderResources.insert(bitmap);
+		// SRV 생성
+		CreateShaderResourceView(bitmap);
 
 		return NytImage{ bitmap };
 	}
@@ -132,7 +133,10 @@ private:
 	std::unordered_map<Shader::Type, std::unique_ptr<Shader>> m_shaders;
 	std::unordered_map<std::string, std::unique_ptr<NytProperty>> m_properties;
 
+	// SRV
+	enum { SRV_HEAP_COUNT = 100 };
 	ComPtr<ID3D12DescriptorHeap> m_srvHeap;
-	std::set<ID3D12Resource*> m_shaderResources;
+	std::unordered_map<ID3D12Resource*, int> m_shaderResources;
+
 	std::vector<ComPtr<ID3D12Resource>> m_uploadBuffers;
 };
