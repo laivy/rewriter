@@ -34,13 +34,13 @@ void EditCtrl::OnMouseEvent(HWND hWnd, UINT message, INT x, INT y)
 		static DWRITE_TEXT_RANGE lastHitTextRange{ 0, 0 };
 		if (lastHitTextRange.length != 0)
 		{
-			m_textLayout->SetDrawingEffect(BrushPool::GetInstance()->GetBrush(BrushType::WHITE).Get(), lastHitTextRange);
+			m_textLayout->SetDrawingEffect(BrushPool::GetInstance()->GetBrush(BrushPool::WHITE), lastHitTextRange);
 			lastHitTextRange.startPosition = 0;
 			lastHitTextRange.length = 0;
 		}
 		if (isInside)
 		{
-			m_textLayout->SetDrawingEffect(BrushPool::GetInstance()->GetBrush(BrushType::BLUE).Get(), DWRITE_TEXT_RANGE{ hitTestMetrics.textPosition, hitTestMetrics.length });
+			m_textLayout->SetDrawingEffect(BrushPool::GetInstance()->GetBrush(BrushPool::BLUE), DWRITE_TEXT_RANGE{ hitTestMetrics.textPosition, hitTestMetrics.length });
 			lastHitTextRange = DWRITE_TEXT_RANGE{ hitTestMetrics.textPosition, hitTestMetrics.length };
 		}
 	}

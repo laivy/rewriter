@@ -15,6 +15,9 @@ public:
 	void Render(const ComPtr<ID3D12GraphicsCommandList>& commandList) const;
 	void Render(const ComPtr<ID2D1DeviceContext2>& renderTarget) const;
 
+	void SetFadeIn(FLOAT second, const std::function<void()>& callback = []() {});
+	void SetFadeOut(FLOAT second, const std::function<void()>& callback = []() {});
+
 	template<class T>
 	requires std::is_base_of_v<Scene, T>
 	void SetScene(T* scene)
@@ -24,14 +27,22 @@ public:
 		m_scene = scene;
 	}
 
-	template<class T>
-	requires std::is_base_of_v<Scene, T>
-	void ChangeScene(T* scene)
+private:
+	void UpdateFadeEffect();
+	void RenderFadeEffect(const ComPtr<ID2D1DeviceContext2>& d2dContext) const;
+
+private:
+	enum class FadeType { NONE, FADEIN, FADEOUT };
+	struct FadeInfo
 	{
-		m_nextScene = scene;
-	}
+		FadeType type{ FadeType::NONE };
+		std::chrono::time_point<std::chrono::high_resolution_clock> startTime;
+		std::chrono::time_point<std::chrono::high_resolution_clock> endTime;
+		std::function<void()> callback{};
+		FLOAT alpha{ 1.0f };
+	};
 
 private:
 	Scene* m_scene;
-	Scene* m_nextScene;
+	FadeInfo m_fadeInfo;
 };
