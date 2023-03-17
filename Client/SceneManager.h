@@ -7,9 +7,9 @@ public:
 	SceneManager();
 	~SceneManager() = default;
 
+	void OnDestroy();
 	void OnMouseEvent(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);
 	void OnKeyboardEvent(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);
-	void OnDestroy();
 
 	void Update(FLOAT deltaTime);
 	void Render(const ComPtr<ID3D12GraphicsCommandList>& commandList) const;

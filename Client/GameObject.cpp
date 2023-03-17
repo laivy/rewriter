@@ -78,6 +78,8 @@ void GameObject::SetPosition(FLOAT x, FLOAT y, Pivot pivot)
 void GameObject::SetLayer(Layer layer)
 {
 	m_layer = layer;
+	if (m_cbGameObject.IsValid())
+		m_cbGameObject->layer = static_cast<float>(layer) / static_cast<float>(Layer::COUNT);
 }
 
 void GameObject::SetShader(Shader* shader)

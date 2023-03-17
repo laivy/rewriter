@@ -1,14 +1,13 @@
 ﻿#pragma once
 #include "Scene.h"
 
-class Camera;
-class Player;
+class NytProperty;
 
-class LoginScene : public Scene, public TSingleton<LoginScene>
+class LogoScene : public Scene, public TSingleton<LogoScene>
 {
 public:
-	LoginScene() = default;
-	~LoginScene() = default;
+	LogoScene() = default;
+	~LogoScene() = default;
 
 	virtual void OnCreate();
 	virtual void OnDestory();
@@ -16,11 +15,8 @@ public:
 	virtual void OnKeyboardEvent(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);
 
 	virtual void Update(FLOAT deltaTime);
-	virtual void Render(const ComPtr<ID3D12GraphicsCommandList>& commandList) const;
 	virtual void Render(const ComPtr<ID2D1DeviceContext2>& d2dContext) const;
 
 private:
-	std::unique_ptr<Camera> m_camera;
-	std::unique_ptr<Player> m_player;
-	std::unique_ptr<Player> m_player2;
+	NytProperty* m_prop;
 };

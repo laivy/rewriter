@@ -21,7 +21,7 @@ enum RootParamIndex
 };
 
 // 앞에 선언되있을 수록 위에 그려짐
-enum Layer
+enum class Layer
 {
 	LOCALPLAYER,
 	REMOTEPLAYER,
@@ -30,4 +30,5 @@ enum Layer
 	BACKGROUND1,
 	BACKGROUND2,
 	BACKGROUND3,
+	COUNT
 };

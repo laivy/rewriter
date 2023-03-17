@@ -9,7 +9,7 @@
 Player::Player()
 {
 	m_cbGameObject.Init();
-	m_cbGameObject->layer = static_cast<float>(Layer::PLAYER) / 10.0f;
+	m_cbGameObject->layer = static_cast<float>(Layer::LOCALPLAYER) / static_cast<float>(Layer::COUNT);
 	m_cbGameObject->alpha = 1.0f;
 	m_cbGameObject->isFliped = TRUE;
 	
@@ -25,7 +25,6 @@ void Player::Update(FLOAT deltaTime)
 	static float degree = 0.0f;
 	SetRotation(degree += deltaTime);
 	m_cbGameObject->worldMatrix = GetWorldMatrix();
-	m_cbGameObject->layer = static_cast<float>(m_layer) / 1000.0f;
 }
 
 void Player::Render(const ComPtr<ID3D12GraphicsCommandList> commandList) const

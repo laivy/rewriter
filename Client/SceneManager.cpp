@@ -1,17 +1,23 @@
 ﻿#include "Stdafx.h"
 #include "Scene.h"
 #include "SceneManager.h"
-#include "LoginScene.h"
+#include "LogoScene.h"
 #include "BrushPool.h"
 
 SceneManager::SceneManager() : m_scene{}, m_nextScene{}
 {
-	LoginScene::Instantiate();
-	if (LoginScene::IsInstanced())
+	LogoScene::Instantiate();
+	if (LogoScene::IsInstanced())
 	{
-		LoginScene::GetInstance()->OnCreate();
-		SetScene(LoginScene::GetInstance());
+		LogoScene::GetInstance()->OnCreate();
+		SetScene(LogoScene::GetInstance());
 	}
+}
+
+void SceneManager::OnDestroy()
+{
+	if (m_scene)
+		m_scene->OnDestory();
 }
 
 void SceneManager::OnMouseEvent(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
@@ -24,12 +30,6 @@ void SceneManager::OnKeyboardEvent(HWND hWnd, UINT message, WPARAM wParam, LPARA
 {
 	if (m_scene)
 		m_scene->OnKeyboardEvent(hWnd, message, wParam, lParam);
-}
-
-void SceneManager::OnDestroy()
-{
-	if (m_scene)
-		m_scene->OnDestory();
 }
 
 void SceneManager::Update(FLOAT deltaTime)

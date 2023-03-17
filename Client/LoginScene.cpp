@@ -10,21 +10,15 @@
 #include "Shader.h"
 #include "WndManager.h"
 
-LoginScene::LoginScene()
-{
-
-}
-
 void LoginScene::OnCreate()
 {
-	ResourceManager::GetInstance()->AddMesh(Mesh::Type::DEFAULT, new Mesh);
 	m_camera = std::make_unique<Camera>();
 	m_player = std::make_unique<Player>();
 	m_player->SetLayer(Layer::REMOTEPLAYER);
 
 	m_player2 = std::make_unique<Player>();
 	m_player2->SetPosition(FLOAT2{ 300.0f, 0.0f });
-	m_player2->SetLayer(Layer::PLAYER);
+	m_player2->SetLayer(Layer::LOCALPLAYER);
 }
 
 void LoginScene::OnDestory()
