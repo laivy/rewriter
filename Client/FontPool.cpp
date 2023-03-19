@@ -30,7 +30,7 @@ FontPool::FontPool()
 		{ 
 			TEXT("Data/morris9.ttf"), 
 			{ 
-				{ DWRITE_FONT_WEIGHT_NORMAL, DWRITE_FONT_STYLE_NORMAL, DWRITE_FONT_STRETCH_NORMAL, 12.0f, TEXT(""), &m_pool[static_cast<int>(FontType::MORRIS)] }
+				{ DWRITE_FONT_WEIGHT_NORMAL, DWRITE_FONT_STYLE_NORMAL, DWRITE_FONT_STRETCH_NORMAL, 12.0f, TEXT(""), &m_pool[MORRIS] }
 			}
 		}
 	};
@@ -62,12 +62,11 @@ FontPool::~FontPool()
 		RemoveFontResource(filePath.c_str());
 }
 
-ComPtr<IDWriteTextFormat> FontPool::GetFont(FontType type)
+ComPtr<IDWriteTextFormat> FontPool::GetFont(Type type) const
 {
-	int key{ static_cast<int>(type) };
-	if (m_pool.contains(key))
-		return m_pool.at(key);
-	return m_pool[static_cast<int>(FontType::DEFAULT)];
+	if (m_pool.contains(type))
+		return m_pool.at(type);
+	return m_pool.at(type);
 }
 
 FontPool::FontInfo FontPool::LoadFont(const std::wstring& filePath)

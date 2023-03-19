@@ -10,7 +10,7 @@ class ResourceManager : public TSingleton<ResourceManager>
 {
 public:
 	ResourceManager();
-	~ResourceManager() = default;
+	~ResourceManager();
 
 	NytProperty* Load(const std::string& filePath);
 	void Unload(const std::string& filePath);

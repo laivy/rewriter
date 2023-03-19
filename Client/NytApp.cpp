@@ -20,17 +20,6 @@ NytApp::NytApp() : m_hWnd{ NULL }, m_size{ 1920, 1080 }, m_timer{ new Timer }
 	assert(SUCCEEDED(hr));
 }
 
-NytApp::~NytApp()
-{
-#ifdef _DEBUG
-	ComPtr<IDXGIDebug1> dxgiDebug;
-	if (SUCCEEDED(DXGIGetDebugInterface1(0, IID_PPV_ARGS(&dxgiDebug))))
-	{
-		dxgiDebug->ReportLiveObjects(DXGI_DEBUG_ALL, DXGI_DEBUG_RLO_FLAGS(DXGI_DEBUG_RLO_SUMMARY | DXGI_DEBUG_RLO_IGNORE_INTERNAL));
-	}
-#endif
-}
-
 void NytApp::OnCreate()
 {
 	ResetCommandList();
@@ -49,11 +38,22 @@ void NytApp::OnCreate()
 	WaitForGPU();
 
 	if (auto rm{ ResourceManager::GetInstance() })
-	{
 		rm->ReleaseUploadBuffers();
-	}
 
 	m_timer->Tick();
+}
+
+void NytApp::OnDestroy()
+{
+	FontPool::Destroy();
+	BrushPool::Destroy();
+	ResourceManager::Destroy();
+
+	WndManager::Destroy();
+	SceneManager::Destroy();
+
+	KeyboardThread::Destroy();
+	MouseThread::Destroy();
 }
 
 void NytApp::OnResize(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
@@ -62,12 +62,6 @@ void NytApp::OnResize(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 	UINT height{ 1080 };
 	m_viewport = D3D12_VIEWPORT{ 0.0f, 0.0f, static_cast<float>(width), static_cast<float>(height), 0.0f, 1.0f };
 	m_scissorRect = D3D12_RECT{ 0, 0, static_cast<long>(width), static_cast<long>(height) };
-}
-
-void NytApp::OnDestroy()
-{
-	if (SceneManager::IsInstanced())
-		SceneManager::GetInstance()->OnDestroy();
 }
 
 void NytApp::Run()
@@ -177,14 +171,17 @@ HRESULT NytApp::InitWnd()
 	wcex.lpszClassName = L"GAME";
 	RegisterClassEx(&wcex);
 	
+	RECT rect{ 0, 0, m_size.x, m_size.y };
+	AdjustWindowRect(&rect, WS_OVERLAPPEDWINDOW, FALSE);
+
 	m_hWnd = CreateWindow(
 		L"GAME",
 		L"GAME",
 		WS_OVERLAPPED | WS_SYSMENU | WS_BORDER,
 		CW_USEDEFAULT,
 		CW_USEDEFAULT,
-		m_size.x,
-		m_size.y,
+		rect.right - rect.left,
+		rect.bottom - rect.top,
 		NULL,
 		NULL,
 		HINST_THISCOMPONENT,
@@ -299,10 +296,13 @@ void NytApp::CreateD2DDevice()
 
 void NytApp::CreateSwapChain()
 {
+	RECT rect{};
+	GetClientRect(m_hWnd, &rect);
+
 	DXGI_SWAP_CHAIN_DESC1 swapChainDesc{};
 	swapChainDesc.BufferCount = FrameCount;
-	swapChainDesc.Width = m_size.x;
-	swapChainDesc.Height = m_size.y;
+	swapChainDesc.Width = rect.right - rect.left;
+	swapChainDesc.Height = rect.bottom - rect.top;
 	swapChainDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
 	swapChainDesc.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
 	swapChainDesc.SwapEffect = DXGI_SWAP_EFFECT_FLIP_DISCARD;
@@ -350,8 +350,8 @@ void NytApp::CreateRenderTargetView()
 	D2D1_BITMAP_PROPERTIES1 bitmapProperties{ D2D1::BitmapProperties1(
 		D2D1_BITMAP_OPTIONS_TARGET | D2D1_BITMAP_OPTIONS_CANNOT_DRAW,
 		D2D1::PixelFormat(DXGI_FORMAT_UNKNOWN, D2D1_ALPHA_MODE_PREMULTIPLIED),
-		dpi * m_size.x / 96.0f,
-		dpi * m_size.y / 96.0f
+		dpi,
+		dpi
 	) };
 
 	CD3DX12_CPU_DESCRIPTOR_HANDLE rtvHandle{ m_rtvHeap->GetCPUDescriptorHandleForHeapStart() };

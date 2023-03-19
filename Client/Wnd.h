@@ -12,14 +12,14 @@ public:
 	virtual void OnButtonClicked(INT id);
 
 	virtual void Update(FLOAT deltaTime);
-	virtual void Render(const ComPtr<ID2D1DeviceContext2>& renderTarget);
+	virtual void Render(const ComPtr<ID2D1DeviceContext2>& d2dContext);
 
 	template <typename T>
-	void AddUI(std::unique_ptr<T>& ui)
+	requires std::is_base_of_v<UI, T>
+	void AddUI(T* ui)
 	{
-		std::unique_ptr<UI> _ui{ static_cast<UI*>(ui.release()) };
-		_ui->SetParent(this);
-		m_ui.push_back(std::move(_ui));
+		ui->SetParent(this);
+		m_ui.emplace_back(ui);
 	}
 
 	void SetFocus(BOOL isFocus);
@@ -29,14 +29,16 @@ public:
 	BOOL IsValid() const;
 	BOOL IsFocus() const;
 	BOOL IsPick() const;
+
+private:
 	FLOAT2 GetPickedDelta() const;
 
 private:
-	std::mutex m_mutex; // 락
+	std::mutex m_mutex;
 
-	BOOL m_isFocus;	// 활성화 여부
-	BOOL m_isPick; // 선택됨 여부(마우스로 창을 움직임)
-	FLOAT2 m_pickDelta; // 창 좌표 - 선택됐을 때의 마우스 좌표
+	BOOL m_isFocus;
+	BOOL m_isPick;
+	FLOAT2 m_pickDelta;
 
-	std::vector<std::unique_ptr<UI>> m_ui; // 이 윈도우에 있는 UI 객체들
+	std::vector<std::unique_ptr<UI>> m_ui;
 };

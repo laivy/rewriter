@@ -6,7 +6,7 @@ class Wnd;
 class Button : public UI
 {
 public:
-	Button(FLOAT width, FLOAT height, FLOAT x = 0.0f, FLOAT y = 0.0f);
+	Button(FLOAT width, FLOAT height);
 	virtual ~Button() = default;
 
 	virtual void OnMouseEvent(HWND hWnd, UINT message, INT x, INT y);

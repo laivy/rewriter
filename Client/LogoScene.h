@@ -6,8 +6,8 @@ class NytProperty;
 class LogoScene : public Scene, public TSingleton<LogoScene>
 {
 public:
-	LogoScene() = default;
-	~LogoScene() = default;
+	LogoScene();
+	~LogoScene();
 
 	virtual void OnCreate();
 	virtual void OnDestory();

@@ -1,18 +1,18 @@
 ﻿#pragma once
 
-enum class FontType
-{
-	DEFAULT,
-	MORRIS,
-};
-
 class FontPool : public TSingleton<FontPool>
 {
+public:
+	enum Type
+	{
+		DEFAULT, MORRIS
+	};
+
 public:
 	FontPool();
 	~FontPool();
 
-	ComPtr<IDWriteTextFormat> GetFont(FontType type);
+	ComPtr<IDWriteTextFormat> GetFont(Type type) const;
 
 private:
 	struct FontInfo
@@ -26,5 +26,5 @@ private:
 
 private:
 	std::set<std::wstring> m_filePaths;
-	std::unordered_map<int, ComPtr<IDWriteTextFormat>> m_pool;
+	std::unordered_map<INT, ComPtr<IDWriteTextFormat>> m_pool;
 };

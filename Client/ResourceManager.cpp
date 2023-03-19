@@ -12,6 +12,11 @@ ResourceManager::ResourceManager()
 	CreateShaders();
 }
 
+ResourceManager::~ResourceManager()
+{
+
+}
+
 NytProperty* ResourceManager::Load(const std::string& filePath)
 {
 	// 이미 로딩된 데이터인지 확인

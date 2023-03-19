@@ -2,13 +2,12 @@
 #include "Button.h"
 #include "Wnd.h"
 
-Button::Button(FLOAT width, FLOAT height, FLOAT x, FLOAT y) : 
+Button::Button(FLOAT width, FLOAT height) : 
 	m_color{ D2D1::ColorF::Aqua },
 	m_isMouseOver{ FALSE },
 	m_isMouseDown{ FALSE }
 {
 	SetSize(FLOAT2{ width, height });
-	SetPosition(FLOAT2{ x, y });
 }
 
 void Button::OnMouseEvent(HWND hWnd, UINT message, INT x, INT y)
@@ -21,7 +20,7 @@ void Button::OnMouseEvent(HWND hWnd, UINT message, INT x, INT y)
 		RECTF rect{ 0.0f, 0.0f, m_size.x, m_size.y };
 		rect.Offset(m_position.x, m_position.y);
 
-		if (Util::IsContain(rect, pos))
+		if (rect.IsContain(pos))
 			m_isMouseOver = TRUE;
 		else
 			m_isMouseOver = FALSE;
@@ -46,7 +45,7 @@ void Button::OnMouseEvent(HWND hWnd, UINT message, INT x, INT y)
 		RECTF rect{ 0.0f, 0.0f, m_size.x, m_size.y };
 		rect.Offset(m_position.x, m_position.y);
 
-		if (Util::IsContain(rect, pos))
+		if (rect.IsContain(pos))
 		{
 			if (m_parent)
 				m_parent->OnButtonClicked(GetId());

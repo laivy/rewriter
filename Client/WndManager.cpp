@@ -3,6 +3,11 @@
 #include "Wnd.h"
 #include "NytApp.h"
 
+WndManager::~WndManager()
+{
+
+}
+
 void WndManager::OnMouseEvent(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
 	POINT mouse;
@@ -14,6 +19,10 @@ void WndManager::OnMouseEvent(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPa
 	{
 	case WM_LBUTTONDOWN:
 	{
+		std::string str{};
+		str += std::to_string(mouse.x) + ", " + std::to_string(mouse.y) + "\n";
+		OutputDebugStringA(str.c_str());
+
 		Wnd* focusWnd{ nullptr };
 		Wnd* pickWnd{ nullptr };
 		FLOAT2 pos{ static_cast<FLOAT>(mouse.x), static_cast<FLOAT>(mouse.y) };
@@ -22,12 +31,12 @@ void WndManager::OnMouseEvent(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPa
 		{
 			// 창의 어디든 클릭됐는지 확인한다.
 			RECTF rect{ w->GetRect() };
-			if (Util::IsContain(rect, pos))
+			if (rect.IsContain(pos))
 				focusWnd = w.get();
 
 			// 이 창의 타이틀 부분이 클릭됐는지 확인한다.
 			rect.bottom = rect.top + 15.0f;
-			if (Util::IsContain(rect, pos))
+			if (rect.IsContain(pos))
 				pickWnd = w.get();
 
 			w->SetFocus(FALSE);
@@ -92,11 +101,11 @@ void WndManager::Update(FLOAT deltaTime)
 	}
 }
 
-void WndManager::Render(const ComPtr<ID2D1DeviceContext2>& renderTarget) const
+void WndManager::Render(const ComPtr<ID2D1DeviceContext2>& d2dContext) const
 {
 	std::unique_lock lock{ m_mutex };
 	for (const auto& w : m_wnds)
-		w->Render(renderTarget);
+		w->Render(d2dContext);
 }
 
 void WndManager::SetTopWnd(const Wnd* const wnd)
@@ -111,4 +120,3 @@ void WndManager::SetTopWnd(const Wnd* const wnd)
 	m_wnds.push_back(std::move(*it));
 	m_wnds.erase(it);
 }
-

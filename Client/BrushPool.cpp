@@ -12,6 +12,11 @@ BrushPool::BrushPool()
 	ctx->CreateSolidColorBrush(D2D1::ColorF{ D2D1::ColorF::Blue }, &m_pool[static_cast<int>(BLUE)]);
 }
 
+BrushPool::~BrushPool()
+{
+
+}
+
 ID2D1SolidColorBrush* BrushPool::GetBrush(Type type) const
 {
 	int key{ static_cast<int>(type) };

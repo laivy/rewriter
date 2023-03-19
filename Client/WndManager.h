@@ -5,15 +5,16 @@ class WndManager : public TSingleton<WndManager>
 {
 public:
 	WndManager() = default;
-	~WndManager() = default;
+	~WndManager();
 
 	void OnMouseEvent(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);
 	void OnKeyboardEvent(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);
 
 	void Update(FLOAT deltaTime);
-	void Render(const ComPtr<ID2D1DeviceContext2>& renderTarget) const;
+	void Render(const ComPtr<ID2D1DeviceContext2>& d2dContext) const;
 
 	template <class T>
+	requires std::is_base_of_v<Wnd, T>
 	void AddWnd(std::unique_ptr<T>& wnd)
 	{
 		std::unique_lock lock{ m_addWndsMutex };

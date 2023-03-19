@@ -1,7 +1,6 @@
 ﻿#pragma once
 #include "UI.h"
-
-enum class FontType;
+#include "FontPool.h"
 
 class EditCtrl : public UI
 {
@@ -16,7 +15,7 @@ public:
 	virtual RECTF GetRect() const;
 
 	void SetText(const std::wstring& text);
-	void SetFont(FontType fontType);
+	void SetFont(FontPool::Type fontType);
 
 private:
 	mutable std::mutex m_mutex;

@@ -5,7 +5,7 @@ class SceneManager : public TSingleton<SceneManager>
 {
 public:
 	SceneManager();
-	~SceneManager() = default;
+	~SceneManager();
 
 	void OnDestroy();
 	void OnMouseEvent(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);
@@ -22,8 +22,9 @@ public:
 	requires std::is_base_of_v<Scene, T>
 	void SetScene(T* scene)
 	{
-		if (m_scene)
-			m_scene->OnDestory();
+		// 이때 씬의 OnCreate 함수를 호출한다.
+		if (scene)
+			scene->OnCreate();
 		m_scene = scene;
 	}
 

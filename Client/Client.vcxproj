@@ -151,6 +151,9 @@
     <ClCompile Include="LoginScene.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Use</PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="LoginWnd.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Use</PrecompiledHeader>
+    </ClCompile>
     <ClCompile Include="LogoScene.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Use</PrecompiledHeader>
     </ClCompile>
@@ -226,6 +229,7 @@
     <ClInclude Include="EditCtrl.h" />
     <ClInclude Include="FontPool.h" />
     <ClInclude Include="LoginScene.h" />
+    <ClInclude Include="LoginWnd.h" />
     <ClInclude Include="LogoScene.h" />
     <ClInclude Include="Mesh.h" />
     <ClInclude Include="NytApp.h" />

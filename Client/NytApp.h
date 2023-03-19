@@ -6,7 +6,7 @@ class NytApp : public TSingleton<NytApp>
 {
 public:
 	NytApp();
-	~NytApp();
+	~NytApp() = default;
 
 	void OnCreate();
 
@@ -23,8 +23,8 @@ public:
 private:
 	static LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);
 
-	void OnResize(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);
 	void OnDestroy();
+	void OnResize(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);
 
 	HRESULT InitWnd();
 	HRESULT InitDirectX();

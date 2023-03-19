@@ -7,24 +7,19 @@
 #include "LoginScene.h"
 #include "BrushPool.h"
 
-SceneManager::SceneManager() : m_scene{}
+SceneManager::SceneManager() : m_scene{ nullptr }
 {
 	LogoScene::Instantiate();
 	if (LogoScene::IsInstanced())
 	{
 		LogoScene::GetInstance()->OnCreate();
 		SetScene(LogoScene::GetInstance());
-		SetFadeOut(
-			3.0f,
-			[]()
-			{
-				LoginScene::Instantiate();
-				auto sm{ SceneManager::GetInstance() };
-				sm->SetScene(LoginScene::GetInstance());
-				sm->SetFadeIn(3.0f);
-			}
-		);
 	}
+}
+
+SceneManager::~SceneManager()
+{
+
 }
 
 void SceneManager::OnDestroy()
@@ -118,6 +113,7 @@ void SceneManager::RenderFadeEffect(const ComPtr<ID2D1DeviceContext2>& d2dContex
 
 	auto brush{ BrushPool::GetInstance()->GetBrush(BrushPool::BLACK) };
 	brush->SetOpacity(m_fadeInfo.alpha);
+	d2dContext->SetTransform(MATRIX::Identity());
 	d2dContext->FillRectangle(RECTF{ 0.0f, 0.0f, 1920.0f, 1080.0f }, brush);
 	brush->SetOpacity(1.0f);
 }

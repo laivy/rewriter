@@ -10,7 +10,7 @@ public:
 
 public:
 	BrushPool();
-	~BrushPool() = default;
+	~BrushPool();
 
 	ID2D1SolidColorBrush* GetBrush(Type type) const;
 

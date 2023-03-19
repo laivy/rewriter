@@ -38,11 +38,7 @@ public:
 	RECTF(FLOAT left, FLOAT top, FLOAT right, FLOAT bottom);
 
 	void Offset(FLOAT x, FLOAT y);
+	BOOL IsContain(FLOAT2 point);
 };
 
 using MATRIX = D2D1::Matrix3x2F;
-
-namespace Util
-{
-	BOOL IsContain(const RECTF& rect, const FLOAT2& point);
-}

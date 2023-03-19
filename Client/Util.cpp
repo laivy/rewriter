@@ -111,13 +111,10 @@ void RECTF::Offset(FLOAT x, FLOAT y)
 	bottom += y;
 }
 
-namespace Util
+BOOL RECTF::IsContain(FLOAT2 point)
 {
-	BOOL IsContain(const RECTF& rect, const FLOAT2& point)
-	{
-		if (rect.left <= point.x && point.x <= rect.right &&
-			rect.top  <= point.y && point.y <= rect.bottom)
-			return TRUE;
-		return FALSE;
-	}
+	if (left <= point.x && point.x <= right &&
+		top <= point.y && point.y <= bottom)
+		return TRUE;
+	return FALSE;
 }

@@ -12,7 +12,7 @@ EditCtrl::EditCtrl(FLOAT width, FLOAT height, FLOAT x, FLOAT y)
 	SetPosition(FLOAT2{ x, y });
 
 	if (FontPool::IsInstanced())
-		m_textFormat = FontPool::GetInstance()->GetFont(FontType::MORRIS);
+		m_textFormat = FontPool::GetInstance()->GetFont(FontPool::MORRIS);
 	
 	std::wstring text{};
 	text += TEXT("<big>안녕하세요</big> <b>볼드텍스트응애!</b> 그냥텍스트응애!");
@@ -99,7 +99,7 @@ void EditCtrl::SetText(const std::wstring& text)
 	}
 }
 
-void EditCtrl::SetFont(FontType fontType)
+void EditCtrl::SetFont(FontPool::Type fontType)
 {
 	if (FontPool::IsInstanced())
 		m_textFormat = FontPool::GetInstance()->GetFont(fontType);
