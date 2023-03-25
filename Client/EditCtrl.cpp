@@ -7,9 +7,11 @@
 #include "Wnd.h"
 
 EditCtrl::EditCtrl(FLOAT width, FLOAT height, FontPool::Type fontType) : 
+	m_isCompositing{ FALSE },
 	m_caretPosition{},
 	m_caretRect{},
-	m_caretTimer{}
+	m_caretTimer{},
+	m_xOffset{}
 {
 	SetSize(FLOAT2{ width, height });
 	SetPosition(FLOAT2{ 0.0f, 0.0f });
@@ -28,9 +30,6 @@ void EditCtrl::OnMouseEvent(HWND hWnd, UINT message, INT x, INT y)
 
 void EditCtrl::OnKeyboardEvent(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
-	// 한글을 조합중인지
-	static BOOL isCompositing{ FALSE };
-	
 	switch (message)
 	{
 	case WM_CHAR:
@@ -45,7 +44,7 @@ void EditCtrl::OnKeyboardEvent(HWND hWnd, UINT message, WPARAM wParam, LPARAM lP
 			InsertText(std::wstring{ static_cast<TCHAR>(wParam) });
 			break;
 		}
-		isCompositing = FALSE;
+		m_isCompositing = FALSE;
 		break;
 	}
 	case WM_KEYDOWN:
@@ -59,25 +58,25 @@ void EditCtrl::OnKeyboardEvent(HWND hWnd, UINT message, WPARAM wParam, LPARAM lP
 		if (lParam & GCS_COMPSTR)
 		{
 			HIMC hImc{ ImmGetContext(hWnd) };
-			int len{ ImmGetCompositionString(hImc, GCS_COMPSTR, NULL, 0) };
+			int length{ ImmGetCompositionString(hImc, GCS_COMPSTR, NULL, 0) };
 
 			// 조합중이라면 글자 교체
-			if (isCompositing && !m_text.empty())
+			if (m_isCompositing && !m_text.empty())
 				EraseText(1);
 
 			// 백스페이스로 조합 중인 글자를 다 지우면 길이가 0이될 수 있음
-			isCompositing = len ? TRUE : FALSE;
-			if (len)
+			m_isCompositing = length ? TRUE : FALSE;
+			if (length)
 				InsertText(std::wstring{ static_cast<WCHAR>(wParam) });
 
 			ImmReleaseContext(hWnd, hImc);
 		}
 		if (lParam & GCS_RESULTSTR)
 		{
-			if (isCompositing && !m_text.empty())
+			if (m_isCompositing && !m_text.empty())
 				EraseText(1);
 			InsertText(std::wstring{ static_cast<WCHAR>(wParam) });
-			isCompositing = FALSE;
+			m_isCompositing = FALSE;
 		}
 		break;
 	}
@@ -86,9 +85,8 @@ void EditCtrl::OnKeyboardEvent(HWND hWnd, UINT message, WPARAM wParam, LPARAM lP
 
 void EditCtrl::Update(FLOAT deltaTime)
 {
-	m_caretTimer += deltaTime;
-
 	// 캐럿 깜빡임
+	m_caretTimer += deltaTime;
 	if (m_caretTimer >= CARET_BLINK_SECOND * 2.0f)
 	{
 		m_caretTimer = 0.0f;
@@ -98,42 +96,24 @@ void EditCtrl::Update(FLOAT deltaTime)
 		m_caretRect = RECTF{};
 		return;
 	}
-
-	// 캐럿 사각형 범위 설정
-	DWRITE_HIT_TEST_METRICS metrics{};
-	FLOAT2 pos;
-	m_textLayout->HitTestTextPosition(
-		m_caretPosition - 1,
-		1,
-		&pos.x,
-		&pos.y,
-		&metrics
-	);
-
-	m_caretRect.left = pos.x - CARET_THICKNESS / 2.0f;
-	m_caretRect.right = pos.x + CARET_THICKNESS / 2.0f;
-	m_caretRect.top = pos.y;
-	m_caretRect.bottom = pos.y + metrics.height;
-	m_caretRect.Offset(1.0f, 0.0f);
 }
 
 void EditCtrl::Render(const ComPtr<ID2D1DeviceContext2>& d2dContext) const
 {
-	if (!m_parent || !m_textFormat) return;
+	if (!m_parent) return;
 
 	FLOAT2 position{ m_position };
 	position += m_parent->GetPosition();
 	d2dContext->SetTransform(MATRIX::Translation(position.x, position.y));
 
 	// 배경
-	d2dContext->FillRectangle(RECTF{ 0.0f, 0.0f, m_size.x, m_size.y }, BrushPool::GetInstance()->GetBrush(BrushPool::WHITE));
+	d2dContext->FillRectangle(RECTF{ -CARET_THICKNESS - 1.0f, 0.0f, m_size.x + CARET_THICKNESS + 1.0f, m_size.y }, BrushPool::GetInstance()->GetBrush(BrushPool::WHITE));
 
-	// 텍스트
-	std::unique_lock lock{ m_mutex };
-	d2dContext->DrawTextLayout(FLOAT2{ 0.0f, 0.0f }, m_textLayout.Get(), BrushPool::GetInstance()->GetBrush(BrushPool::BLACK), D2D1_DRAW_TEXT_OPTIONS_CLIP);
-
-	// 캐럿
-	d2dContext->FillRectangle(m_caretRect, BrushPool::GetInstance()->GetBrush(BrushPool::GREEN));
+	// 텍스트, 캐럿
+	d2dContext->PushAxisAlignedClip(RECTF{ 0.0f, 0.0f, m_size.x, m_size.y }, D2D1_ANTIALIAS_MODE_ALIASED);
+	d2dContext->DrawTextLayout(FLOAT2{ -m_xOffset, 0.0f }, m_textLayout.Get(), BrushPool::GetInstance()->GetBrush(BrushPool::BLACK));
+	d2dContext->PopAxisAlignedClip();
+	d2dContext->FillRectangle(m_caretRect, BrushPool::GetInstance()->GetBrush(BrushPool::BLACK));
 }
 
 void EditCtrl::SetText(const std::wstring& text)
@@ -143,10 +123,17 @@ void EditCtrl::SetText(const std::wstring& text)
 	auto dwriteFactory{ NytApp::GetInstance()->GetDwriteFactory() };
 	dwriteFactory->CreateTextLayout(m_text.c_str(), static_cast<UINT32>(m_text.length()), m_textFormat.Get(), m_size.x, m_size.y, &m_textLayout);
 	m_textLayout->SetParagraphAlignment(DWRITE_PARAGRAPH_ALIGNMENT_CENTER);
+	m_textLayout->SetWordWrapping(DWRITE_WORD_WRAPPING_NO_WRAP);
 }
 
 void EditCtrl::EraseText(size_t count)
 {
+	if (m_caretPosition == 0)
+	{
+		MoveCaret(0);
+		return;
+	}
+
 	MoveCaret(-1);
 	m_text.erase(m_caretPosition, count);
 	SetText(m_text);
@@ -162,5 +149,35 @@ void EditCtrl::InsertText(const std::wstring& text)
 void EditCtrl::MoveCaret(int distance)
 {
 	m_caretTimer = 0.0f;
-	m_caretPosition = std::clamp(m_caretPosition + distance, static_cast<size_t>(0), m_text.size());
+	m_caretPosition = std::clamp(m_caretPosition + distance, 0, static_cast<int>(m_text.size()));
+
+	// 캐럿 사각형 범위 설정
+	DWRITE_HIT_TEST_METRICS metrics{};
+	FLOAT2 pos;
+	m_textLayout->HitTestTextPosition(
+		m_caretPosition,
+		1,
+		&pos.x,
+		&pos.y,
+		&metrics
+	);
+
+	// 우측 스크롤
+	FLOAT caretRightPos{ metrics.left + CARET_THICKNESS / 2.0f };
+	FLOAT overLength{ caretRightPos - m_size.x };
+	if (m_xOffset < overLength)
+		m_xOffset = overLength;
+
+	// 좌측 스크롤
+	FLOAT totalLength{ m_size.x + m_xOffset };
+	FLOAT caretLeftPos{ max(0, metrics.left - CARET_THICKNESS / 2.0f) };
+	if (totalLength - caretLeftPos > m_size.x)
+		m_xOffset -= metrics.width;
+
+	m_caretRect.left = metrics.left - CARET_THICKNESS / 2.0f;
+	m_caretRect.right = metrics.left + CARET_THICKNESS / 2.0f;
+	m_caretRect.top = pos.y;
+	m_caretRect.bottom = pos.y + metrics.height;
+	m_caretRect.Offset(-m_xOffset, 0.0f);
+	m_caretRect.Offset(1.0f, 0.0f); // 보기 좋게 1px 정도 오른쪽으로
 }

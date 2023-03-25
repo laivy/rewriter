@@ -5,11 +5,11 @@
 BrushPool::BrushPool()
 {
 	auto ctx{ NytApp::GetInstance()->GetD2DContext() };
-	ctx->CreateSolidColorBrush(D2D1::ColorF{ D2D1::ColorF::Black }, &m_pool[static_cast<int>(BLACK)]);
-	ctx->CreateSolidColorBrush(D2D1::ColorF{ D2D1::ColorF::White }, &m_pool[static_cast<int>(WHITE)]);
-	ctx->CreateSolidColorBrush(D2D1::ColorF{ D2D1::ColorF::Red }, &m_pool[static_cast<int>(RED)]);
-	ctx->CreateSolidColorBrush(D2D1::ColorF{ D2D1::ColorF::Green }, &m_pool[static_cast<int>(GREEN)]);
-	ctx->CreateSolidColorBrush(D2D1::ColorF{ D2D1::ColorF::Blue }, &m_pool[static_cast<int>(BLUE)]);
+	ctx->CreateSolidColorBrush(D2D1::ColorF{ D2D1::ColorF::Black }, &m_pool[BLACK]);
+	ctx->CreateSolidColorBrush(D2D1::ColorF{ D2D1::ColorF::White }, &m_pool[WHITE]);
+	ctx->CreateSolidColorBrush(D2D1::ColorF{ D2D1::ColorF::Red }, &m_pool[RED]);
+	ctx->CreateSolidColorBrush(D2D1::ColorF{ D2D1::ColorF::Green }, &m_pool[GREEN]);
+	ctx->CreateSolidColorBrush(D2D1::ColorF{ D2D1::ColorF::Blue }, &m_pool[BLUE]);
 }
 
 BrushPool::~BrushPool()

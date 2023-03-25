@@ -26,10 +26,12 @@ private:
 	ComPtr<IDWriteTextLayout> m_textLayout;
 	ComPtr<IDWriteTextFormat> m_textFormat;
 	std::wstring m_text;
+	BOOL m_isCompositing;
 
 	constexpr static INT CARET_THICKNESS = 2;
 	constexpr static FLOAT CARET_BLINK_SECOND = 0.5f;
-	size_t m_caretPosition;
+	INT m_caretPosition;
 	RECTF m_caretRect;
 	FLOAT m_caretTimer;
+	FLOAT m_xOffset;
 };
