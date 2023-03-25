@@ -2,6 +2,7 @@
 
 // Windows
 #define WIN32_LEAN_AND_MEAN 
+#pragma comment(lib, "imm32.lib")
 #include <SDKDDKVer.h>
 #include <windows.h>
 #include <wincodec.h>

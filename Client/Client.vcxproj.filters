@@ -150,6 +150,9 @@
     <ClCompile Include="LoginWnd.cpp">
       <Filter>소스 파일\Scene</Filter>
     </ClCompile>
+    <ClCompile Include="Label.cpp">
+      <Filter>소스 파일\UI</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Stdafx.h">
@@ -256,6 +259,9 @@
     </ClInclude>
     <ClInclude Include="LoginWnd.h">
       <Filter>헤더 파일\Scene</Filter>
+    </ClInclude>
+    <ClInclude Include="Label.h">
+      <Filter>헤더 파일\UI</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

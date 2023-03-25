@@ -15,16 +15,15 @@ public:
 
 	template <class T>
 	requires std::is_base_of_v<Wnd, T>
-	void AddWnd(std::unique_ptr<T>& wnd)
+	void AddWnd(T* wnd)
 	{
 		std::unique_lock lock{ m_addWndsMutex };
-		std::unique_ptr<Wnd> _wnd{ static_cast<Wnd*>(wnd.release()) };
 		for (const auto& w : m_wnds)
 			w->SetFocus(FALSE);
 		for (const auto& w : m_addWnds)
 			w->SetFocus(FALSE);
-		_wnd->SetFocus(TRUE);
-		m_addWnds.push_back(std::move(_wnd));
+		wnd->SetFocus(TRUE);
+		m_addWnds.emplace_back(wnd);
 	}
 
 	void SetTopWnd(const Wnd* const wnd);

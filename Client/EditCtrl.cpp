@@ -1,106 +1,166 @@
 ﻿#include "Stdafx.h"
-#include "EditCtrl.h"
 #include "BrushPool.h"
+#include "EditCtrl.h"
 #include "FontPool.h"
 #include "NytApp.h"
 #include "TextUtil.h"
 #include "Wnd.h"
 
-EditCtrl::EditCtrl(FLOAT width, FLOAT height, FLOAT x, FLOAT y)
+EditCtrl::EditCtrl(FLOAT width, FLOAT height, FontPool::Type fontType) : 
+	m_caretPosition{},
+	m_caretRect{},
+	m_caretTimer{}
 {
 	SetSize(FLOAT2{ width, height });
-	SetPosition(FLOAT2{ x, y });
+	SetPosition(FLOAT2{ 0.0f, 0.0f });
 
-	if (FontPool::IsInstanced())
-		m_textFormat = FontPool::GetInstance()->GetFont(FontPool::MORRIS);
-	
-	std::wstring text{};
-	text += TEXT("<big>안녕하세요</big> <b>볼드텍스트응애!</b> 그냥텍스트응애!");
-	SetText(text.c_str());
+	if (auto fp{ FontPool::GetInstance() })
+	{
+		m_textFormat = fp->GetFont(fontType);
+		SetText(L"");
+	}
 }
 
 void EditCtrl::OnMouseEvent(HWND hWnd, UINT message, INT x, INT y)
 {
-	if (message == WM_MOUSEMOVE)
+
+}
+
+void EditCtrl::OnKeyboardEvent(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
+{
+	// 한글을 조합중인지
+	static BOOL isCompositing{ FALSE };
+	
+	switch (message)
 	{
-		if (!m_textLayout) return;
-
-		BOOL isTrailingHit{};
-		BOOL isInside{};
-		DWRITE_HIT_TEST_METRICS hitTestMetrics{};
-		std::unique_lock lock{ m_mutex };
-		m_textLayout->HitTestPoint(x - m_position.x, y - m_position.y, &isTrailingHit, &isInside, &hitTestMetrics);
-
-		static DWRITE_TEXT_RANGE lastHitTextRange{ 0, 0 };
-		if (lastHitTextRange.length != 0)
+	case WM_CHAR:
+	{
+		switch (wParam)
 		{
-			m_textLayout->SetDrawingEffect(BrushPool::GetInstance()->GetBrush(BrushPool::WHITE), lastHitTextRange);
-			lastHitTextRange.startPosition = 0;
-			lastHitTextRange.length = 0;
+		case VK_BACK:
+			if (!m_text.empty())
+				EraseText(1);
+			break;
+		default:
+			InsertText(std::wstring{ static_cast<TCHAR>(wParam) });
+			break;
 		}
-		if (isInside)
+		isCompositing = FALSE;
+		break;
+	}
+	case WM_KEYDOWN:
+		if (wParam == VK_LEFT)
+			MoveCaret(-1);
+		else if (wParam == VK_RIGHT)
+			MoveCaret(1);
+		break;
+	case WM_IME_COMPOSITION:
+	{
+		if (lParam & GCS_COMPSTR)
 		{
-			m_textLayout->SetDrawingEffect(BrushPool::GetInstance()->GetBrush(BrushPool::BLUE), DWRITE_TEXT_RANGE{ hitTestMetrics.textPosition, hitTestMetrics.length });
-			lastHitTextRange = DWRITE_TEXT_RANGE{ hitTestMetrics.textPosition, hitTestMetrics.length };
+			HIMC hImc{ ImmGetContext(hWnd) };
+			int len{ ImmGetCompositionString(hImc, GCS_COMPSTR, NULL, 0) };
+
+			// 조합중이라면 글자 교체
+			if (isCompositing && !m_text.empty())
+				EraseText(1);
+
+			// 백스페이스로 조합 중인 글자를 다 지우면 길이가 0이될 수 있음
+			isCompositing = len ? TRUE : FALSE;
+			if (len)
+				InsertText(std::wstring{ static_cast<WCHAR>(wParam) });
+
+			ImmReleaseContext(hWnd, hImc);
 		}
+		if (lParam & GCS_RESULTSTR)
+		{
+			if (isCompositing && !m_text.empty())
+				EraseText(1);
+			InsertText(std::wstring{ static_cast<WCHAR>(wParam) });
+			isCompositing = FALSE;
+		}
+		break;
+	}
 	}
 }
 
-void EditCtrl::Render(const ComPtr<ID2D1DeviceContext2>& renderTarget) const
+void EditCtrl::Update(FLOAT deltaTime)
 {
-	if (!m_parent) return;
+	m_caretTimer += deltaTime;
+
+	// 캐럿 깜빡임
+	if (m_caretTimer >= CARET_BLINK_SECOND * 2.0f)
+	{
+		m_caretTimer = 0.0f;
+	}
+	if (m_caretTimer > CARET_BLINK_SECOND)
+	{
+		m_caretRect = RECTF{};
+		return;
+	}
+
+	// 캐럿 사각형 범위 설정
+	DWRITE_HIT_TEST_METRICS metrics{};
+	FLOAT2 pos;
+	m_textLayout->HitTestTextPosition(
+		m_caretPosition - 1,
+		1,
+		&pos.x,
+		&pos.y,
+		&metrics
+	);
+
+	m_caretRect.left = pos.x - CARET_THICKNESS / 2.0f;
+	m_caretRect.right = pos.x + CARET_THICKNESS / 2.0f;
+	m_caretRect.top = pos.y;
+	m_caretRect.bottom = pos.y + metrics.height;
+	m_caretRect.Offset(1.0f, 0.0f);
+}
+
+void EditCtrl::Render(const ComPtr<ID2D1DeviceContext2>& d2dContext) const
+{
+	if (!m_parent || !m_textFormat) return;
 
 	FLOAT2 position{ m_position };
 	position += m_parent->GetPosition();
+	d2dContext->SetTransform(MATRIX::Translation(position.x, position.y));
 
-	ComPtr<ID2D1SolidColorBrush> brush{};
-	renderTarget->CreateSolidColorBrush(D2D1::ColorF{ D2D1::ColorF::Purple }, &brush);
-	renderTarget->SetTransform(D2D1::Matrix3x2F::Translation(position.x, position.y));
-	renderTarget->FillRectangle(RECTF{ 0.0f, 0.0f, m_size.x, m_size.y }, brush.Get());
+	// 배경
+	d2dContext->FillRectangle(RECTF{ 0.0f, 0.0f, m_size.x, m_size.y }, BrushPool::GetInstance()->GetBrush(BrushPool::WHITE));
 
-	if (m_textLayout)
-	{
-		ComPtr<ID2D1SolidColorBrush> textBrush{};
-		renderTarget->CreateSolidColorBrush(D2D1::ColorF{ D2D1::ColorF::White }, &textBrush);
+	// 텍스트
+	std::unique_lock lock{ m_mutex };
+	d2dContext->DrawTextLayout(FLOAT2{ 0.0f, 0.0f }, m_textLayout.Get(), BrushPool::GetInstance()->GetBrush(BrushPool::BLACK), D2D1_DRAW_TEXT_OPTIONS_CLIP);
 
-		std::unique_lock lock{ m_mutex };
-		renderTarget->DrawTextLayout(FLOAT2{ 0.0f, 0.0f }, m_textLayout.Get(), textBrush.Get(), D2D1_DRAW_TEXT_OPTIONS_CLIP);
-	}
-}
-
-RECTF EditCtrl::GetRect() const
-{
-	return RECTF{};
+	// 캐럿
+	d2dContext->FillRectangle(m_caretRect, BrushPool::GetInstance()->GetBrush(BrushPool::GREEN));
 }
 
 void EditCtrl::SetText(const std::wstring& text)
 {
 	m_text = text;
 
-	// 태그를 통해 레이아웃 변경 정보를 가져오고 텍스트에서 태그 제거
-	auto layoutChangeInfoList{ TextUtil::ApplyTextTag(m_text) };
-
-	// 레이아웃 생성
 	auto dwriteFactory{ NytApp::GetInstance()->GetDwriteFactory() };
 	dwriteFactory->CreateTextLayout(m_text.c_str(), static_cast<UINT32>(m_text.length()), m_textFormat.Get(), m_size.x, m_size.y, &m_textLayout);
-
-	// 레이아웃에 태그 적용
-	for (const auto& info : layoutChangeInfoList)
-	{
-		switch (info.changeType)
-		{
-		case LayoutChangeType::SIZE:
-			m_textLayout->SetFontSize(info.fontSize, info.textRange);
-			break;
-		case LayoutChangeType::WEIGHT:
-			m_textLayout->SetFontWeight(info.fontWeight, info.textRange);
-			break;
-		}
-	}
+	m_textLayout->SetParagraphAlignment(DWRITE_PARAGRAPH_ALIGNMENT_CENTER);
 }
 
-void EditCtrl::SetFont(FontPool::Type fontType)
+void EditCtrl::EraseText(size_t count)
 {
-	if (FontPool::IsInstanced())
-		m_textFormat = FontPool::GetInstance()->GetFont(fontType);
+	MoveCaret(-1);
+	m_text.erase(m_caretPosition, count);
+	SetText(m_text);
+}
+
+void EditCtrl::InsertText(const std::wstring& text)
+{
+	m_text.insert(m_caretPosition, text);
+	SetText(m_text);
+	MoveCaret(text.size());
+}
+
+void EditCtrl::MoveCaret(int distance)
+{
+	m_caretTimer = 0.0f;
+	m_caretPosition = std::clamp(m_caretPosition + distance, static_cast<size_t>(0), m_text.size());
 }

@@ -136,14 +136,16 @@ LRESULT CALLBACK NytApp::WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM 
 	case WM_SIZE:
 		app->OnResize(hWnd, message, wParam, lParam);
 		break;
-	case WM_LBUTTONDOWN:
-	case WM_LBUTTONUP:
 	case WM_MOUSEMOVE:
+	case WM_LBUTTONUP:
+	case WM_LBUTTONDOWN:
 		if (SceneManager::IsInstanced())
 			SceneManager::GetInstance()->OnMouseEvent(hWnd, message, wParam, lParam);
 		break;
-	case WM_KEYDOWN:
+	case WM_CHAR:
 	case WM_KEYUP:
+	case WM_KEYDOWN:
+	case WM_IME_COMPOSITION:
 		if (SceneManager::IsInstanced())
 			SceneManager::GetInstance()->OnKeyboardEvent(hWnd, message, wParam, lParam);
 		break;

@@ -32,6 +32,9 @@ void Wnd::OnKeyboardEvent(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 			Destroy();
 		break;
 	}
+
+	for (const auto& ui : m_ui)
+		ui->OnKeyboardEvent(hWnd, message, wParam, lParam);
 }
 
 void Wnd::OnButtonClicked(INT id)

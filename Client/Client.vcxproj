@@ -148,6 +148,9 @@
     <ClCompile Include="GameObject.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Use</PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="Label.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Use</PrecompiledHeader>
+    </ClCompile>
     <ClCompile Include="LoginScene.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Use</PrecompiledHeader>
     </ClCompile>
@@ -228,6 +231,7 @@
     <ClInclude Include="d3dx12.h" />
     <ClInclude Include="EditCtrl.h" />
     <ClInclude Include="FontPool.h" />
+    <ClInclude Include="Label.h" />
     <ClInclude Include="LoginScene.h" />
     <ClInclude Include="LoginWnd.h" />
     <ClInclude Include="LogoScene.h" />

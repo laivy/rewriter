@@ -1,5 +1,7 @@
 ﻿#include "Stdafx.h"
 #include "Camera.h"
+#include "EditCtrl.h"
+#include "Label.h"
 #include "LoginScene.h"
 #include "LoginWnd.h"
 #include "Mesh.h"
@@ -13,7 +15,12 @@
 
 void LoginScene::OnCreate()
 {
-	std::unique_ptr<LoginWnd> wnd{ new LoginWnd{ 300.0f, 300.0f } };
+	LoginWnd* wnd{ new LoginWnd{ 300.0f, 300.0f } };
+	
+	EditCtrl* editCtrl{ new EditCtrl{ 200.0f, 20.0f } };
+	editCtrl->SetPosition(FLOAT2{ 150.0f, 150.0f }, Pivot::CENTER);
+	wnd->AddUI(editCtrl);
+
 	WndManager::GetInstance()->AddWnd(wnd);
 }
 

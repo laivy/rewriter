@@ -5,21 +5,31 @@
 class EditCtrl : public UI
 {
 public:
-	EditCtrl(FLOAT width, FLOAT height, FLOAT x = 0.0f, FLOAT y = 0.0f);
+	EditCtrl(FLOAT width, FLOAT height, FontPool::Type fontType = FontPool::Type::MORRIS);
 	~EditCtrl() = default;
 
 	virtual void OnMouseEvent(HWND hWnd, UINT message, INT x, INT y);
+	virtual void OnKeyboardEvent(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);
 
-	virtual void Update(FLOAT deltaTime) { }
-	virtual void Render(const ComPtr<ID2D1DeviceContext2>& renderTarget) const;
-	virtual RECTF GetRect() const;
+	virtual void Update(FLOAT deltaTime);
+	virtual void Render(const ComPtr<ID2D1DeviceContext2>& d2dContext) const;
 
 	void SetText(const std::wstring& text);
-	void SetFont(FontPool::Type fontType);
+
+private:
+	void EraseText(size_t count);
+	void InsertText(const std::wstring& text);
+	void MoveCaret(int distance);
 
 private:
 	mutable std::mutex m_mutex;
 	ComPtr<IDWriteTextLayout> m_textLayout;
 	ComPtr<IDWriteTextFormat> m_textFormat;
 	std::wstring m_text;
+
+	constexpr static INT CARET_THICKNESS = 2;
+	constexpr static FLOAT CARET_BLINK_SECOND = 0.5f;
+	size_t m_caretPosition;
+	RECTF m_caretRect;
+	FLOAT m_caretTimer;
 };
