@@ -26,6 +26,7 @@ public:
 		m_addWnds.emplace_back(wnd);
 	}
 
+	void SetWndFocus(Wnd* const focusWnd);
 	void SetTopWnd(const Wnd* const wnd);
 
 	std::mutex& GetLock() { return m_mutex; }

@@ -6,8 +6,9 @@ INT UI::s_id{ 0 };
 
 UI::UI() :
 	m_id{ s_id++ },
+	m_parent{ nullptr },
 	m_isValid{ TRUE },
-	m_parent{ nullptr }
+	m_isFocus{ FALSE }
 {
 
 }
@@ -25,6 +26,11 @@ void UI::Destroy()
 void UI::SetParent(Wnd* const wnd)
 {
 	m_parent = wnd;
+}
+
+void UI::SetFocus(BOOL focus)
+{
+	m_isFocus = focus;
 }
 
 void UI::SetSize(const FLOAT2& size)
@@ -78,6 +84,11 @@ INT UI::GetId() const
 BOOL UI::IsValid() const
 {
 	return m_isValid;
+}
+
+BOOL UI::IsFocus() const
+{
+	return m_isFocus;
 }
 
 Wnd* const UI::GetParent() const

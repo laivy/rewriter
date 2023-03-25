@@ -18,7 +18,6 @@ void Button::OnMouseEvent(HWND hWnd, UINT message, INT x, INT y)
 	{
 		FLOAT2 pos{ static_cast<FLOAT>(x), static_cast<FLOAT>(y) };
 		RECTF rect{ 0.0f, 0.0f, m_size.x, m_size.y };
-		rect.Offset(m_position.x, m_position.y);
 
 		if (rect.IsContain(pos))
 			m_isMouseOver = TRUE;
@@ -43,7 +42,6 @@ void Button::OnMouseEvent(HWND hWnd, UINT message, INT x, INT y)
 
 		FLOAT2 pos{ static_cast<FLOAT>(x), static_cast<FLOAT>(y) };
 		RECTF rect{ 0.0f, 0.0f, m_size.x, m_size.y };
-		rect.Offset(m_position.x, m_position.y);
 
 		if (rect.IsContain(pos))
 		{

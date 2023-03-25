@@ -16,21 +16,24 @@ public:
 	virtual void Destroy();
 
 	void SetParent(Wnd* const wnd);
+	void SetFocus(BOOL focus);
 	void SetSize(const FLOAT2& size);
 	void SetPosition(const FLOAT2& position, Pivot pivot = Pivot::LEFTTOP);
 
 	INT GetId() const;
 	BOOL IsValid() const;
+	BOOL IsFocus() const;
 	RECTF GetRect() const;
 	FLOAT2 GetSize() const;
 	FLOAT2 GetPosition() const;
 	Wnd* const GetParent() const;
 
 protected:
-	BOOL m_isValid;
 	Wnd* m_parent;
-	FLOAT2 m_size;
+	BOOL m_isValid;
+	BOOL m_isFocus;
 	FLOAT2 m_position;
+	FLOAT2 m_size;
 
 private:
 	static INT s_id;

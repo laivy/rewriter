@@ -22,6 +22,7 @@ public:
 		m_ui.emplace_back(ui);
 	}
 
+	void SetUIFocus(UI* focusUI);
 	void SetFocus(BOOL isFocus);
 	void SetPick(BOOL isPick);
 
@@ -32,6 +33,9 @@ public:
 
 private:
 	FLOAT2 GetPickedDelta() const;
+
+protected:
+	static constexpr FLOAT WND_TITLE_HEIGHT = 15.0f;
 
 private:
 	std::mutex m_mutex;

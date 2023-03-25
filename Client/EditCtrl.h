@@ -23,8 +23,10 @@ private:
 
 private:
 	mutable std::mutex m_mutex;
+
 	ComPtr<IDWriteTextLayout> m_textLayout;
 	ComPtr<IDWriteTextFormat> m_textFormat;
+
 	std::wstring m_text;
 	BOOL m_isCompositing;
 

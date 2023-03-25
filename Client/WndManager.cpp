@@ -10,47 +10,13 @@ WndManager::~WndManager()
 
 void WndManager::OnMouseEvent(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
-	POINT mouse;
-	GetCursorPos(&mouse);
-	ScreenToClient(NytApp::GetInstance()->GetHwnd(), &mouse);
-
 	// 어떤 창이 선택됐는지 체크한다.
 	switch (message)
 	{
 	case WM_LBUTTONDOWN:
 	{
-		std::string str{};
-		str += std::to_string(mouse.x) + ", " + std::to_string(mouse.y) + "\n";
-		OutputDebugStringA(str.c_str());
-
-		Wnd* focusWnd{ nullptr };
-		Wnd* pickWnd{ nullptr };
-		FLOAT2 pos{ static_cast<FLOAT>(mouse.x), static_cast<FLOAT>(mouse.y) };
-
 		for (const auto& w : m_wnds)
-		{
-			// 창의 어디든 클릭됐는지 확인한다.
-			RECTF rect{ w->GetRect() };
-			if (rect.IsContain(pos))
-				focusWnd = w.get();
-
-			// 이 창의 타이틀 부분이 클릭됐는지 확인한다.
-			rect.bottom = rect.top + 15.0f;
-			if (rect.IsContain(pos))
-				pickWnd = w.get();
-
 			w->SetFocus(FALSE);
-			w->SetPick(FALSE);
-		}
-
-		if (focusWnd)
-		{
-			focusWnd->SetFocus(TRUE);
-			std::unique_lock lock{ m_mutex };
-			SetTopWnd(focusWnd);
-		}
-		if (pickWnd)
-			pickWnd->SetPick(TRUE);
 		break;
 	}
 	case WM_LBUTTONUP:
@@ -59,17 +25,20 @@ void WndManager::OnMouseEvent(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPa
 		break;
 	}
 
+	// 윈도우 객체들에게 클라이언트 좌표계 -> 해당 윈도우 좌표계로 바꿔서 전달한다.
 	for (const auto& w : m_wnds)
 	{
 		if (!w->IsValid())
 			continue;
 
-		// 윈도우 객체들에게는 클라이언트 좌표계 -> 해당 윈도우 좌표계로 바꿔서 전달한다.
-		POINT clientPos{ mouse };
-		FLOAT2 wndPos{ w->GetPosition() };
-		clientPos.x -= static_cast<LONG>(wndPos.x);
-		clientPos.y -= static_cast<LONG>(wndPos.y);
-		w->OnMouseEvent(hWnd, message, clientPos.x, clientPos.y);
+		POINT mouse;
+		GetCursorPos(&mouse);
+		ScreenToClient(NytApp::GetInstance()->GetHwnd(), &mouse);
+
+		FLOAT2 pos{ w->GetPosition() };
+		mouse.x -= static_cast<LONG>(pos.x);
+		mouse.y -= static_cast<LONG>(pos.y);
+		w->OnMouseEvent(hWnd, message, mouse.x, mouse.y);
 	}
 }
 
@@ -106,6 +75,15 @@ void WndManager::Render(const ComPtr<ID2D1DeviceContext2>& d2dContext) const
 	std::unique_lock lock{ m_mutex };
 	for (const auto& w : m_wnds)
 		w->Render(d2dContext);
+}
+
+void WndManager::SetWndFocus(Wnd* const focusWnd)
+{
+	std::unique_lock lock{ m_mutex };
+	for (const auto& w : m_wnds)
+		w->SetFocus(FALSE);
+	if (focusWnd)
+		focusWnd->SetFocus(TRUE);
 }
 
 void WndManager::SetTopWnd(const Wnd* const wnd)

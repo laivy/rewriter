@@ -20,16 +20,29 @@ EditCtrl::EditCtrl(FLOAT width, FLOAT height, FontPool::Type fontType) :
 	{
 		m_textFormat = fp->GetFont(fontType);
 		SetText(L"");
+		MoveCaret(0);
 	}
 }
 
 void EditCtrl::OnMouseEvent(HWND hWnd, UINT message, INT x, INT y)
 {
-
+	switch (message)
+	{
+	case WM_LBUTTONDOWN:
+	{
+		RECTF rect{ 0.0f, 0.0f, m_size.x, m_size.y };
+		if (rect.IsContain(FLOAT2(x, y)))
+			m_parent->SetUIFocus(this);
+		break;
+	}
+	}
 }
 
 void EditCtrl::OnKeyboardEvent(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
+	if (!m_isFocus)
+		return;
+
 	switch (message)
 	{
 	case WM_CHAR:
@@ -85,17 +98,13 @@ void EditCtrl::OnKeyboardEvent(HWND hWnd, UINT message, WPARAM wParam, LPARAM lP
 
 void EditCtrl::Update(FLOAT deltaTime)
 {
+	if (!m_isFocus)
+		return;
+
 	// 캐럿 깜빡임
 	m_caretTimer += deltaTime;
 	if (m_caretTimer >= CARET_BLINK_SECOND * 2.0f)
-	{
 		m_caretTimer = 0.0f;
-	}
-	if (m_caretTimer > CARET_BLINK_SECOND)
-	{
-		m_caretRect = RECTF{};
-		return;
-	}
 }
 
 void EditCtrl::Render(const ComPtr<ID2D1DeviceContext2>& d2dContext) const
@@ -109,11 +118,14 @@ void EditCtrl::Render(const ComPtr<ID2D1DeviceContext2>& d2dContext) const
 	// 배경
 	d2dContext->FillRectangle(RECTF{ -CARET_THICKNESS - 1.0f, 0.0f, m_size.x + CARET_THICKNESS + 1.0f, m_size.y }, BrushPool::GetInstance()->GetBrush(BrushPool::WHITE));
 
-	// 텍스트, 캐럿
+	// 텍스트
 	d2dContext->PushAxisAlignedClip(RECTF{ 0.0f, 0.0f, m_size.x, m_size.y }, D2D1_ANTIALIAS_MODE_ALIASED);
 	d2dContext->DrawTextLayout(FLOAT2{ -m_xOffset, 0.0f }, m_textLayout.Get(), BrushPool::GetInstance()->GetBrush(BrushPool::BLACK));
 	d2dContext->PopAxisAlignedClip();
-	d2dContext->FillRectangle(m_caretRect, BrushPool::GetInstance()->GetBrush(BrushPool::BLACK));
+
+	// 캐럿
+	if (m_isFocus && m_parent->IsFocus() && 0.0f <= m_caretTimer && m_caretTimer < CARET_BLINK_SECOND)
+		d2dContext->FillRectangle(m_caretRect, BrushPool::GetInstance()->GetBrush(BrushPool::BLACK));
 }
 
 void EditCtrl::SetText(const std::wstring& text)
@@ -173,6 +185,8 @@ void EditCtrl::MoveCaret(int distance)
 	FLOAT caretLeftPos{ max(0, metrics.left - CARET_THICKNESS / 2.0f) };
 	if (totalLength - caretLeftPos > m_size.x)
 		m_xOffset -= metrics.width;
+	
+	m_xOffset = std::clamp(m_xOffset, 0.0f, totalLength);
 
 	m_caretRect.left = metrics.left - CARET_THICKNESS / 2.0f;
 	m_caretRect.right = metrics.left + CARET_THICKNESS / 2.0f;

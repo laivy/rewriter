@@ -16,8 +16,30 @@ Wnd::Wnd(FLOAT width, FLOAT height, FLOAT x, FLOAT y) :
 
 void Wnd::OnMouseEvent(HWND hWnd, UINT message, INT x, INT y)
 {
+	if (!m_isValid)
+		return;
+
+	switch (message)
+	{
+	case WM_LBUTTONDOWN:
+	{
+		RECTF rect{ 0.0f, 0.0f, m_size.x, m_size.y };
+		if (rect.IsContain(FLOAT2(x, y)))
+			WndManager::GetInstance()->SetWndFocus(this);
+		
+		rect.bottom = rect.top + WND_TITLE_HEIGHT;
+		if (rect.IsContain(FLOAT2(x, y)))
+			SetPick(TRUE);
+		break;
+	}
+	}
+
+	// UI 객체들에게 윈도우 좌표계 -> UI 좌표계로 바꿔서 전달한다.
 	for (const auto& ui : m_ui)
-		ui->OnMouseEvent(hWnd, message, x, y);
+	{
+		FLOAT2 pos{ ui->GetPosition() };
+		ui->OnMouseEvent(hWnd, message, x - pos.x, y - pos.y);
+	}
 }
 
 void Wnd::OnKeyboardEvent(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
@@ -88,9 +110,22 @@ void Wnd::Render(const ComPtr<ID2D1DeviceContext2>& d2dContext)
 		ui->Render(d2dContext);
 }
 
+void Wnd::SetUIFocus(UI* focusUI)
+{
+	for (const auto& ui : m_ui)
+		ui->SetFocus(FALSE);
+	if (focusUI)
+		focusUI->SetFocus(TRUE);
+}
+
 void Wnd::SetFocus(BOOL isFocus)
 {
 	m_isFocus = isFocus;
+	if (!m_isFocus)
+	{
+		for (const auto& ui : m_ui)
+			ui->SetFocus(FALSE);
+	}
 }
 
 void Wnd::SetPick(BOOL isPick)
