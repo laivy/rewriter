@@ -51,13 +51,13 @@
     <Compile Include="Common\NytTreeView.cs">
       <SubType>Component</SubType>
     </Compile>
-    <Compile Include="Form\NodeForm.cs">
+    <Compile Include="Form\NodeEditForm.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="Form\NodeForm.Designer.cs">
-      <DependentUpon>NodeForm.cs</DependentUpon>
+    <Compile Include="Form\NodeEditForm.Designer.cs">
+      <DependentUpon>NodeEditForm.cs</DependentUpon>
     </Compile>
-    <Compile Include="Common\NytTreeNode.cs" />
+    <Compile Include="Common\NytNode.cs" />
     <Compile Include="Form\FileViewForm.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -72,8 +72,8 @@
     </Compile>
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <EmbeddedResource Include="Form\NodeForm.resx">
-      <DependentUpon>NodeForm.cs</DependentUpon>
+    <EmbeddedResource Include="Form\NodeEditForm.resx">
+      <DependentUpon>NodeEditForm.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Form\FileViewForm.resx">
       <DependentUpon>FileViewForm.cs</DependentUpon>

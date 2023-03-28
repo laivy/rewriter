@@ -17,7 +17,7 @@ namespace Editor.Nyt
 				SelectedNode = null;
 		}
 
-		public void Add(NytTreeNode node)
+		public void Add(NytNode node)
 		{
 			if (SelectedNode == null)
 				Nodes.Add(node);
@@ -35,21 +35,21 @@ namespace Editor.Nyt
 			IEnumerator iter = Nodes.GetEnumerator();
 			while (iter.MoveNext())
 			{
-				NytTreeNode node = (NytTreeNode)iter.Current;
+				NytNode node = (NytNode)iter.Current;
 				node.Save(binaryWriter);
 			}
 			binaryWriter.Close();
 			fileStream.Close();
 		}
 
-		internal void Load(string filePath)
+		public void Load(string filePath)
 		{
 			FileStream fileStream = new FileStream(filePath, FileMode.Open);
 			BinaryReader binaryReader = new BinaryReader(fileStream);
 			int nodeCount = binaryReader.ReadInt32();
 			for (int i = 0; i < nodeCount; ++i)
 			{
-				NytTreeNode node = new NytTreeNode();
+				NytNode node = new NytNode();
 				node.Load(binaryReader);
 				Add(node);
 				SelectedNode = null;

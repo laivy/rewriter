@@ -34,9 +34,6 @@
             this.Menu_File_Open = new System.Windows.Forms.ToolStripMenuItem();
             this.Menu_File_Save = new System.Windows.Forms.ToolStripMenuItem();
             this.Menu_File_SaveAs = new System.Windows.Forms.ToolStripMenuItem();
-            this.Menu_Edit = new System.Windows.Forms.ToolStripMenuItem();
-            this.Menu_Edit_Add = new System.Windows.Forms.ToolStripMenuItem();
-            this.Menu_Edit_Modify = new System.Windows.Forms.ToolStripMenuItem();
             this.MainMenu.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -44,8 +41,7 @@
             // 
             this.MainMenu.BackColor = System.Drawing.SystemColors.Window;
             this.MainMenu.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.Menu_File,
-            this.Menu_Edit});
+            this.Menu_File});
             this.MainMenu.Location = new System.Drawing.Point(0, 0);
             this.MainMenu.Name = "MainMenu";
             this.MainMenu.Size = new System.Drawing.Size(1264, 24);
@@ -66,53 +62,30 @@
             // Menu_File_New
             // 
             this.Menu_File_New.Name = "Menu_File_New";
-            this.Menu_File_New.Size = new System.Drawing.Size(178, 22);
+            this.Menu_File_New.Size = new System.Drawing.Size(180, 22);
             this.Menu_File_New.Text = "새로 만들기";
             this.Menu_File_New.Click += new System.EventHandler(this.OnNewFileMenuClick);
             // 
             // Menu_File_Open
             // 
             this.Menu_File_Open.Name = "Menu_File_Open";
-            this.Menu_File_Open.Size = new System.Drawing.Size(178, 22);
+            this.Menu_File_Open.Size = new System.Drawing.Size(180, 22);
             this.Menu_File_Open.Text = "열기";
             this.Menu_File_Open.Click += new System.EventHandler(this.OnFileOpenMenuClick);
             // 
             // Menu_File_Save
             // 
             this.Menu_File_Save.Name = "Menu_File_Save";
-            this.Menu_File_Save.Size = new System.Drawing.Size(178, 22);
+            this.Menu_File_Save.Size = new System.Drawing.Size(180, 22);
             this.Menu_File_Save.Text = "저장";
             this.Menu_File_Save.Click += new System.EventHandler(this.OnFileSaveMenuClick);
             // 
             // Menu_File_SaveAs
             // 
             this.Menu_File_SaveAs.Name = "Menu_File_SaveAs";
-            this.Menu_File_SaveAs.Size = new System.Drawing.Size(178, 22);
+            this.Menu_File_SaveAs.Size = new System.Drawing.Size(180, 22);
             this.Menu_File_SaveAs.Text = "다른 이름으로 저장";
             this.Menu_File_SaveAs.Click += new System.EventHandler(this.OnFileSaveAsMenuClick);
-            // 
-            // Menu_Edit
-            // 
-            this.Menu_Edit.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.Menu_Edit_Add,
-            this.Menu_Edit_Modify});
-            this.Menu_Edit.Name = "Menu_Edit";
-            this.Menu_Edit.Size = new System.Drawing.Size(43, 20);
-            this.Menu_Edit.Text = "편집";
-            // 
-            // Menu_Edit_Add
-            // 
-            this.Menu_Edit_Add.Name = "Menu_Edit_Add";
-            this.Menu_Edit_Add.Size = new System.Drawing.Size(180, 22);
-            this.Menu_Edit_Add.Text = "추가";
-            this.Menu_Edit_Add.Click += new System.EventHandler(this.OnAddNodeMenuClick);
-            // 
-            // Menu_Edit_Modify
-            // 
-            this.Menu_Edit_Modify.Name = "Menu_Edit_Modify";
-            this.Menu_Edit_Modify.Size = new System.Drawing.Size(180, 22);
-            this.Menu_Edit_Modify.Text = "수정";
-            this.Menu_Edit_Modify.Click += new System.EventHandler(this.OnModifyNodeMenuClick);
             // 
             // MainForm
             // 
@@ -137,10 +110,7 @@
 		private System.Windows.Forms.ToolStripMenuItem Menu_File_Open;
 		private System.Windows.Forms.ToolStripMenuItem Menu_File_Save;
 		private System.Windows.Forms.ToolStripMenuItem Menu_File_SaveAs;
-		private System.Windows.Forms.ToolStripMenuItem Menu_Edit;
-		private System.Windows.Forms.ToolStripMenuItem Menu_Edit_Add;
 		private System.Windows.Forms.ToolStripMenuItem Menu_File_New;
-		private System.Windows.Forms.ToolStripMenuItem Menu_Edit_Modify;
 	}
 }
 

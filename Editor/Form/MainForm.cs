@@ -6,16 +6,16 @@ namespace Editor
 {
 	public partial class MainForm : Form
 	{
-		private FileViewForm _treeViewForm;	// 활성화 상태인 트리뷰폼
+		private FileViewForm _fileViewForm;	// 활성화 상태인 트리뷰폼
 
 		public MainForm()
 		{
 			InitializeComponent();
 		}
 
-		private void OnActivated(object sender, EventArgs e)
+		private void OnFileViewActivated(object sender, EventArgs e)
 		{
-			_treeViewForm = (FileViewForm)sender;
+			_fileViewForm = (FileViewForm)sender;
 		}
 
 		private void OnNewFileMenuClick(object sender, EventArgs e)
@@ -34,11 +34,11 @@ namespace Editor
 				MessageBox.Show("해당 경로에 저장할 수 없습니다.");
 				return;
 			}
-
-			_treeViewForm = new FileViewForm(saveFileDialog.FileName);
-			_treeViewForm.Activated += OnActivated;
-			_treeViewForm.MdiParent = this;
-			_treeViewForm.Show();
+			_fileViewForm = new FileViewForm(saveFileDialog.FileName);
+			_fileViewForm.Activated += OnFileViewActivated;
+			_fileViewForm.MdiParent = this;
+			_fileViewForm.SetIsModified(true);
+			_fileViewForm.Show();
 		}
 
 		private void OnFileOpenMenuClick(object sender, EventArgs e)
@@ -58,56 +58,34 @@ namespace Editor
 				return;
 			}
 
-			_treeViewForm = new FileViewForm(openFileDialog.FileName);
-			_treeViewForm.Activated += OnActivated;
-			_treeViewForm.MdiParent = this;
-			_treeViewForm.LoadFile();
-			_treeViewForm.Show();
+			_fileViewForm = new FileViewForm(openFileDialog.FileName);
+			_fileViewForm.Activated += OnFileViewActivated;
+			_fileViewForm.MdiParent = this;
+			_fileViewForm.LoadFile();
+			_fileViewForm.Show();
 		}
 
 		private void OnFileSaveMenuClick(object sender, EventArgs e)
 		{
-			_treeViewForm?.SaveFile();
+			_fileViewForm?.SaveFile();
 		}
 
 		private void OnFileSaveAsMenuClick(object sender, EventArgs e)
 		{
-			if (_treeViewForm == null)
+			if (_fileViewForm == null)
 				return;
 
-			SaveFileDialog saveFileDialog = new SaveFileDialog();
-			saveFileDialog.Filter = "nyt files (*.nyt)|*.nyt";
-			saveFileDialog.Title = "저장할 파일 위치를 선택해주세요.";
+			SaveFileDialog saveFileDialog = new SaveFileDialog
+			{
+				Filter = "nyt files (*.nyt)|*.nyt",
+				Title = "저장할 파일 위치를 선택해주세요."
+			};
 			if (saveFileDialog.ShowDialog() != DialogResult.OK)
 			{
 				MessageBox.Show("해당 파일을 열 수 없습니다.");
 				return;
 			}
-			_treeViewForm.SaveFile(saveFileDialog.FileName);
-		}
-
-		private void OnAddNodeMenuClick(object sender, EventArgs e)
-		{
-			if (_treeViewForm == null)
-				return;
-
-			NodeForm nodeAddForm = new NodeForm();
-			nodeAddForm._OnAddNode += _treeViewForm.OnAddNode;
-			nodeAddForm.ShowDialog();
-		}
-
-		private void OnModifyNodeMenuClick(object sender, EventArgs e)
-		{
-			if (_treeViewForm == null)
-				return;
-
-			NytTreeNode node = _treeViewForm.GetSelectedNode();
-			if (node == null)
-				return;
-
-			NodeForm nodeAddForm = new NodeForm(node);
-			nodeAddForm._OnAddNode += _treeViewForm.OnAddNode;
-			nodeAddForm.ShowDialog();
+			_fileViewForm.SaveAsFile(saveFileDialog.FileName);
 		}
 	}
 }

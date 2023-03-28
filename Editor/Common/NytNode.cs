@@ -1,32 +1,31 @@
-﻿using System;
-using System.Collections;
+﻿using System.Collections;
 using System.IO;
 using System.Windows.Forms;
 
 namespace Editor.Nyt
 {
-	public class NytTreeNode : TreeNode
+	public class NytNode : TreeNode
 	{
-		public NytDataType _type { get; set; }
+		public NytType _type { get; set; }
 		public string _name { get; set; }
 		public string _value { get; set; }
 		public byte[] _data { get; set; }
 		
-		public NytTreeNode() { }
+		public NytNode() { }
 
-		public NytTreeNode(NytTreeNodeInfo info)
+		public NytNode(NytType type, string name, string value)
 		{
-			_type = info._type;
-			_name = info._name;
-			_value = info._value;
+			_type = type;
+			_name = name;
+			_value = value;
 
 			switch (_type)
 			{
-				case NytDataType.GROUP:
+				case NytType.GROUP:
 					Text = _name;
 					break;
-				case NytDataType.UI:
-				case NytDataType.IMAGE:
+				case NytType.D2DImage:
+				case NytType.D3DImage:
 					Text = _name;
 					_data = File.ReadAllBytes(_value);
 					break;
@@ -41,29 +40,29 @@ namespace Editor.Nyt
 			binaryWriter.Write((byte)_type);
 			switch (_type)
 			{
-				case NytDataType.GROUP:
+				case NytType.GROUP:
 					binaryWriter.Write(_name);
 					break;
-				case NytDataType.INT:
+				case NytType.INT:
 					binaryWriter.Write(_name);
 					binaryWriter.Write(int.Parse(_value));
 					break;
-				case NytDataType.INT2:
+				case NytType.INT2:
 					binaryWriter.Write(_name);
 					string[] values = _value.Split(',');
 					foreach (string value in values)
 						binaryWriter.Write(int.Parse(value.Trim()));
 					break;
-				case NytDataType.FLOAT:
+				case NytType.FLOAT:
 					binaryWriter.Write(_name);
 					binaryWriter.Write(float.Parse(_value));
 					break;
-				case NytDataType.STRING:
+				case NytType.STRING:
 					binaryWriter.Write(_name);
 					binaryWriter.Write(_value);
 					break;
-				case NytDataType.UI:
-				case NytDataType.IMAGE:
+				case NytType.D2DImage:
+				case NytType.D3DImage:
 					binaryWriter.Write(_name);
 					binaryWriter.Write(_data.Length);
 					binaryWriter.Write(_data);
@@ -74,37 +73,37 @@ namespace Editor.Nyt
 			IEnumerator iter = Nodes.GetEnumerator();
 			while (iter.MoveNext())
 			{
-				NytTreeNode node = (NytTreeNode)iter.Current;
+				NytNode node = (NytNode)iter.Current;
 				node.Save(binaryWriter);
 			}
 		}
 
 		public void Load(BinaryReader binaryReader)
 		{
-			_type = (NytDataType)binaryReader.ReadByte();
+			_type = (NytType)binaryReader.ReadByte();
 			switch (_type)
 			{
-				case NytDataType.GROUP:
+				case NytType.GROUP:
 					_name = binaryReader.ReadString();
 					break;
-				case NytDataType.INT:
+				case NytType.INT:
 					_name = binaryReader.ReadString();
 					_value = binaryReader.ReadInt32().ToString();
 					break;
-				case NytDataType.INT2:
+				case NytType.INT2:
 					_name = binaryReader.ReadString();
 					_value = $"{binaryReader.ReadInt32()},{binaryReader.ReadInt32()}";
 					break;
-				case NytDataType.FLOAT:
+				case NytType.FLOAT:
 					_name = binaryReader.ReadString();
 					_value = binaryReader.ReadSingle().ToString();
 					break;
-				case NytDataType.STRING:
+				case NytType.STRING:
 					_name = binaryReader.ReadString();
 					_value = binaryReader.ReadString();
 					break;
-				case NytDataType.UI:
-				case NytDataType.IMAGE:
+				case NytType.D2DImage:
+				case NytType.D3DImage:
 					_name = binaryReader.ReadString();
 					_data = binaryReader.ReadBytes(binaryReader.ReadInt32());
 					break;
@@ -112,10 +111,10 @@ namespace Editor.Nyt
 
 			switch (_type)
 			{
-				case NytDataType.GROUP:
+				case NytType.GROUP:
 					Text = _name;
 					break;
-				case NytDataType.IMAGE:
+				case NytType.D3DImage:
 					Text = _name;
 					break;
 				default:
@@ -126,7 +125,7 @@ namespace Editor.Nyt
 			int childNodeCount = binaryReader.ReadInt32();
 			for (int i = 0; i < childNodeCount; ++i)
 			{
-				NytTreeNode childNode = new NytTreeNode();
+				NytNode childNode = new NytNode();
 				childNode.Load(binaryReader);
 				Nodes.Add(childNode);
 			}

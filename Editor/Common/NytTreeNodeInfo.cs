@@ -1,19 +1,19 @@
 ﻿namespace Editor.Nyt
 {
-	public enum NytDataType
+	public enum NytType
 	{
-		GROUP, INT, INT2, FLOAT, STRING, UI, IMAGE
+		GROUP, INT, INT2, FLOAT, STRING, D2DImage, D3DImage
 	}
 
 	public class NytTreeNodeInfo
 	{
-		public NytDataType _type { get; }
+		public NytType _type { get; }
 		public string _name { get; }
 		public string _value { get; }
 
 		public NytTreeNodeInfo(int type, string name, string value)
 		{
-			_type = (NytDataType)type;
+			_type = (NytType)type;
 			_name = name;
 			_value = value;
 		}
