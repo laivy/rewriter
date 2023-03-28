@@ -22,8 +22,6 @@ private:
 	void MoveCaret(int distance);
 
 private:
-	mutable std::mutex m_mutex;
-
 	ComPtr<IDWriteTextLayout> m_textLayout;
 	ComPtr<IDWriteTextFormat> m_textFormat;
 

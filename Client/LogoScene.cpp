@@ -22,7 +22,6 @@ void LogoScene::OnCreate()
 {
 	auto rm{ ResourceManager::GetInstance() };
 	rm->AddMesh(Mesh::DEFAULT, new Mesh);
-	
 	m_prop = rm->Load("Main.nyt")->Get<NytProperty>("UIStatus");
 }
 
@@ -62,8 +61,6 @@ void LogoScene::Update(FLOAT deltaTime)
 
 void LogoScene::Render(const ComPtr<ID2D1DeviceContext2>& d2dContext) const
 {
-	auto size{ NytApp::GetInstance()->GetWindowSize() };
-
-	auto logo{ m_prop->Get<NytUI>("ui") };
+	auto logo{ m_prop->Get<NytImage>("ui") };
 	logo->Render(d2dContext, 0.0f, 0.0f);
 }

@@ -7,7 +7,6 @@
 #include "Mesh.h"
 #include "NytImage.h"
 #include "NytProperty.h"
-#include "NytUI.h"
 #include "Player.h"
 #include "ResourceManager.h"
 #include "Shader.h"
@@ -16,15 +15,6 @@
 void LoginScene::OnCreate()
 {
 	LoginWnd* wnd{ new LoginWnd{ 300.0f, 300.0f } };
-	
-	EditCtrl* editCtrl{ new EditCtrl{ 200.0f, 20.0f } };
-	editCtrl->SetPosition(FLOAT2{ 150.0f, 135.0f }, Pivot::CENTER);
-	wnd->AddUI(editCtrl);
-
-	EditCtrl* editCtrl2{ new EditCtrl{ 200.0f, 20.0f } };
-	editCtrl2->SetPosition(FLOAT2{ 150.0f, 165.0f }, Pivot::CENTER);
-	wnd->AddUI(editCtrl2);
-
 	WndManager::GetInstance()->AddWnd(wnd);
 }
 

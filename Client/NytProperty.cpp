@@ -1,12 +1,11 @@
 ﻿#include "Stdafx.h"
 #include "NytProperty.h"
-#include "NytUI.h"
 #include "NytImage.h"
 
 NytProperty::NytProperty() : m_type{ NytType::GROUP }, m_data{} { }
 NytProperty::NytProperty(NytType type, const std::any& data) : m_type{ type }
 {
-	m_data = std::move(data);
+	m_data = data;
 }
 
 NytProperty::~NytProperty()
@@ -26,8 +25,6 @@ NytProperty::~NytProperty()
 		delete std::any_cast<std::string*>(m_data);
 		break;
 	case NytType::UI:
-		delete std::any_cast<NytUI*>(m_data);
-		break;
 	case NytType::IMAGE:
 		delete std::any_cast<NytImage*>(m_data);
 		break;

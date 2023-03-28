@@ -116,7 +116,13 @@ void EditCtrl::Render(const ComPtr<ID2D1DeviceContext2>& d2dContext) const
 	d2dContext->SetTransform(MATRIX::Translation(position.x, position.y));
 
 	// 배경
-	d2dContext->FillRectangle(RECTF{ -CARET_THICKNESS - 1.0f, 0.0f, m_size.x + CARET_THICKNESS + 1.0f, m_size.y }, BrushPool::GetInstance()->GetBrush(BrushPool::WHITE));
+	D2D1_ROUNDED_RECT rect
+	{
+		RECTF{ -CARET_THICKNESS - 1.0f, 0.0f, m_size.x + CARET_THICKNESS + 1.0f, m_size.y },
+		1.0f,
+		1.0f
+	};
+	d2dContext->FillRoundedRectangle(rect, BrushPool::GetInstance()->GetBrush(BrushPool::WHITE));
 
 	// 텍스트
 	d2dContext->PushAxisAlignedClip(RECTF{ 0.0f, 0.0f, m_size.x, m_size.y }, D2D1_ANTIALIAS_MODE_ALIASED);

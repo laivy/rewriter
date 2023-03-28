@@ -168,6 +168,7 @@ HRESULT NytApp::InitWnd()
 	wcex.cbClsExtra = 0;
 	wcex.cbWndExtra = 0;
 	wcex.hInstance = HINST_THISCOMPONENT;
+	wcex.hCursor = LoadCursor(NULL, IDC_ARROW);
 	wcex.hbrBackground = NULL;
 	wcex.lpszMenuName = NULL;
 	wcex.lpszClassName = L"GAME";
