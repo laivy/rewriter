@@ -70,7 +70,7 @@
             this.addButton.Name = "addButton";
             this.addButton.Size = new System.Drawing.Size(75, 23);
             this.addButton.TabIndex = 3;
-            this.addButton.Text = "추가";
+            this.addButton.Text = "확인";
             this.addButton.UseVisualStyleBackColor = true;
             this.addButton.Click += new System.EventHandler(this.OnAddButtonClick);
             // 
@@ -138,6 +138,7 @@
             this.Name = "NodeEditForm";
             this.ShowIcon = false;
             this.SizeGripStyle = System.Windows.Forms.SizeGripStyle.Hide;
+            this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
             this.Text = "추가하기";
             this.ResumeLayout(false);
             this.PerformLayout();

@@ -62,33 +62,34 @@
             // Menu_File_New
             // 
             this.Menu_File_New.Name = "Menu_File_New";
-            this.Menu_File_New.Size = new System.Drawing.Size(180, 22);
+            this.Menu_File_New.Size = new System.Drawing.Size(178, 22);
             this.Menu_File_New.Text = "새로 만들기";
             this.Menu_File_New.Click += new System.EventHandler(this.OnNewFileMenuClick);
             // 
             // Menu_File_Open
             // 
             this.Menu_File_Open.Name = "Menu_File_Open";
-            this.Menu_File_Open.Size = new System.Drawing.Size(180, 22);
+            this.Menu_File_Open.Size = new System.Drawing.Size(178, 22);
             this.Menu_File_Open.Text = "열기";
             this.Menu_File_Open.Click += new System.EventHandler(this.OnFileOpenMenuClick);
             // 
             // Menu_File_Save
             // 
             this.Menu_File_Save.Name = "Menu_File_Save";
-            this.Menu_File_Save.Size = new System.Drawing.Size(180, 22);
+            this.Menu_File_Save.Size = new System.Drawing.Size(178, 22);
             this.Menu_File_Save.Text = "저장";
             this.Menu_File_Save.Click += new System.EventHandler(this.OnFileSaveMenuClick);
             // 
             // Menu_File_SaveAs
             // 
             this.Menu_File_SaveAs.Name = "Menu_File_SaveAs";
-            this.Menu_File_SaveAs.Size = new System.Drawing.Size(180, 22);
+            this.Menu_File_SaveAs.Size = new System.Drawing.Size(178, 22);
             this.Menu_File_SaveAs.Text = "다른 이름으로 저장";
             this.Menu_File_SaveAs.Click += new System.EventHandler(this.OnFileSaveAsMenuClick);
             // 
             // MainForm
             // 
+            this.AllowDrop = true;
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.SystemColors.Control;

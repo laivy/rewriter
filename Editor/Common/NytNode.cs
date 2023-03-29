@@ -130,5 +130,15 @@ namespace Editor.Nyt
 				Nodes.Add(childNode);
 			}
 		}
+
+		override public object Clone() 
+		{
+			NytNode node = (NytNode)base.Clone();
+			node._type = _type;
+			node._name = _name;
+			node._value = _value;
+			node._data = _data;
+			return node;
+		}
 	}
 }

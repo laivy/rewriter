@@ -69,6 +69,7 @@
             // 
             // NytTreeView
             // 
+            this.NytTreeView.AllowDrop = true;
             this.NytTreeView.Dock = System.Windows.Forms.DockStyle.Fill;
             this.NytTreeView.LabelEdit = true;
             this.NytTreeView.Location = new System.Drawing.Point(0, 0);

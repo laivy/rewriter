@@ -11,6 +11,9 @@ namespace Editor
 		public MainForm()
 		{
 			InitializeComponent();
+
+			DragEnter += OnDragEnter;
+			DragDrop += OnDragDrop;
 		}
 
 		private void OnFileViewActivated(object sender, EventArgs e)
@@ -86,6 +89,28 @@ namespace Editor
 				return;
 			}
 			_fileViewForm.SaveAsFile(saveFileDialog.FileName);
+		}
+		
+		private void OnDragEnter(object sender, DragEventArgs e)
+		{
+			if (e.Data.GetDataPresent(DataFormats.FileDrop))
+				e.Effect = DragDropEffects.Copy;
+		}
+
+		private void OnDragDrop(object sender, DragEventArgs e)
+		{
+			string[] files = (string[])e.Data.GetData(DataFormats.FileDrop);
+			foreach (string file in files)
+			{
+				if (!file.EndsWith(".nyt"))
+					continue;
+
+				_fileViewForm = new FileViewForm(file);
+				_fileViewForm.Activated += OnFileViewActivated;
+				_fileViewForm.MdiParent = this;
+				_fileViewForm.LoadFile();
+				_fileViewForm.Show();
+			}
 		}
 	}
 }
