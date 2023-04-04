@@ -24,8 +24,8 @@ NytProperty::~NytProperty()
 	case NytType::STRING:
 		delete std::any_cast<std::string*>(m_data);
 		break;
-	case NytType::UI:
-	case NytType::IMAGE:
+	case NytType::D2DImage:
+	case NytType::D3DImage:
 		delete std::any_cast<NytImage*>(m_data);
 		break;
 	}

@@ -13,6 +13,8 @@ public:
 	void Update(FLOAT deltaTime);
 	void Render(const ComPtr<ID2D1DeviceContext2>& d2dContext) const;
 
+	void RemoveAllWnd();
+
 	template <class T>
 	requires std::is_base_of_v<Wnd, T>
 	void AddWnd(T* wnd)

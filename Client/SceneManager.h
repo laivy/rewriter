@@ -5,7 +5,7 @@ class SceneManager : public TSingleton<SceneManager>
 {
 public:
 	SceneManager();
-	~SceneManager();
+	~SceneManager() = default;
 
 	void OnDestroy();
 	void OnMouseEvent(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);
@@ -19,10 +19,11 @@ public:
 	void SetFadeOut(FLOAT second, const std::function<void()>& callback = []() {});
 
 	template<class T>
-	requires std::is_base_of_v<Scene, T>
+	requires std::is_base_of_v<IScene, T>
 	void SetScene(T* scene)
 	{
-		// 이때 씬의 OnCreate 함수를 호출한다.
+		if (m_scene)
+			m_scene->OnDestory();
 		if (scene)
 			scene->OnCreate();
 		m_scene = scene;
@@ -44,6 +45,6 @@ private:
 	};
 
 private:
-	Scene* m_scene;
+	IScene* m_scene;
 	FadeInfo m_fadeInfo;
 };

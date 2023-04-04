@@ -49,8 +49,8 @@ void NytApp::OnDestroy()
 	BrushPool::Destroy();
 	ResourceManager::Destroy();
 
-	WndManager::Destroy();
 	SceneManager::Destroy();
+	WndManager::Destroy();
 
 	KeyboardThread::Destroy();
 	MouseThread::Destroy();
@@ -477,8 +477,11 @@ void NytApp::Update()
 	m_timer->Tick();
 	FLOAT deltaTime{ m_timer->GetDeltaTime() };
 
+	ResetCommandList();
 	if (SceneManager::IsInstanced())
 		SceneManager::GetInstance()->Update(deltaTime);
+	ExecuteCommandList();
+	WaitForGPU();
 }
 
 void NytApp::Render()

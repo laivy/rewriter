@@ -6,25 +6,33 @@
 #include "ResourceManager.h"
 #include "Shader.h"
 
-Player::Player()
+Player::Player() : m_stand{ nullptr }, m_frame{ 0.0f }
 {
 	m_cbGameObject.Init();
 	m_cbGameObject->layer = static_cast<float>(Layer::LOCALPLAYER) / static_cast<float>(Layer::COUNT);
 	m_cbGameObject->alpha = 1.0f;
-	m_cbGameObject->isFliped = TRUE;
+	m_cbGameObject->isFliped = FALSE;
 	
-	m_mesh = ResourceManager::GetInstance()->GetMesh(Mesh::DEFAULT);
-	m_shader = ResourceManager::GetInstance()->GetShader(Shader::DEFAULT);
+	DirectX::XMFLOAT4X4 worldMatrix{};
+	DirectX::XMStoreFloat4x4(&worldMatrix, DirectX::XMMatrixIdentity());
+	m_cbGameObject->worldMatrix = worldMatrix;
+	
+	auto rm{ ResourceManager::GetInstance() };
+	m_mesh = rm->GetMesh(Mesh::DEFAULT);
+	m_shader = rm->GetShader(Shader::DEFAULT);
 
-	auto prop{ ResourceManager::GetInstance()->Load("Main.nyt") };
-	m_image = prop->Get<NytImage>("UIStatus/background");
+	auto prop{ rm->Load("Player.nyt") };
+	m_stand = prop->Get<NytProperty>("Stand");
 }
 
 void Player::Update(FLOAT deltaTime)
 {
-	static float degree = 0.0f;
-	SetRotation(degree += deltaTime);
-	m_cbGameObject->worldMatrix = GetWorldMatrix();
+	if (!m_stand)
+		return;
+
+	m_frame += deltaTime * 5.0f;
+	if (m_frame > static_cast<FLOAT>(m_stand->GetChildCount()))
+		m_frame = 0.0f;
 }
 
 void Player::Render(const ComPtr<ID3D12GraphicsCommandList> commandList) const
@@ -33,8 +41,11 @@ void Player::Render(const ComPtr<ID3D12GraphicsCommandList> commandList) const
 		commandList->SetGraphicsRootConstantBufferView(RootParamIndex::GAMEOBJECT, m_cbGameObject.GetGPUVirtualAddress());
 	if (m_shader)
 		commandList->SetPipelineState(m_shader->GetPipelineState());
-	if (m_image)
-		m_image->UpdateShaderVariable(commandList);
+	if (m_stand)
+	{
+		auto img{ m_stand->Get<NytImage>(std::to_string(static_cast<INT>(m_frame))) };
+		img->UpdateShaderVariable(commandList);
+	}
 	if (m_mesh)
 		m_mesh->Render(commandList);
 }

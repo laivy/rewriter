@@ -3,7 +3,7 @@
 
 class Wnd;
 
-class Button : public UI
+class Button : public IUserInterface
 {
 public:
 	Button(FLOAT width, FLOAT height);
@@ -14,8 +14,11 @@ public:
 	virtual void Update(FLOAT deltaTime);
 	virtual void Render(const ComPtr<ID2D1DeviceContext2>& renderTarget) const;
 
+	void SetCallback(const std::function<void()>& callback);
+
 private:
-	D2D1::ColorF m_color;
+	std::function<void()> m_callback;
 	BOOL m_isMouseOver;
 	BOOL m_isMouseDown;
+	D2D1::ColorF m_color;
 };

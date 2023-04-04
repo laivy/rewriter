@@ -1,10 +1,14 @@
 ﻿#pragma once
+#include "Scene.h"
 
-class IScene abstract
+class Camera;
+class Player;
+
+class GameScene : public IScene, public TSingleton<GameScene>
 {
 public:
-	IScene() = default;
-	virtual ~IScene() = default;
+	GameScene();
+	~GameScene();
 
 	virtual void OnCreate();
 	virtual void OnDestory();
@@ -14,4 +18,8 @@ public:
 	virtual void Update(FLOAT deltaTime);
 	virtual void Render(const ComPtr<ID3D12GraphicsCommandList>& commandList) const;
 	virtual void Render(const ComPtr<ID2D1DeviceContext2>& d2dContext) const;
+
+private:
+	std::unique_ptr<Camera> m_camera;
+	std::unique_ptr<Player> m_player;
 };

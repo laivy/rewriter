@@ -79,6 +79,11 @@ public:
 		return m_childProps.at(name)->Get<T>();
 	}
 
+	size_t GetChildCount() const
+	{
+		return m_childProps.size();
+	}
+
 private:
 	NytType m_type;
 	std::any m_data;

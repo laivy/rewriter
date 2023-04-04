@@ -2,10 +2,7 @@
 #include "UI.h"
 #include "Wnd.h"
 
-INT UI::s_id{ 0 };
-
-UI::UI() :
-	m_id{ s_id++ },
+IUserInterface::IUserInterface() :
 	m_parent{ nullptr },
 	m_isValid{ TRUE },
 	m_isFocus{ FALSE }
@@ -13,32 +10,32 @@ UI::UI() :
 
 }
 
-void UI::OnMouseEvent(HWND hWnd, UINT message, INT x, INT y) { }
-void UI::OnKeyboardEvent(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam) { }
-void UI::Update(FLOAT deltaTime) { }
-void UI::Render(const ComPtr<ID2D1DeviceContext2>& d2dContext) const { }
+void IUserInterface::OnMouseEvent(HWND hWnd, UINT message, INT x, INT y) { }
+void IUserInterface::OnKeyboardEvent(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam) { }
+void IUserInterface::Update(FLOAT deltaTime) { }
+void IUserInterface::Render(const ComPtr<ID2D1DeviceContext2>& d2dContext) const { }
 
-void UI::Destroy()
+void IUserInterface::Destroy()
 {
 	m_isValid = TRUE;
 }
 
-void UI::SetParent(Wnd* const wnd)
+void IUserInterface::SetParent(Wnd* const wnd)
 {
 	m_parent = wnd;
 }
 
-void UI::SetFocus(BOOL focus)
+void IUserInterface::SetFocus(BOOL focus)
 {
 	m_isFocus = focus;
 }
 
-void UI::SetSize(const FLOAT2& size)
+void IUserInterface::SetSize(const FLOAT2& size)
 {
 	m_size = size;
 }
 
-void UI::SetPosition(const FLOAT2& position, Pivot pivot)
+void IUserInterface::SetPosition(const FLOAT2& position, Pivot pivot)
 {
 	m_position = position;
 	switch (pivot)
@@ -76,27 +73,22 @@ void UI::SetPosition(const FLOAT2& position, Pivot pivot)
 	}
 }
 
-INT UI::GetId() const
-{
-	return m_id;
-}
-
-BOOL UI::IsValid() const
+BOOL IUserInterface::IsValid() const
 {
 	return m_isValid;
 }
 
-BOOL UI::IsFocus() const
+BOOL IUserInterface::IsFocus() const
 {
 	return m_isFocus;
 }
 
-Wnd* const UI::GetParent() const
+Wnd* const IUserInterface::GetParent() const
 {
 	return m_parent;
 }
 
-RECTF UI::GetRect() const
+RECTF IUserInterface::GetRect() const
 {
 	FLOAT2 pos{ m_position };
 	if (m_parent)
@@ -104,12 +96,12 @@ RECTF UI::GetRect() const
 	return RECTF{ pos.x, pos.y, pos.x + m_size.x, pos.y + m_size.y };
 }
 
-FLOAT2 UI::GetSize() const
+FLOAT2 IUserInterface::GetSize() const
 {
 	return m_size;
 }
 
-FLOAT2 UI::GetPosition() const
+FLOAT2 IUserInterface::GetPosition() const
 {
 	return m_position;
 }

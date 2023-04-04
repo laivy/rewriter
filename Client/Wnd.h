@@ -1,7 +1,7 @@
 ﻿#pragma once
 #include "UI.h"
 
-class Wnd : public UI
+class Wnd : public IUserInterface
 {
 public:
 	Wnd(FLOAT width, FLOAT height, FLOAT x = 0.0f, FLOAT y = 0.0f);
@@ -15,14 +15,14 @@ public:
 	virtual void Render(const ComPtr<ID2D1DeviceContext2>& d2dContext);
 
 	template <typename T>
-	requires std::is_base_of_v<UI, T>
+	requires std::is_base_of_v<IUserInterface, T>
 	void AddUI(T* ui)
 	{
 		ui->SetParent(this);
 		m_ui.emplace_back(ui);
 	}
 
-	void SetUIFocus(UI* focusUI);
+	void SetUIFocus(IUserInterface* focusUI);
 	void SetFocus(BOOL isFocus);
 	void SetPick(BOOL isPick);
 
@@ -44,5 +44,5 @@ private:
 	BOOL m_isPick;
 	FLOAT2 m_pickDelta;
 
-	std::vector<std::unique_ptr<UI>> m_ui;
+	std::vector<std::unique_ptr<IUserInterface>> m_ui;
 };

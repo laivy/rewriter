@@ -19,12 +19,6 @@
     <Filter Include="헤더 파일\UI">
       <UniqueIdentifier>{dc10fe95-325b-42cb-9152-046df3a5081f}</UniqueIdentifier>
     </Filter>
-    <Filter Include="헤더 파일\Interface">
-      <UniqueIdentifier>{5cff70ed-5059-4473-98f1-c78348e58d64}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="소스 파일\Interface">
-      <UniqueIdentifier>{16e06589-d80f-471b-a466-5e7168e9355a}</UniqueIdentifier>
-    </Filter>
     <Filter Include="소스 파일\Util">
       <UniqueIdentifier>{b7990f5a-354e-4bfb-98b3-27eeaf60dcd2}</UniqueIdentifier>
     </Filter>
@@ -78,12 +72,6 @@
     <ClCompile Include="EditCtrl.cpp">
       <Filter>소스 파일\UI</Filter>
     </ClCompile>
-    <ClCompile Include="GameObject.cpp">
-      <Filter>소스 파일\Interface</Filter>
-    </ClCompile>
-    <ClCompile Include="UI.cpp">
-      <Filter>소스 파일\Interface</Filter>
-    </ClCompile>
     <ClCompile Include="FontPool.cpp">
       <Filter>소스 파일\UI</Filter>
     </ClCompile>
@@ -104,9 +92,6 @@
     </ClCompile>
     <ClCompile Include="SceneManager.cpp">
       <Filter>소스 파일\Scene</Filter>
-    </ClCompile>
-    <ClCompile Include="Scene.cpp">
-      <Filter>소스 파일\Interface</Filter>
     </ClCompile>
     <ClCompile Include="LoginScene.cpp">
       <Filter>소스 파일\Scene</Filter>
@@ -144,10 +129,22 @@
     <ClCompile Include="LogoScene.cpp">
       <Filter>소스 파일\Scene</Filter>
     </ClCompile>
+    <ClCompile Include="Label.cpp">
+      <Filter>소스 파일\UI</Filter>
+    </ClCompile>
     <ClCompile Include="LoginWnd.cpp">
+      <Filter>소스 파일\UI</Filter>
+    </ClCompile>
+    <ClCompile Include="GameScene.cpp">
       <Filter>소스 파일\Scene</Filter>
     </ClCompile>
-    <ClCompile Include="Label.cpp">
+    <ClCompile Include="GameObject.cpp">
+      <Filter>소스 파일\GameObject</Filter>
+    </ClCompile>
+    <ClCompile Include="Scene.cpp">
+      <Filter>소스 파일\Scene</Filter>
+    </ClCompile>
+    <ClCompile Include="UI.cpp">
       <Filter>소스 파일\UI</Filter>
     </ClCompile>
   </ItemGroup>
@@ -164,14 +161,8 @@
     <ClInclude Include="WndManager.h">
       <Filter>헤더 파일\UI</Filter>
     </ClInclude>
-    <ClInclude Include="GameObject.h">
-      <Filter>헤더 파일\Interface</Filter>
-    </ClInclude>
     <ClInclude Include="EditCtrl.h">
       <Filter>헤더 파일\UI</Filter>
-    </ClInclude>
-    <ClInclude Include="UI.h">
-      <Filter>헤더 파일\Interface</Filter>
     </ClInclude>
     <ClInclude Include="FontPool.h">
       <Filter>헤더 파일\UI</Filter>
@@ -184,9 +175,6 @@
     </ClInclude>
     <ClInclude Include="BrushPool.h">
       <Filter>헤더 파일\UI</Filter>
-    </ClInclude>
-    <ClInclude Include="Singleton.h">
-      <Filter>헤더 파일\Interface</Filter>
     </ClInclude>
     <ClInclude Include="StringTable.h">
       <Filter>헤더 파일</Filter>
@@ -202,9 +190,6 @@
     </ClInclude>
     <ClInclude Include="SceneManager.h">
       <Filter>헤더 파일\Scene</Filter>
-    </ClInclude>
-    <ClInclude Include="Scene.h">
-      <Filter>헤더 파일\Interface</Filter>
     </ClInclude>
     <ClInclude Include="LoginScene.h">
       <Filter>헤더 파일\Scene</Filter>
@@ -251,11 +236,26 @@
     <ClInclude Include="LogoScene.h">
       <Filter>헤더 파일\Scene</Filter>
     </ClInclude>
-    <ClInclude Include="LoginWnd.h">
-      <Filter>헤더 파일\Scene</Filter>
-    </ClInclude>
     <ClInclude Include="Label.h">
       <Filter>헤더 파일\UI</Filter>
+    </ClInclude>
+    <ClInclude Include="LoginWnd.h">
+      <Filter>헤더 파일\UI</Filter>
+    </ClInclude>
+    <ClInclude Include="GameScene.h">
+      <Filter>헤더 파일\Scene</Filter>
+    </ClInclude>
+    <ClInclude Include="GameObject.h">
+      <Filter>헤더 파일\GameObject</Filter>
+    </ClInclude>
+    <ClInclude Include="Scene.h">
+      <Filter>헤더 파일\Scene</Filter>
+    </ClInclude>
+    <ClInclude Include="UI.h">
+      <Filter>헤더 파일\UI</Filter>
+    </ClInclude>
+    <ClInclude Include="Singleton.h">
+      <Filter>헤더 파일\Framework</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

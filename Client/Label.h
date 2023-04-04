@@ -1,7 +1,7 @@
 ﻿#pragma once
 #include "UI.h"
 
-class Label : public UI
+class Label : public IUserInterface
 {
 public:
 	Label(FLOAT width, FLOAT height);

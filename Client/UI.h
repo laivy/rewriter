@@ -2,11 +2,11 @@
 
 class Wnd;
 
-class UI abstract
+class IUserInterface abstract
 {
 public:
-	UI();
-	virtual ~UI() = default;
+	IUserInterface();
+	virtual ~IUserInterface() = default;
 
 	virtual void OnMouseEvent(HWND hWnd, UINT message, INT x, INT y);
 	virtual void OnKeyboardEvent(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);
@@ -20,7 +20,6 @@ public:
 	void SetSize(const FLOAT2& size);
 	void SetPosition(const FLOAT2& position, Pivot pivot = Pivot::LEFTTOP);
 
-	INT GetId() const;
 	BOOL IsValid() const;
 	BOOL IsFocus() const;
 	RECTF GetRect() const;
@@ -34,8 +33,4 @@ protected:
 	BOOL m_isFocus;
 	FLOAT2 m_position;
 	FLOAT2 m_size;
-
-private:
-	static INT s_id;
-	INT m_id;
 };

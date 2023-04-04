@@ -17,11 +17,6 @@ SceneManager::SceneManager() : m_scene{ nullptr }
 	}
 }
 
-SceneManager::~SceneManager()
-{
-
-}
-
 void SceneManager::OnDestroy()
 {
 	if (m_scene)

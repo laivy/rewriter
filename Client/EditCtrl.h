@@ -2,7 +2,7 @@
 #include "UI.h"
 #include "FontPool.h"
 
-class EditCtrl : public UI
+class EditCtrl : public IUserInterface
 {
 public:
 	EditCtrl(FLOAT width, FLOAT height, FontPool::Type fontType = FontPool::Type::MORRIS);

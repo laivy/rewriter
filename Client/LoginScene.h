@@ -4,7 +4,7 @@
 class Camera;
 class Player;
 
-class LoginScene : public Scene, public TSingleton<LoginScene>
+class LoginScene : public IScene, public TSingleton<LoginScene>
 {
 public:
 	LoginScene() = default;

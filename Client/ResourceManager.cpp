@@ -141,8 +141,8 @@ void ResourceManager::Load(std::ifstream& fs, NytProperty* root)
 	case NytType::STRING:
 		data = new std::string{ Read<std::string>(fs) };
 		break;
-	case NytType::UI:
-	case NytType::IMAGE:
+	case NytType::D2DImage:
+	case NytType::D3DImage:
 		data = new NytImage{ Read(fs, type) };
 		break;
 	default:
@@ -163,7 +163,7 @@ NytImage ResourceManager::Read(std::ifstream& fs, NytType type)
 	std::unique_ptr<BYTE> buffer{ new BYTE[length] };
 	fs.read(reinterpret_cast<char*>(buffer.get()), length);
 
-	if (type == NytType::UI)
+	if (type == NytType::D2DImage)
 	{
 		ComPtr<IWICImagingFactory> factory;
 		ComPtr<IWICBitmapDecoder> decoder;
@@ -187,7 +187,7 @@ NytImage ResourceManager::Read(std::ifstream& fs, NytType type)
 
 		return NytImage{ bitmap };
 	}
-	else if (type == NytType::IMAGE)
+	else if (type == NytType::D3DImage)
 	{
 		ID3D12Resource* bitmap;
 		ComPtr<ID3D12Resource> uploadBuffer;

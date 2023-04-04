@@ -8,7 +8,7 @@
 #include "ResourceManager.h"
 #include "SceneManager.h"
 
-LogoScene::LogoScene() : m_prop{ nullptr }
+LogoScene::LogoScene() : m_prop{ nullptr }, m_isFirstUpdate{ TRUE }
 {
 
 }
@@ -42,21 +42,20 @@ void LogoScene::OnKeyboardEvent(HWND hWnd, UINT message, WPARAM wParam, LPARAM l
 
 void LogoScene::Update(FLOAT deltaTime)
 {
-	static BOOL isFirstUpdate{ TRUE };
-	if (isFirstUpdate)
-	{
-		SceneManager::GetInstance()->SetFadeOut(1.0f,
-			[]()
-			{
-				LoginScene::Instantiate();
-				auto sm{ SceneManager::GetInstance() };
-				sm->SetScene(LoginScene::GetInstance());
-				sm->SetFadeIn(1.0f);
-				LogoScene::Destroy();
-			}
-		);
-		isFirstUpdate = FALSE;
-	}
+	if (!m_isFirstUpdate)
+		return;
+
+	SceneManager::GetInstance()->SetFadeOut(0.5f,
+		[]()
+		{
+			LoginScene::Instantiate();
+			auto sm{ SceneManager::GetInstance() };
+			sm->SetScene(LoginScene::GetInstance());
+			sm->SetFadeIn(0.5f);
+			LogoScene::Destroy();
+		}
+	);
+	m_isFirstUpdate = FALSE;
 }
 
 void LogoScene::Render(const ComPtr<ID2D1DeviceContext2>& d2dContext) const

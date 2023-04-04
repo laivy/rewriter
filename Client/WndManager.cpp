@@ -77,6 +77,16 @@ void WndManager::Render(const ComPtr<ID2D1DeviceContext2>& d2dContext) const
 		w->Render(d2dContext);
 }
 
+void WndManager::RemoveAllWnd()
+{
+	std::unique_lock wndLock{ m_mutex, std::defer_lock };
+	std::unique_lock addWndLock{ m_addWndsMutex, std::defer_lock };
+	std::lock(wndLock, addWndLock);
+
+	m_wnds.clear();
+	m_addWnds.clear();
+}
+
 void WndManager::SetWndFocus(Wnd* const focusWnd)
 {
 	std::unique_lock lock{ m_mutex };

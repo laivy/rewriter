@@ -110,7 +110,7 @@ void Wnd::Render(const ComPtr<ID2D1DeviceContext2>& d2dContext)
 		ui->Render(d2dContext);
 }
 
-void Wnd::SetUIFocus(UI* focusUI)
+void Wnd::SetUIFocus(IUserInterface* focusUI)
 {
 	for (const auto& ui : m_ui)
 		ui->SetFocus(FALSE);

@@ -4,6 +4,7 @@ class Timer
 {
 public:
 	Timer();
+
 	void Tick();
 
 	FLOAT GetDeltaTime() const;

@@ -7,6 +7,7 @@ Button::Button(FLOAT width, FLOAT height) :
 	m_isMouseOver{ FALSE },
 	m_isMouseDown{ FALSE }
 {
+	m_callback = []() {};
 	SetSize(FLOAT2{ width, height });
 }
 
@@ -35,19 +36,14 @@ void Button::OnMouseEvent(HWND hWnd, UINT message, INT x, INT y)
 	}
 	case WM_LBUTTONUP:
 	{
-		if (!m_isMouseOver || !m_isMouseDown)
-			break;
-
 		m_isMouseDown = FALSE;
+		if (!m_isMouseOver)
+			break;
 
 		FLOAT2 pos{ static_cast<FLOAT>(x), static_cast<FLOAT>(y) };
 		RECTF rect{ 0.0f, 0.0f, m_size.x, m_size.y };
-
 		if (rect.IsContain(pos))
-		{
-			if (m_parent)
-				m_parent->OnButtonClicked(GetId());
-		}
+			m_callback();
 		break;
 	}
 	default:
@@ -81,4 +77,9 @@ void Button::Render(const ComPtr<ID2D1DeviceContext2>& renderTarget) const
 	renderTarget->CreateSolidColorBrush(D2D1::ColorF{ m_color }, &brush);
 	renderTarget->SetTransform(D2D1::Matrix3x2F::Translation(position.x, position.y));
 	renderTarget->FillRectangle(D2D1::RectF(0.0f, 0.0f, m_size.x, m_size.y), brush.Get());
+}
+
+void Button::SetCallback(const std::function<void()>& callback)
+{
+	m_callback = callback;
 }

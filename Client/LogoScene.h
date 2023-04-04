@@ -3,7 +3,7 @@
 
 class NytProperty;
 
-class LogoScene : public Scene, public TSingleton<LogoScene>
+class LogoScene : public IScene, public TSingleton<LogoScene>
 {
 public:
 	LogoScene();
@@ -19,4 +19,5 @@ public:
 
 private:
 	NytProperty* m_prop;
+	BOOL m_isFirstUpdate;
 };

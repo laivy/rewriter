@@ -21,6 +21,7 @@ void LoginScene::OnCreate()
 void LoginScene::OnDestory()
 {
 	ResourceManager::GetInstance()->Unload("Login.nyt");
+	WndManager::GetInstance()->RemoveAllWnd();
 }
 
 void LoginScene::OnMouseEvent(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)

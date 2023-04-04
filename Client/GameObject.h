@@ -4,11 +4,11 @@
 class Shader;
 class Mesh;
 
-class GameObject abstract
+class IGameObject abstract
 {
 public:
-	GameObject();
-	virtual ~GameObject() = default;
+	IGameObject();
+	virtual ~IGameObject() = default;
 
 	virtual void Update(FLOAT deltaTime);
 	virtual void Render(const ComPtr<ID3D12GraphicsCommandList>& commandList) const;
@@ -18,12 +18,10 @@ public:
 	void SetScale(const FLOAT2& scale);
 	void SetRotation(FLOAT degree);
 	void SetPosition(const FLOAT2& position, Pivot pivot = Pivot::LEFTTOP);
-	void SetPosition(FLOAT x, FLOAT y, Pivot pivot = Pivot::LEFTTOP);
 	void SetLayer(Layer layer);
 	void SetShader(Shader* shader);
 	void SetMesh(Mesh* mesh);
 
-	INT GetId() const;
 	BOOL IsValid() const;
 	FLOAT2 GetSize() const;
 	FLOAT2 GetPosition() const;
@@ -49,8 +47,4 @@ protected:
 		FLOAT dummy;
 	};
 	ConstantBuffer<cbGameObject> m_cbGameObject;
-
-private:
-	static INT s_id;
-	INT m_id;
 };

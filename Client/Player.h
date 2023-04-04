@@ -1,9 +1,9 @@
 ﻿#pragma once
 #include "GameObject.h"
 
-class NytImage;
+class NytProperty;
 
-class Player : public GameObject
+class Player : public IGameObject
 {
 public:
 	Player();
@@ -13,5 +13,6 @@ public:
 	virtual void Render(const ComPtr<ID3D12GraphicsCommandList> commandList) const;
 
 private:
-	NytImage* m_image;
+	NytProperty* m_stand;
+	FLOAT m_frame;
 };
