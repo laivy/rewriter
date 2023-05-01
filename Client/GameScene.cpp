@@ -18,7 +18,7 @@ void GameScene::OnCreate()
 {
 	m_camera = std::make_unique<Camera>();
 	m_player = std::make_unique<Player>();
-	m_player->SetPosition(FLOAT2{ 500.0f, 500.0f }, Pivot::CENTER);
+	m_player->SetPosition(FLOAT2{ 100.0f, 0.0f }, Pivot::CENTER);
 }
 
 void GameScene::OnDestory()
@@ -44,7 +44,7 @@ void GameScene::Update(FLOAT deltaTime)
 void GameScene::Render(const ComPtr<ID3D12GraphicsCommandList>& commandList) const
 {
 	if (m_camera)
-		m_camera->UpdateShaderVariable(commandList);
+		m_camera->SetShaderVariable(commandList);
 	if (m_player)
 		m_player->Render(commandList);
 }

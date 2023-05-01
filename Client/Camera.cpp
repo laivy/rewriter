@@ -19,9 +19,9 @@ void Camera::Update(FLOAT deltaTime)
 	m_cbCamera->viewMatrix = DirectX::XMMatrixTranspose(DirectX::XMMatrixLookAtLH(eye, at, up));
 }
 
-void Camera::UpdateShaderVariable(const ComPtr<ID3D12GraphicsCommandList>& commandList)
+void Camera::SetShaderVariable(const ComPtr<ID3D12GraphicsCommandList>& commandList)
 {
-	commandList->SetGraphicsRootConstantBufferView(RootParamIndex::CAMERA, m_cbCamera.GetGPUVirtualAddress());
+	m_cbCamera.SetShaderVariable(commandList, RootParamIndex::CAMERA);
 }
 
 void Camera::SetScale(const FLOAT2& scale)

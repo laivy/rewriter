@@ -22,9 +22,9 @@ void NytImage::Render(const ComPtr<ID2D1DeviceContext2>& d2dContext, FLOAT x, FL
 	d2dContext->DrawBitmap(m_bitmap.Get(), RECTF{ x, y, x + m_size.x, y + m_size.y });
 }
 
-void NytImage::UpdateShaderVariable(const ComPtr<ID3D12GraphicsCommandList>& commandList, RootParamIndex rootParameterIndex)
+void NytImage::SetShaderVariable(const ComPtr<ID3D12GraphicsCommandList>& commandList, RootParamIndex rootParameterIndex)
 {
 	auto handle{ ResourceManager::GetInstance()->GetGPUDescriptorHandle(m_resource.Get()) };
 	commandList->SetGraphicsRootDescriptorTable(rootParameterIndex, handle);
-	commandList->SetGraphicsRootConstantBufferView(RootParamIndex::TEXTURE, m_cbTexture.GetGPUVirtualAddress());
+	m_cbTexture.SetShaderVariable(commandList, RootParamIndex::TEXTURE);
 }

@@ -149,8 +149,7 @@ void ResourceManager::Load(std::ifstream& fs, NytProperty* root)
 		assert(false);
 	}
 
-	root->m_childNames.push_back(name);
-	root->m_childProps.emplace(name, new NytProperty{ type, std::move(data) });
+	root->m_childProps.emplace(name, new NytProperty{ type, data });
 
 	int childNodeCount{ Read<int>(fs) };
 	for (int i = 0; i < childNodeCount; ++i)

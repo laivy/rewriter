@@ -6,6 +6,16 @@ class Mesh;
 
 class IGameObject abstract
 {
+private:
+	struct cbGameObject
+	{
+		DirectX::XMFLOAT4X4 worldMatrix;
+		FLOAT layer;
+		FLOAT alpha;
+		BOOL isFliped;
+		FLOAT dummy;
+	};
+
 public:
 	IGameObject();
 	virtual ~IGameObject() = default;
@@ -14,11 +24,13 @@ public:
 	virtual void Render(const ComPtr<ID3D12GraphicsCommandList>& commandList) const;
 	virtual void Destroy();
 
+	void Move(const FLOAT2& delta);
+
+	void SetLayer(Layer layer);
 	void SetSize(const FLOAT2& size);
 	void SetScale(const FLOAT2& scale);
 	void SetRotation(FLOAT degree);
 	void SetPosition(const FLOAT2& position, Pivot pivot = Pivot::LEFTTOP);
-	void SetLayer(Layer layer);
 	void SetShader(Shader* shader);
 	void SetMesh(Mesh* mesh);
 
@@ -29,22 +41,14 @@ public:
 
 protected:
 	BOOL m_isValid;
+	Layer m_layer;
 	FLOAT2 m_size;
 	FLOAT2 m_scale;
 	FLOAT m_degree;
 	FLOAT2 m_position;
-	Layer m_layer;
+	Pivot m_pivot;
 
 	Shader* m_shader;
 	Mesh* m_mesh;
-
-	struct cbGameObject
-	{
-		DirectX::XMFLOAT4X4 worldMatrix;
-		FLOAT layer;
-		FLOAT alpha;
-		BOOL isFliped;
-		FLOAT dummy;
-	};
 	ConstantBuffer<cbGameObject> m_cbGameObject;
 };

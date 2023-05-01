@@ -1,8 +1,7 @@
 ﻿#include "Stdafx.h"
 #include "BrushPool.h"
 #include "FontPool.h"
-#include "KeyboardThread.h"
-#include "MouseThread.h"
+#include "InputThread.h"
 #include "NytApp.h"
 #include "NytImage.h"
 #include "NytProperty.h"
@@ -31,8 +30,7 @@ void NytApp::OnCreate()
 	WndManager::Instantiate();
 	SceneManager::Instantiate();
 
-	KeyboardThread::Instantiate();
-	MouseThread::Instantiate();
+	InputThread::Instantiate();
 
 	ExecuteCommandList();
 	WaitForGPU();
@@ -52,8 +50,15 @@ void NytApp::OnDestroy()
 	SceneManager::Destroy();
 	WndManager::Destroy();
 
-	KeyboardThread::Destroy();
-	MouseThread::Destroy();
+	InputThread::Destroy();
+
+#ifdef _DEBUG
+	ComPtr<IDXGIDebug1> dxgiDebug;
+	if (SUCCEEDED(DXGIGetDebugInterface1(0, IID_PPV_ARGS(&dxgiDebug))))
+	{
+		dxgiDebug->ReportLiveObjects(DXGI_DEBUG_ALL, DXGI_DEBUG_RLO_FLAGS(DXGI_DEBUG_RLO_ALL));
+	}
+#endif
 }
 
 void NytApp::OnResize(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
@@ -139,13 +144,15 @@ LRESULT CALLBACK NytApp::WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM 
 	case WM_MOUSEMOVE:
 	case WM_LBUTTONUP:
 	case WM_LBUTTONDOWN:
+	case WM_RBUTTONUP:
+	case WM_RBUTTONDOWN:
 		if (SceneManager::IsInstanced())
 			SceneManager::GetInstance()->OnMouseEvent(hWnd, message, wParam, lParam);
 		break;
 	case WM_CHAR:
+	case WM_IME_COMPOSITION:
 	case WM_KEYUP:
 	case WM_KEYDOWN:
-	case WM_IME_COMPOSITION:
 		if (SceneManager::IsInstanced())
 			SceneManager::GetInstance()->OnKeyboardEvent(hWnd, message, wParam, lParam);
 		break;
@@ -477,17 +484,15 @@ void NytApp::Update()
 	m_timer->Tick();
 	FLOAT deltaTime{ m_timer->GetDeltaTime() };
 
+	// Update에서도 커맨드리스트에 명령을 추가하는 경우가 있음
 	ResetCommandList();
+
 	if (SceneManager::IsInstanced())
 		SceneManager::GetInstance()->Update(deltaTime);
-	ExecuteCommandList();
-	WaitForGPU();
 }
 
 void NytApp::Render()
 {
-	ResetCommandList();
-
 	m_commandList->SetGraphicsRootSignature(m_rootSignature.Get());
 	m_commandList->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(m_renderTargets[m_frameIndex].Get(), D3D12_RESOURCE_STATE_PRESENT, D3D12_RESOURCE_STATE_RENDER_TARGET));
 

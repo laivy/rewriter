@@ -37,14 +37,14 @@ public:
 		return m_data ? TRUE : FALSE;
 	}
 
+	void SetShaderVariable(const ComPtr<ID3D12GraphicsCommandList>& commandList, UINT rootParameterIndex) const
+	{
+		commandList->SetGraphicsRootConstantBufferView(rootParameterIndex, m_buffer->GetGPUVirtualAddress());
+	}
+
 	T* operator->()
 	{
 		return m_data;
-	}
-
-	D3D12_GPU_VIRTUAL_ADDRESS GetGPUVirtualAddress() const
-	{
-		return m_buffer->GetGPUVirtualAddress();
 	}
 
 private:

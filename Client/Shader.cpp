@@ -21,11 +21,13 @@ Shader::Shader()
 	hr = D3DCompileFromFile(L"Default.hlsl", NULL, D3D_COMPILE_STANDARD_FILE_INCLUDE, "VS", "vs_5_1", compileFlags, 0, &vertexShader, &error);
 	hr |= D3DCompileFromFile(L"Default.hlsl", NULL, D3D_COMPILE_STANDARD_FILE_INCLUDE, "GS", "gs_5_1", compileFlags, 0, &geometryShader, &error);
 	hr |= D3DCompileFromFile(L"Default.hlsl", NULL, D3D_COMPILE_STANDARD_FILE_INCLUDE, "PS", "ps_5_1", compileFlags, 0, &pixelShader, &error);
+#ifdef _DEBUG
 	if (FAILED(hr))
 	{
 		OutputDebugStringA(reinterpret_cast<char*>(error->GetBufferPointer()));
 		assert(false);
 	}
+#endif
 
 	CD3DX12_BLEND_DESC blendDesc{ D3D12_DEFAULT };
 	blendDesc.RenderTarget[0].BlendEnable = TRUE;

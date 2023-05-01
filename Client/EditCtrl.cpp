@@ -188,7 +188,7 @@ void EditCtrl::MoveCaret(int distance)
 
 	// 좌측 스크롤
 	FLOAT totalLength{ m_size.x + m_xOffset };
-	FLOAT caretLeftPos{ max(0, metrics.left - CARET_THICKNESS / 2.0f) };
+	FLOAT caretLeftPos{ std::max(0.0f, metrics.left - CARET_THICKNESS / 2.0f) };
 	if (totalLength - caretLeftPos > m_size.x)
 		m_xOffset -= metrics.width;
 	

@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug|Win32">
@@ -103,7 +103,7 @@
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>_DEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_DEBUG;_WINDOWS;NOMINMAX;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>false</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
     </ClCompile>
@@ -151,6 +151,7 @@
     <ClCompile Include="GameScene.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Use</PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="InputThread.cpp" />
     <ClCompile Include="Label.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Use</PrecompiledHeader>
     </ClCompile>
@@ -167,12 +168,6 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Use</PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="NytApp.cpp">
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Use</PrecompiledHeader>
-    </ClCompile>
-    <ClCompile Include="KeyboardThread.cpp">
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Use</PrecompiledHeader>
-    </ClCompile>
-    <ClCompile Include="MouseThread.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Use</PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="NytImage.cpp">
@@ -232,6 +227,7 @@
     <ClInclude Include="EditCtrl.h" />
     <ClInclude Include="FontPool.h" />
     <ClInclude Include="GameScene.h" />
+    <ClInclude Include="InputThread.h" />
     <ClInclude Include="Label.h" />
     <ClInclude Include="LoginScene.h" />
     <ClInclude Include="LoginWnd.h" />
@@ -239,8 +235,6 @@
     <ClInclude Include="Mesh.h" />
     <ClInclude Include="NytApp.h" />
     <ClInclude Include="GameObject.h" />
-    <ClInclude Include="KeyboardThread.h" />
-    <ClInclude Include="MouseThread.h" />
     <ClInclude Include="NytType.h" />
     <ClInclude Include="NytImage.h" />
     <ClInclude Include="NytProperty.h" />

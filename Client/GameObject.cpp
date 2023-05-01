@@ -5,10 +5,12 @@
 
 IGameObject::IGameObject() :
 	m_isValid{ TRUE },
+	m_layer{ Layer::LOCALPLAYER },
 	m_size{ 0.0f, 0.0f },
 	m_scale{ 1.0f, 1.0f },
 	m_degree{ 0.0f },
 	m_position{ 0.0f, 0.0f },
+	m_pivot{ Pivot::LEFTTOP },
 	m_shader{ nullptr },
 	m_mesh{ nullptr }
 {
@@ -16,6 +18,7 @@ IGameObject::IGameObject() :
 }
 
 void IGameObject::Update(FLOAT deltaTime) { }
+
 void IGameObject::Render(const ComPtr<ID3D12GraphicsCommandList>& commandList) const
 {
 	if (m_shader)
@@ -29,10 +32,38 @@ void IGameObject::Destroy()
 	m_isValid = FALSE;
 }
 
+void IGameObject::Move(const FLOAT2& delta)
+{
+	SetPosition(m_position + delta, m_pivot);
+}
+
+void IGameObject::SetLayer(Layer layer)
+{
+	m_layer = layer;
+	if (m_cbGameObject.IsValid())
+		m_cbGameObject->layer = static_cast<float>(layer) / static_cast<float>(Layer::COUNT);
+}
+
+void IGameObject::SetSize(const FLOAT2& size)
+{
+	m_size = size;
+}
+
+void IGameObject::SetScale(const FLOAT2& scale)
+{
+	m_scale = scale;
+}
+
+void IGameObject::SetRotation(FLOAT degree)
+{
+	m_degree = degree;
+}
+
 void IGameObject::SetPosition(const FLOAT2& position, Pivot pivot)
 {
 	m_position = position;
-	switch (pivot)
+	m_pivot = pivot;
+	switch (m_pivot)
 	{
 	case Pivot::LEFTTOP:
 		break;
@@ -65,13 +96,9 @@ void IGameObject::SetPosition(const FLOAT2& position, Pivot pivot)
 		m_position.y -= m_size.y;
 		break;
 	}
-}
 
-void IGameObject::SetLayer(Layer layer)
-{
-	m_layer = layer;
 	if (m_cbGameObject.IsValid())
-		m_cbGameObject->layer = static_cast<float>(layer) / static_cast<float>(Layer::COUNT);
+		m_cbGameObject->worldMatrix = GetWorldMatrix();
 }
 
 void IGameObject::SetShader(Shader* shader)
@@ -82,21 +109,6 @@ void IGameObject::SetShader(Shader* shader)
 void IGameObject::SetMesh(Mesh* mesh)
 {
 	m_mesh = mesh;
-}
-
-void IGameObject::SetSize(const FLOAT2& size)
-{
-	m_size = size;
-}
-
-void IGameObject::SetScale(const FLOAT2& scale)
-{
-	m_scale = scale;
-}
-
-void IGameObject::SetRotation(FLOAT degree)
-{
-	m_degree = degree;
 }
 
 BOOL IGameObject::IsValid() const

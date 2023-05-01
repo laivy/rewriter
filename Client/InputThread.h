@@ -1,15 +1,13 @@
 ﻿#pragma once
 
-template<class T>
-class TSingleton;
-
-class MouseThread : public TSingleton<MouseThread>
+class InputThread : public TSingleton<InputThread>
 {
 public:
-	MouseThread();
-	~MouseThread();
+	InputThread();
+	~InputThread();
 
 	void OnMouseEvent(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);
+	void OnKeyboardEvent(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);
 
 private:
 	void Run();

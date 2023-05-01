@@ -67,10 +67,7 @@ namespace DX
 	class com_exception : public std::exception
 	{
 	public:
-		com_exception(HRESULT hr) : result{ hr }
-		{
-			OutputDebugStringA(what());
-		}
+		com_exception(HRESULT hr) : result{ hr } { }
 
 		const char* what() const override
 		{

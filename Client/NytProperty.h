@@ -5,45 +5,8 @@ class NytProperty
 public:
 	friend class ResourceManager;
 
-	class iterator
-	{
-	public:
-		using iterator_category = std::random_access_iterator_tag;
-
-		iterator(const NytProperty& prop, size_t index = 0) : m_root{ prop }, m_index{ index } { }
-
-		iterator& operator++()
-		{
-			++m_index;
-			return *this;
-		}
-
-		std::pair<std::string, NytProperty*> operator*() const
-		{
-			return std::make_pair(
-				m_root.m_childNames[m_index],
-				m_root.m_childProps.at(m_root.m_childNames[m_index]).get()
-			);
-		}
-
-		bool operator!=(const iterator& iter) const
-		{
-			if (&m_root != &iter.m_root)
-				return true;
-			if (m_index != iter.m_index)
-				return true;
-			return false;
-		}
-
-	private:
-		const NytProperty& m_root;
-		size_t m_index;
-	};
-
-	iterator begin() { return iterator{ *this }; }
-	iterator end() { return iterator{ *this, m_childNames.size() }; }
-	iterator begin() const { return iterator{ *this }; }
-	iterator end() const { return iterator{ *this, m_childNames.size() }; }
+	auto begin() { return m_childProps.begin(); }
+	auto end() { return m_childProps.end(); }
 
 public:
 	NytProperty();
@@ -87,7 +50,5 @@ public:
 private:
 	NytType m_type;
 	std::any m_data;
-
-	std::vector<std::string> m_childNames;
 	std::unordered_map<std::string, std::unique_ptr<NytProperty>> m_childProps;
 };
