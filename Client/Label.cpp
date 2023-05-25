@@ -1,7 +1,7 @@
 ﻿#include "Stdafx.h"
 #include "BrushPool.h"
 #include "FontPool.h"
-#include "NytApp.h"
+#include "GameApp.h"
 #include "Label.h"
 #include "Wnd.h"
 
@@ -29,7 +29,7 @@ void Label::Render(const ComPtr<ID2D1DeviceContext2>& d2dContext) const
 void Label::SetText(const std::wstring& text)
 {
 	m_text = text;
-	NytApp::GetInstance()->GetDwriteFactory()->CreateTextLayout(
+	GameApp::GetInstance()->GetDwriteFactory()->CreateTextLayout(
 		m_text.c_str(),
 		static_cast<UINT32>(m_text.length()),
 		m_textFormat.Get(),

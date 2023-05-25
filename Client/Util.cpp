@@ -1,16 +1,17 @@
 ﻿#include "Stdafx.h"
 #include "Util.h"
 
-INT2::INT2()
+INT2::INT2() : 
+	x{ 0 },
+	y{ 0 }
 {
-	x = 0;
-	y = 0;
+
 }
 
 INT2::INT2(int x, int y)
 {
-	this->x = static_cast<LONG>(x);
-	this->y = static_cast<LONG>(y);
+	this->x = x;
+	this->y = y;
 }
 
 INT2::operator D2D1_SIZE_U() const

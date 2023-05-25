@@ -1,7 +1,20 @@
 ﻿#pragma once
 
-class NytProperty
+class Property
 {
+public:
+	// NytTreeNodeInfo.cs에 정의되어 있는 NytDataType와 동일해야함
+	enum class Type
+	{
+		GROUP,
+		INT,
+		INT2,
+		FLOAT,
+		STRING,
+		D2DImage,
+		D3DImage
+	};
+
 public:
 	friend class ResourceManager;
 
@@ -9,9 +22,9 @@ public:
 	auto end() { return m_childProps.end(); }
 
 public:
-	NytProperty();
-	NytProperty(NytType type, const std::any& data);
-	~NytProperty();
+	Property();
+	Property(Type type, const std::any& data);
+	~Property();
 
 	template<class T>
 	T* Get() const
@@ -36,7 +49,7 @@ public:
 		if (!m_childProps.contains(name))
 			assert(false);
 
-		if constexpr (std::is_same_v<T, NytProperty>)
+		if constexpr (std::is_same_v<T, Property>)
 			return m_childProps.at(name).get();
 
 		return m_childProps.at(name)->Get<T>();
@@ -48,7 +61,7 @@ public:
 	}
 
 private:
-	NytType m_type;
+	Type m_type;
 	std::any m_data;
-	std::unordered_map<std::string, std::unique_ptr<NytProperty>> m_childProps;
+	std::unordered_map<std::string, std::unique_ptr<Property>> m_childProps;
 };

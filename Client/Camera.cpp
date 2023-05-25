@@ -1,10 +1,15 @@
 ﻿#include "Stdafx.h"
 #include "Camera.h"
-#include "NytApp.h"
+#include "GameApp.h"
 
-Camera::Camera() : m_eye{ 0.0f, 0.0f, 0.0f }, m_at{ 0.0f, 0.0f, 1.0f }, m_up{ 0.0f, 1.0f, 0.0f }, m_scale{ 1.0f, 1.0f }, m_degree{ 0.0f }
+Camera::Camera() : 
+	m_eye{ 0.0f, 0.0f, 0.0f }, 
+	m_at{ 0.0f, 0.0f, 1.0f }, 
+	m_up{ 0.0f, 1.0f, 0.0f }, 
+	m_scale{ 1.0f, 1.0f }, 
+	m_degree{ 0.0f }
 {
-	auto [width, height] { NytApp::GetInstance()->GetWindowSize() };
+	auto [width, height] { GameApp::GetInstance()->GetWindowSize() };
 
 	m_cbCamera.Init();
 	m_cbCamera->viewMatrix = DirectX::XMMatrixIdentity();

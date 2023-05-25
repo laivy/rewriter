@@ -1,12 +1,16 @@
 ﻿#include "Stdafx.h"
 #include "Player.h"
 #include "Mesh.h"
-#include "NytImage.h"
-#include "NytProperty.h"
+#include "Image.h"
+#include "Property.h"
 #include "ResourceManager.h"
 #include "Shader.h"
 
-Player::Player() : m_animationComponent{ this }, m_inputComponent{ this }
+Player::Player() :
+	m_animationComponent{ this },
+	m_inputComponent{ this },
+	m_collisionComponent{ this },
+	m_speed{ 50 }
 {
 	m_cbGameObject.Init();
 	m_cbGameObject->layer = static_cast<float>(Layer::LOCALPLAYER) / static_cast<float>(Layer::COUNT);
@@ -18,14 +22,15 @@ Player::Player() : m_animationComponent{ this }, m_inputComponent{ this }
 	m_cbGameObject->worldMatrix = worldMatrix;
 	
 	auto rm{ ResourceManager::GetInstance() };
-	m_mesh = rm->GetMesh(Mesh::DEFAULT);
-	m_shader = rm->GetShader(Shader::DEFAULT);
+	m_mesh = rm->GetMesh(Mesh::Type::DEFAULT);
+	m_shader = rm->GetShader(Shader::Type::DEFAULT);
 }
 
 void Player::Update(FLOAT deltaTime)
 {
-	m_animationComponent.Update(deltaTime);
+	m_collisionComponent.Update(deltaTime);
 	m_inputComponent.Update(deltaTime);
+	m_animationComponent.Update(deltaTime);
 }
 
 void Player::Render(const ComPtr<ID3D12GraphicsCommandList>& commandList) const
@@ -39,11 +44,11 @@ void Player::Render(const ComPtr<ID3D12GraphicsCommandList>& commandList) const
 		m_mesh->Render(commandList);
 }
 
-Player::AnimationComponent::AnimationComponent(Player* player) : m_player{ player }, m_type { Type::STAND }, m_frame{ 0 }, m_timer{ 0.0f }
+Player::AnimationComponent::AnimationComponent(Player* player) : m_player{ player }, m_type { AnimationType::STAND }, m_frame{ 0 }, m_timer{ 0.0f }
 {
 	auto rm{ ResourceManager::GetInstance() };
 	m_root = rm->Load("Player.nyt");
-	m_currAniProp = m_root->Get<NytProperty>("Stand");
+	m_currAniProp = m_root->Get<Property>("Stand");
 }
 
 void Player::AnimationComponent::OnAnimationStart()
@@ -55,12 +60,12 @@ void Player::AnimationComponent::OnAnimationEnd()
 {
 	switch (m_type)
 	{
-	case Type::STAND:
-		PlayAnimation(Type::STAND);
+	case AnimationType::STAND:
+		PlayAnimation(AnimationType::STAND);
 		break;
-	case Type::ATTACK1:
+	case AnimationType::ATTACK1:
 		break;
-	case Type::ATTACK2:
+	case AnimationType::ATTACK2:
 		break;
 	default:
 		break;
@@ -83,7 +88,7 @@ void Player::AnimationComponent::Update(FLOAT deltaTime)
 	}
 }
 
-void Player::AnimationComponent::PlayAnimation(Type type)
+void Player::AnimationComponent::PlayAnimation(AnimationType type)
 {
 	m_type = type;
 	m_frame = 0;
@@ -93,10 +98,11 @@ void Player::AnimationComponent::PlayAnimation(Type type)
 
 void Player::AnimationComponent::SetShaderVariable(const ComPtr<ID3D12GraphicsCommandList>& commandList) const
 {
-	m_currAniProp->Get<NytImage>(std::to_string(m_frame))->SetShaderVariable(commandList);
+	m_currAniProp->Get<Image>(std::to_string(m_frame))->SetShaderVariable(commandList);
 }
 
-Player::InputComponent::InputComponent(Player* player) : m_player{ player }
+Player::InputComponent::InputComponent(Player* player) : 
+	m_player{ player }
 {
 }
 
@@ -104,6 +110,15 @@ void Player::InputComponent::Update(FLOAT deltaTime)
 {
 	if (GetAsyncKeyState(VK_LEFT) & 0x8000)
 	{
-		m_player->Move(FLOAT2{ -SPEED * deltaTime, 0.0f });
+		m_player->Move(FLOAT2{ -m_player->m_speed * deltaTime, 0.0f });
 	}
+}
+
+Player::CollisionComponent::CollisionComponent(Player* player) :
+	m_player{ player }
+{
+}
+
+void Player::CollisionComponent::Update(FLOAT deltaTime)
+{
 }

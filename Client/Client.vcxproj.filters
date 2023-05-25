@@ -52,6 +52,12 @@
     <Filter Include="소스 파일\GameObject">
       <UniqueIdentifier>{030e7fab-bc3d-4ad6-a2ee-c4823fda6ed1}</UniqueIdentifier>
     </Filter>
+    <Filter Include="소스 파일\Map">
+      <UniqueIdentifier>{1d719522-c4c8-4354-9eb8-ea027d2f7e0d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="헤더 파일\Map">
+      <UniqueIdentifier>{657fbd4e-9161-4844-a801-0907762299a5}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Main.cpp">
@@ -84,10 +90,10 @@
     <ClCompile Include="BrushPool.cpp">
       <Filter>소스 파일\UI</Filter>
     </ClCompile>
-    <ClCompile Include="NytProperty.cpp">
+    <ClCompile Include="Property.cpp">
       <Filter>소스 파일\Data</Filter>
     </ClCompile>
-    <ClCompile Include="NytImage.cpp">
+    <ClCompile Include="Image.cpp">
       <Filter>소스 파일\Data</Filter>
     </ClCompile>
     <ClCompile Include="SceneManager.cpp">
@@ -96,7 +102,7 @@
     <ClCompile Include="LoginScene.cpp">
       <Filter>소스 파일\Scene</Filter>
     </ClCompile>
-    <ClCompile Include="NytApp.cpp">
+    <ClCompile Include="GameApp.cpp">
       <Filter>소스 파일\Framework</Filter>
     </ClCompile>
     <ClCompile Include="Shader.cpp">
@@ -144,6 +150,12 @@
     <ClCompile Include="InputThread.cpp">
       <Filter>소스 파일\Framework</Filter>
     </ClCompile>
+    <ClCompile Include="Map.cpp">
+      <Filter>소스 파일\Map</Filter>
+    </ClCompile>
+    <ClCompile Include="Platform.cpp">
+      <Filter>소스 파일\Map</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Stdafx.h">
@@ -176,13 +188,10 @@
     <ClInclude Include="StringTable.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
-    <ClInclude Include="NytProperty.h">
+    <ClInclude Include="Property.h">
       <Filter>헤더 파일\Data</Filter>
     </ClInclude>
-    <ClInclude Include="NytType.h">
-      <Filter>헤더 파일\Data</Filter>
-    </ClInclude>
-    <ClInclude Include="NytImage.h">
+    <ClInclude Include="Image.h">
       <Filter>헤더 파일\Data</Filter>
     </ClInclude>
     <ClInclude Include="SceneManager.h">
@@ -191,7 +200,7 @@
     <ClInclude Include="LoginScene.h">
       <Filter>헤더 파일\Scene</Filter>
     </ClInclude>
-    <ClInclude Include="NytApp.h">
+    <ClInclude Include="GameApp.h">
       <Filter>헤더 파일\Framework</Filter>
     </ClInclude>
     <ClInclude Include="Shader.h">
@@ -250,6 +259,12 @@
     </ClInclude>
     <ClInclude Include="InputThread.h">
       <Filter>헤더 파일\Framework</Filter>
+    </ClInclude>
+    <ClInclude Include="Map.h">
+      <Filter>헤더 파일\Map</Filter>
+    </ClInclude>
+    <ClInclude Include="Platform.h">
+      <Filter>헤더 파일\Map</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

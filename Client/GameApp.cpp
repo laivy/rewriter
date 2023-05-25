@@ -1,17 +1,20 @@
 ﻿#include "Stdafx.h"
 #include "BrushPool.h"
 #include "FontPool.h"
+#include "GameApp.h"
 #include "InputThread.h"
-#include "NytApp.h"
-#include "NytImage.h"
-#include "NytProperty.h"
+#include "Image.h"
+#include "Property.h"
 #include "ResourceManager.h"
 #include "SceneManager.h"
 #include "Timer.h"
 #include "Wnd.h"
 #include "WndManager.h"
 
-NytApp::NytApp() : m_hWnd{ NULL }, m_size{ 1920, 1080 }, m_timer{ new Timer }
+GameApp::GameApp() : 
+	m_hWnd{ NULL },
+	m_size{ 1920, 1080 },
+	m_timer{ new Timer }
 {
 	HRESULT hr{ E_FAIL };
 	hr = InitWnd();
@@ -19,7 +22,7 @@ NytApp::NytApp() : m_hWnd{ NULL }, m_size{ 1920, 1080 }, m_timer{ new Timer }
 	assert(SUCCEEDED(hr));
 }
 
-void NytApp::OnCreate()
+void GameApp::OnCreate()
 {
 	ResetCommandList();
 
@@ -41,7 +44,7 @@ void NytApp::OnCreate()
 	m_timer->Tick();
 }
 
-void NytApp::OnDestroy()
+void GameApp::OnDestroy()
 {
 	FontPool::Destroy();
 	BrushPool::Destroy();
@@ -61,7 +64,7 @@ void NytApp::OnDestroy()
 #endif
 }
 
-void NytApp::OnResize(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
+void GameApp::OnResize(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
 	UINT width{ 1920 };
 	UINT height{ 1080 };
@@ -69,10 +72,10 @@ void NytApp::OnResize(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 	m_scissorRect = D3D12_RECT{ 0, 0, static_cast<long>(width), static_cast<long>(height) };
 }
 
-void NytApp::Run()
+void GameApp::Run()
 {
 	MSG msg{};
-	while (TRUE)
+	while (true)
 	{
 		if (PeekMessage(&msg, NULL, 0, 0, PM_REMOVE))
 		{
@@ -89,53 +92,53 @@ void NytApp::Run()
 	}
 }
 
-HWND NytApp::GetHwnd() const
+HWND GameApp::GetHwnd() const
 {
 	return m_hWnd;
 }
 
-INT2 NytApp::GetWindowSize() const
+INT2 GameApp::GetWindowSize() const
 {
 	return m_size;
 }
 
-ID3D12Device* NytApp::GetD3DDevice() const
+ID3D12Device* GameApp::GetD3DDevice() const
 {
 	return m_d3dDevice.Get();
 }
 
-ID3D12GraphicsCommandList* NytApp::GetCommandList() const
+ID3D12GraphicsCommandList* GameApp::GetCommandList() const
 {
 	return m_commandList.Get();
 }
 
-ID3D12RootSignature* NytApp::GetRootSignature() const
+ID3D12RootSignature* GameApp::GetRootSignature() const
 {
 	return m_rootSignature.Get();
 }
 
-IDWriteFactory5* NytApp::GetDwriteFactory() const
+IDWriteFactory5* GameApp::GetDwriteFactory() const
 {
 	return m_dwriteFactory.Get();
 }
 
-ID2D1DeviceContext2* NytApp::GetD2DContext() const
+ID2D1DeviceContext2* GameApp::GetD2DContext() const
 {
 	return m_d2dDeviceContext.Get();
 }
 
-LRESULT CALLBACK NytApp::WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
+LRESULT CALLBACK GameApp::WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
-	NytApp* app{};
+	GameApp* app{};
 	if (message == WM_NCCREATE)
 	{
 		LPCREATESTRUCT pcs{ reinterpret_cast<LPCREATESTRUCT>(lParam) };
-		app = static_cast<NytApp*>(pcs->lpCreateParams);
+		app = static_cast<GameApp*>(pcs->lpCreateParams);
 		SetWindowLongPtr(hWnd, GWLP_USERDATA, reinterpret_cast<LONG_PTR>(app));
 		return 1;
 	}
 
-	app = reinterpret_cast<NytApp*>(GetWindowLongPtr(hWnd, GWLP_USERDATA));
+	app = reinterpret_cast<GameApp*>(GetWindowLongPtr(hWnd, GWLP_USERDATA));
 	switch (message)
 	{
 	case WM_SIZE:
@@ -166,7 +169,7 @@ LRESULT CALLBACK NytApp::WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM 
 	return 0;
 }
 
-HRESULT NytApp::InitWnd()
+HRESULT GameApp::InitWnd()
 {
 	WNDCLASSEX wcex{};
 	wcex.cbSize = sizeof(WNDCLASSEX);
@@ -207,7 +210,7 @@ HRESULT NytApp::InitWnd()
 	return hr;
 }
 
-HRESULT NytApp::InitDirectX()
+HRESULT GameApp::InitDirectX()
 {
 	CreateFactory();
 	CreateDevice();
@@ -229,7 +232,7 @@ HRESULT NytApp::InitDirectX()
 	return S_OK;
 }
 
-void NytApp::CreateFactory()
+void GameApp::CreateFactory()
 {
 	UINT dxgiFactoryFlags{ 0 };
 
@@ -245,7 +248,7 @@ void NytApp::CreateFactory()
 	DX::ThrowIfFailed(CreateDXGIFactory2(dxgiFactoryFlags, IID_PPV_ARGS(&m_factory)));
 }
 
-void NytApp::CreateDevice()
+void GameApp::CreateDevice()
 {
 	ComPtr<IDXGIAdapter1> hardwareAdapter;
 	for (UINT i = 0; DXGI_ERROR_NOT_FOUND != m_factory->EnumAdapters1(i, &hardwareAdapter); ++i)
@@ -263,7 +266,7 @@ void NytApp::CreateDevice()
 	g_cbvSrvUavDescriptorIncrementSize = m_d3dDevice->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
 }
 
-void NytApp::CreateCommandQueue()
+void GameApp::CreateCommandQueue()
 {
 	D3D12_COMMAND_QUEUE_DESC queueDesc{};
 	queueDesc.Flags = D3D12_COMMAND_QUEUE_FLAG_NONE;
@@ -271,7 +274,7 @@ void NytApp::CreateCommandQueue()
 	DX::ThrowIfFailed(m_d3dDevice->CreateCommandQueue(&queueDesc, IID_PPV_ARGS(&m_commandQueue)));
 }
 
-void NytApp::CreateD3D11On12Device()
+void GameApp::CreateD3D11On12Device()
 {
 	ComPtr<ID3D11Device> d3d11Device;
 	DX::ThrowIfFailed(D3D11On12CreateDevice(
@@ -290,12 +293,12 @@ void NytApp::CreateD3D11On12Device()
 	DX::ThrowIfFailed(d3d11Device.As(&m_d3d11On12Device));
 }
 
-void NytApp::CreateD2DFactory()
+void GameApp::CreateD2DFactory()
 {
 	DX::ThrowIfFailed(D2D1CreateFactory(D2D1_FACTORY_TYPE_SINGLE_THREADED, m_d2dFactory.GetAddressOf()));
 }
 
-void NytApp::CreateD2DDevice()
+void GameApp::CreateD2DDevice()
 {
 	ComPtr<IDXGIDevice> dxgiDevice;
 	DX::ThrowIfFailed(m_d3d11On12Device.As(&dxgiDevice));
@@ -304,13 +307,13 @@ void NytApp::CreateD2DDevice()
 	DX::ThrowIfFailed(DWriteCreateFactory(DWRITE_FACTORY_TYPE_SHARED, __uuidof(IDWriteFactory), &m_dwriteFactory));
 }
 
-void NytApp::CreateSwapChain()
+void GameApp::CreateSwapChain()
 {
 	RECT rect{};
 	GetClientRect(m_hWnd, &rect);
 
 	DXGI_SWAP_CHAIN_DESC1 swapChainDesc{};
-	swapChainDesc.BufferCount = FrameCount;
+	swapChainDesc.BufferCount = FRAME_COUNT;
 	swapChainDesc.Width = rect.right - rect.left;
 	swapChainDesc.Height = rect.bottom - rect.top;
 	swapChainDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
@@ -335,10 +338,10 @@ void NytApp::CreateSwapChain()
 	DX::ThrowIfFailed(m_factory->MakeWindowAssociation(m_hWnd, DXGI_MWA_NO_ALT_ENTER));
 }
 
-void NytApp::CreateRtvDsvDescriptorHeap()
+void GameApp::CreateRtvDsvDescriptorHeap()
 {
 	D3D12_DESCRIPTOR_HEAP_DESC rtvHeapDesc{};
-	rtvHeapDesc.NumDescriptors = FrameCount;
+	rtvHeapDesc.NumDescriptors = FRAME_COUNT;
 	rtvHeapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_RTV;
 	rtvHeapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_NONE;
 	rtvHeapDesc.NodeMask = NULL;
@@ -353,7 +356,7 @@ void NytApp::CreateRtvDsvDescriptorHeap()
 	DX::ThrowIfFailed(m_d3dDevice->CreateDescriptorHeap(&dsvHeapDesc, IID_PPV_ARGS(&m_dsvHeap)));
 }
 
-void NytApp::CreateRenderTargetView()
+void GameApp::CreateRenderTargetView()
 {
 	// D2D 렌더타겟 속성
 	UINT dpi{ GetDpiForWindow(m_hWnd) };
@@ -365,7 +368,7 @@ void NytApp::CreateRenderTargetView()
 	) };
 
 	CD3DX12_CPU_DESCRIPTOR_HANDLE rtvHandle{ m_rtvHeap->GetCPUDescriptorHandleForHeapStart() };
-	for (UINT i = 0; i < FrameCount; ++i)
+	for (UINT i = 0; i < FRAME_COUNT; ++i)
 	{
 		// DX12
 		DX::ThrowIfFailed(m_swapChain->GetBuffer(i, IID_PPV_ARGS(&m_renderTargets[i])));
@@ -395,7 +398,7 @@ void NytApp::CreateRenderTargetView()
 	DX::ThrowIfFailed(m_d3dDevice->CreateCommandAllocator(D3D12_COMMAND_LIST_TYPE_DIRECT, IID_PPV_ARGS(&m_commandAllocators)));
 }
 
-void NytApp::CreateDepthStencilView()
+void GameApp::CreateDepthStencilView()
 {
 	D3D12_RESOURCE_DESC desc{};
 	desc.Dimension = D3D12_RESOURCE_DIMENSION_TEXTURE2D;
@@ -430,7 +433,7 @@ void NytApp::CreateDepthStencilView()
 	m_d3dDevice->CreateDepthStencilView(m_depthStencil.Get(), &depthStencilViewDesc, m_dsvHeap->GetCPUDescriptorHandleForHeapStart());
 }
 
-void NytApp::CreateRootSignature()
+void GameApp::CreateRootSignature()
 {
 	CD3DX12_DESCRIPTOR_RANGE ranges[1]{};
 	ranges[0].Init(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 1, 0, 0, D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND);
@@ -466,20 +469,20 @@ void NytApp::CreateRootSignature()
 	DX::ThrowIfFailed(m_d3dDevice->CreateRootSignature(0, signature->GetBufferPointer(), signature->GetBufferSize(), IID_PPV_ARGS(&m_rootSignature)));
 }
 
-void NytApp::CreateCommandList()
+void GameApp::CreateCommandList()
 {
 	DX::ThrowIfFailed(m_d3dDevice->CreateCommandList(0, D3D12_COMMAND_LIST_TYPE_DIRECT, m_commandAllocators.Get(), nullptr, IID_PPV_ARGS(&m_commandList)));
 	DX::ThrowIfFailed(m_commandList->Close());
 }
 
-void NytApp::CreateFence()
+void GameApp::CreateFence()
 {
 	DX::ThrowIfFailed(m_d3dDevice->CreateFence(0, D3D12_FENCE_FLAG_NONE, IID_PPV_ARGS(&m_fence)));
 	m_fenceEvent = CreateEvent(NULL, FALSE, FALSE, NULL);
 	++m_fenceValues[m_frameIndex];
 }
 
-void NytApp::Update()
+void GameApp::Update()
 {
 	m_timer->Tick();
 	FLOAT deltaTime{ m_timer->GetDeltaTime() };
@@ -491,7 +494,7 @@ void NytApp::Update()
 		SceneManager::GetInstance()->Update(deltaTime);
 }
 
-void NytApp::Render()
+void GameApp::Render()
 {
 	m_commandList->SetGraphicsRootSignature(m_rootSignature.Get());
 	m_commandList->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(m_renderTargets[m_frameIndex].Get(), D3D12_RESOURCE_STATE_PRESENT, D3D12_RESOURCE_STATE_RENDER_TARGET));
@@ -533,20 +536,20 @@ void NytApp::Render()
 	WaitPrevFrame();
 }
 
-void NytApp::ResetCommandList()
+void GameApp::ResetCommandList()
 {
 	DX::ThrowIfFailed(m_commandAllocators->Reset());
 	DX::ThrowIfFailed(m_commandList->Reset(m_commandAllocators.Get(), nullptr));
 }
 
-void NytApp::ExecuteCommandList()
+void GameApp::ExecuteCommandList()
 {
 	DX::ThrowIfFailed(m_commandList->Close());
 	ID3D12CommandList* ppCommandList[]{ m_commandList.Get() };
 	m_commandQueue->ExecuteCommandLists(_countof(ppCommandList), ppCommandList);
 }
 
-void NytApp::WaitPrevFrame()
+void GameApp::WaitPrevFrame()
 {
 	const UINT64 currentFenceValue{ m_fenceValues[m_frameIndex] };
 	DX::ThrowIfFailed(m_commandQueue->Signal(m_fence.Get(), currentFenceValue));
@@ -561,7 +564,7 @@ void NytApp::WaitPrevFrame()
 	m_fenceValues[m_frameIndex] = currentFenceValue + 1;
 }
 
-void NytApp::WaitForGPU()
+void GameApp::WaitForGPU()
 {
 	DX::ThrowIfFailed(m_commandQueue->Signal(m_fence.Get(), m_fenceValues[m_frameIndex]));
 	DX::ThrowIfFailed(m_fence->SetEventOnCompletion(m_fenceValues[m_frameIndex], m_fenceEvent));

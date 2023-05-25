@@ -2,11 +2,11 @@
 
 class Timer;
 
-class NytApp : public TSingleton<NytApp>
+class GameApp : public TSingleton<GameApp>
 {
 public:
-	NytApp();
-	~NytApp() = default;
+	GameApp();
+	~GameApp() = default;
 
 	void OnCreate();
 
@@ -52,7 +52,7 @@ private:
 	void WaitForGPU();
 
 private:
-	static constexpr UINT FrameCount = 3;
+	static constexpr UINT FRAME_COUNT = 3;
 
 	// Window
 	HINSTANCE m_hInstance;
@@ -67,7 +67,7 @@ private:
 	ComPtr<ID3D12CommandAllocator> m_commandAllocators;
 	ComPtr<ID3D12GraphicsCommandList> m_commandList;
 	ComPtr<ID3D12DescriptorHeap> m_rtvHeap;
-	ComPtr<ID3D12Resource> m_renderTargets[FrameCount];
+	ComPtr<ID3D12Resource> m_renderTargets[FRAME_COUNT];
 	ComPtr<ID3D12DescriptorHeap> m_dsvHeap;
 	ComPtr<ID3D12Resource> m_depthStencil;
 	ComPtr<ID3D12RootSignature> m_rootSignature;
@@ -76,19 +76,19 @@ private:
 	D3D12_RECT m_scissorRect;
 	UINT m_frameIndex;
 	HANDLE m_fenceEvent;
-	UINT64 m_fenceValues[FrameCount];
+	UINT64 m_fenceValues[FRAME_COUNT];
 	UINT m_rtvDescriptorSize;
 
 	// Direct3D11on12
 	ComPtr<ID3D11On12Device> m_d3d11On12Device;
 	ComPtr<ID3D11DeviceContext> m_d3d11DeviceContext;
-	ComPtr<ID3D11Resource> m_wrappedBackBuffers[FrameCount];
+	ComPtr<ID3D11Resource> m_wrappedBackBuffers[FRAME_COUNT];
 
 	// Direct2D
 	ComPtr<ID2D1Factory3> m_d2dFactory;
 	ComPtr<ID2D1Device2> m_d2dDevice;
 	ComPtr<ID2D1DeviceContext2> m_d2dDeviceContext;
-	ComPtr<ID2D1Bitmap1> m_d2dRenderTargets[FrameCount];
+	ComPtr<ID2D1Bitmap1> m_d2dRenderTargets[FRAME_COUNT];
 
 	// DirectWrite
 	ComPtr<IDWriteFactory5>	m_dwriteFactory;

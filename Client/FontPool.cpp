@@ -1,6 +1,6 @@
 ﻿#include "Stdafx.h"
 #include "FontPool.h"
-#include "NytApp.h"
+#include "GameApp.h"
 
 FontPool::FontPool()
 {
@@ -36,7 +36,7 @@ FontPool::FontPool()
 	};
 
 	// 폰트 로딩
-	auto dwriteFactory{ NytApp::GetInstance()->GetDwriteFactory() };
+	auto dwriteFactory{ GameApp::GetInstance()->GetDwriteFactory() };
 	for (const auto& fontLoadInfo : fontLoadInfoList)
 	{
 		auto fontInfo = LoadFont(fontLoadInfo.fontPath);
@@ -71,7 +71,7 @@ ComPtr<IDWriteTextFormat> FontPool::GetFont(Type type) const
 
 FontPool::FontInfo FontPool::LoadFont(const std::wstring& filePath)
 {
-	auto dwriteFactory{ NytApp::GetInstance()->GetDwriteFactory() };
+	auto dwriteFactory{ GameApp::GetInstance()->GetDwriteFactory() };
 
 	ComPtr<IDWriteFontFile> fontFile;
 	dwriteFactory->CreateFontFileReference(filePath.c_str(), nullptr, &fontFile);

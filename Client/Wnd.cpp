@@ -1,7 +1,7 @@
 ﻿#include "Stdafx.h"
 #include "Wnd.h"
 #include "WndManager.h"
-#include "NytApp.h"
+#include "GameApp.h"
 #include "Button.h"
 #include "EditCtrl.h"
 
@@ -73,7 +73,7 @@ void Wnd::Update(FLOAT deltaTime)
 	{
 		POINT mouse;
 		GetCursorPos(&mouse);
-		ScreenToClient(NytApp::GetInstance()->GetHwnd(), &mouse);
+		ScreenToClient(GameApp::GetInstance()->GetHwnd(), &mouse);
 		SetPosition(FLOAT2{ static_cast<FLOAT>(mouse.x + m_pickDelta.x), static_cast<FLOAT>(mouse.y + m_pickDelta.y) });
 	}
 	
@@ -135,7 +135,7 @@ void Wnd::SetPick(BOOL isPick)
 	{
 		POINT mouse;
 		GetCursorPos(&mouse);
-		ScreenToClient(NytApp::GetInstance()->GetHwnd(), &mouse);
+		ScreenToClient(GameApp::GetInstance()->GetHwnd(), &mouse);
 
 		m_pickDelta.x = m_position.x - mouse.x;
 		m_pickDelta.y = m_position.y - mouse.y;

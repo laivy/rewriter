@@ -47,7 +47,6 @@ using Microsoft::WRL::ComPtr;
 
 // Nyaight
 #include "Common.h"
-#include "NytType.h"
 #include "Singleton.h"
 #include "StringTable.h"
 #include "Util.h"

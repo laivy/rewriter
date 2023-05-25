@@ -2,7 +2,7 @@
 #include "BrushPool.h"
 #include "EditCtrl.h"
 #include "FontPool.h"
-#include "NytApp.h"
+#include "GameApp.h"
 #include "TextUtil.h"
 #include "Wnd.h"
 
@@ -138,7 +138,7 @@ void EditCtrl::SetText(const std::wstring& text)
 {
 	m_text = text;
 
-	auto dwriteFactory{ NytApp::GetInstance()->GetDwriteFactory() };
+	auto dwriteFactory{ GameApp::GetInstance()->GetDwriteFactory() };
 	dwriteFactory->CreateTextLayout(m_text.c_str(), static_cast<UINT32>(m_text.length()), m_textFormat.Get(), m_size.x, m_size.y, &m_textLayout);
 	m_textLayout->SetParagraphAlignment(DWRITE_PARAGRAPH_ALIGNMENT_CENTER);
 	m_textLayout->SetWordWrapping(DWRITE_WORD_WRAPPING_NO_WRAP);

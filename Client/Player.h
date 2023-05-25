@@ -1,7 +1,7 @@
 ﻿#pragma once
 #include "GameObject.h"
 
-class NytProperty;
+class Property;
 
 class Player : public IGameObject
 {
@@ -9,7 +9,7 @@ public:
 	class AnimationComponent
 	{
 	public:
-		enum class Type
+		enum class AnimationType
 		{
 			STAND, ATTACK1, ATTACK2
 		};
@@ -23,7 +23,7 @@ public:
 
 		void Update(FLOAT deltaTime);
 
-		void PlayAnimation(Type type);
+		void PlayAnimation(AnimationType type);
 		void SetShaderVariable(const ComPtr<ID3D12GraphicsCommandList>& commandList) const;
 
 	private:
@@ -31,11 +31,11 @@ public:
 
 		Player* m_player;
 
-		Type m_type;
-		INT m_frame;
-		FLOAT m_timer;
-		NytProperty* m_root;
-		NytProperty* m_currAniProp;
+		AnimationType m_type;
+		int m_frame;
+		float m_timer;
+		Property* m_root;
+		Property* m_currAniProp;
 	};
 
 	class InputComponent
@@ -47,8 +47,18 @@ public:
 		void Update(FLOAT deltaTime);
 
 	private:
-		static constexpr auto SPEED = 50.0f;
+		Player* m_player;
+	};
 
+	class CollisionComponent
+	{
+	public:
+		CollisionComponent(Player* player);
+		~CollisionComponent() = default;
+
+		void Update(FLOAT deltaTime);
+
+	private:
 		Player* m_player;
 	};
 
@@ -62,4 +72,8 @@ public:
 private:
 	AnimationComponent m_animationComponent;
 	InputComponent m_inputComponent;
+	CollisionComponent m_collisionComponent;
+
+	bool m_isOnPlatform;
+	int m_speed;
 };

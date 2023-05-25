@@ -1,12 +1,15 @@
 ﻿#pragma once
 #include "Stdafx.h"
-#include "NytApp.h"
+#include "GameApp.h"
 
 template <class T>
 class ConstantBuffer
 {
 public:
-	ConstantBuffer() : m_data{ nullptr } { }
+	ConstantBuffer() : 
+		m_data{ nullptr }
+	{ }
+
 	~ConstantBuffer()
 	{
 		if (m_buffer)
@@ -15,7 +18,7 @@ public:
 
 	void Init()
 	{
-		auto device{ NytApp::GetInstance()->GetD3DDevice() };
+		auto device{ GameApp::GetInstance()->GetD3DDevice() };
 
 		const UINT size{ (sizeof(T) + 255) & ~255 };
 		CD3DX12_HEAP_PROPERTIES prop{ D3D12_HEAP_TYPE_UPLOAD };

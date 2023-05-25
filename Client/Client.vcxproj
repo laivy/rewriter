@@ -164,16 +164,22 @@
     <ClCompile Include="LogoScene.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Use</PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="Map.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Use</PrecompiledHeader>
+    </ClCompile>
     <ClCompile Include="Mesh.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Use</PrecompiledHeader>
     </ClCompile>
-    <ClCompile Include="NytApp.cpp">
+    <ClCompile Include="GameApp.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Use</PrecompiledHeader>
     </ClCompile>
-    <ClCompile Include="NytImage.cpp">
+    <ClCompile Include="Image.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Use</PrecompiledHeader>
     </ClCompile>
-    <ClCompile Include="NytProperty.cpp">
+    <ClCompile Include="Property.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Use</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="Platform.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Use</PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="Player.cpp">
@@ -232,12 +238,13 @@
     <ClInclude Include="LoginScene.h" />
     <ClInclude Include="LoginWnd.h" />
     <ClInclude Include="LogoScene.h" />
+    <ClInclude Include="Map.h" />
     <ClInclude Include="Mesh.h" />
-    <ClInclude Include="NytApp.h" />
+    <ClInclude Include="GameApp.h" />
     <ClInclude Include="GameObject.h" />
-    <ClInclude Include="NytType.h" />
-    <ClInclude Include="NytImage.h" />
-    <ClInclude Include="NytProperty.h" />
+    <ClInclude Include="Image.h" />
+    <ClInclude Include="Property.h" />
+    <ClInclude Include="Platform.h" />
     <ClInclude Include="Player.h" />
     <ClInclude Include="ResourceManager.h" />
     <ClInclude Include="Scene.h" />

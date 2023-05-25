@@ -19,13 +19,7 @@ IGameObject::IGameObject() :
 
 void IGameObject::Update(FLOAT deltaTime) { }
 
-void IGameObject::Render(const ComPtr<ID3D12GraphicsCommandList>& commandList) const
-{
-	if (m_shader)
-		commandList->SetPipelineState(m_shader->GetPipelineState());
-	if (m_mesh)
-		m_mesh->Render(commandList);
-}
+void IGameObject::Render(const ComPtr<ID3D12GraphicsCommandList>& commandList) const { }
 
 void IGameObject::Destroy()
 {

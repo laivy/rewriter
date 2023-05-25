@@ -2,13 +2,15 @@
 #include "LoginScene.h"
 #include "LogoScene.h"
 #include "Mesh.h"
-#include "NytApp.h"
-#include "NytImage.h"
-#include "NytProperty.h"
+#include "GameApp.h"
+#include "Image.h"
+#include "Property.h"
 #include "ResourceManager.h"
 #include "SceneManager.h"
 
-LogoScene::LogoScene() : m_prop{ nullptr }, m_isFirstUpdate{ TRUE }
+LogoScene::LogoScene() : 
+	m_prop{ nullptr },
+	m_isFirstUpdate{ TRUE }
 {
 
 }
@@ -21,8 +23,8 @@ LogoScene::~LogoScene()
 void LogoScene::OnCreate()
 {
 	auto rm{ ResourceManager::GetInstance() };
-	rm->AddMesh(Mesh::DEFAULT, new Mesh);
-	m_prop = rm->Load("Main.nyt")->Get<NytProperty>("UIStatus");
+	rm->AddMesh(Mesh::Type::DEFAULT, new Mesh);
+	m_prop = rm->Load("Main.nyt")->Get<Property>("UIStatus");
 }
 
 void LogoScene::OnDestory()
@@ -60,6 +62,6 @@ void LogoScene::Update(FLOAT deltaTime)
 
 void LogoScene::Render(const ComPtr<ID2D1DeviceContext2>& d2dContext) const
 {
-	auto logo{ m_prop->Get<NytImage>("ui") };
+	auto logo{ m_prop->Get<Image>("ui") };
 	logo->Render(d2dContext, 0.0f, 0.0f);
 }

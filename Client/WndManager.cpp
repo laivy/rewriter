@@ -1,7 +1,7 @@
 ﻿#include "Stdafx.h"
 #include "WndManager.h"
 #include "Wnd.h"
-#include "NytApp.h"
+#include "GameApp.h"
 
 WndManager::~WndManager()
 {
@@ -33,7 +33,7 @@ void WndManager::OnMouseEvent(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPa
 
 		POINT mouse;
 		GetCursorPos(&mouse);
-		ScreenToClient(NytApp::GetInstance()->GetHwnd(), &mouse);
+		ScreenToClient(GameApp::GetInstance()->GetHwnd(), &mouse);
 
 		FLOAT2 pos{ w->GetPosition() };
 		mouse.x -= static_cast<LONG>(pos.x);

@@ -3,7 +3,7 @@
 class Shader
 {
 public:
-	enum Type
+	enum class Type
 	{
 		DEFAULT
 	};

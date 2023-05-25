@@ -4,7 +4,9 @@
 #include "Player.h"
 #include "ResourceManager.h"
 
-GameScene::GameScene() : m_camera{ nullptr }, m_player{ nullptr }
+GameScene::GameScene() : 
+	m_camera{ nullptr }, 
+	m_player{ nullptr }
 {
 
 }
@@ -18,7 +20,7 @@ void GameScene::OnCreate()
 {
 	m_camera = std::make_unique<Camera>();
 	m_player = std::make_unique<Player>();
-	m_player->SetPosition(FLOAT2{ 100.0f, 0.0f }, Pivot::CENTER);
+	m_player->SetPosition(FLOAT2{ 100.0f, 0.0f }, Pivot::CENTERBOT);
 }
 
 void GameScene::OnDestory()

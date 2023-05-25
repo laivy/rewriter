@@ -3,6 +3,13 @@
 
 class Camera
 {
+private:
+	struct cbCamera
+	{
+		DirectX::XMMATRIX viewMatrix;
+		DirectX::XMMATRIX projMatrix;
+	};
+
 public:
 	Camera();
 	~Camera() = default;
@@ -26,10 +33,5 @@ private:
 	FLOAT2 m_scale;
 	FLOAT m_degree;
 
-	struct cbCamera
-	{
-		DirectX::XMMATRIX viewMatrix;
-		DirectX::XMMATRIX projMatrix;
-	};
 	ConstantBuffer<cbCamera> m_cbCamera;
 };

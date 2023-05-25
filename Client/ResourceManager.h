@@ -1,9 +1,8 @@
 ﻿#pragma once
+#include "Image.h"
 #include "Mesh.h"
+#include "Property.h"
 #include "Shader.h"
-#include "NytImage.h"
-
-class NytProperty;
 
 class ResourceManager : public TSingleton<ResourceManager>
 {
@@ -11,7 +10,7 @@ public:
 	ResourceManager();
 	~ResourceManager();
 
-	NytProperty* Load(const std::string& filePath);
+	Property* Load(const std::string& filePath);
 	void Unload(const std::string& filePath);
 
 	ID3D12DescriptorHeap* const* GetSrvDescriptorHeap() const;
@@ -28,7 +27,7 @@ private:
 	void CreateSRVHeap();
 	void CreateShaders();
 
-	void Load(std::ifstream& fs, NytProperty* root);
+	void Load(std::ifstream& fs, Property* root);
 
 	template<class T>
 	T Read(std::ifstream& fs)
@@ -50,12 +49,12 @@ private:
 		return std::string{ buffer.get(), static_cast<size_t>(length) };
 	}
 
-	NytImage Read(std::ifstream& fs, NytType type);
+	Image Read(std::ifstream& fs, Property::Type type);
 
 private:
 	std::unordered_map<Mesh::Type, std::unique_ptr<Mesh>> m_meshes;
 	std::unordered_map<Shader::Type, std::unique_ptr<Shader>> m_shaders;
-	std::unordered_map<std::string, std::unique_ptr<NytProperty>> m_properties;
+	std::unordered_map<std::string, std::unique_ptr<Property>> m_properties;
 
 	// SRV
 	enum { SRV_HEAP_COUNT = 100 };

@@ -1,7 +1,5 @@
 ﻿#include "Stdafx.h"
 #include "ResourceManager.h"
-#include "NytImage.h"
-#include "NytProperty.h"
 
 ResourceManager::ResourceManager()
 {
@@ -16,7 +14,7 @@ ResourceManager::~ResourceManager()
 
 }
 
-NytProperty* ResourceManager::Load(const std::string& filePath)
+Property* ResourceManager::Load(const std::string& filePath)
 {
 	// 이미 로딩된 데이터인지 확인
 	if (m_properties.contains(filePath))
@@ -27,7 +25,7 @@ NytProperty* ResourceManager::Load(const std::string& filePath)
 	assert(ifstream);
 
 	// 루트 노드
-	std::unique_ptr<NytProperty> root{ new NytProperty };
+	std::unique_ptr<Property> root{ new Property };
 
 	// 하위 노드 로드
 	int nodeCount{ Read<int>(ifstream) };
@@ -63,7 +61,7 @@ void ResourceManager::CreateShaderResourceView(ID3D12Resource* const resource)
 	if (m_shaderResources.contains(resource))
 		return;
 
-	auto d3dDevice{ NytApp::GetInstance()->GetD3DDevice() };
+	auto d3dDevice{ GameApp::GetInstance()->GetD3DDevice() };
 	auto index{ static_cast<int>(m_shaderResources.size()) };
 
 	CD3DX12_CPU_DESCRIPTOR_HANDLE srvDescriptorHandle{ m_srvHeap->GetCPUDescriptorHandleForHeapStart() };
@@ -105,7 +103,7 @@ Shader* ResourceManager::GetShader(Shader::Type key) const
 
 void ResourceManager::CreateSRVHeap()
 {
-	auto d3dDevice{ NytApp::GetInstance()->GetD3DDevice() };
+	auto d3dDevice{ GameApp::GetInstance()->GetD3DDevice() };
 
 	D3D12_DESCRIPTOR_HEAP_DESC srvHeapDesc{};
 	srvHeapDesc.NumDescriptors = static_cast<UINT>(SRV_HEAP_COUNT);
@@ -116,53 +114,53 @@ void ResourceManager::CreateSRVHeap()
 
 void ResourceManager::CreateShaders()
 {
-	m_shaders.emplace(Shader::DEFAULT, new Shader);
+	m_shaders.emplace(Shader::Type::DEFAULT, new Shader);
 }
 
-void ResourceManager::Load(std::ifstream& fs, NytProperty* root)
+void ResourceManager::Load(std::ifstream& fs, Property* root)
 {
-	NytType type{ Read<BYTE>(fs) };
+	Property::Type type{ Read<BYTE>(fs) };
 	std::string name{ Read<std::string>(fs) };
 	std::any data{};
 
 	switch (type)
 	{
-	case NytType::GROUP:
+	case Property::Type::GROUP:
 		break;
-	case NytType::INT:
+	case Property::Type::INT:
 		data = new int{ Read<int>(fs) };
 		break;
-	case NytType::INT2:
+	case Property::Type::INT2:
 		data = new INT2{ Read<INT2>(fs) };
 		break;
-	case NytType::FLOAT:
+	case Property::Type::FLOAT:
 		data = new float{ Read<float>(fs) };
 		break;
-	case NytType::STRING:
+	case Property::Type::STRING:
 		data = new std::string{ Read<std::string>(fs) };
 		break;
-	case NytType::D2DImage:
-	case NytType::D3DImage:
-		data = new NytImage{ Read(fs, type) };
+	case Property::Type::D2DImage:
+	case Property::Type::D3DImage:
+		data = new Image{ Read(fs, type) };
 		break;
 	default:
 		assert(false);
 	}
 
-	root->m_childProps.emplace(name, new NytProperty{ type, data });
+	root->m_childProps.emplace(name, new Property{ type, data });
 
 	int childNodeCount{ Read<int>(fs) };
 	for (int i = 0; i < childNodeCount; ++i)
 		Load(fs, root->m_childProps[name].get());
 }
 
-NytImage ResourceManager::Read(std::ifstream& fs, NytType type)
+Image ResourceManager::Read(std::ifstream& fs, Property::Type type)
 {
 	int length{ Read<int>(fs) };
 	std::unique_ptr<BYTE> buffer{ new BYTE[length] };
 	fs.read(reinterpret_cast<char*>(buffer.get()), length);
 
-	if (type == NytType::D2DImage)
+	if (type == Property::Type::D2DImage)
 	{
 		ComPtr<IWICImagingFactory> factory;
 		ComPtr<IWICBitmapDecoder> decoder;
@@ -180,17 +178,17 @@ NytImage ResourceManager::Read(std::ifstream& fs, NytType type)
 		hr = decoder->GetFrame(0, &frameDecode);
 		hr = converter->Initialize(frameDecode.Get(), GUID_WICPixelFormat32bppPBGRA, WICBitmapDitherTypeNone, NULL, 0.0f, WICBitmapPaletteTypeMedianCut);
 
-		auto d2dContext{ NytApp::GetInstance()->GetD2DContext() };
+		auto d2dContext{ GameApp::GetInstance()->GetD2DContext() };
 		hr = d2dContext->CreateBitmapFromWicBitmap(converter.Get(), &bitmap);
 		assert(SUCCEEDED(hr));
 
-		return NytImage{ bitmap };
+		return Image{ bitmap };
 	}
-	else if (type == NytType::D3DImage)
+	else if (type == Property::Type::D3DImage)
 	{
 		ID3D12Resource* bitmap;
 		ComPtr<ID3D12Resource> uploadBuffer;
-		auto d3dDevice{ NytApp::GetInstance()->GetD3DDevice() };
+		auto d3dDevice{ GameApp::GetInstance()->GetD3DDevice() };
 		std::unique_ptr<uint8_t[]> decodedData;
 		D3D12_SUBRESOURCE_DATA subresource;
 		DirectX::LoadWICTextureFromMemoryEx(
@@ -216,7 +214,7 @@ NytImage ResourceManager::Read(std::ifstream& fs, NytType type)
 			IID_PPV_ARGS(&uploadBuffer)
 		));
 
-		auto commandList{ NytApp::GetInstance()->GetCommandList() };
+		auto commandList{ GameApp::GetInstance()->GetCommandList() };
 		UpdateSubresources(commandList, bitmap, uploadBuffer.Get(), 0, 0, 1, &subresource);
 
 		// GPU 메모리에 복사가 끝난 뒤에 해제해야함
@@ -225,7 +223,7 @@ NytImage ResourceManager::Read(std::ifstream& fs, NytType type)
 		// SRV 생성
 		CreateShaderResourceView(bitmap);
 
-		return NytImage{ bitmap };
+		return Image{ bitmap };
 	}
 	assert(false);
 }
