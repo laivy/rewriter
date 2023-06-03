@@ -11,7 +11,11 @@ public:
 	public:
 		enum class AnimationType
 		{
-			STAND, ATTACK1, ATTACK2
+			NONE,
+			IDLE,
+			RUN,
+			JUMP,
+			FALL
 		};
 
 	public:
@@ -20,22 +24,26 @@ public:
 
 		void OnAnimationStart();
 		void OnAnimationEnd();
+		void OnFrameChange();
 
 		void Update(FLOAT deltaTime);
 
 		void PlayAnimation(AnimationType type);
 		void SetShaderVariable(const ComPtr<ID3D12GraphicsCommandList>& commandList) const;
 
+		AnimationType GetAnimationType() const;
+
 	private:
-		static constexpr auto FRAME_INTERVAL = 0.2f;
+		static constexpr auto DEFAULT_FRAME_INTERVAL = 0.2f;
 
 		Player* m_player;
 
 		AnimationType m_type;
-		int m_frame;
-		float m_timer;
+		INT m_frame;
+		FLOAT m_timer;
 		Property* m_root;
 		Property* m_currAniProp;
+		Property* m_currFrameProp;
 	};
 
 	class InputComponent
@@ -48,6 +56,33 @@ public:
 
 	private:
 		Player* m_player;
+	};
+
+	class PhysicsComponent
+	{
+	public:
+		enum class Direction
+		{
+			LEFT = -1,
+			NONE = 0,
+			RIGHT = 1
+		};
+
+	public:
+		PhysicsComponent(Player* player);
+		~PhysicsComponent() = default;
+
+		void OnLanding();
+
+		void Update(FLOAT deltaTime);
+
+		void Move(Direction direction);
+		void Jump();
+
+	private:
+		Player* m_player;
+		Direction m_direction;
+		FLOAT2 m_speed;
 	};
 
 	class CollisionComponent
@@ -70,10 +105,8 @@ public:
 	virtual void Render(const ComPtr<ID3D12GraphicsCommandList>& commandList) const;
 
 private:
-	AnimationComponent m_animationComponent;
 	InputComponent m_inputComponent;
+	PhysicsComponent m_physicsComponent;
 	CollisionComponent m_collisionComponent;
-
-	bool m_isOnPlatform;
-	int m_speed;
+	AnimationComponent m_animationComponent;
 };

@@ -42,12 +42,12 @@ public:
 			std::string childName{ name.substr(0, pos) };
 			if (m_childProps.contains(childName))
 				return m_childProps.at(childName)->Get<T>(name.substr(pos + 1));
-			assert(false);
+			return nullptr;
 		}
 
 		// 해당 이름의 자식 프로퍼티가 있는지 확인
 		if (!m_childProps.contains(name))
-			assert(false);
+			return nullptr;
 
 		if constexpr (std::is_same_v<T, Property>)
 			return m_childProps.at(name).get();

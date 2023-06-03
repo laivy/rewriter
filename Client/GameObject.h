@@ -10,7 +10,7 @@ private:
 	struct cbGameObject
 	{
 		DirectX::XMFLOAT4X4 worldMatrix;
-		FLOAT layer;
+		INT layer;
 		FLOAT alpha;
 		BOOL isFliped;
 		FLOAT dummy;

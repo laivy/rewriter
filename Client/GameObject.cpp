@@ -35,7 +35,7 @@ void IGameObject::SetLayer(Layer layer)
 {
 	m_layer = layer;
 	if (m_cbGameObject.IsValid())
-		m_cbGameObject->layer = static_cast<float>(layer) / static_cast<float>(Layer::COUNT);
+		m_cbGameObject->layer = static_cast<INT>(layer);
 }
 
 void IGameObject::SetSize(const FLOAT2& size)

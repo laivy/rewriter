@@ -8,6 +8,7 @@ public:
 	Map() = default;
 	~Map() = default;
 
-private:
+public:
 	int m_id;
+	std::vector<Platform> m_platforms;
 };
