@@ -1,12 +1,15 @@
 ﻿#include "Stdafx.h"
 #include "Camera.h"
 #include "GameScene.h"
+#include "Map.h"
+#include "Platform.h"
 #include "Player.h"
 #include "ResourceManager.h"
 
-GameScene::GameScene() : 
-	m_camera{ nullptr }, 
-	m_player{ nullptr }
+GameScene::GameScene() :
+	m_camera{ nullptr },
+	m_player{ nullptr },
+	m_map{ nullptr }
 {
 
 }
@@ -20,7 +23,12 @@ void GameScene::OnCreate()
 {
 	m_camera = std::make_unique<Camera>();
 	m_player = std::make_unique<Player>();
-	m_player->SetPosition(FLOAT2{ 100.0f, 0.0f }, Pivot::CENTERBOT);
+	m_player->SetPosition(FLOAT2{ 0.0f, 500.0f }, Pivot::CENTERBOT);
+
+	m_map = std::make_unique<Map>();
+	m_map->m_platforms.emplace_back(INT2{ -50, 0 }, INT2{ 50, 0 });
+	m_map->m_platforms.emplace_back(INT2{ 50, 0 }, INT2{ 1000, 0 });
+	m_map->m_platforms.emplace_back(INT2{ -500, -100 }, INT2{ 500, -100 });
 }
 
 void GameScene::OnDestory()
@@ -54,4 +62,9 @@ void GameScene::Render(const ComPtr<ID3D12GraphicsCommandList>& commandList) con
 void GameScene::Render(const ComPtr<ID2D1DeviceContext2>& d2dContext) const
 {
 
+}
+
+Map* GameScene::GetMap() const
+{
+	return m_map.get();
 }

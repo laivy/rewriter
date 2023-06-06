@@ -1,6 +1,7 @@
 ﻿#pragma once
 #include "GameObject.h"
 
+class Platform;
 class Property;
 
 class Player : public IGameObject
@@ -73,6 +74,7 @@ public:
 		~PhysicsComponent() = default;
 
 		void OnLanding();
+		void OnFalling();
 
 		void Update(FLOAT deltaTime);
 
@@ -80,21 +82,13 @@ public:
 		void Jump();
 
 	private:
-		Player* m_player;
-		Direction m_direction;
-		FLOAT2 m_speed;
-	};
-
-	class CollisionComponent
-	{
-	public:
-		CollisionComponent(Player* player);
-		~CollisionComponent() = default;
-
-		void Update(FLOAT deltaTime);
+		const Platform* GetTopPlatformBelowPosition(const FLOAT2& position);
 
 	private:
 		Player* m_player;
+		const Platform* m_platform;
+		Direction m_direction;
+		FLOAT2 m_speed;
 	};
 
 public:
@@ -107,6 +101,5 @@ public:
 private:
 	InputComponent m_inputComponent;
 	PhysicsComponent m_physicsComponent;
-	CollisionComponent m_collisionComponent;
 	AnimationComponent m_animationComponent;
 };

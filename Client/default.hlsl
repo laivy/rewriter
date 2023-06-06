@@ -39,10 +39,6 @@ void GS(point GS_INPUT input[1], inout TriangleStream<PS_INPUT> triangleStream)
 	
 	float2 uv[4] =
 	{
-		//float2(g_isFliped - 0.0f, 1.0f),
-		//float2(g_isFliped - 0.0f, 0.0f),
-		//float2(g_isFliped - 1.0f, 1.0f),
-		//float2(g_isFliped - 1.0f, 0.0f)
 		float2(0.0f + g_isFliped, 1.0f),
 		float2(0.0f + g_isFliped, 0.0f),
 		float2(1.0f - g_isFliped, 1.0f),

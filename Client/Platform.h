@@ -9,6 +9,9 @@ public:
 
 	virtual void Render(const ComPtr<ID3D12GraphicsCommandList>& commandList) const override;
 
+	std::pair<INT2, INT2> GetStartEndPosition() const;
+	FLOAT GetHeight(FLOAT x) const;
+
 private:
 	INT2 m_startPosition;
 	INT2 m_endPosition;
