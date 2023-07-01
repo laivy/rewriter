@@ -23,6 +23,7 @@ using Microsoft::WRL::ComPtr;
 #include <set>
 #include <string>
 #include <thread>
+#include <variant>
 #include <vector>
 
 // DirectX
@@ -45,7 +46,7 @@ using Microsoft::WRL::ComPtr;
 #include <dxgidebug.h>
 #endif
 
-// Nyaight
+// Game
 #include "Common.h"
 #include "Singleton.h"
 #include "StringTable.h"

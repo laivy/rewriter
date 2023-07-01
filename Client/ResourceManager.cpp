@@ -4,7 +4,6 @@
 ResourceManager::ResourceManager()
 {
 	m_shaderResources.reserve(SRV_HEAP_COUNT);
-
 	CreateSRVHeap();
 	CreateShaders();
 }
@@ -18,23 +17,22 @@ Property* ResourceManager::Load(const std::string& filePath)
 {
 	// 이미 로딩된 데이터인지 확인
 	if (m_properties.contains(filePath))
-		return m_properties[filePath].get();
+		return &m_properties.at(filePath);
 
 	// 파일 로드
 	std::ifstream ifstream{ StringTable::DATA_FOLDER_PATH + filePath, std::ifstream::binary };
-	assert(ifstream);
 
 	// 루트 노드
-	std::unique_ptr<Property> root{ new Property };
+	Property root{};
 
 	// 하위 노드 로드
 	int nodeCount{ Read<int>(ifstream) };
 	for (int i = 0; i < nodeCount; ++i)
-		Load(ifstream, root.get());
+		Load(ifstream, &root);
 
 	// 저장 후 반환
 	m_properties[filePath] = std::move(root);
-	return m_properties[filePath].get();
+	return &m_properties[filePath];
 }
 
 void ResourceManager::Unload(const std::string& filePath)
@@ -119,39 +117,40 @@ void ResourceManager::CreateShaders()
 
 void ResourceManager::Load(std::ifstream& fs, Property* root)
 {
-	Property::Type type{ Read<BYTE>(fs) };
-	std::string name{ Read<std::string>(fs) };
-	std::any data{};
+	Property node{};
+	node.m_type = static_cast<Property::Type>(Read<BYTE>(fs));
 
-	switch (type)
+	std::string name{ Read<std::string>(fs) };
+
+	switch (node.m_type)
 	{
 	case Property::Type::GROUP:
 		break;
 	case Property::Type::INT:
-		data = new int{ Read<int>(fs) };
+		node.m_data = Read<INT>(fs);
 		break;
 	case Property::Type::INT2:
-		data = new INT2{ Read<INT2>(fs) };
+		node.m_data = Read<INT2>(fs);
 		break;
 	case Property::Type::FLOAT:
-		data = new float{ Read<float>(fs) };
+		node.m_data = Read<FLOAT>(fs);
 		break;
 	case Property::Type::STRING:
-		data = new std::string{ Read<std::string>(fs) };
+		node.m_data = Read<std::string>(fs);
 		break;
 	case Property::Type::D2DImage:
 	case Property::Type::D3DImage:
-		data = new Image{ Read(fs, type) };
+		node.m_data = Read(fs, node.m_type);
 		break;
 	default:
 		assert(false);
 	}
 
-	root->m_childProps.emplace(name, new Property{ type, data });
+	root->m_childProps.insert(std::make_pair(name, node));
 
-	int childNodeCount{ Read<int>(fs) };
+	int childNodeCount{ Read<INT>(fs) };
 	for (int i = 0; i < childNodeCount; ++i)
-		Load(fs, root->m_childProps[name].get());
+		Load(fs, &root->m_childProps.at(name));
 }
 
 Image ResourceManager::Read(std::ifstream& fs, Property::Type type)

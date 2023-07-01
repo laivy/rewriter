@@ -54,12 +54,11 @@ private:
 private:
 	std::unordered_map<Mesh::Type, std::unique_ptr<Mesh>> m_meshes;
 	std::unordered_map<Shader::Type, std::unique_ptr<Shader>> m_shaders;
-	std::unordered_map<std::string, std::unique_ptr<Property>> m_properties;
+	std::unordered_map<std::string, Property> m_properties;
+	std::vector<ComPtr<ID3D12Resource>> m_uploadBuffers;
 
 	// SRV
 	enum { SRV_HEAP_COUNT = 100 };
 	ComPtr<ID3D12DescriptorHeap> m_srvHeap;
 	std::unordered_map<ID3D12Resource*, int> m_shaderResources;
-
-	std::vector<ComPtr<ID3D12Resource>> m_uploadBuffers;
 };
