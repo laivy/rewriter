@@ -26,7 +26,7 @@ void GameScene::OnCreate()
 	m_player->SetPosition(FLOAT2{ 0.0f, 500.0f }, Pivot::CENTERBOT);
 
 	m_map = std::make_unique<Map>();
-	m_map->m_platforms.emplace_back(INT2{ -500, -50 }, INT2{ 500, 50 });
+	m_map->m_platforms.emplace_back(std::make_shared<Platform>(INT2{ -500, -50 }, INT2{ 500, 50 }));
 	//m_map->m_platforms.emplace_back(INT2{ 50, 0 }, INT2{ 1000, 0 });
 	//m_map->m_platforms.emplace_back(INT2{ -500, -100 }, INT2{ 500, -100 });
 }

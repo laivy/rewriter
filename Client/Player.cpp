@@ -12,7 +12,8 @@
 Player::Player() :
 	m_inputComponent{ this },
 	m_physicsComponent{ this },
-	m_animationComponent{ this }
+	m_animationComponent{ this },
+	m_direction{ Direction::RIGHT }
 {
 	m_cbGameObject.Init();
 	m_cbGameObject->layer = static_cast<int>(Layer::LOCALPLAYER);
@@ -43,6 +44,46 @@ void Player::Render(const ComPtr<ID3D12GraphicsCommandList>& commandList) const
 		m->Render(commandList);
 }
 
+void Player::OnJump()
+{
+	m_physicsComponent.OnJump();
+	m_animationComponent.OnJump();
+}
+
+void Player::OnLanding()
+{
+	m_physicsComponent.OnLanding();
+	m_animationComponent.OnLanding();
+}
+
+void Player::OnFalling()
+{
+	m_physicsComponent.OnFalling();
+	m_animationComponent.OnFalling();
+}
+
+void Player::SetDirection(Direction direction)
+{
+	m_direction = direction;
+	if (m_cbGameObject.IsValid())
+	{
+		switch (m_direction)
+		{
+		case Direction::LEFT:
+			m_cbGameObject->isFliped = TRUE;
+			break;
+		case Direction::RIGHT:
+			m_cbGameObject->isFliped = FALSE;
+			break;
+		}
+	}
+}
+
+Player::Direction Player::GetDirection() const
+{
+	return m_direction;
+}
+
 Player::AnimationComponent::AnimationComponent(Player* player) : 
 	m_player{ player },
 	m_type{ AnimationType::IDLE },
@@ -54,6 +95,24 @@ Player::AnimationComponent::AnimationComponent(Player* player) :
 {
 	auto rm{ ResourceManager::GetInstance() };
 	m_root = rm->Load("Player.nyt");
+	PlayAnimation(AnimationType::FALL);
+}
+
+void Player::AnimationComponent::OnJump()
+{
+	PlayAnimation(AnimationType::JUMP);
+}
+
+void Player::AnimationComponent::OnLanding()
+{
+	if (m_player->GetDirection() == Direction::NONE)
+		PlayAnimation(AnimationType::IDLE);
+	else
+		PlayAnimation(AnimationType::RUN);
+}
+
+void Player::AnimationComponent::OnFalling()
+{
 	PlayAnimation(AnimationType::FALL);
 }
 
@@ -86,30 +145,8 @@ void Player::AnimationComponent::OnFrameChange()
 
 void Player::AnimationComponent::Update(FLOAT deltaTime)
 {
-	m_timer += deltaTime;
-
-	FLOAT interval{ DEFAULT_FRAME_INTERVAL };
-	do
-	{
-		if (auto currFrameInterval{ m_currFrameProp->Get<FLOAT>("interval") })
-			interval = *currFrameInterval;
-
-		if (m_timer >= interval)
-		{
-			if (m_frame >= m_currAniProp->GetChildCount() - 1)
-			{
-				// OnAnimationEnd에서 PlayAnimation을 호출하여 m_timer값이 0이되버리므로 저장해줬다가 다시 설정해줌
-				FLOAT timer{ m_timer };
-				OnAnimationEnd();
-				m_timer = timer - interval;
-				continue;
-			}
-
-			++m_frame;
-			m_timer -= interval;
-			OnFrameChange();
-		}
-	} while (m_timer >= interval);
+	UpdateAnimationType(deltaTime);
+	UpdateAnimationFrame(deltaTime);
 }
 
 void Player::AnimationComponent::PlayAnimation(AnimationType type)
@@ -150,6 +187,49 @@ Player::AnimationComponent::AnimationType Player::AnimationComponent::GetAnimati
 	return m_type;
 }
 
+void Player::AnimationComponent::UpdateAnimationType(float deltaTime)
+{
+	auto type{ AnimationType::NONE };
+	if (m_type != AnimationType::JUMP && m_type != AnimationType::FALL)
+	{
+		if (m_player->GetDirection() != Direction::NONE)
+			type = AnimationType::RUN;
+		else
+			type = AnimationType::IDLE;
+	}
+
+	if (type != AnimationType::NONE && m_type != type)
+		PlayAnimation(type);
+}
+
+void Player::AnimationComponent::UpdateAnimationFrame(float deltaTime)
+{
+	m_timer += deltaTime;
+
+	FLOAT interval{ DEFAULT_FRAME_INTERVAL };
+	do
+	{
+		if (auto currFrameInterval{ m_currFrameProp->Get<FLOAT>("interval") })
+			interval = *currFrameInterval;
+
+		if (m_timer >= interval)
+		{
+			if (m_frame >= m_currAniProp->GetChildCount() - 1)
+			{
+				// OnAnimationEnd에서 PlayAnimation을 호출하여 m_timer값이 0이되버리므로 저장해줬다가 다시 설정해줌
+				FLOAT timer{ m_timer };
+				OnAnimationEnd();
+				m_timer = timer - interval;
+				continue;
+			}
+
+			++m_frame;
+			m_timer -= interval;
+			OnFrameChange();
+		}
+	} while (m_timer >= interval);
+}
+
 Player::InputComponent::InputComponent(Player* player) : 
 	m_player{ player }
 {
@@ -163,86 +243,78 @@ void Player::InputComponent::Update(FLOAT deltaTime)
 		--dir;
 	if (GetAsyncKeyState(VK_RIGHT) & 0x8000)
 		++dir;
-	m_player->m_physicsComponent.Move(static_cast<PhysicsComponent::Direction>(dir));
+	m_player->SetDirection(static_cast<Direction>(dir));
 
 	// 점프
-	bool isJumped{ false };
-	if (GetAsyncKeyState('C') & 0x8000)
+	if (GetAsyncKeyState('C') & 0x8000 && m_player->m_physicsComponent.CanJump())
 	{
-		m_player->m_physicsComponent.Jump();
-		isJumped = true;
+		m_player->OnJump();
 	}
-
-	// 애니메이션 재생
-	auto animationType{ AnimationComponent::AnimationType::NONE };
-	if (isJumped)
-		animationType = AnimationComponent::AnimationType::JUMP;
-	else if (m_player->m_animationComponent.GetAnimationType() != AnimationComponent::AnimationType::JUMP && m_player->m_animationComponent.GetAnimationType() != AnimationComponent::AnimationType::FALL)
-	{
-		if (dir != 0)
-			animationType = AnimationComponent::AnimationType::RUN;
-		else
-			animationType = AnimationComponent::AnimationType::IDLE;
-	}
-
-	if (animationType != AnimationComponent::AnimationType::NONE &&
-		m_player->m_animationComponent.GetAnimationType() != animationType)
-		m_player->m_animationComponent.PlayAnimation(animationType);
 }
 
 Player::PhysicsComponent::PhysicsComponent(Player* player) :
 	m_player{ player },
-	m_platform{ nullptr },
-	m_direction{ Direction::NONE },
-	m_speed{ 100.0f, 0.0f }
+	m_platform{},
+	m_speed{ 100.0f, 0.0f },
+	m_isOnPlatform{ false },
+	m_isJumping{ false }
 {
 }
 
 void Player::PhysicsComponent::OnLanding()
 {
-	m_player->m_position.y = m_platform->GetHeight(m_player->GetPosition().x);
-	m_speed.y = 0.0f;
-
-	if (m_player->m_animationComponent.GetAnimationType() == AnimationComponent::AnimationType::JUMP ||
-		m_player->m_animationComponent.GetAnimationType() == AnimationComponent::AnimationType::FALL)
+	if (auto p{ m_platform.lock() })
 	{
-		if (GetAsyncKeyState(VK_LEFT) & 0x8000 || GetAsyncKeyState(VK_RIGHT) & 0x8000)
-			m_player->m_animationComponent.PlayAnimation(AnimationComponent::AnimationType::RUN);
-		else
-			m_player->m_animationComponent.PlayAnimation(AnimationComponent::AnimationType::IDLE);
+		m_player->m_position.y = p->GetHeight(m_player->GetPosition().x);
 	}
+	m_speed.y = 0.0f;
+	m_isOnPlatform = true;
+	m_isJumping = false;
 }
 
 void Player::PhysicsComponent::OnFalling()
 {
-	m_player->m_animationComponent.PlayAnimation(AnimationComponent::AnimationType::FALL);
+	m_isOnPlatform = false;
 }
 
 void Player::PhysicsComponent::Update(FLOAT deltaTime)
 {
 	FLOAT2 beforePlayerPosition{ m_player->GetPosition() };
 	FLOAT2 afterPlayerPosition{};
-	const Platform* beforePlatform{ m_platform };
-	const Platform* afterPlatform{ nullptr };
+	std::shared_ptr<Platform> beforePlatform{ m_platform.lock() };
+	std::shared_ptr<Platform> afterPlatform{};
 
-	// 이동. 현재 플렛폼의 높이와 플레이어의 높이가 같다면 플렛폼 위에 서있다는 것
-	if (m_speed.y < 0.0f && m_platform && m_platform->GetHeight(beforePlayerPosition.x) == beforePlayerPosition.y)
+	// 플렛폼 위에서 움직이는 경우
+	if (m_isOnPlatform)
+	{
+		// x축으로만 움직인 뒤, 여전히 같은 플렛폼 위에 있다면 높이를 해당 위치의 플렛폼 높이로 설정
+		// 그 외의 경우엔 기존 플렛폼에서 벗어나는 것이므로 y축으로도 움직임
+		m_player->Move(FLOAT2{ static_cast<int>(m_player->GetDirection()) * m_speed.x * deltaTime, 0.0f });
+		FLOAT2 pos{ m_player->GetPosition() };
+		if (beforePlatform->IsBetweenX(pos.x))
+			m_player->SetPosition(FLOAT2{ pos.x, beforePlatform->GetHeight(pos.x) }, Pivot::CENTERBOT);
+		else
+			m_player->Move(FLOAT2{ 0.0f, m_speed.y * deltaTime });
 		m_speed.y = 0.0f;
-	m_player->Move(FLOAT2{ static_cast<int>(m_direction) * m_speed.x * deltaTime, m_speed.y * deltaTime });
+	}
+	else
+	{
+		m_player->Move(FLOAT2{ static_cast<int>(m_player->GetDirection()) * m_speed.x * deltaTime, m_speed.y * deltaTime });
+	}
 
 	// 현재 위치에서 가장 높은 플렛폼 계산
 	afterPlayerPosition = m_player->GetPosition();
-	afterPlatform = GetTopPlatformBelowPosition(afterPlayerPosition);
+	afterPlatform = GetTopPlatformBelowPosition(afterPlayerPosition).lock();
 
 	// 움직이기 이전, 이후 플레이어 y좌표 사이에 이전 플렛폼 높이가 있다면 착지한 것
 	FLOAT platformHeight{ -FLT_MAX };
 	if (beforePlatform)
 		platformHeight = beforePlatform->GetHeight(beforePlayerPosition.x);
-	if (afterPlayerPosition.y < platformHeight && platformHeight < beforePlayerPosition.y)
+	if (afterPlayerPosition.y < platformHeight && platformHeight < beforePlayerPosition.y && !m_isOnPlatform)
 	{
 		afterPlatform = beforePlatform;
 		m_platform = beforePlatform;
-		OnLanding();
+		m_player->OnLanding();
 	}
 	else
 	{
@@ -251,55 +323,47 @@ void Player::PhysicsComponent::Update(FLOAT deltaTime)
 
 	// 이전, 이후 플렛폼이 다르고 이후 플렛폼이 없거나 이전 플렛폼의 높이가 이후 플렛폼의 높이보다 크면 플렛폼을 벗어나 떨어지는 것
 	if (beforePlatform != afterPlatform && (!afterPlatform || (beforePlatform && afterPlatform && beforePlatform->GetHeight(beforePlayerPosition.x) > afterPlatform->GetHeight(afterPlayerPosition.x))))
-		OnFalling();
+		m_player->OnFalling();
 
 	// 중력 적용
-	m_speed.y -= 980.0f * deltaTime;
+	m_speed.y = std::max(m_speed.y - GRAVITY * deltaTime, MIN_Y_SPEED);
 }
 
-void Player::PhysicsComponent::Move(Direction direction)
+void Player::PhysicsComponent::OnJump()
 {
-	m_direction = direction;
-	
-	switch (m_direction)
-	{
-	case Direction::LEFT:
-		m_player->m_cbGameObject->isFliped = TRUE;
-		break;
-	case Direction::RIGHT:
-		m_player->m_cbGameObject->isFliped = FALSE;
-		break;
-	}
+	m_speed.y = 500.0f;
+	m_isOnPlatform = false;
+	m_isJumping = true;
 }
 
-void Player::PhysicsComponent::Jump()
+bool Player::PhysicsComponent::CanJump() const
 {
-	m_speed.y = 300.0f;
+	return !m_isJumping;
 }
 
-const Platform* Player::PhysicsComponent::GetTopPlatformBelowPosition(const FLOAT2& position) const
+std::weak_ptr<Platform> Player::PhysicsComponent::GetTopPlatformBelowPosition(const FLOAT2& position) const
 {
 	Map* map{ GameScene::GetInstance()->GetMap() };
 	if (!map)
-		return nullptr;
+		return {};
 
-	const Platform* topPlatform{ nullptr };
+	std::weak_ptr<Platform> topPlatform{};
 	FLOAT topPlatformHeight{ -FLT_MAX };
 	FLOAT2 playerPosition{ m_player->GetPosition() };
 
 	for (const auto& p : map->GetPlatforms())
 	{
-		auto [s, e] { p.GetStartEndPosition() };
+		auto [s, e] { p->GetStartEndPosition() };
 		if (position.x < s.x || position.x > e.x)
 			continue;
 
-		FLOAT platformHeight{ p.GetHeight(playerPosition.x) };
+		FLOAT platformHeight{ p->GetHeight(playerPosition.x) };
 		if (platformHeight > playerPosition.y ||
 			platformHeight < topPlatformHeight)
 			continue;
 
 		topPlatformHeight = platformHeight;
-		topPlatform = &p;
+		topPlatform = p;
 	}
 	return topPlatform;
 }

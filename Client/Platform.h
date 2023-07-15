@@ -11,6 +11,8 @@ public:
 
 	std::pair<INT2, INT2> GetStartEndPosition() const;
 	float GetHeight(FLOAT x) const;
+	bool IsBetweenX(float x) const;
+	bool IsBetweenY(float y) const;
 
 private:
 	INT2 m_startPosition;

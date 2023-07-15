@@ -8,9 +8,9 @@ public:
 	Map() = default;
 	~Map() = default;
 
-	const std::vector<Platform>& GetPlatforms() const;
+	const std::vector<std::shared_ptr<Platform>>& GetPlatforms() const;
 
 public:
 	int m_id;
-	std::vector<Platform> m_platforms;
+	std::vector<std::shared_ptr<Platform>> m_platforms;
 };

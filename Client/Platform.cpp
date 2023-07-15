@@ -38,3 +38,15 @@ float Platform::GetHeight(FLOAT x) const
 
 	return static_cast<float>(std::lerp(m_startPosition.y, m_endPosition.y, (x - m_startPosition.x) / (m_endPosition.x - m_startPosition.x)));
 }
+
+bool Platform::IsBetweenX(float x) const
+{
+	return static_cast<float>(m_startPosition.x) <= x && x <= static_cast<float>(m_endPosition.x);
+}
+
+bool Platform::IsBetweenY(float y) const
+{
+	float minY{ std::min(static_cast<float>(m_startPosition.y), static_cast<float>(m_endPosition.y)) };
+	float maxY{ std::max(static_cast<float>(m_startPosition.y), static_cast<float>(m_endPosition.y)) };
+	return minY <= y && y <= maxY;
+}
