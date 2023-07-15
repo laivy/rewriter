@@ -31,8 +31,6 @@ public:
 	void SetScale(const FLOAT2& scale);
 	void SetRotation(FLOAT degree);
 	void SetPosition(const FLOAT2& position, Pivot pivot = Pivot::LEFTTOP);
-	void SetShader(Shader* shader);
-	void SetMesh(Mesh* mesh);
 
 	BOOL IsValid() const;
 	FLOAT2 GetSize() const;
@@ -48,7 +46,7 @@ protected:
 	FLOAT2 m_position;
 	Pivot m_pivot;
 
-	Shader* m_shader;
-	Mesh* m_mesh;
+	std::weak_ptr<Shader> m_shader;
+	std::weak_ptr<Mesh> m_mesh;
 	ConstantBuffer<cbGameObject> m_cbGameObject;
 };

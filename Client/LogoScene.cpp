@@ -15,16 +15,21 @@ LogoScene::LogoScene() :
 
 }
 
-LogoScene::~LogoScene()
-{
-	LogoScene::Destroy();
-}
-
 void LogoScene::OnCreate()
 {
-	auto rm{ ResourceManager::GetInstance() };
-	rm->AddMesh(Mesh::Type::DEFAULT, new Mesh);
-	m_prop = rm->Load("Main.nyt")->Get<Property>("UIStatus");
+	if (auto rm{ ResourceManager::GetInstance() })
+		m_prop = rm->Load("Main.nyt")->Get<Property>("UIStatus");
+
+	SceneManager::GetInstance()->SetFadeOut(0.5f,
+		[]()
+		{
+			LoginScene::Instantiate();
+			auto sm{ SceneManager::GetInstance() };
+			sm->SetScene(LoginScene::GetInstance());
+			sm->SetFadeIn(0.5f);
+			LogoScene::Destroy();
+		}
+	);
 }
 
 void LogoScene::OnDestory()
@@ -44,20 +49,7 @@ void LogoScene::OnKeyboardEvent(HWND hWnd, UINT message, WPARAM wParam, LPARAM l
 
 void LogoScene::Update(FLOAT deltaTime)
 {
-	if (!m_isFirstUpdate)
-		return;
 
-	SceneManager::GetInstance()->SetFadeOut(0.5f,
-		[]()
-		{
-			LoginScene::Instantiate();
-			auto sm{ SceneManager::GetInstance() };
-			sm->SetScene(LoginScene::GetInstance());
-			sm->SetFadeIn(0.5f);
-			LogoScene::Destroy();
-		}
-	);
-	m_isFirstUpdate = FALSE;
 }
 
 void LogoScene::Render(const ComPtr<ID2D1DeviceContext2>& d2dContext) const

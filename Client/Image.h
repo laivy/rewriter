@@ -4,14 +4,27 @@
 class Image
 {
 private:
-	struct cbImage
+	struct D2DImage
 	{
-		UINT width;
-		UINT height;
-		FLOAT2 dummy;
+		ComPtr<ID2D1Bitmap> bitmap;
+		FLOAT2 size;
+	};
+
+	struct D3DImage
+	{
+		struct cbImage
+		{
+			UINT width;
+			UINT height;
+			FLOAT2 dummy;
+		};
+
+		ComPtr<ID3D12Resource> resource;
+		ConstantBuffer<cbImage> cbImage;
 	};
 
 public:
+	Image();
 	Image(ID2D1Bitmap* bitmap);
 	Image(ID3D12Resource* resource);
 	~Image() = default;
@@ -20,11 +33,5 @@ public:
 	void SetShaderVariable(const ComPtr<ID3D12GraphicsCommandList>& commandList, RootParamIndex rootParameterIndex = RootParamIndex::TEXTURE0);
 
 private:
-	// D2D
-	ComPtr<ID2D1Bitmap> m_bitmap;
-	FLOAT2 m_size;
-
-	// D3D
-	ComPtr<ID3D12Resource> m_resource;
-	ConstantBuffer<cbImage> m_cbTexture;
+	std::variant<D2DImage, D3DImage> m_data;
 };

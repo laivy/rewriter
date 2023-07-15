@@ -78,9 +78,6 @@
     <ClCompile Include="EditCtrl.cpp">
       <Filter>소스 파일\UI</Filter>
     </ClCompile>
-    <ClCompile Include="FontPool.cpp">
-      <Filter>소스 파일\UI</Filter>
-    </ClCompile>
     <ClCompile Include="Util.cpp">
       <Filter>소스 파일\Util</Filter>
     </ClCompile>
@@ -156,6 +153,9 @@
     <ClCompile Include="Platform.cpp">
       <Filter>소스 파일\Map</Filter>
     </ClCompile>
+    <ClCompile Include="Font.cpp">
+      <Filter>소스 파일\Framework</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Stdafx.h">
@@ -173,9 +173,6 @@
     <ClInclude Include="EditCtrl.h">
       <Filter>헤더 파일\UI</Filter>
     </ClInclude>
-    <ClInclude Include="FontPool.h">
-      <Filter>헤더 파일\UI</Filter>
-    </ClInclude>
     <ClInclude Include="Util.h">
       <Filter>헤더 파일\Util</Filter>
     </ClInclude>
@@ -184,9 +181,6 @@
     </ClInclude>
     <ClInclude Include="BrushPool.h">
       <Filter>헤더 파일\UI</Filter>
-    </ClInclude>
-    <ClInclude Include="StringTable.h">
-      <Filter>헤더 파일</Filter>
     </ClInclude>
     <ClInclude Include="Property.h">
       <Filter>헤더 파일\Data</Filter>
@@ -265,6 +259,12 @@
     </ClInclude>
     <ClInclude Include="Platform.h">
       <Filter>헤더 파일\Map</Filter>
+    </ClInclude>
+    <ClInclude Include="Font.h">
+      <Filter>헤더 파일\Framework</Filter>
+    </ClInclude>
+    <ClInclude Include="StringTable.h">
+      <Filter>헤더 파일\Data</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

@@ -7,6 +7,7 @@ public:
 	SceneManager();
 	~SceneManager() = default;
 
+	void OnCreate();
 	void OnDestroy();
 	void OnMouseEvent(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);
 	void OnKeyboardEvent(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);

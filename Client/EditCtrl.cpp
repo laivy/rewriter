@@ -1,13 +1,13 @@
 ﻿#include "Stdafx.h"
 #include "BrushPool.h"
 #include "EditCtrl.h"
-#include "FontPool.h"
+#include "Font.h"
 #include "GameApp.h"
-#include "TextUtil.h"
+#include "ResourceManager.h"
 #include "Wnd.h"
 
-EditCtrl::EditCtrl(FLOAT width, FLOAT height, FontPool::Type fontType) : 
-	m_isCompositing{ FALSE },
+EditCtrl::EditCtrl(FLOAT width, FLOAT height, Font::Type fontType) : 
+	m_isCompositing{ false },
 	m_caretPosition{},
 	m_caretRect{},
 	m_caretTimer{},
@@ -16,10 +16,10 @@ EditCtrl::EditCtrl(FLOAT width, FLOAT height, FontPool::Type fontType) :
 	SetSize(FLOAT2{ width, height });
 	SetPosition(FLOAT2{ 0.0f, 0.0f });
 
-	if (auto fp{ FontPool::GetInstance() })
+	if (auto rm{ ResourceManager::GetInstance() })
 	{
-		m_textFormat = fp->GetFont(fontType);
-		SetText(L"");
+		SetFont(rm->GetFont(fontType));
+		SetText("");
 		MoveCaret(0);
 	}
 }
@@ -31,7 +31,7 @@ void EditCtrl::OnMouseEvent(HWND hWnd, UINT message, INT x, INT y)
 	case WM_LBUTTONDOWN:
 	{
 		RECTF rect{ 0.0f, 0.0f, m_size.x, m_size.y };
-		if (rect.IsContain(FLOAT2(x, y)))
+		if (rect.IsContain(FLOAT2{ static_cast<float>(x), static_cast<float>(y) }))
 			m_parent->SetUIFocus(this);
 		break;
 	}
@@ -57,7 +57,7 @@ void EditCtrl::OnKeyboardEvent(HWND hWnd, UINT message, WPARAM wParam, LPARAM lP
 			InsertText(std::wstring{ static_cast<TCHAR>(wParam) });
 			break;
 		}
-		m_isCompositing = FALSE;
+		m_isCompositing = false;
 		break;
 	}
 	case WM_KEYDOWN:
@@ -78,7 +78,7 @@ void EditCtrl::OnKeyboardEvent(HWND hWnd, UINT message, WPARAM wParam, LPARAM lP
 				EraseText(1);
 
 			// 백스페이스로 조합 중인 글자를 다 지우면 길이가 0이될 수 있음
-			m_isCompositing = length ? TRUE : FALSE;
+			m_isCompositing = length ? true : false;
 			if (length)
 				InsertText(std::wstring{ static_cast<WCHAR>(wParam) });
 
@@ -89,7 +89,7 @@ void EditCtrl::OnKeyboardEvent(HWND hWnd, UINT message, WPARAM wParam, LPARAM lP
 			if (m_isCompositing && !m_text.empty())
 				EraseText(1);
 			InsertText(std::wstring{ static_cast<WCHAR>(wParam) });
-			m_isCompositing = FALSE;
+			m_isCompositing = false;
 		}
 		break;
 	}
@@ -109,7 +109,8 @@ void EditCtrl::Update(FLOAT deltaTime)
 
 void EditCtrl::Render(const ComPtr<ID2D1DeviceContext2>& d2dContext) const
 {
-	if (!m_parent) return;
+	if (!m_parent)
+		return;
 
 	FLOAT2 position{ m_position };
 	position += m_parent->GetPosition();
@@ -134,14 +135,15 @@ void EditCtrl::Render(const ComPtr<ID2D1DeviceContext2>& d2dContext) const
 		d2dContext->FillRectangle(m_caretRect, BrushPool::GetInstance()->GetBrush(BrushPool::BLACK));
 }
 
-void EditCtrl::SetText(const std::wstring& text)
+void EditCtrl::SetFont(const std::shared_ptr<Font>& font)
 {
-	m_text = text;
+	m_font = font;
+}
 
-	auto dwriteFactory{ GameApp::GetInstance()->GetDwriteFactory() };
-	dwriteFactory->CreateTextLayout(m_text.c_str(), static_cast<UINT32>(m_text.length()), m_textFormat.Get(), m_size.x, m_size.y, &m_textLayout);
-	m_textLayout->SetParagraphAlignment(DWRITE_PARAGRAPH_ALIGNMENT_CENTER);
-	m_textLayout->SetWordWrapping(DWRITE_WORD_WRAPPING_NO_WRAP);
+void EditCtrl::SetText(const std::string& text)
+{
+	m_text = TextUtil::str2wstr(text);
+	CreateTextLayout();
 }
 
 void EditCtrl::EraseText(size_t count)
@@ -154,14 +156,14 @@ void EditCtrl::EraseText(size_t count)
 
 	MoveCaret(-1);
 	m_text.erase(m_caretPosition, count);
-	SetText(m_text);
+	CreateTextLayout();
 }
 
 void EditCtrl::InsertText(const std::wstring& text)
 {
 	m_text.insert(m_caretPosition, text);
-	SetText(m_text);
-	MoveCaret(text.size());
+	CreateTextLayout();
+	MoveCaret(static_cast<int>(text.size()));
 }
 
 void EditCtrl::MoveCaret(int distance)
@@ -181,14 +183,14 @@ void EditCtrl::MoveCaret(int distance)
 	);
 
 	// 우측 스크롤
-	FLOAT caretRightPos{ metrics.left + CARET_THICKNESS / 2.0f };
-	FLOAT overLength{ caretRightPos - m_size.x };
+	float caretRightPos{ metrics.left + CARET_THICKNESS / 2.0f };
+	float overLength{ caretRightPos - m_size.x };
 	if (m_xOffset < overLength)
 		m_xOffset = overLength;
 
 	// 좌측 스크롤
-	FLOAT totalLength{ m_size.x + m_xOffset };
-	FLOAT caretLeftPos{ std::max(0.0f, metrics.left - CARET_THICKNESS / 2.0f) };
+	float totalLength{ m_size.x + m_xOffset };
+	float caretLeftPos{ std::max(0.0f, metrics.left - CARET_THICKNESS / 2.0f) };
 	if (totalLength - caretLeftPos > m_size.x)
 		m_xOffset -= metrics.width;
 	
@@ -200,4 +202,12 @@ void EditCtrl::MoveCaret(int distance)
 	m_caretRect.bottom = pos.y + metrics.height;
 	m_caretRect.Offset(-m_xOffset, 0.0f);
 	m_caretRect.Offset(1.0f, 0.0f); // 보기 좋게 1px 정도 오른쪽으로
+}
+
+void EditCtrl::CreateTextLayout()
+{
+	auto dwriteFactory{ GameApp::GetInstance()->GetDwriteFactory() };
+	dwriteFactory->CreateTextLayout(m_text.c_str(), static_cast<UINT32>(m_text.length()), m_font->GetTextFormat().Get(), m_size.x, m_size.y, &m_textLayout);
+	m_textLayout->SetParagraphAlignment(DWRITE_PARAGRAPH_ALIGNMENT_CENTER);
+	m_textLayout->SetWordWrapping(DWRITE_WORD_WRAPPING_NO_WRAP);
 }

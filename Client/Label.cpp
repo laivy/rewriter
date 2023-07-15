@@ -1,15 +1,19 @@
 ﻿#include "Stdafx.h"
 #include "BrushPool.h"
-#include "FontPool.h"
 #include "GameApp.h"
 #include "Label.h"
+#include "ResourceManager.h"
 #include "Wnd.h"
 
-Label::Label(FLOAT width, FLOAT height)
+Label::Label(FLOAT width, FLOAT height, Font::Type fontType)
 {
 	SetSize(FLOAT2{ width, height });
 	SetPosition(FLOAT2{ 0.0f, 0.0f });
-	m_textFormat = FontPool::GetInstance()->GetFont(FontPool::MORRIS);
+	if (auto rm{ ResourceManager::GetInstance() })
+	{
+		SetFont(rm->GetFont(fontType));
+		SetText("");
+	}
 }
 
 void Label::Render(const ComPtr<ID2D1DeviceContext2>& d2dContext) const
@@ -26,13 +30,18 @@ void Label::Render(const ComPtr<ID2D1DeviceContext2>& d2dContext) const
 	}
 }
 
-void Label::SetText(const std::wstring& text)
+void Label::SetFont(const std::shared_ptr<Font>& font)
 {
-	m_text = text;
+	m_font = font;
+}
+
+void Label::SetText(const std::string& text)
+{
+	m_text = TextUtil::str2wstr(text);
 	GameApp::GetInstance()->GetDwriteFactory()->CreateTextLayout(
 		m_text.c_str(),
 		static_cast<UINT32>(m_text.length()),
-		m_textFormat.Get(),
+		m_font->GetTextFormat().Get(),
 		m_size.x,
 		m_size.y,
 		&m_textLayout

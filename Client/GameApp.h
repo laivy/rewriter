@@ -14,11 +14,11 @@ public:
 
 	HWND GetHwnd() const;
 	INT2 GetWindowSize() const;
-	ID3D12Device* GetD3DDevice() const;
-	ID3D12GraphicsCommandList* GetCommandList() const;
-	ID3D12RootSignature* GetRootSignature() const;
-	ID2D1DeviceContext2* GetD2DContext() const;
-	IDWriteFactory5* GetDwriteFactory() const;
+	ComPtr<ID3D12Device> GetD3DDevice() const;
+	ComPtr<ID3D12GraphicsCommandList> GetCommandList() const;
+	ComPtr<ID3D12RootSignature> GetRootSignature() const;
+	ComPtr<ID2D1DeviceContext2> GetD2DContext() const;
+	ComPtr<IDWriteFactory5> GetDwriteFactory() const;
 
 private:
 	static LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);

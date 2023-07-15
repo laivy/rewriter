@@ -24,11 +24,11 @@ void Wnd::OnMouseEvent(HWND hWnd, UINT message, INT x, INT y)
 	case WM_LBUTTONDOWN:
 	{
 		RECTF rect{ 0.0f, 0.0f, m_size.x, m_size.y };
-		if (rect.IsContain(FLOAT2(x, y)))
+		if (rect.IsContain(FLOAT2{ static_cast<float>(x), static_cast<float>(y) }))
 			WndManager::GetInstance()->SetWndFocus(this);
 		
 		rect.bottom = rect.top + WND_TITLE_HEIGHT;
-		if (rect.IsContain(FLOAT2(x, y)))
+		if (rect.IsContain(FLOAT2{ static_cast<float>(x), static_cast<float>(y) }))
 			SetPick(TRUE);
 		break;
 	}
@@ -38,7 +38,7 @@ void Wnd::OnMouseEvent(HWND hWnd, UINT message, INT x, INT y)
 	for (const auto& ui : m_ui)
 	{
 		FLOAT2 pos{ ui->GetPosition() };
-		ui->OnMouseEvent(hWnd, message, x - pos.x, y - pos.y);
+		ui->OnMouseEvent(hWnd, message, static_cast<int>(x - pos.x), static_cast<int>(y - pos.y));
 	}
 }
 

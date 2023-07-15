@@ -2,7 +2,9 @@
 #include "Mesh.h"
 #include "GameApp.h"
 
-Mesh::Mesh() : m_primitiveTopology{ D3D_PRIMITIVE_TOPOLOGY_POINTLIST }, m_nVertices{ 1 }
+Mesh::Mesh() : 
+	m_primitiveTopology{ D3D_PRIMITIVE_TOPOLOGY_POINTLIST }, 
+	m_nVertices{ 1 }
 {
 	auto d3dDevice{ GameApp::GetInstance()->GetD3DDevice() };
 	auto commandList{ GameApp::GetInstance()->GetCommandList() };
@@ -39,7 +41,7 @@ Mesh::Mesh() : m_primitiveTopology{ D3D_PRIMITIVE_TOPOLOGY_POINTLIST }, m_nVerti
 	bufferData.pData = &vertex;
 	bufferData.RowPitch = bufferSize;
 	bufferData.SlicePitch = bufferData.RowPitch;
-	UpdateSubresources(commandList, m_vertexBuffer.Get(), m_vertexUploadBuffer.Get(), 0, 0, 1, &bufferData);
+	UpdateSubresources(commandList.Get(), m_vertexBuffer.Get(), m_vertexUploadBuffer.Get(), 0, 0, 1, &bufferData);
 
 	// 리소스 베리어 설정
 	commandList->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(m_vertexBuffer.Get(), D3D12_RESOURCE_STATE_COPY_DEST, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER));

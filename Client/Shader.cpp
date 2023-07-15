@@ -44,7 +44,7 @@ Shader::Shader()
 	// PSO 생성
 	D3D12_GRAPHICS_PIPELINE_STATE_DESC psoDesc{};
 	psoDesc.InputLayout = { m_inputLayout.data(), static_cast<UINT>(m_inputLayout.size()) };
-	psoDesc.pRootSignature = GameApp::GetInstance()->GetRootSignature();
+	psoDesc.pRootSignature = GameApp::GetInstance()->GetRootSignature().Get();
 	psoDesc.VS = CD3DX12_SHADER_BYTECODE{ vertexShader.Get() };
 	psoDesc.GS = CD3DX12_SHADER_BYTECODE{ geometryShader.Get() };
 	psoDesc.PS = CD3DX12_SHADER_BYTECODE{ pixelShader.Get() };

@@ -20,5 +20,5 @@ struct LayoutChangeInfo
 
 namespace TextUtil
 {
-	std::vector<LayoutChangeInfo> ApplyTextTag(std::wstring& text);
+	std::wstring str2wstr(const std::string& str);
 }

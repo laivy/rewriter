@@ -2,31 +2,43 @@
 #include "Image.h"
 #include "ResourceManager.h"
 
-Image::Image(ID2D1Bitmap* bitmap) : 
-	m_bitmap{ bitmap }
+Image::Image()
 {
-	m_size.x = bitmap->GetSize().width;
-	m_size.y = bitmap->GetSize().height;
+	assert(false);
 }
 
-Image::Image(ID3D12Resource* resource) : 
-	m_resource{ resource }
+Image::Image(ID2D1Bitmap* bitmap)
 {
-	auto desc{ resource->GetDesc() };
+	D2DImage data{};
+	data.bitmap = bitmap;
+	data.size.x = bitmap->GetSize().width;
+	data.size.y = bitmap->GetSize().height;
+	m_data = data;
+}
 
-	m_cbTexture.Init();
-	m_cbTexture->width = static_cast<UINT>(desc.Width);
-	m_cbTexture->height = static_cast<UINT>(desc.Height);
+Image::Image(ID3D12Resource* resource)
+{
+	D3DImage data{};
+	data.resource = resource;
+
+	auto desc{ resource->GetDesc() };
+	data.cbImage.Init();
+	data.cbImage->width = static_cast<UINT>(desc.Width);
+	data.cbImage->height = static_cast<UINT>(desc.Height);
+
+	m_data = data;
 }
 
 void Image::Render(const ComPtr<ID2D1DeviceContext2>& d2dContext, FLOAT x, FLOAT y) const
 {
-	d2dContext->DrawBitmap(m_bitmap.Get(), RECTF{ x, y, x + m_size.x, y + m_size.y });
+	auto d2dImage{ std::get<D2DImage>(m_data) };
+	d2dContext->DrawBitmap(d2dImage.bitmap.Get(), RECTF{ x, y, x + d2dImage.size.x, y + d2dImage.size.y });
 }
 
 void Image::SetShaderVariable(const ComPtr<ID3D12GraphicsCommandList>& commandList, RootParamIndex rootParameterIndex)
 {
-	auto handle{ ResourceManager::GetInstance()->GetGPUDescriptorHandle(m_resource.Get()) };
+	auto d3dImage{ std::get<D3DImage>(m_data) };
+	auto handle{ ResourceManager::GetInstance()->GetGPUDescriptorHandle(d3dImage.resource.Get()) };
 	commandList->SetGraphicsRootDescriptorTable(rootParameterIndex, handle);
-	m_cbTexture.SetShaderVariable(commandList, RootParamIndex::TEXTURE);
+	d3dImage.cbImage.SetShaderVariable(commandList, RootParamIndex::TEXTURE);
 }

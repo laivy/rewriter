@@ -14,6 +14,7 @@ using Microsoft::WRL::ComPtr;
 #include <array>
 #include <cassert>
 #include <chrono>
+#include <codecvt>
 #include <fstream>
 #include <functional>
 #include <list>
@@ -50,6 +51,7 @@ using Microsoft::WRL::ComPtr;
 #include "Common.h"
 #include "Singleton.h"
 #include "StringTable.h"
+#include "TextUtil.h"
 #include "Util.h"
 #include "WICTextureLoader12.h"
 

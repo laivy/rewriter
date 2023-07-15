@@ -1,38 +1,34 @@
 ﻿#include "Stdafx.h"
 #include "ResourceManager.h"
 
-ResourceManager::ResourceManager()
+void ResourceManager::OnCreate()
 {
 	m_shaderResources.reserve(SRV_HEAP_COUNT);
-	CreateSRVHeap();
+	CreateFonts();
+	CreateMeshes();
 	CreateShaders();
-}
-
-ResourceManager::~ResourceManager()
-{
-
+	CreateSRVHeap();
 }
 
 Property* ResourceManager::Load(const std::string& filePath)
 {
 	// 이미 로딩된 데이터인지 확인
 	if (m_properties.contains(filePath))
-		return &m_properties.at(filePath);
+		return m_properties.at(filePath).get();
 
 	// 파일 로드
 	std::ifstream ifstream{ StringTable::DATA_FOLDER_PATH + filePath, std::ifstream::binary };
 
 	// 루트 노드
-	Property root{};
+	auto root{ std::make_unique<Property>() };
 
-	// 하위 노드 로드
+	// 모든 노드 로드
 	int nodeCount{ Read<int>(ifstream) };
 	for (int i = 0; i < nodeCount; ++i)
-		Load(ifstream, &root);
+		Load(ifstream, root.get());
+	m_properties.emplace(filePath, std::move(root));
 
-	// 저장 후 반환
-	m_properties[filePath] = std::move(root);
-	return &m_properties[filePath];
+	return m_properties.at(filePath).get();
 }
 
 void ResourceManager::Unload(const std::string& filePath)
@@ -80,23 +76,40 @@ void ResourceManager::ReleaseUploadBuffers()
 	m_uploadBuffers.clear();
 }
 
-void ResourceManager::AddMesh(Mesh::Type key, Mesh* value)
+std::shared_ptr<Font> ResourceManager::GetFont(Font::Type type) const
 {
-	m_meshes.emplace(key, value);
-}
-
-Mesh* ResourceManager::GetMesh(Mesh::Type key) const
-{
-	if (m_meshes.contains(key))
-		return m_meshes.at(key).get();
+	if (m_fonts.contains(type))
+		return m_fonts.at(type);
 	return nullptr;
 }
 
-Shader* ResourceManager::GetShader(Shader::Type key) const
+std::shared_ptr<Mesh> ResourceManager::GetMesh(Mesh::Type type) const
 {
-	if (m_shaders.contains(key))
-		return m_shaders.at(key).get();
+	if (m_meshes.contains(type))
+		return m_meshes.at(type);
 	return nullptr;
+}
+
+std::shared_ptr<Shader> ResourceManager::GetShader(Shader::Type type) const
+{
+	if (m_shaders.contains(type))
+		return m_shaders.at(type);
+	return nullptr;
+}
+
+void ResourceManager::CreateFonts()
+{
+	m_fonts.emplace(Font::Type::MORRIS12, std::make_shared<Font>(StringTable::DATA_FOLDER_PATH + std::string{ "morris9.ttf" }, 12.0f));
+}
+
+void ResourceManager::CreateMeshes()
+{
+	m_meshes.emplace(Mesh::Type::DEFAULT, std::make_shared<Mesh>());
+}
+
+void ResourceManager::CreateShaders()
+{
+	m_shaders.emplace(Shader::Type::DEFAULT, std::make_shared<Shader>());
 }
 
 void ResourceManager::CreateSRVHeap()
@@ -110,47 +123,42 @@ void ResourceManager::CreateSRVHeap()
 	d3dDevice->CreateDescriptorHeap(&srvHeapDesc, IID_PPV_ARGS(&m_srvHeap));
 }
 
-void ResourceManager::CreateShaders()
-{
-	m_shaders.emplace(Shader::Type::DEFAULT, new Shader);
-}
-
 void ResourceManager::Load(std::ifstream& fs, Property* root)
 {
-	Property node{};
-	node.m_type = static_cast<Property::Type>(Read<BYTE>(fs));
+	auto node{ std::make_unique<Property>() };
+	node->m_type = static_cast<Property::Type>(Read<BYTE>(fs));
 
 	std::string name{ Read<std::string>(fs) };
 
-	switch (node.m_type)
+	switch (node->m_type)
 	{
 	case Property::Type::GROUP:
 		break;
 	case Property::Type::INT:
-		node.m_data = Read<INT>(fs);
+		node->m_data = Read<INT>(fs);
 		break;
 	case Property::Type::INT2:
-		node.m_data = Read<INT2>(fs);
+		node->m_data = Read<INT2>(fs);
 		break;
 	case Property::Type::FLOAT:
-		node.m_data = Read<FLOAT>(fs);
+		node->m_data = Read<FLOAT>(fs);
 		break;
 	case Property::Type::STRING:
-		node.m_data = Read<std::string>(fs);
+		node->m_data = Read<std::string>(fs);
 		break;
 	case Property::Type::D2DImage:
 	case Property::Type::D3DImage:
-		node.m_data = Read(fs, node.m_type);
+		node->m_data = Read(fs, node->m_type);
 		break;
 	default:
 		assert(false);
 	}
 
-	root->m_childProps.insert(std::make_pair(name, node));
-
-	int childNodeCount{ Read<INT>(fs) };
+	int childNodeCount{ Read<int>(fs) };
 	for (int i = 0; i < childNodeCount; ++i)
-		Load(fs, &root->m_childProps.at(name));
+		Load(fs, node.get());
+
+	root->m_childProps.insert(std::make_pair(name, std::move(node)));
 }
 
 Image ResourceManager::Read(std::ifstream& fs, Property::Type type)
@@ -191,7 +199,7 @@ Image ResourceManager::Read(std::ifstream& fs, Property::Type type)
 		std::unique_ptr<uint8_t[]> decodedData;
 		D3D12_SUBRESOURCE_DATA subresource;
 		DirectX::LoadWICTextureFromMemoryEx(
-			d3dDevice,
+			d3dDevice.Get(),
 			buffer.get(),
 			length,
 			0,
@@ -214,7 +222,7 @@ Image ResourceManager::Read(std::ifstream& fs, Property::Type type)
 		));
 
 		auto commandList{ GameApp::GetInstance()->GetCommandList() };
-		UpdateSubresources(commandList, bitmap, uploadBuffer.Get(), 0, 0, 1, &subresource);
+		UpdateSubresources(commandList.Get(), bitmap, uploadBuffer.Get(), 0, 0, 1, &subresource);
 
 		// GPU 메모리에 복사가 끝난 뒤에 해제해야함
 		m_uploadBuffers.push_back(uploadBuffer);
@@ -224,5 +232,5 @@ Image ResourceManager::Read(std::ifstream& fs, Property::Type type)
 
 		return Image{ bitmap };
 	}
-	assert(false);
+	return Image{};
 }

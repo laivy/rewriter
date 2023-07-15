@@ -1,6 +1,5 @@
 ﻿#include "Stdafx.h"
 #include "BrushPool.h"
-#include "FontPool.h"
 #include "GameApp.h"
 #include "InputThread.h"
 #include "Image.h"
@@ -26,13 +25,15 @@ void GameApp::OnCreate()
 {
 	ResetCommandList();
 
-	FontPool::Instantiate();
 	BrushPool::Instantiate();
+
 	ResourceManager::Instantiate();
+	ResourceManager::GetInstance()->OnCreate();
+
+	SceneManager::Instantiate();
+	SceneManager::GetInstance()->OnCreate();
 
 	WndManager::Instantiate();
-	SceneManager::Instantiate();
-
 	InputThread::Instantiate();
 
 	ExecuteCommandList();
@@ -46,7 +47,6 @@ void GameApp::OnCreate()
 
 void GameApp::OnDestroy()
 {
-	FontPool::Destroy();
 	BrushPool::Destroy();
 	ResourceManager::Destroy();
 
@@ -102,29 +102,29 @@ INT2 GameApp::GetWindowSize() const
 	return m_size;
 }
 
-ID3D12Device* GameApp::GetD3DDevice() const
+ComPtr<ID3D12Device> GameApp::GetD3DDevice() const
 {
-	return m_d3dDevice.Get();
+	return m_d3dDevice;
 }
 
-ID3D12GraphicsCommandList* GameApp::GetCommandList() const
+ComPtr<ID3D12GraphicsCommandList> GameApp::GetCommandList() const
 {
-	return m_commandList.Get();
+	return m_commandList;
 }
 
-ID3D12RootSignature* GameApp::GetRootSignature() const
+ComPtr<ID3D12RootSignature> GameApp::GetRootSignature() const
 {
-	return m_rootSignature.Get();
+	return m_rootSignature;
 }
 
-IDWriteFactory5* GameApp::GetDwriteFactory() const
+ComPtr<IDWriteFactory5> GameApp::GetDwriteFactory() const
 {
-	return m_dwriteFactory.Get();
+	return m_dwriteFactory;
 }
 
-ID2D1DeviceContext2* GameApp::GetD2DContext() const
+ComPtr<ID2D1DeviceContext2> GameApp::GetD2DContext() const
 {
-	return m_d2dDeviceContext.Get();
+	return m_d2dDeviceContext;
 }
 
 LRESULT CALLBACK GameApp::WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
@@ -363,8 +363,8 @@ void GameApp::CreateRenderTargetView()
 	D2D1_BITMAP_PROPERTIES1 bitmapProperties{ D2D1::BitmapProperties1(
 		D2D1_BITMAP_OPTIONS_TARGET | D2D1_BITMAP_OPTIONS_CANNOT_DRAW,
 		D2D1::PixelFormat(DXGI_FORMAT_UNKNOWN, D2D1_ALPHA_MODE_PREMULTIPLIED),
-		dpi,
-		dpi
+		static_cast<float>(dpi),
+		static_cast<float>(dpi)
 	) };
 
 	CD3DX12_CPU_DESCRIPTOR_HANDLE rtvHandle{ m_rtvHeap->GetCPUDescriptorHandleForHeapStart() };

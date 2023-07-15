@@ -9,12 +9,13 @@
 
 SceneManager::SceneManager() : m_scene{ nullptr }
 {
+
+}
+
+void SceneManager::OnCreate()
+{
 	LogoScene::Instantiate();
-	if (LogoScene::IsInstanced())
-	{
-		LogoScene::GetInstance()->OnCreate();
-		SetScene(LogoScene::GetInstance());
-	}
+	SetScene(LogoScene::GetInstance());
 }
 
 void SceneManager::OnDestroy()

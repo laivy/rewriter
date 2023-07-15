@@ -7,7 +7,7 @@ class LogoScene : public IScene, public TSingleton<LogoScene>
 {
 public:
 	LogoScene();
-	~LogoScene();
+	~LogoScene() = default;
 
 	virtual void OnCreate();
 	virtual void OnDestory();

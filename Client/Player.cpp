@@ -37,10 +37,10 @@ void Player::Render(const ComPtr<ID3D12GraphicsCommandList>& commandList) const
 	m_animationComponent.SetShaderVariable(commandList);
 	if (m_cbGameObject.IsValid())
 		m_cbGameObject.SetShaderVariable(commandList, RootParamIndex::GAMEOBJECT);
-	if (m_shader)
-		commandList->SetPipelineState(m_shader->GetPipelineState());
-	if (m_mesh)
-		m_mesh->Render(commandList);
+	if (auto s{ m_shader.lock() })
+		commandList->SetPipelineState(s->GetPipelineState());
+	if (auto m{ m_mesh.lock() })
+		m->Render(commandList);
 }
 
 Player::AnimationComponent::AnimationComponent(Player* player) : 
@@ -48,9 +48,9 @@ Player::AnimationComponent::AnimationComponent(Player* player) :
 	m_type{ AnimationType::IDLE },
 	m_frame{ 0 },
 	m_timer{ 0.0f },
-	m_root{ nullptr },
-	m_currAniProp{ nullptr },
-	m_currFrameProp{ nullptr }
+	m_root{},
+	m_currAniProp{},
+	m_currFrameProp{}
 {
 	auto rm{ ResourceManager::GetInstance() };
 	m_root = rm->Load("Player.nyt");
@@ -98,7 +98,7 @@ void Player::AnimationComponent::Update(FLOAT deltaTime)
 		{
 			if (m_frame >= m_currAniProp->GetChildCount() - 1)
 			{
-				// OnAnimationEnd에서 m_timer값이 0이되버리므로 저장해줬다가 다시 설정해줌
+				// OnAnimationEnd에서 PlayAnimation을 호출하여 m_timer값이 0이되버리므로 저장해줬다가 다시 설정해줌
 				FLOAT timer{ m_timer };
 				OnAnimationEnd();
 				m_timer = timer - interval;
@@ -225,7 +225,7 @@ void Player::PhysicsComponent::Update(FLOAT deltaTime)
 	const Platform* beforePlatform{ m_platform };
 	const Platform* afterPlatform{ nullptr };
 
-	// 이동
+	// 이동. 현재 플렛폼의 높이와 플레이어의 높이가 같다면 플렛폼 위에 서있다는 것
 	if (m_speed.y < 0.0f && m_platform && m_platform->GetHeight(beforePlayerPosition.x) == beforePlayerPosition.y)
 		m_speed.y = 0.0f;
 	m_player->Move(FLOAT2{ static_cast<int>(m_direction) * m_speed.x * deltaTime, m_speed.y * deltaTime });
@@ -277,7 +277,7 @@ void Player::PhysicsComponent::Jump()
 	m_speed.y = 300.0f;
 }
 
-const Platform* Player::PhysicsComponent::GetTopPlatformBelowPosition(const FLOAT2& position)
+const Platform* Player::PhysicsComponent::GetTopPlatformBelowPosition(const FLOAT2& position) const
 {
 	Map* map{ GameScene::GetInstance()->GetMap() };
 	if (!map)

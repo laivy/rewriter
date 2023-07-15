@@ -27,14 +27,14 @@ std::pair<INT2, INT2> Platform::GetStartEndPosition() const
 }
 
 // x에서의 플렛폼의 높이값을 반환한다.
-FLOAT Platform::GetHeight(FLOAT x) const
+float Platform::GetHeight(FLOAT x) const
 {
 	if (static_cast<FLOAT>(m_startPosition.x) > x ||
 		static_cast<FLOAT>(m_endPosition.x) < x)
 		return -FLT_MAX;
 
 	if (m_startPosition.y == m_endPosition.y)
-		return m_startPosition.y;
+		return static_cast<float>(m_startPosition.y);
 
-	return std::lerp(m_startPosition.y, m_endPosition.y, (m_endPosition.x - x) / (m_endPosition.x - m_startPosition.x));
+	return static_cast<float>(std::lerp(m_startPosition.y, m_endPosition.y, (x - m_startPosition.x) / (m_endPosition.x - m_startPosition.x)));
 }

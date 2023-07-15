@@ -3,6 +3,8 @@
 class Property
 {
 public:
+	friend class ResourceManager;
+
 	// NytTreeNodeInfo.cs에 정의되어 있는 NytDataType와 동일해야함
 	enum class Type
 	{
@@ -15,25 +17,30 @@ public:
 		D3DImage
 	};
 
+	typedef std::variant<INT, INT2, FLOAT, std::string, Image> Data;
+
 public:
-	friend class ResourceManager;
+	Property();
+	Property(Type type, const Data& data);
+	~Property() = default;
 
 	auto begin() { return m_childProps.begin(); }
 	auto end() { return m_childProps.end(); }
 
-public:
-	Property();
-	Property(Type type, const std::any& data);
-	~Property();
-
 	template<class T>
-	T* Get() const
+	T* Get()
 	{
-		return std::any_cast<T*>(m_data);
+		return &std::get<T>(m_data);
+	}
+
+	template<>
+	Property* Get()
+	{
+		return this;
 	}
 
 	template<class T>
-	T* Get(const std::string& name) const
+	T* Get(const std::string& name)
 	{
 		// 하위 프로퍼티에서 가져옴
 		size_t pos{ name.find('/') };
@@ -62,6 +69,6 @@ public:
 
 private:
 	Type m_type;
-	std::any m_data;
+	Data m_data;
 	std::unordered_map<std::string, std::unique_ptr<Property>> m_childProps;
 };

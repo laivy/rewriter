@@ -1,11 +1,15 @@
 ﻿#pragma once
 #include "UI.h"
-#include "FontPool.h"
+#include "Font.h"
 
 class EditCtrl : public IUserInterface
 {
+private:
+	constexpr static int CARET_THICKNESS = 2;
+	constexpr static float CARET_BLINK_SECOND = 0.5f;
+
 public:
-	EditCtrl(FLOAT width, FLOAT height, FontPool::Type fontType = FontPool::Type::MORRIS);
+	EditCtrl(FLOAT width, FLOAT height, Font::Type fontType = Font::Type::MORRIS12);
 	~EditCtrl() = default;
 
 	virtual void OnMouseEvent(HWND hWnd, UINT message, INT x, INT y);
@@ -14,24 +18,25 @@ public:
 	virtual void Update(FLOAT deltaTime);
 	virtual void Render(const ComPtr<ID2D1DeviceContext2>& d2dContext) const;
 
-	void SetText(const std::wstring& text);
+	void SetFont(const std::shared_ptr<Font>& font);
+	void SetText(const std::string& text);
 
 private:
 	void EraseText(size_t count);
 	void InsertText(const std::wstring& text);
 	void MoveCaret(int distance);
+	void CreateTextLayout();
 
 private:
+	std::shared_ptr<Font> m_font;
 	ComPtr<IDWriteTextLayout> m_textLayout;
-	ComPtr<IDWriteTextFormat> m_textFormat;
 
 	std::wstring m_text;
-	BOOL m_isCompositing;
+	bool m_isCompositing;
 
-	constexpr static INT CARET_THICKNESS = 2;
-	constexpr static FLOAT CARET_BLINK_SECOND = 0.5f;
-	INT m_caretPosition;
+	// 캐럿
+	int m_caretPosition;
 	RECTF m_caretRect;
-	FLOAT m_caretTimer;
-	FLOAT m_xOffset;
+	float m_caretTimer;
+	float m_xOffset;
 };

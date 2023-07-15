@@ -3,11 +3,6 @@
 #include "Wnd.h"
 #include "GameApp.h"
 
-WndManager::~WndManager()
-{
-
-}
-
 void WndManager::OnMouseEvent(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
 	// 어떤 창이 선택됐는지 체크한다.

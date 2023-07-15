@@ -11,8 +11,8 @@ IGameObject::IGameObject() :
 	m_degree{ 0.0f },
 	m_position{ 0.0f, 0.0f },
 	m_pivot{ Pivot::LEFTTOP },
-	m_shader{ nullptr },
-	m_mesh{ nullptr }
+	m_shader{},
+	m_mesh{}
 {
 	
 }
@@ -93,16 +93,6 @@ void IGameObject::SetPosition(const FLOAT2& position, Pivot pivot)
 
 	if (m_cbGameObject.IsValid())
 		m_cbGameObject->worldMatrix = GetWorldMatrix();
-}
-
-void IGameObject::SetShader(Shader* shader)
-{
-	m_shader = shader;
-}
-
-void IGameObject::SetMesh(Mesh* mesh)
-{
-	m_mesh = mesh;
 }
 
 BOOL IGameObject::IsValid() const
