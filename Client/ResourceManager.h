@@ -54,7 +54,8 @@ private:
 		return std::string{ buffer.get(), static_cast<size_t>(length) };
 	}
 
-	Image Read(std::ifstream& fs, Property::Type type);
+	ID2D1Bitmap* ReadD2DImage(std::ifstream& fs);
+	ID3D12Resource* ReadD3DImage(std::ifstream& fs);
 
 private:
 	std::unordered_map<Font::Type, std::shared_ptr<Font>> m_fonts;

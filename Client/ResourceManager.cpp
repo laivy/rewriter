@@ -147,8 +147,10 @@ void ResourceManager::Load(std::ifstream& fs, Property* root)
 		node->m_data = Read<std::string>(fs);
 		break;
 	case Property::Type::D2DImage:
+		node->m_data.emplace<Image>(ReadD2DImage(fs));
+		break;
 	case Property::Type::D3DImage:
-		node->m_data = Read(fs, node->m_type);
+		node->m_data.emplace<Image>(ReadD3DImage(fs));
 		break;
 	default:
 		assert(false);
@@ -161,76 +163,77 @@ void ResourceManager::Load(std::ifstream& fs, Property* root)
 	root->m_childProps.insert(std::make_pair(name, std::move(node)));
 }
 
-Image ResourceManager::Read(std::ifstream& fs, Property::Type type)
+ID2D1Bitmap* ResourceManager::ReadD2DImage(std::ifstream& fs)
 {
 	int length{ Read<int>(fs) };
 	std::unique_ptr<BYTE> buffer{ new BYTE[length] };
 	fs.read(reinterpret_cast<char*>(buffer.get()), length);
 
-	if (type == Property::Type::D2DImage)
-	{
-		ComPtr<IWICImagingFactory> factory;
-		ComPtr<IWICBitmapDecoder> decoder;
-		ComPtr<IWICFormatConverter> converter;
-		ComPtr<IWICBitmapFrameDecode> frameDecode;
-		ComPtr<IWICStream> stream;
-		ID2D1Bitmap* bitmap;
+	ComPtr<IWICImagingFactory> factory;
+	ComPtr<IWICBitmapDecoder> decoder;
+	ComPtr<IWICFormatConverter> converter;
+	ComPtr<IWICBitmapFrameDecode> frameDecode;
+	ComPtr<IWICStream> stream;
+	ID2D1Bitmap* bitmap{ nullptr };
 
-		HRESULT hr{ E_FAIL };
-		hr = CoCreateInstance(CLSID_WICImagingFactory, NULL, CLSCTX_INPROC_SERVER, IID_PPV_ARGS(&factory));
-		hr = factory->CreateStream(&stream);
-		hr = stream->InitializeFromMemory(buffer.get(), length);
-		hr = factory->CreateDecoderFromStream(stream.Get(), NULL, WICDecodeMetadataCacheOnLoad, &decoder);
-		hr = factory->CreateFormatConverter(&converter);
-		hr = decoder->GetFrame(0, &frameDecode);
-		hr = converter->Initialize(frameDecode.Get(), GUID_WICPixelFormat32bppPBGRA, WICBitmapDitherTypeNone, NULL, 0.0f, WICBitmapPaletteTypeMedianCut);
+	HRESULT hr{ E_FAIL };
+	hr = CoCreateInstance(CLSID_WICImagingFactory, NULL, CLSCTX_INPROC_SERVER, IID_PPV_ARGS(&factory));
+	hr = factory->CreateStream(&stream);
+	hr = stream->InitializeFromMemory(buffer.get(), length);
+	hr = factory->CreateDecoderFromStream(stream.Get(), NULL, WICDecodeMetadataCacheOnLoad, &decoder);
+	hr = factory->CreateFormatConverter(&converter);
+	hr = decoder->GetFrame(0, &frameDecode);
+	hr = converter->Initialize(frameDecode.Get(), GUID_WICPixelFormat32bppPBGRA, WICBitmapDitherTypeNone, NULL, 0.0f, WICBitmapPaletteTypeMedianCut);
 
-		auto d2dContext{ GameApp::GetInstance()->GetD2DContext() };
-		hr = d2dContext->CreateBitmapFromWicBitmap(converter.Get(), &bitmap);
-		assert(SUCCEEDED(hr));
+	auto d2dContext{ GameApp::GetInstance()->GetD2DContext() };
+	hr = d2dContext->CreateBitmapFromWicBitmap(converter.Get(), &bitmap);
+	assert(SUCCEEDED(hr));
 
-		return Image{ bitmap };
-	}
-	else if (type == Property::Type::D3DImage)
-	{
-		ID3D12Resource* bitmap;
-		ComPtr<ID3D12Resource> uploadBuffer;
-		auto d3dDevice{ GameApp::GetInstance()->GetD3DDevice() };
-		std::unique_ptr<uint8_t[]> decodedData;
-		D3D12_SUBRESOURCE_DATA subresource;
-		DirectX::LoadWICTextureFromMemoryEx(
-			d3dDevice.Get(),
-			buffer.get(),
-			length,
-			0,
-			D3D12_RESOURCE_FLAG_NONE,
-			DirectX::WIC_LOADER_FORCE_RGBA32,
-			&bitmap,
-			decodedData,
-			subresource
-		);
+	return bitmap;
+}
 
-		UINT64 nBytes{ GetRequiredIntermediateSize(bitmap, 0, 1) };
-		nBytes += D3D12_DEFAULT_RESOURCE_PLACEMENT_ALIGNMENT;
-		DX::ThrowIfFailed(d3dDevice->CreateCommittedResource(
-			&CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_UPLOAD),
-			D3D12_HEAP_FLAG_NONE,
-			&CD3DX12_RESOURCE_DESC::Buffer(nBytes),
-			D3D12_RESOURCE_STATE_GENERIC_READ,
-			NULL,
-			IID_PPV_ARGS(&uploadBuffer)
-		));
+ID3D12Resource* ResourceManager::ReadD3DImage(std::ifstream& fs)
+{
+	int length{ Read<int>(fs) };
+	std::unique_ptr<BYTE> buffer{ new BYTE[length] };
+	fs.read(reinterpret_cast<char*>(buffer.get()), length);
 
-		auto commandList{ GameApp::GetInstance()->GetCommandList() };
-		UpdateSubresources(commandList.Get(), bitmap, uploadBuffer.Get(), 0, 0, 1, &subresource);
+	ID3D12Resource* bitmap{ nullptr };
+	ComPtr<ID3D12Resource> uploadBuffer;
+	auto d3dDevice{ GameApp::GetInstance()->GetD3DDevice() };
+	std::unique_ptr<uint8_t[]> decodedData;
+	D3D12_SUBRESOURCE_DATA subresource;
+	DirectX::LoadWICTextureFromMemoryEx(
+		d3dDevice.Get(),
+		buffer.get(),
+		length,
+		0,
+		D3D12_RESOURCE_FLAG_NONE,
+		DirectX::WIC_LOADER_FORCE_RGBA32,
+		&bitmap,
+		decodedData,
+		subresource
+	);
 
-		// GPU 메모리에 복사가 끝난 뒤에 해제해야함
-		m_uploadBuffers.push_back(uploadBuffer);
+	UINT64 nBytes{ GetRequiredIntermediateSize(bitmap, 0, 1) };
+	nBytes += D3D12_DEFAULT_RESOURCE_PLACEMENT_ALIGNMENT;
+	DX::ThrowIfFailed(d3dDevice->CreateCommittedResource(
+		&CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_UPLOAD),
+		D3D12_HEAP_FLAG_NONE,
+		&CD3DX12_RESOURCE_DESC::Buffer(nBytes),
+		D3D12_RESOURCE_STATE_GENERIC_READ,
+		NULL,
+		IID_PPV_ARGS(&uploadBuffer)
+	));
 
-		// SRV 생성
-		CreateShaderResourceView(bitmap);
+	auto commandList{ GameApp::GetInstance()->GetCommandList() };
+	UpdateSubresources(commandList.Get(), bitmap, uploadBuffer.Get(), 0, 0, 1, &subresource);
 
-		return Image{ bitmap };
-	}
-	return Image{};
+	// GPU 메모리에 복사가 끝난 뒤에 해제해야함
+	m_uploadBuffers.push_back(uploadBuffer);
+
+	// SRV 생성
+	CreateShaderResourceView(bitmap);
+
+	return bitmap;
 }

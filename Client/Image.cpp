@@ -31,13 +31,13 @@ Image::Image(ID3D12Resource* resource)
 
 void Image::Render(const ComPtr<ID2D1DeviceContext2>& d2dContext, FLOAT x, FLOAT y) const
 {
-	auto d2dImage{ std::get<D2DImage>(m_data) };
+	const auto& d2dImage{ std::get<D2DImage>(m_data) };
 	d2dContext->DrawBitmap(d2dImage.bitmap.Get(), RECTF{ x, y, x + d2dImage.size.x, y + d2dImage.size.y });
 }
 
 void Image::SetShaderVariable(const ComPtr<ID3D12GraphicsCommandList>& commandList, RootParamIndex rootParameterIndex)
 {
-	auto d3dImage{ std::get<D3DImage>(m_data) };
+	const auto& d3dImage{ std::get<D3DImage>(m_data) };
 	auto handle{ ResourceManager::GetInstance()->GetGPUDescriptorHandle(d3dImage.resource.Get()) };
 	commandList->SetGraphicsRootDescriptorTable(rootParameterIndex, handle);
 	d3dImage.cbImage.SetShaderVariable(commandList, RootParamIndex::TEXTURE);
