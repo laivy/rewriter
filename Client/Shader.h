@@ -5,7 +5,7 @@ class Shader
 public:
 	enum class Type
 	{
-		DEFAULT
+		DEFAULT, LINE
 	};
 
 public:
@@ -14,7 +14,14 @@ public:
 
 	ID3D12PipelineState* GetPipelineState() const;
 
-private:
+protected:
 	ComPtr<ID3D12PipelineState>	m_pipelineState;
 	std::vector<D3D12_INPUT_ELEMENT_DESC> m_inputLayout;
+};
+
+class LineShader : public Shader
+{
+public:
+	LineShader();
+	~LineShader() = default;
 };

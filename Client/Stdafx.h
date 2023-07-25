@@ -48,7 +48,6 @@ using Microsoft::WRL::ComPtr;
 #endif
 
 // Game
-#include "Common.h"
 #include "Singleton.h"
 #include "StringTable.h"
 #include "TextUtil.h"
@@ -62,3 +61,40 @@ EXTERN_C IMAGE_DOS_HEADER __ImageBase;
 
 // 전역 변수
 extern UINT g_cbvSrvUavDescriptorIncrementSize;
+
+enum RootParamIndex
+{
+	// 상수버퍼
+	GAMEOBJECT,
+	CAMERA,
+	TEXTURE,
+#ifdef _DEBUG
+	LINE,
+#endif
+
+	// 서술자
+	TEXTURE0,
+
+	// 루트파라미터 개수
+	COUNT
+};
+
+enum class Pivot
+{
+	LEFTTOP, CENTERTOP, RIGHTTOP,
+	LEFTCENTER, CENTER, RIGHTCENTER,
+	LEFTBOT, CENTERBOT, RIGHTBOT
+};
+
+// 앞에 선언되있을 수록 위에 그려짐
+enum class Layer
+{
+	LOCALPLAYER,
+	REMOTEPLAYER,
+	MONSTER,
+	TERRAIN,
+	BACKGROUND1,
+	BACKGROUND2,
+	BACKGROUND3,
+	COUNT
+};

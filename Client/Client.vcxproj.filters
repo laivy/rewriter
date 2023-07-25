@@ -25,12 +25,6 @@
     <Filter Include="헤더 파일\Util">
       <UniqueIdentifier>{ac245af0-89aa-47bf-9274-5d499ef9140f}</UniqueIdentifier>
     </Filter>
-    <Filter Include="소스 파일\Data">
-      <UniqueIdentifier>{fd0d75a2-1320-4473-a894-07ada4b1fbee}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="헤더 파일\Data">
-      <UniqueIdentifier>{13c11019-d459-4a4f-8d4e-de1eb501ef8d}</UniqueIdentifier>
-    </Filter>
     <Filter Include="헤더 파일\Scene">
       <UniqueIdentifier>{38409fea-a705-4241-81f1-e37a6c0c2f11}</UniqueIdentifier>
     </Filter>
@@ -58,6 +52,12 @@
     <Filter Include="헤더 파일\Map">
       <UniqueIdentifier>{657fbd4e-9161-4844-a801-0907762299a5}</UniqueIdentifier>
     </Filter>
+    <Filter Include="소스 파일\Resource">
+      <UniqueIdentifier>{fd0d75a2-1320-4473-a894-07ada4b1fbee}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="헤더 파일\Resource">
+      <UniqueIdentifier>{13c11019-d459-4a4f-8d4e-de1eb501ef8d}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Main.cpp">
@@ -84,14 +84,11 @@
     <ClCompile Include="TextUtil.cpp">
       <Filter>소스 파일\Util</Filter>
     </ClCompile>
-    <ClCompile Include="BrushPool.cpp">
-      <Filter>소스 파일\UI</Filter>
-    </ClCompile>
     <ClCompile Include="Property.cpp">
-      <Filter>소스 파일\Data</Filter>
+      <Filter>소스 파일\Resource</Filter>
     </ClCompile>
     <ClCompile Include="Image.cpp">
-      <Filter>소스 파일\Data</Filter>
+      <Filter>소스 파일\Resource</Filter>
     </ClCompile>
     <ClCompile Include="SceneManager.cpp">
       <Filter>소스 파일\Scene</Filter>
@@ -102,9 +99,6 @@
     <ClCompile Include="GameApp.cpp">
       <Filter>소스 파일\Framework</Filter>
     </ClCompile>
-    <ClCompile Include="Shader.cpp">
-      <Filter>소스 파일\Framework</Filter>
-    </ClCompile>
     <ClCompile Include="Camera.cpp">
       <Filter>소스 파일\Framework</Filter>
     </ClCompile>
@@ -112,16 +106,10 @@
       <Filter>소스 파일\Framework</Filter>
     </ClCompile>
     <ClCompile Include="WICTextureLoader12.cpp">
-      <Filter>소스 파일\Data</Filter>
+      <Filter>소스 파일\Resource</Filter>
     </ClCompile>
     <ClCompile Include="Player.cpp">
       <Filter>소스 파일\GameObject</Filter>
-    </ClCompile>
-    <ClCompile Include="Mesh.cpp">
-      <Filter>소스 파일\Framework</Filter>
-    </ClCompile>
-    <ClCompile Include="ResourceManager.cpp">
-      <Filter>소스 파일\Framework</Filter>
     </ClCompile>
     <ClCompile Include="LogoScene.cpp">
       <Filter>소스 파일\Scene</Filter>
@@ -144,9 +132,6 @@
     <ClCompile Include="UI.cpp">
       <Filter>소스 파일\UI</Filter>
     </ClCompile>
-    <ClCompile Include="InputThread.cpp">
-      <Filter>소스 파일\Framework</Filter>
-    </ClCompile>
     <ClCompile Include="Map.cpp">
       <Filter>소스 파일\Map</Filter>
     </ClCompile>
@@ -154,7 +139,19 @@
       <Filter>소스 파일\Map</Filter>
     </ClCompile>
     <ClCompile Include="Font.cpp">
+      <Filter>소스 파일\Resource</Filter>
+    </ClCompile>
+    <ClCompile Include="ResourceManager.cpp">
       <Filter>소스 파일\Framework</Filter>
+    </ClCompile>
+    <ClCompile Include="BrushPool.cpp">
+      <Filter>소스 파일\Resource</Filter>
+    </ClCompile>
+    <ClCompile Include="Shader.cpp">
+      <Filter>소스 파일\Resource</Filter>
+    </ClCompile>
+    <ClCompile Include="Mesh.cpp">
+      <Filter>소스 파일\Resource</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -179,14 +176,11 @@
     <ClInclude Include="TextUtil.h">
       <Filter>헤더 파일\Util</Filter>
     </ClInclude>
-    <ClInclude Include="BrushPool.h">
-      <Filter>헤더 파일\UI</Filter>
-    </ClInclude>
     <ClInclude Include="Property.h">
-      <Filter>헤더 파일\Data</Filter>
+      <Filter>헤더 파일\Resource</Filter>
     </ClInclude>
     <ClInclude Include="Image.h">
-      <Filter>헤더 파일\Data</Filter>
+      <Filter>헤더 파일\Resource</Filter>
     </ClInclude>
     <ClInclude Include="SceneManager.h">
       <Filter>헤더 파일\Scene</Filter>
@@ -195,9 +189,6 @@
       <Filter>헤더 파일\Scene</Filter>
     </ClInclude>
     <ClInclude Include="GameApp.h">
-      <Filter>헤더 파일\Framework</Filter>
-    </ClInclude>
-    <ClInclude Include="Shader.h">
       <Filter>헤더 파일\Framework</Filter>
     </ClInclude>
     <ClInclude Include="d3dx12.h">
@@ -209,20 +200,11 @@
     <ClInclude Include="Timer.h">
       <Filter>헤더 파일\Framework</Filter>
     </ClInclude>
-    <ClInclude Include="ConstantBuffer.h">
-      <Filter>헤더 파일\Framework</Filter>
-    </ClInclude>
     <ClInclude Include="WICTextureLoader12.h">
-      <Filter>헤더 파일\Data</Filter>
+      <Filter>헤더 파일\Resource</Filter>
     </ClInclude>
     <ClInclude Include="Player.h">
       <Filter>헤더 파일\GameObject</Filter>
-    </ClInclude>
-    <ClInclude Include="Mesh.h">
-      <Filter>헤더 파일\Framework</Filter>
-    </ClInclude>
-    <ClInclude Include="Common.h">
-      <Filter>헤더 파일</Filter>
     </ClInclude>
     <ClInclude Include="ResourceManager.h">
       <Filter>헤더 파일\Framework</Filter>
@@ -251,20 +233,29 @@
     <ClInclude Include="Singleton.h">
       <Filter>헤더 파일\Framework</Filter>
     </ClInclude>
-    <ClInclude Include="InputThread.h">
-      <Filter>헤더 파일\Framework</Filter>
-    </ClInclude>
     <ClInclude Include="Map.h">
       <Filter>헤더 파일\Map</Filter>
     </ClInclude>
     <ClInclude Include="Platform.h">
       <Filter>헤더 파일\Map</Filter>
     </ClInclude>
-    <ClInclude Include="Font.h">
-      <Filter>헤더 파일\Framework</Filter>
-    </ClInclude>
     <ClInclude Include="StringTable.h">
-      <Filter>헤더 파일\Data</Filter>
+      <Filter>헤더 파일\Resource</Filter>
+    </ClInclude>
+    <ClInclude Include="BrushPool.h">
+      <Filter>헤더 파일\Resource</Filter>
+    </ClInclude>
+    <ClInclude Include="Mesh.h">
+      <Filter>헤더 파일\Resource</Filter>
+    </ClInclude>
+    <ClInclude Include="Shader.h">
+      <Filter>헤더 파일\Resource</Filter>
+    </ClInclude>
+    <ClInclude Include="Font.h">
+      <Filter>헤더 파일\Resource</Filter>
+    </ClInclude>
+    <ClInclude Include="ConstantBuffer.h">
+      <Filter>헤더 파일\Resource</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -272,6 +263,9 @@
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="Default.hlsl">
+      <Filter>셰이더 파일</Filter>
+    </FxCompile>
+    <FxCompile Include="Line.hlsl">
       <Filter>셰이더 파일</Filter>
     </FxCompile>
   </ItemGroup>

@@ -13,6 +13,8 @@ Image::Image(ID2D1Bitmap* bitmap)
 	data.bitmap = bitmap;
 	data.size.x = bitmap->GetSize().width;
 	data.size.y = bitmap->GetSize().height;
+
+	m_size = { static_cast<int>(data.size.x), static_cast<int>(data.size.y) };
 	m_data = data;
 }
 
@@ -26,6 +28,7 @@ Image::Image(ID3D12Resource* resource)
 	data.cbImage->width = static_cast<UINT>(desc.Width);
 	data.cbImage->height = static_cast<UINT>(desc.Height);
 
+	m_size = { static_cast<int>(desc.Width), static_cast<int>(desc.Height) };
 	m_data = data;
 }
 
@@ -41,4 +44,9 @@ void Image::SetShaderVariable(const ComPtr<ID3D12GraphicsCommandList>& commandLi
 	auto handle{ ResourceManager::GetInstance()->GetGPUDescriptorHandle(d3dImage.resource.Get()) };
 	commandList->SetGraphicsRootDescriptorTable(rootParameterIndex, handle);
 	d3dImage.cbImage.SetShaderVariable(commandList, RootParamIndex::TEXTURE);
+}
+
+INT2 Image::GetSize() const
+{
+	return m_size;
 }

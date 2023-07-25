@@ -24,6 +24,13 @@ Player::Player() :
 	auto rm{ ResourceManager::GetInstance() };
 	m_mesh = rm->GetMesh(Mesh::Type::DEFAULT);
 	m_shader = rm->GetShader(Shader::Type::DEFAULT);
+
+	auto prop{ rm->Load("Player.nyt") };
+	auto idle{ prop->Get<Property>("Idle") };
+	auto idle0{ idle->Get<Image>("0") };
+	auto [w, h] {idle0->GetSize()};
+	SetSize({ static_cast<float>(w), static_cast<float>(h) });
+	SetPivot(Pivot::CENTERBOT);
 }
 
 void Player::Update(FLOAT deltaTime)
@@ -292,7 +299,7 @@ void Player::PhysicsComponent::Update(FLOAT deltaTime)
 		m_player->Move(FLOAT2{ static_cast<int>(m_player->GetDirection()) * m_speed.x * deltaTime, 0.0f });
 		FLOAT2 pos{ m_player->GetPosition() };
 		if (beforePlatform->IsBetweenX(pos.x))
-			m_player->SetPosition(FLOAT2{ pos.x, beforePlatform->GetHeight(pos.x) }, Pivot::CENTERBOT);
+			m_player->SetPosition(FLOAT2{ pos.x, beforePlatform->GetHeight(pos.x) });
 		else
 			m_player->Move(FLOAT2{ 0.0f, m_speed.y * deltaTime });
 		m_speed.y = 0.0f;
@@ -321,8 +328,8 @@ void Player::PhysicsComponent::Update(FLOAT deltaTime)
 		m_platform = afterPlatform;
 	}
 
-	// 이전, 이후 플렛폼이 다르고 이후 플렛폼이 없거나 이전 플렛폼의 높이가 이후 플렛폼의 높이보다 크면 플렛폼을 벗어나 떨어지는 것
-	if (beforePlatform != afterPlatform && (!afterPlatform || (beforePlatform && afterPlatform && beforePlatform->GetHeight(beforePlayerPosition.x) > afterPlatform->GetHeight(afterPlayerPosition.x))))
+	// 플렛폼 위에 있으면서 이전, 이후 플렛폼이 다르고 이후 플렛폼이 없거나 이전 플렛폼의 높이가 이후 플렛폼의 높이보다 크면 플렛폼을 벗어나 떨어지는 것
+	if (m_isOnPlatform && beforePlatform != afterPlatform && (!afterPlatform || (beforePlatform && afterPlatform && beforePlatform->GetHeight(beforePlayerPosition.x) > afterPlatform->GetHeight(afterPlayerPosition.x))))
 		m_player->OnFalling();
 
 	// 중력 적용

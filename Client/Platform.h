@@ -17,4 +17,14 @@ public:
 private:
 	INT2 m_startPosition;
 	INT2 m_endPosition;
+
+#ifdef _DEBUG
+	struct cbLine
+	{
+		DirectX::XMFLOAT2 position1;
+		DirectX::XMFLOAT2 position2;
+		DirectX::XMFLOAT4 color;
+	};
+	ConstantBuffer<cbLine> m_cbLine;
+#endif
 };

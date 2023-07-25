@@ -59,6 +59,10 @@ void GS(point GS_INPUT input[1], inout TriangleStream<PS_INPUT> triangleStream)
 float4 PS(PS_INPUT input) : SV_TARGET
 {
 	float4 color = g_texture.Sample(g_sampler, input.uv);
-	color.a *= g_alpha;
+	color.a *= g_alpha;	
+	
+	if (color.a <= 0.0f)
+		discard;
+	
 	return color;
 }

@@ -22,3 +22,10 @@ cbuffer cbTexture : register(b2)
 	uint2 g_size;
 	float2 _dummy;
 }
+
+cbuffer cbLine : register(b3)
+{
+	float2 g_point1;
+	float2 g_point2;
+	float4 g_lineColor;
+}

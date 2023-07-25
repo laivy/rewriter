@@ -27,10 +27,11 @@ public:
 	void Move(const FLOAT2& delta);
 
 	void SetLayer(Layer layer);
+	void SetPivot(Pivot pivot);
 	void SetSize(const FLOAT2& size);
 	void SetScale(const FLOAT2& scale);
 	void SetRotation(FLOAT degree);
-	void SetPosition(const FLOAT2& position, Pivot pivot = Pivot::LEFTTOP);
+	void SetPosition(const FLOAT2& position);
 
 	BOOL IsValid() const;
 	FLOAT2 GetSize() const;

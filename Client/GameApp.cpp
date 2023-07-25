@@ -1,7 +1,6 @@
 ﻿#include "Stdafx.h"
 #include "BrushPool.h"
 #include "GameApp.h"
-#include "InputThread.h"
 #include "Image.h"
 #include "Property.h"
 #include "ResourceManager.h"
@@ -34,7 +33,6 @@ void GameApp::OnCreate()
 	SceneManager::GetInstance()->OnCreate();
 
 	WndManager::Instantiate();
-	InputThread::Instantiate();
 
 	ExecuteCommandList();
 	WaitForGPU();
@@ -47,21 +45,14 @@ void GameApp::OnCreate()
 
 void GameApp::OnDestroy()
 {
+	WaitForGPU();
+	CloseHandle(m_fenceEvent);
+
 	BrushPool::Destroy();
 	ResourceManager::Destroy();
 
 	SceneManager::Destroy();
 	WndManager::Destroy();
-
-	InputThread::Destroy();
-
-#ifdef _DEBUG
-	ComPtr<IDXGIDebug1> dxgiDebug;
-	if (SUCCEEDED(DXGIGetDebugInterface1(0, IID_PPV_ARGS(&dxgiDebug))))
-	{
-		dxgiDebug->ReportLiveObjects(DXGI_DEBUG_ALL, DXGI_DEBUG_RLO_FLAGS(DXGI_DEBUG_RLO_ALL));
-	}
-#endif
 }
 
 void GameApp::OnResize(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
@@ -393,9 +384,10 @@ void GameApp::CreateRenderTargetView()
 			&bitmapProperties,
 			&m_d2dRenderTargets[i]
 		));
-	}
 
-	DX::ThrowIfFailed(m_d3dDevice->CreateCommandAllocator(D3D12_COMMAND_LIST_TYPE_DIRECT, IID_PPV_ARGS(&m_commandAllocators)));
+		// CommandAllocator
+		DX::ThrowIfFailed(m_d3dDevice->CreateCommandAllocator(D3D12_COMMAND_LIST_TYPE_DIRECT, IID_PPV_ARGS(&m_commandAllocators[i])));
+	}
 }
 
 void GameApp::CreateDepthStencilView()
@@ -438,10 +430,13 @@ void GameApp::CreateRootSignature()
 	CD3DX12_DESCRIPTOR_RANGE ranges[1]{};
 	ranges[0].Init(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 1, 0, 0, D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND);
 
-	CD3DX12_ROOT_PARAMETER rootParameter[4]{};
+	CD3DX12_ROOT_PARAMETER rootParameter[RootParamIndex::COUNT]{};
 	rootParameter[RootParamIndex::GAMEOBJECT].InitAsConstantBufferView(RootParamIndex::GAMEOBJECT);
 	rootParameter[RootParamIndex::CAMERA].InitAsConstantBufferView(RootParamIndex::CAMERA);
 	rootParameter[RootParamIndex::TEXTURE].InitAsConstantBufferView(RootParamIndex::TEXTURE);
+#ifdef _DEBUG
+	rootParameter[RootParamIndex::LINE].InitAsConstantBufferView(RootParamIndex::LINE);
+#endif
 	rootParameter[RootParamIndex::TEXTURE0].InitAsDescriptorTable(1, &ranges[0], D3D12_SHADER_VISIBILITY_PIXEL);
 	
 	CD3DX12_STATIC_SAMPLER_DESC samplerDesc[1]{};
@@ -471,7 +466,7 @@ void GameApp::CreateRootSignature()
 
 void GameApp::CreateCommandList()
 {
-	DX::ThrowIfFailed(m_d3dDevice->CreateCommandList(0, D3D12_COMMAND_LIST_TYPE_DIRECT, m_commandAllocators.Get(), nullptr, IID_PPV_ARGS(&m_commandList)));
+	DX::ThrowIfFailed(m_d3dDevice->CreateCommandList(0, D3D12_COMMAND_LIST_TYPE_DIRECT, m_commandAllocators[m_frameIndex].Get(), nullptr, IID_PPV_ARGS(&m_commandList)));
 	DX::ThrowIfFailed(m_commandList->Close());
 }
 
@@ -538,8 +533,8 @@ void GameApp::Render()
 
 void GameApp::ResetCommandList()
 {
-	DX::ThrowIfFailed(m_commandAllocators->Reset());
-	DX::ThrowIfFailed(m_commandList->Reset(m_commandAllocators.Get(), nullptr));
+	DX::ThrowIfFailed(m_commandAllocators[m_frameIndex]->Reset());
+	DX::ThrowIfFailed(m_commandList->Reset(m_commandAllocators[m_frameIndex].Get(), nullptr));
 }
 
 void GameApp::ExecuteCommandList()

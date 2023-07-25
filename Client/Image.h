@@ -32,6 +32,9 @@ public:
 	void Render(const ComPtr<ID2D1DeviceContext2>& d2dContext, FLOAT x, FLOAT y) const;
 	void SetShaderVariable(const ComPtr<ID3D12GraphicsCommandList>& commandList, RootParamIndex rootParameterIndex = RootParamIndex::TEXTURE0);
 
+	INT2 GetSize() const;
+
 private:
 	std::variant<D2DImage, D3DImage> m_data;
+	INT2 m_size;
 };

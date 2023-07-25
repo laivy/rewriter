@@ -66,7 +66,8 @@ void Wnd::OnButtonClicked(INT id)
 
 void Wnd::Update(FLOAT deltaTime)
 {
-	if (!m_isValid) return;
+	if (!m_isValid)
+		return;
 
 	// 선택된 윈도우 마우스로 옮기기
 	if (m_isPick)
@@ -83,7 +84,8 @@ void Wnd::Update(FLOAT deltaTime)
 
 void Wnd::Render(const ComPtr<ID2D1DeviceContext2>& d2dContext)
 {
-	if (!m_isValid) return;
+	if (!m_isValid)
+		return;
 
 	ComPtr<ID2D1SolidColorBrush> brush{};
 	d2dContext->CreateSolidColorBrush(D2D1::ColorF{ D2D1::ColorF::Black }, &brush);
@@ -92,7 +94,7 @@ void Wnd::Render(const ComPtr<ID2D1DeviceContext2>& d2dContext)
 	// 포커스 되어있다면 테두리를 그린다.
 	if (m_isFocus)
 	{
-		ComPtr<ID2D1SolidColorBrush> focusBrush;
+		ComPtr<ID2D1SolidColorBrush> focusBrush{};
 		d2dContext->CreateSolidColorBrush(D2D1::ColorF{ D2D1::ColorF::Aqua }, &focusBrush);
 		d2dContext->DrawRectangle(RECTF{ 0.0f, 0.0f, m_size.x, m_size.y }, focusBrush.Get(), 10.0f);
 	}

@@ -110,6 +110,7 @@ void ResourceManager::CreateMeshes()
 void ResourceManager::CreateShaders()
 {
 	m_shaders.emplace(Shader::Type::DEFAULT, std::make_shared<Shader>());
+	m_shaders.emplace(Shader::Type::LINE, std::make_shared<LineShader>());
 }
 
 void ResourceManager::CreateSRVHeap()

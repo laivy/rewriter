@@ -23,12 +23,12 @@ void GameScene::OnCreate()
 {
 	m_camera = std::make_unique<Camera>();
 	m_player = std::make_unique<Player>();
-	m_player->SetPosition(FLOAT2{ 0.0f, 500.0f }, Pivot::CENTERBOT);
+	m_player->SetPosition(FLOAT2{ 0.0f, 500.0f });
 
 	m_map = std::make_unique<Map>();
-	m_map->m_platforms.emplace_back(std::make_shared<Platform>(INT2{ -500, -50 }, INT2{ 500, 50 }));
-	//m_map->m_platforms.emplace_back(INT2{ 50, 0 }, INT2{ 1000, 0 });
-	//m_map->m_platforms.emplace_back(INT2{ -500, -100 }, INT2{ 500, -100 });
+	m_map->m_platforms.emplace_back(std::make_shared<Platform>(INT2{ -200, -100 }, INT2{ 0, -150 }));
+	m_map->m_platforms.emplace_back(std::make_shared<Platform>(INT2{ 100, -150 }, INT2{ 200, -150 }));
+	m_map->m_platforms.emplace_back(std::make_shared<Platform>(INT2{ -500, -250 }, INT2{ 500, -250 }));
 }
 
 void GameScene::OnDestory()
@@ -57,6 +57,8 @@ void GameScene::Render(const ComPtr<ID3D12GraphicsCommandList>& commandList) con
 		m_camera->SetShaderVariable(commandList);
 	if (m_player)
 		m_player->Render(commandList);
+	for (const auto& p : m_map->GetPlatforms())
+		p->Render(commandList);
 }
 
 void GameScene::Render(const ComPtr<ID2D1DeviceContext2>& d2dContext) const

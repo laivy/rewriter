@@ -5,10 +5,20 @@
 template <class T>
 class ConstantBuffer
 {
+private:
+	constexpr static UINT BUFFER_SIZE = (sizeof(T) + 255) & ~255;
+
 public:
 	ConstantBuffer() : 
 		m_data{ nullptr }
 	{ }
+
+	ConstantBuffer(const ConstantBuffer& rhs) :
+		m_buffer{ rhs.m_buffer },
+		m_data{ rhs.m_data }
+	{
+		
+	}
 
 	~ConstantBuffer()
 	{
@@ -19,19 +29,14 @@ public:
 	void Init()
 	{
 		auto device{ GameApp::GetInstance()->GetD3DDevice() };
-
-		const UINT size{ (sizeof(T) + 255) & ~255 };
-		CD3DX12_HEAP_PROPERTIES prop{ D3D12_HEAP_TYPE_UPLOAD };
-		CD3DX12_RESOURCE_DESC desc{ CD3DX12_RESOURCE_DESC::Buffer(size) };
-
 		DX::ThrowIfFailed(device->CreateCommittedResource(
-			&prop,
+			&CD3DX12_HEAP_PROPERTIES{ D3D12_HEAP_TYPE_UPLOAD },
 			D3D12_HEAP_FLAG_NONE,
-			&desc,
+			&CD3DX12_RESOURCE_DESC::Buffer(BUFFER_SIZE),
 			D3D12_RESOURCE_STATE_GENERIC_READ,
 			NULL,
 			IID_PPV_ARGS(&m_buffer)));
-
+		m_buffer->SetName(TEXT("GAMEOBJECT CONSTANT BUFFER"));
 		DX::ThrowIfFailed(m_buffer->Map(0, nullptr, reinterpret_cast<void**>(&m_data)));
 	}
 

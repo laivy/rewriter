@@ -10,7 +10,7 @@ IGameObject::IGameObject() :
 	m_scale{ 1.0f, 1.0f },
 	m_degree{ 0.0f },
 	m_position{ 0.0f, 0.0f },
-	m_pivot{ Pivot::LEFTTOP },
+	m_pivot{ Pivot::CENTER },
 	m_shader{},
 	m_mesh{}
 {
@@ -28,7 +28,7 @@ void IGameObject::Destroy()
 
 void IGameObject::Move(const FLOAT2& delta)
 {
-	SetPosition(m_position + delta, m_pivot);
+	SetPosition(m_position + delta);
 }
 
 void IGameObject::SetLayer(Layer layer)
@@ -36,6 +36,11 @@ void IGameObject::SetLayer(Layer layer)
 	m_layer = layer;
 	if (m_cbGameObject.IsValid())
 		m_cbGameObject->layer = static_cast<INT>(layer);
+}
+
+void IGameObject::SetPivot(Pivot pivot)
+{
+	m_pivot = pivot;
 }
 
 void IGameObject::SetSize(const FLOAT2& size)
@@ -53,44 +58,9 @@ void IGameObject::SetRotation(FLOAT degree)
 	m_degree = degree;
 }
 
-void IGameObject::SetPosition(const FLOAT2& position, Pivot pivot)
+void IGameObject::SetPosition(const FLOAT2& position)
 {
 	m_position = position;
-	m_pivot = pivot;
-	switch (m_pivot)
-	{
-	case Pivot::LEFTTOP:
-		break;
-	case Pivot::CENTERTOP:
-		m_position.x -= m_size.x / 2.0f;
-		break;
-	case Pivot::RIGHTTOP:
-		m_position.x -= m_size.x;
-		break;
-	case Pivot::LEFTCENTER:
-		m_position.y -= m_size.y / 2.0f;
-		break;
-	case Pivot::CENTER:
-		m_position.x -= m_size.x / 2.0f;
-		m_position.y -= m_size.y / 2.0f;
-		break;
-	case Pivot::RIGHTCENTER:
-		m_position.x -= m_size.x;
-		m_position.y -= m_size.y / 2.0f;
-		break;
-	case Pivot::LEFTBOT:
-		m_position.y -= m_size.y;
-		break;
-	case Pivot::CENTERBOT:
-		m_position.x -= m_size.x / 2.0f;
-		m_position.y -= m_size.y;
-		break;
-	case Pivot::RIGHTBOT:
-		m_position.x -= m_size.x;
-		m_position.y -= m_size.y;
-		break;
-	}
-
 	if (m_cbGameObject.IsValid())
 		m_cbGameObject->worldMatrix = GetWorldMatrix();
 }
@@ -112,11 +82,47 @@ FLOAT2 IGameObject::GetSize() const
 
 DirectX::XMFLOAT4X4 IGameObject::GetWorldMatrix() const
 {
+	// 피봇을 고려하여 위치 설정
+	float deltaX{}, deltaY{};
+	switch (m_pivot)
+	{
+	case Pivot::LEFTTOP:
+		deltaX = -m_size.x / 2.0f;
+		deltaY = -m_size.y / 2.0f;
+		break;
+	case Pivot::CENTERTOP:
+		deltaY = -m_size.y / 2.0f;
+		break;
+	case Pivot::RIGHTTOP:
+		deltaX = m_size.x / 2.0f;
+		deltaY = -m_size.y / 2.0f;
+		break;
+	case Pivot::LEFTCENTER:
+		deltaX = -m_size.x / 2.0f;
+		break;
+	case Pivot::CENTER:
+		break;
+	case Pivot::RIGHTCENTER:
+		deltaX = m_size.x / 2.0f;
+		break;
+	case Pivot::LEFTBOT:
+		deltaX = -m_size.x / 2.0f;
+		deltaY = m_size.y / 2.0f;
+		break;
+	case Pivot::CENTERBOT:
+		deltaY = m_size.y / 2.0f;
+		break;
+	case Pivot::RIGHTBOT:
+		deltaX = m_size.x / 2.0f;
+		deltaY = m_size.y / 2.0f;
+		break;
+	}
+
 	using namespace DirectX;
 	XMMATRIX scale{ XMMatrixScaling(m_scale.x, m_scale.y, 1.0f) };
 	XMMATRIX rotate{ XMMatrixRotationRollPitchYaw(0.0f, 0.0f, XMConvertToRadians(m_degree)) };
-	XMMATRIX translate{ XMMatrixTranslation(m_position.x, m_position.y, 0.0f) };
-	
+	XMMATRIX translate{ XMMatrixTranslation(m_position.x + deltaX, m_position.y + deltaY, 0.0f) };
+
 	XMFLOAT4X4 worldMatrix{};
 	XMStoreFloat4x4(&worldMatrix, XMMatrixTranspose(scale * rotate * translate));
 	return worldMatrix;
