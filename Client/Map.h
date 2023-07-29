@@ -5,10 +5,12 @@ class Platform;
 class Map
 {
 public:
-	Map() = default;
+	Map();
 	~Map() = default;
 
 	const std::vector<std::shared_ptr<Platform>>& GetPlatforms() const;
+
+	std::weak_ptr<Platform> GetBelowPlatform(const FLOAT2& position) const;
 
 public:
 	int m_id;

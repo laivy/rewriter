@@ -14,7 +14,6 @@ public:
 		RIGHT = 1
 	};
 
-public:
 	class InputComponent
 	{
 	public:
@@ -46,7 +45,7 @@ public:
 		bool CanJump() const;
 
 	private:
-		std::weak_ptr<Platform> GetTopPlatformBelowPosition(const FLOAT2& position) const;
+		void UpdateMovement(float deltaTime);
 
 	private:
 		Player* m_player;
@@ -118,12 +117,13 @@ private:
 	void OnFalling();
 
 	void SetDirection(Direction direction);
+
 	Player::Direction GetDirection() const;
 
 private:
+	Direction m_direction;
+
 	InputComponent m_inputComponent;
 	PhysicsComponent m_physicsComponent;
 	AnimationComponent m_animationComponent;
-
-	Direction m_direction;
 };

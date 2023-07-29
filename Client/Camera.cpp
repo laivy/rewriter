@@ -9,7 +9,7 @@ Camera::Camera() :
 	m_scale{ 1.0f, 1.0f }, 
 	m_degree{ 0.0f }
 {
-	auto [width, height] { GameApp::GetInstance()->GetWindowSize() };
+	const auto& [width, height] { GameApp::GetInstance()->GetWindowSize() };
 
 	m_cbCamera.Init();
 	m_cbCamera->viewMatrix = DirectX::XMMatrixIdentity();
@@ -32,6 +32,12 @@ void Camera::SetShaderVariable(const ComPtr<ID3D12GraphicsCommandList>& commandL
 void Camera::SetScale(const FLOAT2& scale)
 {
 	m_scale = scale;
+
+	if (m_cbCamera.IsValid())
+	{
+		const auto& [width, height] { GameApp::GetInstance()->GetWindowSize() };
+		m_cbCamera->projMatrix = DirectX::XMMatrixTranspose(DirectX::XMMatrixOrthographicLH(static_cast<float>(width / m_scale.x), static_cast<float>(height / m_scale.y), 0.0f, 1.0f));
+	}
 }
 
 void Camera::SetRotation(FLOAT degree)

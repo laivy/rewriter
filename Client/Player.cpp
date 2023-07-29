@@ -25,11 +25,7 @@ Player::Player() :
 	m_mesh = rm->GetMesh(Mesh::Type::DEFAULT);
 	m_shader = rm->GetShader(Shader::Type::DEFAULT);
 
-	auto prop{ rm->Load("Player.nyt") };
-	auto idle{ prop->Get<Property>("Idle") };
-	auto idle0{ idle->Get<Image>("0") };
-	auto [w, h] {idle0->GetSize()};
-	SetSize({ static_cast<float>(w), static_cast<float>(h) });
+	SetSize({ 50.0f, 37.0f });
 	SetPivot(Pivot::CENTERBOT);
 }
 
@@ -286,41 +282,25 @@ void Player::PhysicsComponent::OnFalling()
 
 void Player::PhysicsComponent::Update(FLOAT deltaTime)
 {
-	FLOAT2 beforePlayerPosition{ m_player->GetPosition() };
-	FLOAT2 afterPlayerPosition{};
+	FLOAT2 beforePosition{ m_player->GetPosition() };
+	FLOAT2 afterPosition{};
 	std::shared_ptr<Platform> beforePlatform{ m_platform.lock() };
 	std::shared_ptr<Platform> afterPlatform{};
 
-	// 플렛폼 위에서 움직이는 경우
-	if (m_isOnPlatform)
-	{
-		// x축으로만 움직인 뒤, 여전히 같은 플렛폼 위에 있다면 높이를 해당 위치의 플렛폼 높이로 설정
-		// 그 외의 경우엔 기존 플렛폼에서 벗어나는 것이므로 y축으로도 움직임
-		m_player->Move(FLOAT2{ static_cast<int>(m_player->GetDirection()) * m_speed.x * deltaTime, 0.0f });
-		FLOAT2 pos{ m_player->GetPosition() };
-		if (beforePlatform->IsBetweenX(pos.x))
-			m_player->SetPosition(FLOAT2{ pos.x, beforePlatform->GetHeight(pos.x) });
-		else
-			m_player->Move(FLOAT2{ 0.0f, m_speed.y * deltaTime });
-		m_speed.y = 0.0f;
-	}
-	else
-	{
-		m_player->Move(FLOAT2{ static_cast<int>(m_player->GetDirection()) * m_speed.x * deltaTime, m_speed.y * deltaTime });
-	}
+	UpdateMovement(deltaTime);
 
 	// 현재 위치에서 가장 높은 플렛폼 계산
-	afterPlayerPosition = m_player->GetPosition();
-	afterPlatform = GetTopPlatformBelowPosition(afterPlayerPosition).lock();
+	afterPosition = m_player->GetPosition();
+	afterPlatform = GameScene::GetInstance()->GetMap()->GetBelowPlatform(afterPosition).lock();
 
 	// 움직이기 이전, 이후 플레이어 y좌표 사이에 이전 플렛폼 높이가 있다면 착지한 것
 	FLOAT platformHeight{ -FLT_MAX };
 	if (beforePlatform)
-		platformHeight = beforePlatform->GetHeight(beforePlayerPosition.x);
-	if (afterPlayerPosition.y < platformHeight && platformHeight < beforePlayerPosition.y && !m_isOnPlatform)
+		platformHeight = beforePlatform->GetHeight(afterPosition.x);
+	if (!m_isOnPlatform && afterPosition.y <= platformHeight)
 	{
 		afterPlatform = beforePlatform;
-		m_platform = beforePlatform;
+		m_platform = afterPlatform;
 		m_player->OnLanding();
 	}
 	else
@@ -328,8 +308,8 @@ void Player::PhysicsComponent::Update(FLOAT deltaTime)
 		m_platform = afterPlatform;
 	}
 
-	// 플렛폼 위에 있으면서 이전, 이후 플렛폼이 다르고 이후 플렛폼이 없거나 이전 플렛폼의 높이가 이후 플렛폼의 높이보다 크면 플렛폼을 벗어나 떨어지는 것
-	if (m_isOnPlatform && beforePlatform != afterPlatform && (!afterPlatform || (beforePlatform && afterPlatform && beforePlatform->GetHeight(beforePlayerPosition.x) > afterPlatform->GetHeight(afterPlayerPosition.x))))
+	// 플렛폼 위에 있으면서 움직이기 이전, 이후 플렛폼이 다르고 이후 플렛폼이 없거나 이전 플렛폼의 높이가 이후 플렛폼의 높이보다 크면 플렛폼을 벗어나 떨어지는 것
+	if (m_isOnPlatform && beforePlatform != afterPlatform && (!afterPlatform || (beforePlatform && afterPlatform && beforePlatform->GetHeight(beforePosition.x) > afterPlatform->GetHeight(afterPosition.x))))
 		m_player->OnFalling();
 
 	// 중력 적용
@@ -348,29 +328,24 @@ bool Player::PhysicsComponent::CanJump() const
 	return !m_isJumping;
 }
 
-std::weak_ptr<Platform> Player::PhysicsComponent::GetTopPlatformBelowPosition(const FLOAT2& position) const
+void Player::PhysicsComponent::UpdateMovement(float deltaTime)
 {
-	Map* map{ GameScene::GetInstance()->GetMap() };
-	if (!map)
-		return {};
-
-	std::weak_ptr<Platform> topPlatform{};
-	FLOAT topPlatformHeight{ -FLT_MAX };
-	FLOAT2 playerPosition{ m_player->GetPosition() };
-
-	for (const auto& p : map->GetPlatforms())
+	// 플렛폼 위에 있지 않은 경우
+	if (!m_isOnPlatform)
 	{
-		auto [s, e] { p->GetStartEndPosition() };
-		if (position.x < s.x || position.x > e.x)
-			continue;
-
-		FLOAT platformHeight{ p->GetHeight(playerPosition.x) };
-		if (platformHeight > playerPosition.y ||
-			platformHeight < topPlatformHeight)
-			continue;
-
-		topPlatformHeight = platformHeight;
-		topPlatform = p;
+		m_player->Move({ static_cast<int>(m_player->GetDirection()) * m_speed.x * deltaTime, m_speed.y * deltaTime });
+		return;
 	}
-	return topPlatform;
+
+	// 플렛폼 위에서 움직이는 경우에는 x축으로만 움직인 뒤, 여전히 같은 플렛폼 위에 있다면 높이를 해당 위치의 플렛폼 높이로 설정
+	// 그 외의 경우엔 기존 플렛폼에서 벗어나는 것이므로 y축으로도 움직임
+	m_player->Move({ static_cast<int>(m_player->GetDirection()) * m_speed.x * deltaTime, 0.0f });
+
+	FLOAT2 pos{ m_player->GetPosition() };
+	auto platform{ m_platform.lock() };
+	if (platform && platform->IsBetweenX(pos.x))
+		m_player->SetPosition({ pos.x, platform->GetHeight(pos.x) });
+	else
+		m_player->Move({ 0.0f, m_speed.y * deltaTime });
+	m_speed.y = 0.0f;
 }
