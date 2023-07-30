@@ -1,6 +1,7 @@
 ﻿#include "Stdafx.h"
 #include "Camera.h"
 #include "GameApp.h"
+#include "GameObject.h"
 
 Camera::Camera() : 
 	m_eye{ 0.0f, 0.0f, 0.0f }, 
@@ -43,6 +44,17 @@ void Camera::SetScale(const FLOAT2& scale)
 void Camera::SetRotation(FLOAT degree)
 {
 	m_degree = degree;
+
+	auto up{ DirectX::XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f) };
+	auto rotate{ DirectX::XMMatrixRotationZ(DirectX::XMConvertToRadians(degree)) };
+	DirectX::XMStoreFloat3(&m_up, DirectX::XMVector3Transform(up, rotate));
+}
+
+void Camera::SetPosition(const FLOAT2& position)
+{
+	m_eye.x = position.x;
+	m_eye.y = position.y;
+	m_eye.z = 0.0f;
 }
 
 FLOAT2 Camera::GetScale() const
@@ -57,10 +69,58 @@ FLOAT Camera::GetRotation() const
 
 FLOAT2 Camera::GetPosition() const
 {
-	return FLOAT2{ m_eye.x, m_eye.y };
+	return { m_eye.x, m_eye.y };
 }
 
-MATRIX Camera::GetMatrix() const
+RECTF Camera::GetCameraBoundary() const
 {
-	return MATRIX::Identity();
+	// 테스트용 맵 크기
+	RECTF mapBoundary{ -800.0f, 500.0f, 800.0f, -500.0f };
+
+	const auto& [width, height] { GameApp::GetInstance()->GetWindowSize() };
+	FLOAT2 cameraRange{ width / m_scale.x, height / m_scale.y };
+
+	RECTF boundary{};
+	boundary.left = mapBoundary.left + cameraRange.x / 2.0f;
+	boundary.top = mapBoundary.top - cameraRange.y / 2.0f;
+	boundary.right = mapBoundary.right - cameraRange.x / 2.0f;
+	boundary.bottom = mapBoundary.bottom + cameraRange.y / 2.0f;
+
+	// 맵이 카메라 범위보다 작을 수도 있음
+	if (boundary.left > boundary.right)
+		boundary.left = boundary.right = 0.0f;
+	if (boundary.top < boundary.bottom)
+		boundary.top = boundary.bottom = 0.0f;
+
+	return boundary;
+}
+
+FocusCamera::FocusCamera() : 
+	Camera{},
+	m_focus{},
+	m_delay{ 0.5f }
+{
+
+}
+
+void FocusCamera::Update(FLOAT deltaTime)
+{
+
+	if (auto focus{ m_focus.lock() })
+	{
+		RECTF boundary{ GetCameraBoundary() };
+		FLOAT2 pos{ GetPosition() };
+		FLOAT2 delta{ focus->GetPosition() - pos };
+
+		delta.x = std::clamp(delta.x, boundary.left - pos.x, boundary.right - pos.x);
+		delta.y = std::clamp(delta.y, boundary.bottom - pos.y, boundary.top - pos.y);
+
+		SetPosition(GetPosition() + delta / m_delay * deltaTime);
+	}
+	Camera::Update(deltaTime);
+}
+
+void FocusCamera::SetFocus(const std::shared_ptr<IGameObject>& focus)
+{
+	m_focus = focus;
 }

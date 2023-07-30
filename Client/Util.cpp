@@ -88,6 +88,16 @@ void operator-=(FLOAT2& lhs, const FLOAT2& rhs)
 	lhs = lhs - rhs;
 }
 
+FLOAT2 operator*(const FLOAT2& lhs, FLOAT rhs)
+{
+	return { lhs.x * rhs, lhs.y * rhs };
+}
+
+FLOAT2 operator/(const FLOAT2& lhs, FLOAT rhs)
+{
+	return { lhs.x / rhs, lhs.y / rhs };
+}
+
 RECTF::RECTF()
 {
 	left = 0.0f;

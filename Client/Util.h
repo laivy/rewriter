@@ -33,6 +33,8 @@ private:
 	friend FLOAT2 operator-(const FLOAT2& lhs, const FLOAT2& rhs);
 	friend void operator+=(FLOAT2& lhs, const FLOAT2& rhs);
 	friend void operator-=(FLOAT2& lhs, const FLOAT2& rhs);
+	friend FLOAT2 operator*(const FLOAT2& lhs, FLOAT rhs);
+	friend FLOAT2 operator/(const FLOAT2& lhs, FLOAT rhs);
 };
 
 class RECTF : public D2D1_RECT_F
