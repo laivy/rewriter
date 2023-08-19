@@ -5,13 +5,13 @@
 #include "ResourceManager.h"
 #include "Wnd.h"
 
-Label::Label(FLOAT width, FLOAT height, Font::Type fontType)
+Label::Label(const INT2& size)
 {
-	SetSize(FLOAT2{ width, height });
+	SetSize(size);
 	SetPosition(FLOAT2{ 0.0f, 0.0f });
 	if (auto rm{ ResourceManager::GetInstance() })
 	{
-		SetFont(rm->GetFont(fontType));
+		SetFont(rm->GetFont(Font::Type::MORRIS12));
 		SetText("");
 	}
 }

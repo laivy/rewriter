@@ -4,7 +4,7 @@
 class Wnd : public IUserInterface
 {
 public:
-	Wnd(FLOAT width, FLOAT height, FLOAT x = 0.0f, FLOAT y = 0.0f);
+	Wnd(const INT2& size);
 	virtual ~Wnd() = default;
 
 	virtual void OnMouseEvent(HWND hWnd, UINT message, INT x, INT y);
@@ -26,23 +26,19 @@ public:
 	void SetFocus(BOOL isFocus);
 	void SetPick(BOOL isPick);
 
-	std::mutex& GetLock();
-	BOOL IsValid() const;
 	BOOL IsFocus() const;
 	BOOL IsPick() const;
+	bool IsInWnd(const INT2& point);
 
 private:
 	FLOAT2 GetPickedDelta() const;
 
 protected:
-	static constexpr FLOAT WND_TITLE_HEIGHT = 15.0f;
+	static constexpr float WND_TITLE_HEIGHT = 15.0f;
 
 private:
-	std::mutex m_mutex;
-
+	std::vector<std::unique_ptr<IUserInterface>> m_ui;
 	BOOL m_isFocus;
 	BOOL m_isPick;
 	FLOAT2 m_pickDelta;
-
-	std::vector<std::unique_ptr<IUserInterface>> m_ui;
 };

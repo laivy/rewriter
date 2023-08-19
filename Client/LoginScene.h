@@ -4,7 +4,9 @@
 class Camera;
 class Player;
 
-class LoginScene : public IScene, public TSingleton<LoginScene>
+class LoginScene : 
+	public IScene, 
+	public TSingleton<LoginScene>
 {
 public:
 	LoginScene() = default;
@@ -18,7 +20,4 @@ public:
 	virtual void Update(FLOAT deltaTime);
 	virtual void Render(const ComPtr<ID3D12GraphicsCommandList>& commandList) const;
 	virtual void Render(const ComPtr<ID2D1DeviceContext2>& d2dContext) const;
-
-private:
-
 };

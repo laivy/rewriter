@@ -1,8 +1,8 @@
 ﻿#include "Stdafx.h"
-#include "GameScene.h"
 #include "Map.h"
 #include "Mesh.h"
 #include "Image.h"
+#include "ObjectManager.h"
 #include "Platform.h"
 #include "Player.h"
 #include "Property.h"
@@ -13,6 +13,7 @@ Player::Player() :
 	m_inputComponent{ this },
 	m_physicsComponent{ this },
 	m_animationComponent{ this },
+	m_characterID{ 0 },
 	m_direction{ Direction::RIGHT }
 {
 	m_cbGameObject.Init();
@@ -45,6 +46,11 @@ void Player::Render(const ComPtr<ID3D12GraphicsCommandList>& commandList) const
 		commandList->SetPipelineState(s->GetPipelineState());
 	if (auto m{ m_mesh.lock() })
 		m->Render(commandList);
+}
+
+CharacterID Player::GetCharacterID() const
+{
+	return m_characterID;
 }
 
 void Player::OnJump()
@@ -258,7 +264,7 @@ void Player::InputComponent::Update(FLOAT deltaTime)
 Player::PhysicsComponent::PhysicsComponent(Player* player) :
 	m_player{ player },
 	m_platform{},
-	m_speed{ 100.0f, 0.0f },
+	m_speed{ DEFAULT_X_SPEED, 0.0f },
 	m_isOnPlatform{ false },
 	m_isJumping{ false }
 {
@@ -291,7 +297,7 @@ void Player::PhysicsComponent::Update(FLOAT deltaTime)
 
 	// 현재 위치에서 가장 높은 플렛폼 계산
 	afterPosition = m_player->GetPosition();
-	afterPlatform = GameScene::GetInstance()->GetMap()->GetBelowPlatform(afterPosition).lock();
+	afterPlatform = ObjectManager::GetInstance()->GetMap().lock()->GetBelowPlatform(afterPosition).lock();
 
 	// 움직이기 이전, 이후 플레이어 y좌표 사이에 이전 플렛폼 높이가 있다면 착지한 것
 	FLOAT platformHeight{ -FLT_MAX };
@@ -318,7 +324,7 @@ void Player::PhysicsComponent::Update(FLOAT deltaTime)
 
 void Player::PhysicsComponent::OnJump()
 {
-	m_speed.y = 500.0f;
+	m_speed.y = DEFAULT_JUMP_POWER;
 	m_isOnPlatform = false;
 	m_isJumping = true;
 }

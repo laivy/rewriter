@@ -1,5 +1,6 @@
 ﻿#pragma once
 #include "Scene.h"
+#include "EventManager.h"
 
 class SceneManager : public TSingleton<SceneManager>
 {
@@ -25,6 +26,8 @@ public:
 	{
 		if (m_scene)
 			m_scene->OnDestory();
+		if (auto em{ EventManager::GetInstance() })
+			em->OnSceneChange();
 		if (scene)
 			scene->OnCreate();
 		m_scene = scene;

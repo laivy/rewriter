@@ -2,14 +2,26 @@
 #include "Map.h"
 #include "Platform.h"
 
-Map::Map() : m_id{}
+Map::Map() :
+	m_id{},
+	m_size{ 1920, 1080 }
 {
 
 }
 
-const std::vector<std::shared_ptr<Platform>>& Map::GetPlatforms() const
+void Map::Update(FLOAT deltaTime)
 {
-	return m_platforms;
+}
+
+void Map::Render(const ComPtr<ID3D12GraphicsCommandList>& commandList) const
+{
+	for (const auto& p : m_platforms)
+		p->Render(commandList);
+}
+
+INT2 Map::GetSize() const
+{
+	return m_size;
 }
 
 std::weak_ptr<Platform> Map::GetBelowPlatform(const FLOAT2& position) const

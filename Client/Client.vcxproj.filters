@@ -72,9 +72,6 @@
     <ClCompile Include="Wnd.cpp">
       <Filter>소스 파일\UI</Filter>
     </ClCompile>
-    <ClCompile Include="WndManager.cpp">
-      <Filter>소스 파일\UI</Filter>
-    </ClCompile>
     <ClCompile Include="EditCtrl.cpp">
       <Filter>소스 파일\UI</Filter>
     </ClCompile>
@@ -89,9 +86,6 @@
     </ClCompile>
     <ClCompile Include="Image.cpp">
       <Filter>소스 파일\Resource</Filter>
-    </ClCompile>
-    <ClCompile Include="SceneManager.cpp">
-      <Filter>소스 파일\Scene</Filter>
     </ClCompile>
     <ClCompile Include="LoginScene.cpp">
       <Filter>소스 파일\Scene</Filter>
@@ -153,6 +147,18 @@
     <ClCompile Include="Mesh.cpp">
       <Filter>소스 파일\Resource</Filter>
     </ClCompile>
+    <ClCompile Include="WndManager.cpp">
+      <Filter>소스 파일\Framework</Filter>
+    </ClCompile>
+    <ClCompile Include="ObjectManager.cpp">
+      <Filter>소스 파일\Framework</Filter>
+    </ClCompile>
+    <ClCompile Include="EventManager.cpp">
+      <Filter>소스 파일\Framework</Filter>
+    </ClCompile>
+    <ClCompile Include="SceneManager.cpp">
+      <Filter>소스 파일\Framework</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Stdafx.h">
@@ -162,9 +168,6 @@
       <Filter>헤더 파일\UI</Filter>
     </ClInclude>
     <ClInclude Include="Wnd.h">
-      <Filter>헤더 파일\UI</Filter>
-    </ClInclude>
-    <ClInclude Include="WndManager.h">
       <Filter>헤더 파일\UI</Filter>
     </ClInclude>
     <ClInclude Include="EditCtrl.h">
@@ -181,9 +184,6 @@
     </ClInclude>
     <ClInclude Include="Image.h">
       <Filter>헤더 파일\Resource</Filter>
-    </ClInclude>
-    <ClInclude Include="SceneManager.h">
-      <Filter>헤더 파일\Scene</Filter>
     </ClInclude>
     <ClInclude Include="LoginScene.h">
       <Filter>헤더 파일\Scene</Filter>
@@ -256,6 +256,18 @@
     </ClInclude>
     <ClInclude Include="ConstantBuffer.h">
       <Filter>헤더 파일\Resource</Filter>
+    </ClInclude>
+    <ClInclude Include="WndManager.h">
+      <Filter>헤더 파일\Framework</Filter>
+    </ClInclude>
+    <ClInclude Include="ObjectManager.h">
+      <Filter>헤더 파일\Framework</Filter>
+    </ClInclude>
+    <ClInclude Include="EventManager.h">
+      <Filter>헤더 파일\Framework</Filter>
+    </ClInclude>
+    <ClInclude Include="SceneManager.h">
+      <Filter>헤더 파일\Framework</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

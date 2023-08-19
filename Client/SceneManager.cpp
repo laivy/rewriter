@@ -1,11 +1,11 @@
 ﻿#include "Stdafx.h"
+#include "BrushPool.h"
 #include "Camera.h"
+#include "GameScene.h"
+#include "LoginScene.h"
 #include "Player.h"
 #include "Scene.h"
 #include "SceneManager.h"
-#include "LogoScene.h"
-#include "LoginScene.h"
-#include "BrushPool.h"
 
 SceneManager::SceneManager() : m_scene{ nullptr }
 {
@@ -14,8 +14,8 @@ SceneManager::SceneManager() : m_scene{ nullptr }
 
 void SceneManager::OnCreate()
 {
-	LogoScene::Instantiate();
-	SetScene(LogoScene::GetInstance());
+	LoginScene::Instantiate();
+	SetScene(LoginScene::GetInstance());
 }
 
 void SceneManager::OnDestroy()

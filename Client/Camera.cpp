@@ -2,13 +2,13 @@
 #include "Camera.h"
 #include "GameApp.h"
 #include "GameObject.h"
+#include "Map.h"
+#include "ObjectManager.h"
 
 Camera::Camera() : 
-	m_eye{ 0.0f, 0.0f, 0.0f }, 
-	m_at{ 0.0f, 0.0f, 1.0f }, 
-	m_up{ 0.0f, 1.0f, 0.0f }, 
-	m_scale{ 1.0f, 1.0f }, 
-	m_degree{ 0.0f }
+	IGameObject{},
+	m_at{ 0.0f, 0.0f }, 
+	m_up{ 0.0f, 1.0f }
 {
 	const auto& [width, height] { GameApp::GetInstance()->GetWindowSize() };
 
@@ -19,9 +19,9 @@ Camera::Camera() :
 
 void Camera::Update(FLOAT deltaTime)
 {
-	auto eye{ DirectX::XMLoadFloat3(&m_eye) };
-	auto at{ DirectX::XMVectorSet(m_eye.x + m_at.x, m_eye.y + m_at.y, m_eye.z + m_at.z, 1.0f) };
-	auto up{ DirectX::XMLoadFloat3(&m_up) };
+	auto eye{ DirectX::XMVectorSet(m_position.x, m_position.y, 0.0f, 0.0f) };
+	auto at{ DirectX::XMVectorSet(m_position.x + m_at.x, m_position.y + m_at.y, 1.0f, 1.0f) };
+	auto up{ DirectX::XMVectorSet(m_up.x, m_up.y, 0.0f, 0.0f) };
 	m_cbCamera->viewMatrix = DirectX::XMMatrixTranspose(DirectX::XMMatrixLookAtLH(eye, at, up));
 }
 
@@ -47,35 +47,15 @@ void Camera::SetRotation(FLOAT degree)
 
 	auto up{ DirectX::XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f) };
 	auto rotate{ DirectX::XMMatrixRotationZ(DirectX::XMConvertToRadians(degree)) };
-	DirectX::XMStoreFloat3(&m_up, DirectX::XMVector3Transform(up, rotate));
-}
-
-void Camera::SetPosition(const FLOAT2& position)
-{
-	m_eye.x = position.x;
-	m_eye.y = position.y;
-	m_eye.z = 0.0f;
-}
-
-FLOAT2 Camera::GetScale() const
-{
-	return m_scale;
-}
-
-FLOAT Camera::GetRotation() const
-{
-	return m_degree;
-}
-
-FLOAT2 Camera::GetPosition() const
-{
-	return { m_eye.x, m_eye.y };
+	up = DirectX::XMVector3Transform(up, rotate);
+	m_up.x = DirectX::XMVectorGetX(up);
+	m_up.y = DirectX::XMVectorGetY(up);
 }
 
 RECTF Camera::GetCameraBoundary() const
 {
-	// 테스트용 맵 크기
-	RECTF mapBoundary{ -800.0f, 500.0f, 800.0f, -500.0f };
+	INT2 mapSize{ ObjectManager::GetInstance()->GetMap().lock()->GetSize() };
+	RECTF mapBoundary{ 0.0f, static_cast<float>(mapSize.y), static_cast<float>(mapSize.x), 0.0f };
 
 	const auto& [width, height] { GameApp::GetInstance()->GetWindowSize() };
 	FLOAT2 cameraRange{ width / m_scale.x, height / m_scale.y };
@@ -98,7 +78,7 @@ RECTF Camera::GetCameraBoundary() const
 FocusCamera::FocusCamera() : 
 	Camera{},
 	m_focus{},
-	m_delay{ 0.5f }
+	m_delay{ 0.75f }
 {
 
 }
@@ -120,7 +100,7 @@ void FocusCamera::Update(FLOAT deltaTime)
 	Camera::Update(deltaTime);
 }
 
-void FocusCamera::SetFocus(const std::shared_ptr<IGameObject>& focus)
+void FocusCamera::SetFocus(const std::weak_ptr<IGameObject>& focus)
 {
 	m_focus = focus;
 }

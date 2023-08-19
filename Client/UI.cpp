@@ -5,7 +5,8 @@
 IUserInterface::IUserInterface() :
 	m_parent{ nullptr },
 	m_isValid{ TRUE },
-	m_isFocus{ FALSE }
+	m_isFocus{ FALSE },
+	m_pivot{ Pivot::CENTER }
 {
 
 }
@@ -25,60 +26,67 @@ void IUserInterface::SetParent(Wnd* const wnd)
 	m_parent = wnd;
 }
 
-void IUserInterface::SetFocus(BOOL focus)
+void IUserInterface::SetFocus(bool focus)
 {
 	m_isFocus = focus;
 }
 
-void IUserInterface::SetSize(const FLOAT2& size)
+void IUserInterface::SetPivot(Pivot pivot)
+{
+	m_pivot = pivot;
+}
+
+void IUserInterface::SetSize(const INT2& size)
 {
 	m_size = size;
 }
 
-void IUserInterface::SetPosition(const FLOAT2& position, Pivot pivot)
+void IUserInterface::SetPosition(const FLOAT2& position)
 {
 	m_position = position;
-	switch (pivot)
+
+	// 기본 피봇인 중심 기준 위치로 설정함
+	switch (m_pivot)
 	{
 	case Pivot::LEFTTOP:
+		m_position.x += m_size.x / 2.0f;
+		m_position.y -= m_size.y / 2.0f;
 		break;
 	case Pivot::CENTERTOP:
-		m_position.x -= m_size.x / 2.0f;
+		m_position.y -= m_size.y / 2.0f;
 		break;
 	case Pivot::RIGHTTOP:
-		m_position.x -= m_size.x;
+		m_position.x -= m_size.x / 2.0f;
+		m_position.y -= m_size.y / 2.0f;
 		break;
 	case Pivot::LEFTCENTER:
-		m_position.y -= m_size.y / 2.0f;
+		m_position.x += m_size.x / 2.0f;
 		break;
 	case Pivot::CENTER:
-		m_position.x -= m_size.x / 2.0f;
-		m_position.y -= m_size.y / 2.0f;
 		break;
 	case Pivot::RIGHTCENTER:
-		m_position.x -= m_size.x;
-		m_position.y -= m_size.y / 2.0f;
+		m_position.x -= m_size.x / 2.0f;
 		break;
 	case Pivot::LEFTBOT:
-		m_position.y -= m_size.y;
+		m_position.x += m_size.x / 2.0f;
+		m_position.y += m_size.y / 2.0f;
 		break;
 	case Pivot::CENTERBOT:
-		m_position.x -= m_size.x / 2.0f;
-		m_position.y -= m_size.y;
+		m_position.y += m_size.y / 2.0f;
 		break;
 	case Pivot::RIGHTBOT:
-		m_position.x -= m_size.x;
-		m_position.y -= m_size.y;
+		m_position.x -= m_size.x / 2.0f;
+		m_position.y += m_size.y / 2.0f;
 		break;
 	}
 }
 
-BOOL IUserInterface::IsValid() const
+bool IUserInterface::IsValid() const
 {
 	return m_isValid;
 }
 
-BOOL IUserInterface::IsFocus() const
+bool IUserInterface::IsFocus() const
 {
 	return m_isFocus;
 }
@@ -96,7 +104,7 @@ RECTF IUserInterface::GetRect() const
 	return RECTF{ pos.x, pos.y, pos.x + m_size.x, pos.y + m_size.y };
 }
 
-FLOAT2 IUserInterface::GetSize() const
+INT2 IUserInterface::GetSize() const
 {
 	return m_size;
 }

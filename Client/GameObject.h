@@ -24,14 +24,14 @@ public:
 	virtual void Render(const ComPtr<ID3D12GraphicsCommandList>& commandList) const;
 	virtual void Destroy();
 
-	void Move(const FLOAT2& delta);
+	virtual void Move(const FLOAT2& delta);
 
-	void SetLayer(Layer layer);
-	void SetPivot(Pivot pivot);
-	void SetSize(const FLOAT2& size);
-	void SetScale(const FLOAT2& scale);
-	void SetRotation(FLOAT degree);
-	void SetPosition(const FLOAT2& position);
+	virtual void SetLayer(Layer layer);
+	virtual void SetPivot(Pivot pivot);
+	virtual void SetSize(const FLOAT2& size);
+	virtual void SetScale(const FLOAT2& scale);
+	virtual void SetRotation(FLOAT degree);
+	virtual void SetPosition(const FLOAT2& position);
 
 	BOOL IsValid() const;
 	FLOAT2 GetSize() const;
@@ -41,11 +41,11 @@ public:
 protected:
 	BOOL m_isValid;
 	Layer m_layer;
+	Pivot m_pivot;
 	FLOAT2 m_size;
 	FLOAT2 m_scale;
 	FLOAT m_degree;
 	FLOAT2 m_position;
-	Pivot m_pivot;
 
 	std::weak_ptr<Shader> m_shader;
 	std::weak_ptr<Mesh> m_mesh;

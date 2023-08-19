@@ -4,6 +4,6 @@
 class LoginWnd : public Wnd
 {
 public:
-	LoginWnd(FLOAT width, FLOAT height);
+	LoginWnd(const INT2& size);
 	~LoginWnd() = default;
 };

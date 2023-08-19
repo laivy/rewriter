@@ -3,7 +3,9 @@
 
 class Property;
 
-class LogoScene : public IScene, public TSingleton<LogoScene>
+class LogoScene :
+	public IScene,
+	public TSingleton<LogoScene>
 {
 public:
 	LogoScene();

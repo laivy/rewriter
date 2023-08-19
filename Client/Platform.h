@@ -7,7 +7,7 @@ public:
 	Platform(INT2 startPosition, INT2 endPosition);
 	~Platform() = default;
 
-	virtual void Render(const ComPtr<ID3D12GraphicsCommandList>& commandList) const override;
+	virtual void Render(const ComPtr<ID3D12GraphicsCommandList>& commandList) const;
 
 	std::pair<INT2, INT2> GetStartEndPosition() const;
 	float GetHeight(FLOAT x) const;

@@ -7,8 +7,6 @@ public:
 	INT2();
 	INT2(int x, int y);
 
-	operator D2D1_SIZE_U() const;
-
 private:
 	friend INT2 operator+(const INT2& lhs, const INT2& rhs);
 	friend INT2 operator-(const INT2& lhs, const INT2& rhs);
@@ -45,6 +43,22 @@ public:
 
 	void Offset(FLOAT x, FLOAT y);
 	BOOL IsContain(FLOAT2 point);
+};
+
+class RECTI
+{
+public:
+	RECTI();
+	RECTI(int left, int top, int right, int bottom);
+
+	void Offset(int x, int y);
+	bool IsContain(const INT2& point);
+
+public:
+	int left;
+	int top;
+	int right;
+	int bottom;
 };
 
 using MATRIX = D2D1::Matrix3x2F;

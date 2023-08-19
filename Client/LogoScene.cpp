@@ -32,25 +32,13 @@ void LogoScene::OnCreate()
 	);
 }
 
-void LogoScene::OnDestory()
-{
+void LogoScene::OnDestory() { }
 
-}
+void LogoScene::OnMouseEvent(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam) { }
 
-void LogoScene::OnMouseEvent(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
-{
+void LogoScene::OnKeyboardEvent(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam) { }
 
-}
-
-void LogoScene::OnKeyboardEvent(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
-{
-
-}
-
-void LogoScene::Update(FLOAT deltaTime)
-{
-
-}
+void LogoScene::Update(FLOAT deltaTime) { }
 
 void LogoScene::Render(const ComPtr<ID2D1DeviceContext2>& d2dContext) const
 {

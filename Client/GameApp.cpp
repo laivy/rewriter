@@ -1,7 +1,9 @@
 ﻿#include "Stdafx.h"
 #include "BrushPool.h"
+#include "EventManager.h"
 #include "GameApp.h"
 #include "Image.h"
+#include "ObjectManager.h"
 #include "Property.h"
 #include "ResourceManager.h"
 #include "SceneManager.h"
@@ -28,11 +30,11 @@ void GameApp::OnCreate()
 
 	ResourceManager::Instantiate();
 	ResourceManager::GetInstance()->OnCreate();
-
+	ObjectManager::Instantiate();
+	WndManager::Instantiate();
+	EventManager::Instantiate();
 	SceneManager::Instantiate();
 	SceneManager::GetInstance()->OnCreate();
-
-	WndManager::Instantiate();
 
 	ExecuteCommandList();
 	WaitForGPU();
@@ -50,9 +52,10 @@ void GameApp::OnDestroy()
 
 	BrushPool::Destroy();
 	ResourceManager::Destroy();
-
-	SceneManager::Destroy();
+	ObjectManager::Destroy();
 	WndManager::Destroy();
+	EventManager::Destroy();
+	SceneManager::Destroy();
 }
 
 void GameApp::OnResize(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
@@ -140,15 +143,15 @@ LRESULT CALLBACK GameApp::WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM
 	case WM_LBUTTONDOWN:
 	case WM_RBUTTONUP:
 	case WM_RBUTTONDOWN:
-		if (SceneManager::IsInstanced())
-			SceneManager::GetInstance()->OnMouseEvent(hWnd, message, wParam, lParam);
+		if (auto sm{ SceneManager::GetInstance() })
+			sm->OnMouseEvent(hWnd, message, wParam, lParam);
 		break;
 	case WM_CHAR:
 	case WM_IME_COMPOSITION:
 	case WM_KEYUP:
 	case WM_KEYDOWN:
-		if (SceneManager::IsInstanced())
-			SceneManager::GetInstance()->OnKeyboardEvent(hWnd, message, wParam, lParam);
+		if (auto sm{ SceneManager::GetInstance() })
+			sm->OnKeyboardEvent(hWnd, message, wParam, lParam);
 		break;
 	case WM_DESTROY:
 		app->OnDestroy();

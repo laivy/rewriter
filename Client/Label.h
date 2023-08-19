@@ -5,7 +5,7 @@
 class Label : public IUserInterface
 {
 public:
-	Label(FLOAT width, FLOAT height, Font::Type fontType = Font::Type::MORRIS12);
+	Label(const INT2& size);
 	~Label() = default;
 
 	virtual void Render(const ComPtr<ID2D1DeviceContext2>& d2dContext) const;

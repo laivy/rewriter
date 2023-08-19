@@ -29,8 +29,10 @@ public:
 	class PhysicsComponent
 	{
 	public:
-		constexpr static auto GRAVITY = 980.0f;
-		constexpr static auto MIN_Y_SPEED = -980.0f;
+		static constexpr auto GRAVITY = 980.0f;
+		static constexpr auto MIN_Y_SPEED = -980.0f;
+		static constexpr auto DEFAULT_X_SPEED = 150.0f;
+		static constexpr auto DEFAULT_JUMP_POWER = 450.0f;
 
 	public:
 		PhysicsComponent(Player* player);
@@ -111,6 +113,8 @@ public:
 	virtual void Update(FLOAT deltaTime);
 	virtual void Render(const ComPtr<ID3D12GraphicsCommandList>& commandList) const;
 
+	int GetCharacterID() const;
+
 private:
 	void OnJump();
 	void OnLanding();
@@ -121,9 +125,14 @@ private:
 	Player::Direction GetDirection() const;
 
 private:
+	CharacterID m_characterID;
+
 	Direction m_direction;
 
 	InputComponent m_inputComponent;
 	PhysicsComponent m_physicsComponent;
 	AnimationComponent m_animationComponent;
 };
+
+class LocalPlayer : public Player { };
+class RemotePlayer : public Player { };

@@ -10,6 +10,7 @@
 using Microsoft::WRL::ComPtr;
 
 // C/C++
+#include <algorithm>
 #include <any>
 #include <array>
 #include <cassert>
@@ -18,10 +19,10 @@ using Microsoft::WRL::ComPtr;
 #include <fstream>
 #include <functional>
 #include <list>
+#include <map>
 #include <memory>
 #include <mutex>
 #include <ranges>
-#include <set>
 #include <string>
 #include <thread>
 #include <variant>
@@ -62,6 +63,8 @@ EXTERN_C IMAGE_DOS_HEADER __ImageBase;
 // 전역 변수
 extern UINT g_cbvSrvUavDescriptorIncrementSize;
 
+using CharacterID = int;
+
 enum RootParamIndex
 {
 	// 상수버퍼
@@ -86,9 +89,9 @@ enum class Pivot
 	LEFTBOT, CENTERBOT, RIGHTBOT
 };
 
-// 앞에 선언되있을 수록 위에 그려짐
 enum class Layer
 {
+	// 먼저 선언되있을 수록 위에 그려짐
 	LOCALPLAYER,
 	REMOTEPLAYER,
 	MONSTER,

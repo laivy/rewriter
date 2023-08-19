@@ -6,19 +6,19 @@
 #include "GameScene.h"
 #include "SceneManager.h"
 
-LoginWnd::LoginWnd(FLOAT width, FLOAT height) : Wnd{ width, height }
+LoginWnd::LoginWnd(const INT2& size) : Wnd{ size }
 {
-	EditCtrl* editCtrl{ new EditCtrl{ 200.0f, 20.0f } };
-	editCtrl->SetPosition(FLOAT2{ 150.0f, 135.0f }, Pivot::CENTER);
-	AddUI(editCtrl);
+	auto editCtrl{ std::make_unique<EditCtrl>(INT2{ 200, 20 }) };
+	editCtrl->SetPosition({ 0.0f, 0.0f });
+	AddUI(editCtrl.release());
 
-	EditCtrl* editCtrl2{ new EditCtrl{ 200.0f, 20.0f } };
-	editCtrl2->SetPosition(FLOAT2{ 150.0f, 165.0f }, Pivot::CENTER);
-	AddUI(editCtrl2);
+	auto editCtrl2{ std::make_unique<EditCtrl>(INT2{ 200, 20 }) };
+	editCtrl2->SetPosition({ 0.0f, 30.0f });
+	AddUI(editCtrl2.release());
 
-	Button* loginBtn{ new Button{ 200.0f, 20.0f } };
-	loginBtn->SetPosition(FLOAT2{ width / 2.0f, height * 0.9f }, Pivot::CENTER);
-	loginBtn->SetCallback(
+	auto button{ std::make_unique<Button>(INT2{ 200, 20 }) };
+	button->SetPosition({ size.x / 2.0f, size.y * 0.9f });
+	button->SetOnButtonClick(
 		[]()
 		{
 			SceneManager::GetInstance()->SetFadeOut(0.5f,
@@ -32,5 +32,5 @@ LoginWnd::LoginWnd(FLOAT width, FLOAT height) : Wnd{ width, height }
 					LoginScene::Destroy();
 				});
 		});
-	AddUI(loginBtn);
+	AddUI(button.release());
 }

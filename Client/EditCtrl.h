@@ -5,11 +5,12 @@
 class EditCtrl : public IUserInterface
 {
 private:
+	constexpr static float MARGIN = 1.0f;
 	constexpr static int CARET_THICKNESS = 2;
 	constexpr static float CARET_BLINK_SECOND = 0.5f;
 
 public:
-	EditCtrl(FLOAT width, FLOAT height, Font::Type fontType = Font::Type::MORRIS12);
+	EditCtrl(const INT2& size);
 	~EditCtrl() = default;
 
 	virtual void OnMouseEvent(HWND hWnd, UINT message, INT x, INT y);

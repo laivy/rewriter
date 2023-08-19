@@ -14,11 +14,6 @@ INT2::INT2(int x, int y)
 	this->y = y;
 }
 
-INT2::operator D2D1_SIZE_U() const
-{
-	return D2D1_SIZE_U{ static_cast<UINT>(x), static_cast<UINT>(y) };
-}
-
 INT2 operator+(const INT2& lhs, const INT2& rhs)
 {
 	INT2 value{ lhs };
@@ -128,4 +123,32 @@ BOOL RECTF::IsContain(FLOAT2 point)
 		top <= point.y && point.y <= bottom)
 		return TRUE;
 	return FALSE;
+}
+
+RECTI::RECTI() :
+	left{ 0 }, top{ 0 }, right{ 0 }, bottom{ 0 }
+{
+
+}
+
+RECTI::RECTI(int left, int top, int right, int bottom) :
+	left{ left }, top{ top }, right{ right }, bottom{ bottom }
+{
+
+}
+
+void RECTI::Offset(int x, int y)
+{
+	left += x;
+	top += y;
+	right += x;
+	bottom += y;
+}
+
+bool RECTI::IsContain(const INT2& point)
+{
+	if (left <= point.x && point.x <= right &&
+		top <= point.y && point.y <= bottom)
+		return true;
+	return false;
 }

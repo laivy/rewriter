@@ -2,13 +2,13 @@
 #include "Button.h"
 #include "Wnd.h"
 
-Button::Button(FLOAT width, FLOAT height) : 
+Button::Button(const INT2& size) :
 	m_color{ D2D1::ColorF::Aqua },
 	m_isMouseOver{ FALSE },
 	m_isMouseDown{ FALSE }
 {
-	m_callback = []() {};
-	SetSize(FLOAT2{ width, height });
+	m_onButtonClick = []() {};
+	SetSize(size);
 }
 
 void Button::OnMouseEvent(HWND hWnd, UINT message, INT x, INT y)
@@ -17,10 +17,8 @@ void Button::OnMouseEvent(HWND hWnd, UINT message, INT x, INT y)
 	{
 	case WM_MOUSEMOVE:
 	{
-		FLOAT2 pos{ static_cast<FLOAT>(x), static_cast<FLOAT>(y) };
-		RECTF rect{ 0.0f, 0.0f, m_size.x, m_size.y };
-
-		if (rect.IsContain(pos))
+		RECTI rect{ 0, 0, m_size.x, m_size.y };
+		if (rect.IsContain({ x, y }))
 			m_isMouseOver = TRUE;
 		else
 			m_isMouseOver = FALSE;
@@ -40,10 +38,9 @@ void Button::OnMouseEvent(HWND hWnd, UINT message, INT x, INT y)
 		if (!m_isMouseOver)
 			break;
 
-		FLOAT2 pos{ static_cast<FLOAT>(x), static_cast<FLOAT>(y) };
-		RECTF rect{ 0.0f, 0.0f, m_size.x, m_size.y };
-		if (rect.IsContain(pos))
-			m_callback();
+		RECTI rect{ 0, 0, m_size.x, m_size.y };
+		if (rect.IsContain({ x, y }))
+			m_onButtonClick();
 		break;
 	}
 	default:
@@ -79,7 +76,7 @@ void Button::Render(const ComPtr<ID2D1DeviceContext2>& renderTarget) const
 	renderTarget->FillRectangle(D2D1::RectF(0.0f, 0.0f, m_size.x, m_size.y), brush.Get());
 }
 
-void Button::SetCallback(const std::function<void()>& callback)
+void Button::SetOnButtonClick(const std::function<void()>& callback)
 {
-	m_callback = callback;
+	m_onButtonClick = callback;
 }

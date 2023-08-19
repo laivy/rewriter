@@ -6,19 +6,19 @@
 #include "ResourceManager.h"
 #include "Wnd.h"
 
-EditCtrl::EditCtrl(FLOAT width, FLOAT height, Font::Type fontType) : 
+EditCtrl::EditCtrl(const INT2& size) : 
 	m_isCompositing{ false },
 	m_caretPosition{},
 	m_caretRect{},
 	m_caretTimer{},
 	m_xOffset{}
 {
-	SetSize(FLOAT2{ width, height });
-	SetPosition(FLOAT2{ 0.0f, 0.0f });
+	SetSize(size);
+	SetPosition({ 0.0f, 0.0f });
 
 	if (auto rm{ ResourceManager::GetInstance() })
 	{
-		SetFont(rm->GetFont(fontType));
+		SetFont(rm->GetFont(Font::Type::MORRIS12));
 		SetText("");
 		MoveCaret(0);
 	}
@@ -30,8 +30,8 @@ void EditCtrl::OnMouseEvent(HWND hWnd, UINT message, INT x, INT y)
 	{
 	case WM_LBUTTONDOWN:
 	{
-		RECTF rect{ 0.0f, 0.0f, m_size.x, m_size.y };
-		if (rect.IsContain(FLOAT2{ static_cast<float>(x), static_cast<float>(y) }))
+		RECTI rect{ 0, 0, m_size.x, m_size.y };
+		if (rect.IsContain({ x, y }))
 			m_parent->SetUIFocus(this);
 		break;
 	}
@@ -119,14 +119,14 @@ void EditCtrl::Render(const ComPtr<ID2D1DeviceContext2>& d2dContext) const
 	// 배경
 	D2D1_ROUNDED_RECT rect
 	{
-		RECTF{ -CARET_THICKNESS - 1.0f, 0.0f, m_size.x + CARET_THICKNESS + 1.0f, m_size.y },
+		RECTF{ -m_size.x / 2.0f - CARET_THICKNESS - MARGIN, -m_size.y / 2.0f, static_cast<float>(m_size.x / 2.0f + CARET_THICKNESS + MARGIN), m_size.y / 2.0f },
 		1.0f,
 		1.0f
 	};
 	d2dContext->FillRoundedRectangle(rect, BrushPool::GetInstance()->GetBrush(BrushPool::WHITE));
 
 	// 텍스트
-	d2dContext->PushAxisAlignedClip(RECTF{ 0.0f, 0.0f, m_size.x, m_size.y }, D2D1_ANTIALIAS_MODE_ALIASED);
+	d2dContext->PushAxisAlignedClip(RECTF{ 0.0f, 0.0f, static_cast<float>(m_size.x), static_cast<float>(m_size.y) }, D2D1_ANTIALIAS_MODE_ALIASED);
 	d2dContext->DrawTextLayout(FLOAT2{ -m_xOffset, 0.0f }, m_textLayout.Get(), BrushPool::GetInstance()->GetBrush(BrushPool::BLACK));
 	d2dContext->PopAxisAlignedClip();
 

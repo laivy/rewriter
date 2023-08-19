@@ -5,13 +5,13 @@
 #include "Button.h"
 #include "EditCtrl.h"
 
-Wnd::Wnd(FLOAT width, FLOAT height, FLOAT x, FLOAT y) :
+Wnd::Wnd(const INT2& size) :
 	m_isFocus{ FALSE },
 	m_isPick{ FALSE },
 	m_pickDelta{ 0.0f, 0.0f }
 {
-	SetSize(FLOAT2{ width, height });
-	SetPosition(FLOAT2{ x, y });
+	SetSize(size);
+	SetPosition({ 0.0f, 0.0f });
 }
 
 void Wnd::OnMouseEvent(HWND hWnd, UINT message, INT x, INT y)
@@ -23,12 +23,12 @@ void Wnd::OnMouseEvent(HWND hWnd, UINT message, INT x, INT y)
 	{
 	case WM_LBUTTONDOWN:
 	{
-		RECTF rect{ 0.0f, 0.0f, m_size.x, m_size.y };
-		if (rect.IsContain(FLOAT2{ static_cast<float>(x), static_cast<float>(y) }))
-			WndManager::GetInstance()->SetWndFocus(this);
+		RECTI rect{ 0, 0, m_size.x, m_size.y };
+		if (rect.IsContain({ x, y }))
+			WndManager::GetInstance()->SetFocusWnd(this);
 		
 		rect.bottom = rect.top + WND_TITLE_HEIGHT;
-		if (rect.IsContain(FLOAT2{ static_cast<float>(x), static_cast<float>(y) }))
+		if (rect.IsContain({ x, y }))
 			SetPick(TRUE);
 		break;
 	}
@@ -96,16 +96,16 @@ void Wnd::Render(const ComPtr<ID2D1DeviceContext2>& d2dContext)
 	{
 		ComPtr<ID2D1SolidColorBrush> focusBrush{};
 		d2dContext->CreateSolidColorBrush(D2D1::ColorF{ D2D1::ColorF::Aqua }, &focusBrush);
-		d2dContext->DrawRectangle(RECTF{ 0.0f, 0.0f, m_size.x, m_size.y }, focusBrush.Get(), 10.0f);
+		d2dContext->DrawRectangle(RECTF{ -m_size.x / 2.0f, -m_size.y / 2.0f, m_size.x / 2.0f, m_size.y / 2.0f }, focusBrush.Get(), 10.0f);
 	}
 
 	// 창
-	d2dContext->FillRectangle(RECTF{ 0.0f, 0.0f, m_size.x, m_size.y }, brush.Get());
+	d2dContext->FillRectangle(RECTF{ -m_size.x / 2.0f, -m_size.y / 2.0f, m_size.x / 2.0f, m_size.y / 2.0f }, brush.Get());
 
 	// 타이틀
 	ComPtr<ID2D1SolidColorBrush> titleBrush{};
 	d2dContext->CreateSolidColorBrush(D2D1::ColorF{ D2D1::ColorF::CadetBlue }, &titleBrush);
-	d2dContext->FillRectangle(RECTF{ 0.0f, 0.0f, m_size.x, 15.0f }, titleBrush.Get());
+	d2dContext->FillRectangle(RECTF{ -m_size.x / 2.0f, -m_size.y / 2.0f, m_size.x / 2.0f, -m_size.y / 2.0f + 15.0f }, titleBrush.Get());
 
 	// UI
 	for (const auto& ui : m_ui)
@@ -115,9 +115,9 @@ void Wnd::Render(const ComPtr<ID2D1DeviceContext2>& d2dContext)
 void Wnd::SetUIFocus(IUserInterface* focusUI)
 {
 	for (const auto& ui : m_ui)
-		ui->SetFocus(FALSE);
+		ui->SetFocus(false);
 	if (focusUI)
-		focusUI->SetFocus(TRUE);
+		focusUI->SetFocus(true);
 }
 
 void Wnd::SetFocus(BOOL isFocus)
@@ -126,7 +126,7 @@ void Wnd::SetFocus(BOOL isFocus)
 	if (!m_isFocus)
 	{
 		for (const auto& ui : m_ui)
-			ui->SetFocus(FALSE);
+			ui->SetFocus(false);
 	}
 }
 
@@ -139,23 +139,12 @@ void Wnd::SetPick(BOOL isPick)
 		GetCursorPos(&mouse);
 		ScreenToClient(GameApp::GetInstance()->GetHwnd(), &mouse);
 
-		m_pickDelta.x = m_position.x - mouse.x;
-		m_pickDelta.y = m_position.y - mouse.y;
+		m_pickDelta = GetPosition() - FLOAT2{ static_cast<float>(mouse.x), static_cast<float>(mouse.y) };
 	}
 	else
 	{
-		m_pickDelta = FLOAT2{ 0.0f, 0.0f };
+		m_pickDelta = { 0.0f, 0.0f };
 	}
-}
-
-std::mutex& Wnd::GetLock()
-{
-	return m_mutex;
-}
-
-BOOL Wnd::IsValid() const
-{
-	return m_isValid;
 }
 
 BOOL Wnd::IsFocus() const
@@ -166,6 +155,16 @@ BOOL Wnd::IsFocus() const
 BOOL Wnd::IsPick() const
 {
 	return m_isPick;
+}
+
+bool Wnd::IsInWnd(const INT2& point)
+{
+	RECTI rect{ 0, 0, m_size.x, m_size.y };
+	rect.Offset(
+		m_position.x - point.x,
+		m_position.y - point.y
+	);
+	return rect.IsContain(point);
 }
 
 FLOAT2 Wnd::GetPickedDelta() const

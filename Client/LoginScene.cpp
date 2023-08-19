@@ -1,6 +1,7 @@
 ﻿#include "Stdafx.h"
 #include "Camera.h"
 #include "EditCtrl.h"
+#include "EventManager.h"
 #include "Label.h"
 #include "LoginScene.h"
 #include "LoginWnd.h"
@@ -14,14 +15,18 @@
 
 void LoginScene::OnCreate()
 {
-	LoginWnd* wnd{ new LoginWnd{ 300.0f, 300.0f } };
-	WndManager::GetInstance()->AddWnd(wnd);
+	//auto wnd{ std::make_unique<LoginWnd>(INT2{ 230, 300 }) };
+	//WndManager::GetInstance()->AddWnd(wnd.release());
+
+	auto wnd2{ std::make_unique<LoginWnd>(INT2{ 230, 300 }) };
+	wnd2->SetPosition({ 230.0f / 2.0f, 300.0f / 2.0f });
+	WndManager::GetInstance()->AddWnd(wnd2.release());
 }
 
 void LoginScene::OnDestory()
 {
 	ResourceManager::GetInstance()->Unload("Login.nyt");
-	WndManager::GetInstance()->RemoveAllWnd();
+	WndManager::GetInstance()->Clear();
 }
 
 void LoginScene::OnMouseEvent(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
