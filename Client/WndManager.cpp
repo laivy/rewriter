@@ -3,26 +3,38 @@
 #include "Wnd.h"
 #include "GameApp.h"
 
-WndManager::WndManager() : m_focusWnd{ nullptr }
-{
-
-}
-
 bool WndManager::OnMouseEvent(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
+	INT2 mouse{ GameApp::GetInstance()->GetCursorPosition() };
+
 	// 어떤 창이 선택됐는지 체크한다.
 	switch (message)
 	{
 	case WM_LBUTTONDOWN:
 	{
+		Wnd* pickWnd{ nullptr };
+		Wnd* focusWnd{ nullptr };
 		for (const auto& w : m_wnds)
-			w->SetFocus(FALSE);
-		m_focusWnd = nullptr;
+		{
+			if (w->IsInPickArea(mouse))
+				pickWnd = w.get();
+			else if (w->IsContain(mouse))
+				focusWnd = w.get();
+			w->SetFocus(false);
+		}
+		if (pickWnd)
+			pickWnd->SetPick(true);
+		else if (focusWnd)
+			focusWnd->SetFocus(true);
 		break;
 	}
 	case WM_LBUTTONUP:
+	{
 		for (const auto& w : m_wnds)
-			w->SetPick(FALSE);
+			w->SetPick(false);
+		break;
+	}
+	default:
 		break;
 	}
 
@@ -32,16 +44,14 @@ bool WndManager::OnMouseEvent(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPa
 		if (!w->IsValid())
 			continue;
 
-		POINT mouse;
-		GetCursorPos(&mouse);
-		ScreenToClient(GameApp::GetInstance()->GetHwnd(), &mouse);
+		if (!w->IsContain({ mouse.x, mouse.y }))
+			continue;
 
-		FLOAT2 pos{ w->GetPosition() };
-		mouse.x -= static_cast<LONG>(pos.x);
-		mouse.y -= static_cast<LONG>(pos.y);
+		INT2 pos{ w->GetPosition() };
+		mouse.x -= pos.x - w->GetSize().x / 2;
+		mouse.y -= pos.y - w->GetSize().y / 2;
 		w->OnMouseEvent(hWnd, message, mouse.x, mouse.y);
 	}
-
 	return false;
 }
 
@@ -73,10 +83,9 @@ void WndManager::Clear()
 void WndManager::SetFocusWnd(Wnd* wnd)
 {
 	for (const auto& w : m_wnds)
-		w->SetFocus(FALSE);
+		w->SetFocus(false);
 	if (wnd)
-		wnd->SetFocus(TRUE);
-	m_focusWnd = wnd;
+		wnd->SetFocus(true);
 }
 
 void WndManager::SetTopWnd(Wnd* wnd)
@@ -93,11 +102,6 @@ void WndManager::SetTopWnd(Wnd* wnd)
 	m_wnds.erase(it);
 }
 
-Wnd* WndManager::GetFocusWnd() const
-{
-	return m_focusWnd;
-}
-
 void WndManager::OnSceneChange()
 {
 	Clear();
@@ -108,7 +112,7 @@ void WndManager::RemoveInvalidWnds()
 	auto count{ std::erase_if(m_wnds, [](const auto& w) { return !w->IsValid(); }) };
 	if (count > 0 && !m_wnds.empty())
 	{
-		m_wnds.back()->SetFocus(TRUE);
+		m_wnds.back()->SetFocus(true);
 		SetTopWnd(m_wnds.back().get());
 	}
 }

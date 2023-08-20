@@ -65,7 +65,7 @@ void IGameObject::SetPosition(const FLOAT2& position)
 		m_cbGameObject->worldMatrix = GetWorldMatrix();
 }
 
-BOOL IGameObject::IsValid() const
+bool IGameObject::IsValid() const
 {
 	return m_isValid;
 }

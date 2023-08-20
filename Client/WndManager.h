@@ -4,7 +4,7 @@
 class WndManager : public TSingleton<WndManager>
 {
 public:
-	WndManager();
+	WndManager() = default;
 	~WndManager() = default;
 
 	bool OnMouseEvent(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);
@@ -25,8 +25,6 @@ public:
 	void SetFocusWnd(Wnd* wnd);
 	void SetTopWnd(Wnd* wnd);
 
-	Wnd* GetFocusWnd() const;
-
 	// 이벤트 함수들
 	void OnSceneChange();
 
@@ -35,5 +33,4 @@ private:
 
 private:
 	std::vector<std::unique_ptr<Wnd>> m_wnds;
-	Wnd* m_focusWnd;
 };

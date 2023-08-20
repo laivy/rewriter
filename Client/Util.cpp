@@ -117,7 +117,7 @@ void RECTF::Offset(FLOAT x, FLOAT y)
 	bottom += y;
 }
 
-BOOL RECTF::IsContain(FLOAT2 point)
+bool RECTF::IsContain(FLOAT2 point)
 {
 	if (left <= point.x && point.x <= right &&
 		top <= point.y && point.y <= bottom)

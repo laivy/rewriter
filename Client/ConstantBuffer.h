@@ -40,7 +40,7 @@ public:
 		DX::ThrowIfFailed(m_buffer->Map(0, nullptr, reinterpret_cast<void**>(&m_data)));
 	}
 
-	BOOL IsValid() const
+	bool IsValid() const
 	{
 		return m_data ? TRUE : FALSE;
 	}

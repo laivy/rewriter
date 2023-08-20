@@ -14,7 +14,7 @@ EditCtrl::EditCtrl(const INT2& size) :
 	m_xOffset{}
 {
 	SetSize(size);
-	SetPosition({ 0.0f, 0.0f });
+	SetPosition({ 0, 0 });
 
 	if (auto rm{ ResourceManager::GetInstance() })
 	{
@@ -26,16 +26,7 @@ EditCtrl::EditCtrl(const INT2& size) :
 
 void EditCtrl::OnMouseEvent(HWND hWnd, UINT message, INT x, INT y)
 {
-	switch (message)
-	{
-	case WM_LBUTTONDOWN:
-	{
-		RECTI rect{ 0, 0, m_size.x, m_size.y };
-		if (rect.IsContain({ x, y }))
-			m_parent->SetUIFocus(this);
-		break;
-	}
-	}
+
 }
 
 void EditCtrl::OnKeyboardEvent(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
@@ -112,14 +103,14 @@ void EditCtrl::Render(const ComPtr<ID2D1DeviceContext2>& d2dContext) const
 	if (!m_parent)
 		return;
 
-	FLOAT2 position{ m_position };
-	position += m_parent->GetPosition();
-	d2dContext->SetTransform(MATRIX::Translation(position.x, position.y));
+	INT2 position{ m_parent->GetPosition(Pivot::LEFTTOP) };
+	position += m_position;
+	d2dContext->SetTransform(MATRIX::Translation(position.x - m_size.x / 2.0f, position.y - m_size.y / 2.0f));
 
 	// 배경
 	D2D1_ROUNDED_RECT rect
 	{
-		RECTF{ -m_size.x / 2.0f - CARET_THICKNESS - MARGIN, -m_size.y / 2.0f, static_cast<float>(m_size.x / 2.0f + CARET_THICKNESS + MARGIN), m_size.y / 2.0f },
+		RECTF{ -(CARET_THICKNESS + 1.0f), 0.0f, m_size.x + CARET_THICKNESS + 1.0f, static_cast<float>(m_size.y) },
 		1.0f,
 		1.0f
 	};

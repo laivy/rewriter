@@ -67,7 +67,7 @@ void Button::Render(const ComPtr<ID2D1DeviceContext2>& renderTarget) const
 {
 	if (!m_parent) return;
 
-	FLOAT2 position{ m_position };
+	INT2 position{ m_position };
 	position += m_parent->GetPosition();
 
 	ComPtr<ID2D1SolidColorBrush> brush{};

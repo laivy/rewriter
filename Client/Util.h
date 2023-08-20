@@ -42,7 +42,7 @@ public:
 	RECTF(FLOAT left, FLOAT top, FLOAT right, FLOAT bottom);
 
 	void Offset(FLOAT x, FLOAT y);
-	BOOL IsContain(FLOAT2 point);
+	bool IsContain(FLOAT2 point);
 };
 
 class RECTI

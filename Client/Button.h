@@ -18,7 +18,7 @@ public:
 
 private:
 	std::function<void()> m_onButtonClick;
-	BOOL m_isMouseOver;
-	BOOL m_isMouseDown;
+	bool m_isMouseOver;
+	bool m_isMouseDown;
 	D2D1::ColorF m_color;
 };

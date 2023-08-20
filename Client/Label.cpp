@@ -8,7 +8,6 @@
 Label::Label(const INT2& size)
 {
 	SetSize(size);
-	SetPosition(FLOAT2{ 0.0f, 0.0f });
 	if (auto rm{ ResourceManager::GetInstance() })
 	{
 		SetFont(rm->GetFont(Font::Type::MORRIS12));
@@ -20,7 +19,7 @@ void Label::Render(const ComPtr<ID2D1DeviceContext2>& d2dContext) const
 {
 	if (!m_parent) return;
 
-	FLOAT2 position{ m_position };
+	INT2 position{ m_position };
 	position += m_parent->GetPosition();
 	d2dContext->SetTransform(MATRIX::Translation(position.x, position.y));
 

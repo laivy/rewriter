@@ -21,7 +21,7 @@ public:
 		return m_instance.get();
 	}
 
-	static BOOL IsInstanced()
+	static bool IsInstanced()
 	{
 		return m_instance.get() == nullptr ? FALSE : TRUE;
 	}

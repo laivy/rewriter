@@ -11,22 +11,22 @@ public:
 	virtual void OnMouseEvent(HWND hWnd, UINT message, INT x, INT y);
 	virtual void OnKeyboardEvent(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);
 
-	virtual void Update(FLOAT deltaTime);
+	virtual void Update(float deltaTime);
 	virtual void Render(const ComPtr<ID2D1DeviceContext2>& d2dContext) const;
 	virtual void Destroy();
 
-	void SetParent(Wnd* const wnd);
-	void SetFocus(bool focus);
-	void SetPivot(Pivot pivot);
-	void SetSize(const INT2& size);
-	void SetPosition(const FLOAT2& position);
+	virtual void SetParent(Wnd* const wnd);
+	virtual void SetFocus(bool focus);
+	virtual void SetPivot(Pivot pivot);
+	virtual void SetSize(const INT2& size);
+	virtual void SetPosition(const INT2& position);
 
 	Wnd* const GetParent() const;
 	bool IsValid() const;
 	bool IsFocus() const;
-	RECTF GetRect() const;
+	bool IsContain(const INT2& point) const;
 	INT2 GetSize() const;
-	FLOAT2 GetPosition() const;
+	INT2 GetPosition(Pivot pivot = Pivot::CENTER) const;
 
 protected:
 	Wnd* m_parent;
@@ -34,5 +34,5 @@ protected:
 	bool m_isFocus;
 	Pivot m_pivot;
 	INT2 m_size;
-	FLOAT2 m_position;
+	INT2 m_position;
 };

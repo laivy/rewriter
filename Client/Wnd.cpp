@@ -6,12 +6,11 @@
 #include "EditCtrl.h"
 
 Wnd::Wnd(const INT2& size) :
-	m_isFocus{ FALSE },
-	m_isPick{ FALSE },
-	m_pickDelta{ 0.0f, 0.0f }
+	m_isPick{ false },
+	m_pickDelta{ 0, 0 }
 {
 	SetSize(size);
-	SetPosition({ 0.0f, 0.0f });
+	m_pickArea = { 0, 0, size.x, DEFAULT_PICK_AREA_HEIGHT };
 }
 
 void Wnd::OnMouseEvent(HWND hWnd, UINT message, INT x, INT y)
@@ -23,22 +22,32 @@ void Wnd::OnMouseEvent(HWND hWnd, UINT message, INT x, INT y)
 	{
 	case WM_LBUTTONDOWN:
 	{
-		RECTI rect{ 0, 0, m_size.x, m_size.y };
-		if (rect.IsContain({ x, y }))
-			WndManager::GetInstance()->SetFocusWnd(this);
-		
-		rect.bottom = rect.top + WND_TITLE_HEIGHT;
-		if (rect.IsContain({ x, y }))
-			SetPick(TRUE);
+		IUserInterface* focusUI{ nullptr };
+		for (const auto& ui : m_userInterfaces)
+		{
+			if (ui->IsContain({ x, y }))
+				focusUI = ui.get();
+			ui->SetFocus(false);
+		}
+		if (focusUI)
+			focusUI->SetFocus(true);
 		break;
 	}
+	default:
+		break;
 	}
 
 	// UI 객체들에게 윈도우 좌표계 -> UI 좌표계로 바꿔서 전달한다.
-	for (const auto& ui : m_ui)
+	for (const auto& ui : m_userInterfaces)
 	{
-		FLOAT2 pos{ ui->GetPosition() };
-		ui->OnMouseEvent(hWnd, message, static_cast<int>(x - pos.x), static_cast<int>(y - pos.y));
+		if (!ui->IsValid())
+			continue;
+
+		if (!ui->IsContain({ x, y }))
+			continue;
+
+		INT2 pos{ ui->GetPosition(Pivot::LEFTTOP) };
+		ui->OnMouseEvent(hWnd, message, x - pos.x, y - pos.y);
 	}
 }
 
@@ -55,7 +64,7 @@ void Wnd::OnKeyboardEvent(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 		break;
 	}
 
-	for (const auto& ui : m_ui)
+	for (const auto& ui : m_userInterfaces)
 		ui->OnKeyboardEvent(hWnd, message, wParam, lParam);
 }
 
@@ -72,13 +81,11 @@ void Wnd::Update(FLOAT deltaTime)
 	// 선택된 윈도우 마우스로 옮기기
 	if (m_isPick)
 	{
-		POINT mouse;
-		GetCursorPos(&mouse);
-		ScreenToClient(GameApp::GetInstance()->GetHwnd(), &mouse);
-		SetPosition(FLOAT2{ static_cast<FLOAT>(mouse.x + m_pickDelta.x), static_cast<FLOAT>(mouse.y + m_pickDelta.y) });
+		INT2 mouse{ GameApp::GetInstance()->GetCursorPosition() };
+		SetPosition({ mouse.x + m_pickDelta.x, mouse.y + m_pickDelta.y });
 	}
 	
-	for (const auto& ui : m_ui)
+	for (const auto& ui : m_userInterfaces)
 		ui->Update(deltaTime);
 }
 
@@ -108,66 +115,53 @@ void Wnd::Render(const ComPtr<ID2D1DeviceContext2>& d2dContext)
 	d2dContext->FillRectangle(RECTF{ -m_size.x / 2.0f, -m_size.y / 2.0f, m_size.x / 2.0f, -m_size.y / 2.0f + 15.0f }, titleBrush.Get());
 
 	// UI
-	for (const auto& ui : m_ui)
+	for (const auto& ui : m_userInterfaces)
 		ui->Render(d2dContext);
 }
 
 void Wnd::SetUIFocus(IUserInterface* focusUI)
 {
-	for (const auto& ui : m_ui)
+	for (const auto& ui : m_userInterfaces)
 		ui->SetFocus(false);
 	if (focusUI)
 		focusUI->SetFocus(true);
 }
 
-void Wnd::SetFocus(BOOL isFocus)
+void Wnd::SetFocus(bool isFocus)
 {
-	m_isFocus = isFocus;
+	IUserInterface::SetFocus(isFocus);
 	if (!m_isFocus)
 	{
-		for (const auto& ui : m_ui)
+		for (const auto& ui : m_userInterfaces)
 			ui->SetFocus(false);
+		SetPick(false); // pick은 focus의 상위호환
 	}
 }
 
-void Wnd::SetPick(BOOL isPick)
+void Wnd::SetPick(bool isPick)
 {
 	m_isPick = isPick;
 	if (isPick)
 	{
-		POINT mouse;
-		GetCursorPos(&mouse);
-		ScreenToClient(GameApp::GetInstance()->GetHwnd(), &mouse);
-
-		m_pickDelta = GetPosition() - FLOAT2{ static_cast<float>(mouse.x), static_cast<float>(mouse.y) };
+		INT2 mouse{ GameApp::GetInstance()->GetCursorPosition() };
+		m_pickDelta = m_position - mouse;
+		SetFocus(true); // pick은 focus의 상위호환
 	}
 	else
 	{
-		m_pickDelta = { 0.0f, 0.0f };
+		m_pickDelta = { 0, 0 };
 	}
 }
 
-BOOL Wnd::IsFocus() const
-{
-	return m_isFocus;
-}
-
-BOOL Wnd::IsPick() const
+bool Wnd::IsPick() const
 {
 	return m_isPick;
 }
 
-bool Wnd::IsInWnd(const INT2& point)
+bool Wnd::IsInPickArea(const INT2& point)
 {
-	RECTI rect{ 0, 0, m_size.x, m_size.y };
-	rect.Offset(
-		m_position.x - point.x,
-		m_position.y - point.y
-	);
-	return rect.IsContain(point);
-}
-
-FLOAT2 Wnd::GetPickedDelta() const
-{
-	return m_pickDelta;
+	// point는 윈도우 좌표계의 좌표
+	RECTI pickArea{ m_pickArea };
+	pickArea.Offset(m_position.x - m_size.x / 2, m_position.y - m_size.y / 2);
+	return pickArea.IsContain(point);
 }

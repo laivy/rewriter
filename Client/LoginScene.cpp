@@ -15,12 +15,9 @@
 
 void LoginScene::OnCreate()
 {
-	//auto wnd{ std::make_unique<LoginWnd>(INT2{ 230, 300 }) };
-	//WndManager::GetInstance()->AddWnd(wnd.release());
-
-	auto wnd2{ std::make_unique<LoginWnd>(INT2{ 230, 300 }) };
-	wnd2->SetPosition({ 230.0f / 2.0f, 300.0f / 2.0f });
-	WndManager::GetInstance()->AddWnd(wnd2.release());
+	auto wnd{ std::make_unique<LoginWnd>(INT2{ 230, 300 }) };
+	wnd->SetPosition({ 1920 / 2, 1080 / 2 });
+	WndManager::GetInstance()->AddWnd(wnd.release());
 }
 
 void LoginScene::OnDestory()

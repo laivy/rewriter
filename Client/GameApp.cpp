@@ -86,14 +86,17 @@ void GameApp::Run()
 	}
 }
 
-HWND GameApp::GetHwnd() const
-{
-	return m_hWnd;
-}
-
 INT2 GameApp::GetWindowSize() const
 {
 	return m_size;
+}
+
+INT2 GameApp::GetCursorPosition() const
+{
+	POINT mouse;
+	GetCursorPos(&mouse);
+	ScreenToClient(m_hWnd, &mouse);
+	return { mouse.x, mouse.y };
 }
 
 ComPtr<ID3D12Device> GameApp::GetD3DDevice() const

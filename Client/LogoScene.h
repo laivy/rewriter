@@ -21,5 +21,5 @@ public:
 
 private:
 	Property* m_prop;
-	BOOL m_isFirstUpdate;
+	bool m_isFirstUpdate;
 };

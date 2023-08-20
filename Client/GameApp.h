@@ -12,8 +12,8 @@ public:
 
 	void Run();
 
-	HWND GetHwnd() const;
 	INT2 GetWindowSize() const;
+	INT2 GetCursorPosition() const;
 	ComPtr<ID3D12Device> GetD3DDevice() const;
 	ComPtr<ID3D12GraphicsCommandList> GetCommandList() const;
 	ComPtr<ID3D12RootSignature> GetRootSignature() const;

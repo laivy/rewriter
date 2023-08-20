@@ -12,7 +12,7 @@ private:
 		DirectX::XMFLOAT4X4 worldMatrix;
 		INT layer;
 		FLOAT alpha;
-		BOOL isFliped;
+		bool isFliped;
 		FLOAT dummy;
 	};
 
@@ -33,13 +33,13 @@ public:
 	virtual void SetRotation(FLOAT degree);
 	virtual void SetPosition(const FLOAT2& position);
 
-	BOOL IsValid() const;
+	bool IsValid() const;
 	FLOAT2 GetSize() const;
 	FLOAT2 GetPosition() const;
 	DirectX::XMFLOAT4X4 GetWorldMatrix() const;
 
 protected:
-	BOOL m_isValid;
+	bool m_isValid;
 	Layer m_layer;
 	Pivot m_pivot;
 	FLOAT2 m_size;

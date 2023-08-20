@@ -3,6 +3,9 @@
 
 class Wnd : public IUserInterface
 {
+protected:
+	static constexpr int DEFAULT_PICK_AREA_HEIGHT = 15;
+
 public:
 	Wnd(const INT2& size);
 	virtual ~Wnd() = default;
@@ -14,31 +17,25 @@ public:
 	virtual void Update(FLOAT deltaTime);
 	virtual void Render(const ComPtr<ID2D1DeviceContext2>& d2dContext);
 
+	virtual void SetFocus(bool isFocus);
+
 	template <typename T>
 	requires std::is_base_of_v<IUserInterface, T>
 	void AddUI(T* ui)
 	{
 		ui->SetParent(this);
-		m_ui.emplace_back(ui);
+		m_userInterfaces.emplace_back(ui);
 	}
 
 	void SetUIFocus(IUserInterface* focusUI);
-	void SetFocus(BOOL isFocus);
-	void SetPick(BOOL isPick);
-
-	BOOL IsFocus() const;
-	BOOL IsPick() const;
-	bool IsInWnd(const INT2& point);
+	void SetPick(bool isPick);
+	
+	bool IsPick() const;
+	bool IsInPickArea(const INT2& point);
 
 private:
-	FLOAT2 GetPickedDelta() const;
-
-protected:
-	static constexpr float WND_TITLE_HEIGHT = 15.0f;
-
-private:
-	std::vector<std::unique_ptr<IUserInterface>> m_ui;
-	BOOL m_isFocus;
-	BOOL m_isPick;
-	FLOAT2 m_pickDelta;
+	std::vector<std::unique_ptr<IUserInterface>> m_userInterfaces;
+	bool m_isPick;
+	RECTI m_pickArea;
+	INT2 m_pickDelta;
 };
