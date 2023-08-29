@@ -12,7 +12,7 @@ public:
 
 	virtual void OnMouseEvent(HWND hWnd, UINT message, INT x, INT y);
 	virtual void OnKeyboardEvent(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);
-	virtual void OnButtonClicked(INT id);
+	virtual void OnButtonClick(ButtonID id);
 
 	virtual void Update(FLOAT deltaTime);
 	virtual void Render(const ComPtr<ID2D1DeviceContext2>& d2dContext);

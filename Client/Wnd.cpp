@@ -43,9 +43,6 @@ void Wnd::OnMouseEvent(HWND hWnd, UINT message, INT x, INT y)
 		if (!ui->IsValid())
 			continue;
 
-		if (!ui->IsContain({ x, y }))
-			continue;
-
 		INT2 pos{ ui->GetPosition(Pivot::LEFTTOP) };
 		ui->OnMouseEvent(hWnd, message, x - pos.x, y - pos.y);
 	}
@@ -68,7 +65,7 @@ void Wnd::OnKeyboardEvent(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 		ui->OnKeyboardEvent(hWnd, message, wParam, lParam);
 }
 
-void Wnd::OnButtonClicked(INT id)
+void Wnd::OnButtonClick(ButtonID id)
 {
 
 }
@@ -96,7 +93,7 @@ void Wnd::Render(const ComPtr<ID2D1DeviceContext2>& d2dContext)
 
 	ComPtr<ID2D1SolidColorBrush> brush{};
 	d2dContext->CreateSolidColorBrush(D2D1::ColorF{ D2D1::ColorF::Black }, &brush);
-	d2dContext->SetTransform(D2D1::Matrix3x2F::Translation(m_position.x, m_position.y));
+	d2dContext->SetTransform(D2D1::Matrix3x2F::Translation(static_cast<float>(m_position.x), static_cast<float>(m_position.y)));
 
 	// 포커스 되어있다면 테두리를 그린다.
 	if (m_isFocus)

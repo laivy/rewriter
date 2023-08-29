@@ -42,7 +42,7 @@ public:
 
 	bool IsValid() const
 	{
-		return m_data ? TRUE : FALSE;
+		return m_data ? true : false;
 	}
 
 	void SetShaderVariable(const ComPtr<ID3D12GraphicsCommandList>& commandList, UINT rootParameterIndex) const

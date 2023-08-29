@@ -21,7 +21,7 @@ void Label::Render(const ComPtr<ID2D1DeviceContext2>& d2dContext) const
 
 	INT2 position{ m_position };
 	position += m_parent->GetPosition();
-	d2dContext->SetTransform(MATRIX::Translation(position.x, position.y));
+	d2dContext->SetTransform(MATRIX::Translation(static_cast<float>(position.x), static_cast<float>(position.y)));
 
 	if (m_textLayout)
 	{
@@ -41,8 +41,8 @@ void Label::SetText(const std::string& text)
 		m_text.c_str(),
 		static_cast<UINT32>(m_text.length()),
 		m_font->GetTextFormat().Get(),
-		m_size.x,
-		m_size.y,
+		static_cast<float>(m_size.x),
+		static_cast<float>(m_size.y),
 		&m_textLayout
 	);
 }

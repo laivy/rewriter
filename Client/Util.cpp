@@ -121,8 +121,8 @@ bool RECTF::IsContain(FLOAT2 point)
 {
 	if (left <= point.x && point.x <= right &&
 		top <= point.y && point.y <= bottom)
-		return TRUE;
-	return FALSE;
+		return true;
+	return false;
 }
 
 RECTI::RECTI() :

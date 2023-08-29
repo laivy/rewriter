@@ -14,11 +14,11 @@ public:
 	virtual void Update(FLOAT deltaTime);
 	virtual void Render(const ComPtr<ID2D1DeviceContext2>& renderTarget) const;
 
-	void SetOnButtonClick(const std::function<void()>& callback);
+	void SetButtonID(ButtonID id);
 
 private:
-	std::function<void()> m_onButtonClick;
 	bool m_isMouseOver;
 	bool m_isMouseDown;
+	ButtonID m_id;
 	D2D1::ColorF m_color;
 };

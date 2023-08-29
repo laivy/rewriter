@@ -81,7 +81,7 @@ std::weak_ptr<RemotePlayer> ObjectManager::GetRemotePlayer(CharacterID character
 	return {};
 }
 
-void ObjectManager::OnSceneChange()
+void ObjectManager::OnSceneChange(IScene* scene)
 {
 	// 관리하는 모든 게임오브젝트들 삭제
 	m_gameObjects.clear();

@@ -63,7 +63,9 @@ EXTERN_C IMAGE_DOS_HEADER __ImageBase;
 // 전역 변수
 extern UINT g_cbvSrvUavDescriptorIncrementSize;
 
-using CharacterID = int;
+using ButtonID = unsigned int;
+using CharacterID = unsigned int;
+using GameObjectID = unsigned int;
 
 enum RootParamIndex
 {

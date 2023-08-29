@@ -198,7 +198,7 @@ void EditCtrl::MoveCaret(int distance)
 void EditCtrl::CreateTextLayout()
 {
 	auto dwriteFactory{ GameApp::GetInstance()->GetDwriteFactory() };
-	dwriteFactory->CreateTextLayout(m_text.c_str(), static_cast<UINT32>(m_text.length()), m_font->GetTextFormat().Get(), m_size.x, m_size.y, &m_textLayout);
+	dwriteFactory->CreateTextLayout(m_text.c_str(), static_cast<UINT32>(m_text.length()), m_font->GetTextFormat().Get(), static_cast<float>(m_size.x), static_cast<float>(m_size.y), &m_textLayout);
 	m_textLayout->SetParagraphAlignment(DWRITE_PARAGRAPH_ALIGNMENT_CENTER);
 	m_textLayout->SetWordWrapping(DWRITE_WORD_WRAPPING_NO_WRAP);
 }

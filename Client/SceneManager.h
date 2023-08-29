@@ -26,11 +26,12 @@ public:
 	{
 		if (m_scene)
 			m_scene->OnDestory();
-		if (auto em{ EventManager::GetInstance() })
-			em->OnSceneChange();
 		if (scene)
 			scene->OnCreate();
 		m_scene = scene;
+
+		if (auto em{ EventManager::GetInstance() })
+			em->OnSceneChange(scene);
 	}
 
 private:

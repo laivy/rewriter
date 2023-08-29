@@ -2,6 +2,7 @@
 
 class Camera;
 class IGameObject;
+class IScene;
 class LocalPlayer;
 class Map;
 class RemotePlayer;
@@ -27,7 +28,7 @@ public:
 	std::weak_ptr<RemotePlayer> GetRemotePlayer(CharacterID characterID) const;
 
 	// 이벤트 함수들
-	void OnSceneChange();
+	void OnSceneChange(IScene* scene);
 
 private:
 	void RemoveInvalidObjects();

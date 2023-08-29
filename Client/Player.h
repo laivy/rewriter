@@ -113,7 +113,7 @@ public:
 	virtual void Update(FLOAT deltaTime);
 	virtual void Render(const ComPtr<ID3D12GraphicsCommandList>& commandList) const;
 
-	int GetCharacterID() const;
+	CharacterID GetCharacterID() const;
 
 private:
 	void OnJump();

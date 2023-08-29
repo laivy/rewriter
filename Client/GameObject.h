@@ -12,7 +12,7 @@ private:
 		DirectX::XMFLOAT4X4 worldMatrix;
 		INT layer;
 		FLOAT alpha;
-		bool isFliped;
+		BOOL isFliped;
 		FLOAT dummy;
 	};
 
@@ -44,7 +44,7 @@ protected:
 	Pivot m_pivot;
 	FLOAT2 m_size;
 	FLOAT2 m_scale;
-	FLOAT m_degree;
+	float m_degree;
 	FLOAT2 m_position;
 
 	std::weak_ptr<Shader> m_shader;
