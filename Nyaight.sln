@@ -5,7 +5,7 @@ VisualStudioVersion = 17.3.32929.385
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Client", "Client\Client.vcxproj", "{D00ABCB1-630E-4A0E-BBCB-F54B221AAA1D}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DataEditor", "Editor\DataEditor.csproj", "{01ACE3AB-756E-48D9-B8C6-57089A6B1E2A}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DataEditor", "DataEditor\DataEditor.csproj", "{01ACE3AB-756E-48D9-B8C6-57089A6B1E2A}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
