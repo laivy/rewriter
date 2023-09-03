@@ -54,7 +54,11 @@ void Camera::SetRotation(FLOAT degree)
 
 RECTF Camera::GetCameraBoundary() const
 {
-	INT2 mapSize{ ObjectManager::GetInstance()->GetMap().lock()->GetSize() };
+	auto map{ ObjectManager::GetInstance()->GetMap().lock() };
+	if (!map)
+		return RECTF{};
+
+	INT2 mapSize{ map->GetSize() };
 	RECTF mapBoundary{ 0.0f, static_cast<float>(mapSize.y), static_cast<float>(mapSize.x), 0.0f };
 
 	const auto& [width, height] { GameApp::GetInstance()->GetWindowSize() };
@@ -85,7 +89,6 @@ FocusCamera::FocusCamera() :
 
 void FocusCamera::Update(FLOAT deltaTime)
 {
-
 	if (auto focus{ m_focus.lock() })
 	{
 		RECTF boundary{ GetCameraBoundary() };
@@ -96,6 +99,10 @@ void FocusCamera::Update(FLOAT deltaTime)
 		delta.y = std::clamp(delta.y, boundary.bottom - pos.y, boundary.top - pos.y);
 
 		SetPosition(GetPosition() + delta / m_delay * deltaTime);
+	}
+	else
+	{
+		focus.reset();
 	}
 	Camera::Update(deltaTime);
 }

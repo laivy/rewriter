@@ -5,13 +5,13 @@
 #pragma comment(lib, "imm32.lib")
 #include <SDKDDKVer.h>
 #include <windows.h>
+#include <windowsx.h>
 #include <wincodec.h>
 #include <wrl.h>
 using Microsoft::WRL::ComPtr;
 
 // C/C++
 #include <algorithm>
-#include <any>
 #include <array>
 #include <cassert>
 #include <chrono>

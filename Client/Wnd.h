@@ -10,8 +10,12 @@ public:
 	Wnd(const INT2& size);
 	virtual ~Wnd() = default;
 
-	virtual void OnMouseEvent(HWND hWnd, UINT message, INT x, INT y);
-	virtual void OnKeyboardEvent(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);
+	virtual void OnMouseMove(int x, int y);
+	virtual void OnLButtonUp(int x, int y);
+	virtual void OnLButtonDown(int x, int y);
+	virtual void OnRButtonUp(int x, int y);
+	virtual void OnRButtonDown(int x, int y);
+	virtual void OnKeyboardEvent(UINT message, WPARAM wParam, LPARAM lParam);
 	virtual void OnButtonClick(ButtonID id);
 
 	virtual void Update(FLOAT deltaTime);
@@ -27,7 +31,6 @@ public:
 		m_userInterfaces.emplace_back(ui);
 	}
 
-	void SetUIFocus(IUserInterface* focusUI);
 	void SetPick(bool isPick);
 	
 	bool IsPick() const;

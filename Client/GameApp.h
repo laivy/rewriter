@@ -12,6 +12,7 @@ public:
 
 	void Run();
 
+	HWND GetHwnd() const;
 	INT2 GetWindowSize() const;
 	INT2 GetCursorPosition() const;
 	ComPtr<ID3D12Device> GetD3DDevice() const;
@@ -24,7 +25,13 @@ private:
 	static LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);
 
 	void OnDestroy();
-	void OnResize(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);
+	void OnResize(int width, int height);
+	void OnMouseMove(int x, int y);
+	void OnLButtonUp(int x, int y);
+	void OnLButtonDown(int x, int y);
+	void OnRButtonUp(int x, int y);
+	void OnRButtonDown(int x, int y);
+	void OnKeyboardEvent(UINT message, WPARAM wParam, LPARAM lParam);
 
 	HRESULT InitWnd();
 	HRESULT InitDirectX();

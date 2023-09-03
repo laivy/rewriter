@@ -1,9 +1,16 @@
 ﻿#include "Stdafx.h"
 #include "Camera.h"
+#include "EventManager.h"
 #include "GameObject.h"
 #include "Map.h"
 #include "ObjectManager.h"
 #include "Player.h"
+
+void ObjectManager::OnCreate()
+{
+	if (auto em{ EventManager::GetInstance() })
+		em->OnSceneChange += std::bind_front(&ObjectManager::OnSceneChange, this);
+}
 
 void ObjectManager::Update(float deltaTime)
 {
@@ -81,13 +88,18 @@ std::weak_ptr<RemotePlayer> ObjectManager::GetRemotePlayer(CharacterID character
 	return {};
 }
 
-void ObjectManager::OnSceneChange(IScene* scene)
+bool ObjectManager::OnSceneChange(IScene* scene)
 {
+	auto om{ ObjectManager::GetInstance() };
+	if (!om)
+		return true;
+
 	// 관리하는 모든 게임오브젝트들 삭제
-	m_gameObjects.clear();
-	m_camera.reset();
-	m_localPlayer.reset();
-	m_remotePlayers.clear();
+	om->m_gameObjects.clear();
+	om->m_camera.reset();
+	om->m_localPlayer.reset();
+	om->m_remotePlayers.clear();
+	return false;
 }
 
 void ObjectManager::RemoveInvalidObjects()

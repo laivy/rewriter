@@ -24,12 +24,7 @@ EditCtrl::EditCtrl(const INT2& size) :
 	}
 }
 
-void EditCtrl::OnMouseEvent(HWND hWnd, UINT message, INT x, INT y)
-{
-
-}
-
-void EditCtrl::OnKeyboardEvent(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
+void EditCtrl::OnKeyboardEvent(UINT message, WPARAM wParam, LPARAM lParam)
 {
 	if (!m_isFocus)
 		return;
@@ -61,7 +56,7 @@ void EditCtrl::OnKeyboardEvent(HWND hWnd, UINT message, WPARAM wParam, LPARAM lP
 	{
 		if (lParam & GCS_COMPSTR)
 		{
-			HIMC hImc{ ImmGetContext(hWnd) };
+			HIMC hImc{ ImmGetContext(GameApp::GetInstance()->GetHwnd()) };
 			int length{ ImmGetCompositionString(hImc, GCS_COMPSTR, NULL, 0) };
 
 			// 조합중이라면 글자 교체
@@ -73,7 +68,7 @@ void EditCtrl::OnKeyboardEvent(HWND hWnd, UINT message, WPARAM wParam, LPARAM lP
 			if (length)
 				InsertText(std::wstring{ static_cast<WCHAR>(wParam) });
 
-			ImmReleaseContext(hWnd, hImc);
+			ImmReleaseContext(GameApp::GetInstance()->GetHwnd(), hImc);
 		}
 		if (lParam & GCS_RESULTSTR)
 		{

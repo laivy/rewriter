@@ -10,8 +10,13 @@ public:
 
 	void OnCreate();
 	void OnDestroy();
-	void OnMouseEvent(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);
-	void OnKeyboardEvent(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);
+	void OnResize(int width, int height);
+	void OnMouseMove(int x, int y);
+	void OnLButtonUp(int x, int y);
+	void OnLButtonDown(int x, int y);
+	void OnRButtonUp(int x, int y);
+	void OnRButtonDown(int x, int y);
+	void OnKeyboardEvent(UINT message, WPARAM wParam, LPARAM lParam);
 
 	void Update(FLOAT deltaTime);
 	void Render(const ComPtr<ID3D12GraphicsCommandList>& commandList) const;
@@ -24,14 +29,13 @@ public:
 	requires std::is_base_of_v<IScene, T>
 	void SetScene(T* scene)
 	{
+		if (auto em{ EventManager::GetInstance() })
+			em->OnSceneChange(scene);
 		if (m_scene)
 			m_scene->OnDestory();
 		if (scene)
 			scene->OnCreate();
 		m_scene = scene;
-
-		if (auto em{ EventManager::GetInstance() })
-			em->OnSceneChange(scene);
 	}
 
 private:

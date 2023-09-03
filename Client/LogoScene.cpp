@@ -8,9 +8,7 @@
 #include "ResourceManager.h"
 #include "SceneManager.h"
 
-LogoScene::LogoScene() : 
-	m_prop{ nullptr },
-	m_isFirstUpdate{ TRUE }
+LogoScene::LogoScene() : m_prop{ nullptr }
 {
 
 }
@@ -34,9 +32,12 @@ void LogoScene::OnCreate()
 
 void LogoScene::OnDestory() { }
 
-void LogoScene::OnMouseEvent(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam) { }
+void LogoScene::OnLButtonDown(int x, int y)
+{
 
-void LogoScene::OnKeyboardEvent(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam) { }
+}
+
+void LogoScene::OnKeyboardEvent(UINT message, WPARAM wParam, LPARAM lParam) { }
 
 void LogoScene::Update(FLOAT deltaTime) { }
 

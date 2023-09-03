@@ -35,11 +35,31 @@ void GameScene::OnDestory()
 {
 }
 
-void GameScene::OnMouseEvent(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
+void GameScene::OnResize(int width, int height)
 {
 }
 
-void GameScene::OnKeyboardEvent(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
+void GameScene::OnMouseMove(int x, int y)
+{
+}
+
+void GameScene::OnLButtonDown(int x, int y)
+{
+}
+
+void GameScene::OnLButtonUp(int x, int y)
+{
+}
+
+void GameScene::OnRButtonDown(int x, int y)
+{
+}
+
+void GameScene::OnRButtonUp(int x, int y)
+{
+}
+
+void GameScene::OnKeyboardEvent(UINT message, WPARAM wParam, LPARAM lParam)
 {
 }
 

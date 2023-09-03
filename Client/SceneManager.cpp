@@ -24,16 +24,46 @@ void SceneManager::OnDestroy()
 		m_scene->OnDestory();
 }
 
-void SceneManager::OnMouseEvent(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
+void SceneManager::OnResize(int width, int height)
 {
 	if (m_scene)
-		m_scene->OnMouseEvent(hWnd, message, wParam, lParam);
+		m_scene->OnResize(width, height);
 }
 
-void SceneManager::OnKeyboardEvent(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
+void SceneManager::OnMouseMove(int x, int y)
 {
 	if (m_scene)
-		m_scene->OnKeyboardEvent(hWnd, message, wParam, lParam);
+		m_scene->OnMouseMove(x, y);
+}
+
+void SceneManager::OnLButtonUp(int x, int y)
+{
+	if (m_scene)
+		m_scene->OnLButtonUp(x, y);
+}
+
+void SceneManager::OnLButtonDown(int x, int y)
+{
+	if (m_scene)
+		m_scene->OnLButtonDown(x, y);
+}
+
+void SceneManager::OnRButtonUp(int x, int y)
+{
+	if (m_scene)
+		m_scene->OnRButtonUp(x, y);
+}
+
+void SceneManager::OnRButtonDown(int x, int y)
+{
+	if (m_scene)
+		m_scene->OnRButtonDown(x, y);
+}
+
+void SceneManager::OnKeyboardEvent(UINT message, WPARAM wParam, LPARAM lParam)
+{
+	if (m_scene)
+		m_scene->OnKeyboardEvent(message, wParam, lParam);
 }
 
 void SceneManager::Update(FLOAT deltaTime)

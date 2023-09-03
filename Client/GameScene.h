@@ -9,12 +9,17 @@ public:
 	GameScene() = default;
 	~GameScene() = default;
 
-	virtual void OnCreate();
-	virtual void OnDestory();
-	virtual void OnMouseEvent(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);
-	virtual void OnKeyboardEvent(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);
+	virtual void OnCreate() final;
+	virtual void OnDestory() final;
+	virtual void OnResize(int width, int height) final;
+	virtual void OnMouseMove(int x, int y) final;
+	virtual void OnLButtonDown(int x, int y) final;
+	virtual void OnLButtonUp(int x, int y) final;
+	virtual void OnRButtonDown(int x, int y) final;
+	virtual void OnRButtonUp(int x, int y) final;
+	virtual void OnKeyboardEvent(UINT message, WPARAM wParam, LPARAM lParam) final;
 
-	virtual void Update(FLOAT deltaTime);
-	virtual void Render(const ComPtr<ID3D12GraphicsCommandList>& commandList) const;
-	virtual void Render(const ComPtr<ID2D1DeviceContext2>& d2dContext) const;
+	virtual void Update(FLOAT deltaTime) final;
+	virtual void Render(const ComPtr<ID3D12GraphicsCommandList>& commandList) const final;
+	virtual void Render(const ComPtr<ID2D1DeviceContext2>& d2dContext) const final;
 };

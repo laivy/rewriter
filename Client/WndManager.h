@@ -1,14 +1,22 @@
 ﻿#pragma once
 #include "Wnd.h"
 
+class IScene;
+
 class WndManager : public TSingleton<WndManager>
 {
 public:
 	WndManager() = default;
 	~WndManager() = default;
 
-	bool OnMouseEvent(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);
-	bool OnKeyboardEvent(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);
+	void OnCreate();
+
+	void OnMouseMove(int x, int y);
+	void OnLButtonUp(int x, int y);
+	void OnLButtonDown(int x, int y);
+	void OnRButtonUp(int x, int y);
+	void OnRButtonDown(int x, int y);
+	void OnKeyboardEvent(UINT message, WPARAM wParam, LPARAM lParam);
 
 	void Update(FLOAT deltaTime);
 	void Render(const ComPtr<ID2D1DeviceContext2>& d2dContext) const;
@@ -22,13 +30,10 @@ public:
 		m_wnds.emplace_back(wnd);
 	}
 
-	void SetFocusWnd(Wnd* wnd);
-	void SetTopWnd(Wnd* wnd);
-
-	// 이벤트 함수들
-	void OnSceneChange();
-
 private:
+	bool OnSceneChange(IScene* scene);
+
+	void SetTopWnd(Wnd* wnd);
 	void RemoveInvalidWnds();
 
 private:

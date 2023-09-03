@@ -31,8 +31,5 @@ protected:
 	virtual ~TSingleton() = default;
 
 private:
-	static std::unique_ptr<T> m_instance;
+	inline static std::unique_ptr<T> m_instance{ nullptr };
 };
-
-template <class T>
-std::unique_ptr<T> TSingleton<T>::m_instance{ nullptr };

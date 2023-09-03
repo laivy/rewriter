@@ -26,13 +26,15 @@ void GameApp::OnCreate()
 {
 	ResetCommandList();
 
+	// 인스턴스 생성 순서가 중요하다.
 	BrushPool::Instantiate();
-
 	ResourceManager::Instantiate();
 	ResourceManager::GetInstance()->OnCreate();
-	ObjectManager::Instantiate();
-	WndManager::Instantiate();
 	EventManager::Instantiate();
+	ObjectManager::Instantiate();
+	ObjectManager::GetInstance()->OnCreate();
+	WndManager::Instantiate();
+	WndManager::GetInstance()->OnCreate();
 	SceneManager::Instantiate();
 	SceneManager::GetInstance()->OnCreate();
 
@@ -43,27 +45,6 @@ void GameApp::OnCreate()
 		rm->ReleaseUploadBuffers();
 
 	m_timer->Tick();
-}
-
-void GameApp::OnDestroy()
-{
-	WaitForGPU();
-	CloseHandle(m_fenceEvent);
-
-	BrushPool::Destroy();
-	ResourceManager::Destroy();
-	ObjectManager::Destroy();
-	WndManager::Destroy();
-	EventManager::Destroy();
-	SceneManager::Destroy();
-}
-
-void GameApp::OnResize(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
-{
-	UINT width{ 1920 };
-	UINT height{ 1080 };
-	m_viewport = D3D12_VIEWPORT{ 0.0f, 0.0f, static_cast<float>(width), static_cast<float>(height), 0.0f, 1.0f };
-	m_scissorRect = D3D12_RECT{ 0, 0, static_cast<long>(width), static_cast<long>(height) };
 }
 
 void GameApp::Run()
@@ -84,6 +65,11 @@ void GameApp::Run()
 			Render();
 		}
 	}
+}
+
+HWND GameApp::GetHwnd() const
+{
+	return m_hWnd;
 }
 
 INT2 GameApp::GetWindowSize() const
@@ -139,22 +125,28 @@ LRESULT CALLBACK GameApp::WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM
 	switch (message)
 	{
 	case WM_SIZE:
-		app->OnResize(hWnd, message, wParam, lParam);
+		app->OnResize(GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam));
 		break;
 	case WM_MOUSEMOVE:
+		app->OnMouseMove(GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam));
+		break;
 	case WM_LBUTTONUP:
+		app->OnLButtonUp(GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam));
+		break;
 	case WM_LBUTTONDOWN:
+		app->OnLButtonDown(GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam));
+		break;
 	case WM_RBUTTONUP:
+		app->OnRButtonUp(GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam));
+		break;
 	case WM_RBUTTONDOWN:
-		if (auto sm{ SceneManager::GetInstance() })
-			sm->OnMouseEvent(hWnd, message, wParam, lParam);
+		app->OnRButtonDown(GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam));
 		break;
 	case WM_CHAR:
 	case WM_IME_COMPOSITION:
 	case WM_KEYUP:
 	case WM_KEYDOWN:
-		if (auto sm{ SceneManager::GetInstance() })
-			sm->OnKeyboardEvent(hWnd, message, wParam, lParam);
+		app->OnKeyboardEvent(message, wParam, lParam);
 		break;
 	case WM_DESTROY:
 		app->OnDestroy();
@@ -164,6 +156,63 @@ LRESULT CALLBACK GameApp::WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM
 		return DefWindowProc(hWnd, message, wParam, lParam);
 	}
 	return 0;
+}
+
+void GameApp::OnDestroy()
+{
+	WaitForGPU();
+	CloseHandle(m_fenceEvent);
+
+	BrushPool::Destroy();
+	ResourceManager::Destroy();
+	ObjectManager::Destroy();
+	WndManager::Destroy();
+	EventManager::Destroy();
+	SceneManager::Destroy();
+}
+
+void GameApp::OnResize(int width, int height)
+{
+	m_viewport = D3D12_VIEWPORT{ 0.0f, 0.0f, static_cast<float>(width), static_cast<float>(height), 0.0f, 1.0f };
+	m_scissorRect = D3D12_RECT{ 0, 0, static_cast<long>(width), static_cast<long>(height) };
+	if (auto sm{ SceneManager::GetInstance() })
+		sm->OnResize(width, height);
+}
+
+void GameApp::OnMouseMove(int x, int y)
+{
+	if (auto sm{ SceneManager::GetInstance() })
+		sm->OnMouseMove(x, y);
+}
+
+void GameApp::OnLButtonUp(int x, int y)
+{
+	if (auto sm{ SceneManager::GetInstance() })
+		sm->OnLButtonUp(x, y);
+}
+
+void GameApp::OnLButtonDown(int x, int y)
+{
+	if (auto sm{ SceneManager::GetInstance() })
+		sm->OnLButtonDown(x, y);
+}
+
+void GameApp::OnRButtonUp(int x, int y)
+{
+	if (auto sm{ SceneManager::GetInstance() })
+		sm->OnRButtonUp(x, y);
+}
+
+void GameApp::OnRButtonDown(int x, int y)
+{
+	if (auto sm{ SceneManager::GetInstance() })
+		sm->OnRButtonDown(x, y);
+}
+
+void GameApp::OnKeyboardEvent(UINT message, WPARAM wParam, LPARAM lParam)
+{
+	if (auto sm{ SceneManager::GetInstance() })
+		sm->OnKeyboardEvent(message, wParam, lParam);
 }
 
 HRESULT GameApp::InitWnd()
@@ -433,10 +482,10 @@ void GameApp::CreateDepthStencilView()
 
 void GameApp::CreateRootSignature()
 {
-	CD3DX12_DESCRIPTOR_RANGE ranges[1]{};
+	std::array<CD3DX12_DESCRIPTOR_RANGE, 1> ranges{};
 	ranges[0].Init(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 1, 0, 0, D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND);
 
-	CD3DX12_ROOT_PARAMETER rootParameter[RootParamIndex::COUNT]{};
+	std::array<CD3DX12_ROOT_PARAMETER, RootParamIndex::COUNT> rootParameter{};
 	rootParameter[RootParamIndex::GAMEOBJECT].InitAsConstantBufferView(RootParamIndex::GAMEOBJECT);
 	rootParameter[RootParamIndex::CAMERA].InitAsConstantBufferView(RootParamIndex::CAMERA);
 	rootParameter[RootParamIndex::TEXTURE].InitAsConstantBufferView(RootParamIndex::TEXTURE);
@@ -445,7 +494,7 @@ void GameApp::CreateRootSignature()
 #endif
 	rootParameter[RootParamIndex::TEXTURE0].InitAsDescriptorTable(1, &ranges[0], D3D12_SHADER_VISIBILITY_PIXEL);
 	
-	CD3DX12_STATIC_SAMPLER_DESC samplerDesc[1]{};
+	std::array<CD3DX12_STATIC_SAMPLER_DESC, 1> samplerDesc{};
 	samplerDesc[0].Init(
 		0,
 		D3D12_FILTER_MIN_MAG_MIP_LINEAR,
@@ -463,7 +512,7 @@ void GameApp::CreateRootSignature()
 	);
 
 	CD3DX12_ROOT_SIGNATURE_DESC rootSignatureDesc{};
-	rootSignatureDesc.Init(_countof(rootParameter), rootParameter, _countof(samplerDesc), samplerDesc, D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT);
+	rootSignatureDesc.Init(static_cast<UINT>(rootParameter.size()), rootParameter.data(), static_cast<UINT>(samplerDesc.size()), samplerDesc.data(), D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT);
 
 	ComPtr<ID3DBlob> signature, error;
 	DX::ThrowIfFailed(D3D12SerializeRootSignature(&rootSignatureDesc, D3D_ROOT_SIGNATURE_VERSION_1, &signature, &error));

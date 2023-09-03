@@ -13,6 +13,8 @@ public:
 	ObjectManager() = default;
 	~ObjectManager() = default;
 
+	void OnCreate();
+
 	void Update(float deltaTime);
 	void Render(const ComPtr<ID3D12GraphicsCommandList>& commandList) const;
 
@@ -27,10 +29,10 @@ public:
 	std::weak_ptr<LocalPlayer> GetLocalPlayer() const;
 	std::weak_ptr<RemotePlayer> GetRemotePlayer(CharacterID characterID) const;
 
-	// 이벤트 함수들
-	void OnSceneChange(IScene* scene);
-
 private:
+	// 이벤트 함수들
+	bool OnSceneChange(IScene* scene);
+
 	void RemoveInvalidObjects();
 
 private:

@@ -13,42 +13,55 @@ Wnd::Wnd(const INT2& size) :
 	m_pickArea = { 0, 0, size.x, DEFAULT_PICK_AREA_HEIGHT };
 }
 
-void Wnd::OnMouseEvent(HWND hWnd, UINT message, INT x, INT y)
+void Wnd::OnMouseMove(int x, int y)
 {
-	if (!m_isValid)
-		return;
-
-	switch (message)
+	for (const auto& ui : m_userInterfaces
+		| std::views::filter([](const auto& ui) { return ui->IsValid(); }))
 	{
-	case WM_LBUTTONDOWN:
-	{
-		IUserInterface* focusUI{ nullptr };
-		for (const auto& ui : m_userInterfaces)
-		{
-			if (ui->IsContain({ x, y }))
-				focusUI = ui.get();
-			ui->SetFocus(false);
-		}
-		if (focusUI)
-			focusUI->SetFocus(true);
-		break;
-	}
-	default:
-		break;
-	}
-
-	// UI 객체들에게 윈도우 좌표계 -> UI 좌표계로 바꿔서 전달한다.
-	for (const auto& ui : m_userInterfaces)
-	{
-		if (!ui->IsValid())
-			continue;
-
 		INT2 pos{ ui->GetPosition(Pivot::LEFTTOP) };
-		ui->OnMouseEvent(hWnd, message, x - pos.x, y - pos.y);
+		ui->OnMouseMove(x - pos.x, y - pos.y);
 	}
 }
 
-void Wnd::OnKeyboardEvent(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
+void Wnd::OnLButtonUp(int x, int y)
+{
+	for (const auto& ui : m_userInterfaces
+		| std::views::filter([](const auto& ui) { return ui->IsValid(); }))
+	{
+		INT2 pos{ ui->GetPosition(Pivot::LEFTTOP) };
+		ui->OnLButtonUp(x - pos.x, y - pos.y);
+	}
+}
+
+void Wnd::OnLButtonDown(int x, int y)
+{
+	IUserInterface* focusUI{ nullptr };
+	for (const auto& ui : m_userInterfaces | std::views::reverse)
+	{
+		if (!focusUI && ui->IsContain({ x, y }))
+			focusUI = ui.get();
+		ui->SetFocus(false);
+	}
+	if (focusUI)
+		focusUI->SetFocus(true);
+
+	for (const auto& ui : m_userInterfaces
+		| std::views::filter([](const auto& ui) { return ui->IsValid(); }))
+	{
+		INT2 pos{ ui->GetPosition(Pivot::LEFTTOP) };
+		ui->OnLButtonDown(x - pos.x, y - pos.y);
+	}
+}
+
+void Wnd::OnRButtonUp(int x, int y)
+{
+}
+
+void Wnd::OnRButtonDown(int x, int y)
+{
+}
+
+void Wnd::OnKeyboardEvent(UINT message, WPARAM wParam, LPARAM lParam)
 {
 	if (!m_isFocus || !m_isValid)
 		return;
@@ -62,7 +75,7 @@ void Wnd::OnKeyboardEvent(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 	}
 
 	for (const auto& ui : m_userInterfaces)
-		ui->OnKeyboardEvent(hWnd, message, wParam, lParam);
+		ui->OnKeyboardEvent(message, wParam, lParam);
 }
 
 void Wnd::OnButtonClick(ButtonID id)
@@ -114,14 +127,6 @@ void Wnd::Render(const ComPtr<ID2D1DeviceContext2>& d2dContext)
 	// UI
 	for (const auto& ui : m_userInterfaces)
 		ui->Render(d2dContext);
-}
-
-void Wnd::SetUIFocus(IUserInterface* focusUI)
-{
-	for (const auto& ui : m_userInterfaces)
-		ui->SetFocus(false);
-	if (focusUI)
-		focusUI->SetFocus(true);
 }
 
 void Wnd::SetFocus(bool isFocus)

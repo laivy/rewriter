@@ -13,8 +13,12 @@ IUserInterface::IUserInterface() :
 
 }
 
-void IUserInterface::OnMouseEvent(HWND hWnd, UINT message, INT x, INT y) { }
-void IUserInterface::OnKeyboardEvent(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam) { }
+void IUserInterface::OnMouseMove(int x, int y) { }
+void IUserInterface::OnLButtonUp(int x, int y) { }
+void IUserInterface::OnLButtonDown(int x, int y) { }
+void IUserInterface::OnRButtonUp(int x, int y) { }
+void IUserInterface::OnRButtonDown(int x, int y) { }
+void IUserInterface::OnKeyboardEvent(UINT message, WPARAM wParam, LPARAM lParam) { }
 void IUserInterface::Update(float deltaTime) { }
 void IUserInterface::Render(const ComPtr<ID2D1DeviceContext2>& d2dContext) const { }
 

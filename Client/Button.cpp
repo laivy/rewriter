@@ -11,41 +11,30 @@ Button::Button(const INT2& size) :
 	SetSize(size);
 }
 
-void Button::OnMouseEvent(HWND hWnd, UINT message, INT x, INT y)
+void Button::OnMouseMove(int x, int y)
 {
-	switch (message)
-	{
-	case WM_MOUSEMOVE:
-	{
-		RECTI rect{ 0, 0, m_size.x, m_size.y };
-		if (rect.IsContain({ x, y }))
-			m_isMouseOver = true;
-		else
-			m_isMouseOver = false;
-		break;
-	}
-	case WM_LBUTTONDOWN:
-	{
-		if (!m_isMouseOver)
-			break;
+	RECTI rect{ 0, 0, m_size.x, m_size.y };
+	if (rect.IsContain({ x, y }))
+		m_isMouseOver = true;
+	else
+		m_isMouseOver = false;
+}
 
+void Button::OnLButtonUp(int x, int y)
+{
+	m_isMouseDown = false;
+	if (!m_isMouseOver)
+		return;
+
+	RECTI rect{ 0, 0, m_size.x, m_size.y };
+	if (m_parent && rect.IsContain({ x, y }))
+		m_parent->OnButtonClick(m_id);
+}
+
+void Button::OnLButtonDown(int x, int y)
+{
+	if (m_isMouseOver)
 		m_isMouseDown = true;
-		break;
-	}
-	case WM_LBUTTONUP:
-	{
-		m_isMouseDown = false;
-		if (!m_isMouseOver)
-			break;
-
-		RECTI rect{ 0, 0, m_size.x, m_size.y };
-		if (m_parent && rect.IsContain({ x, y }))
-			m_parent->OnButtonClick(m_id);
-		break;
-	}
-	default:
-		break;
-	}
 }
 
 void Button::Update(FLOAT deltaTime)
@@ -63,7 +52,7 @@ void Button::Update(FLOAT deltaTime)
 	}
 }
 
-void Button::Render(const ComPtr<ID2D1DeviceContext2>& renderTarget) const
+void Button::Render(const ComPtr<ID2D1DeviceContext2>& d2dContext) const
 {
 	if (!m_parent) return;
 
@@ -71,9 +60,9 @@ void Button::Render(const ComPtr<ID2D1DeviceContext2>& renderTarget) const
 	position += m_parent->GetPosition(Pivot::LEFTTOP);
 
 	ComPtr<ID2D1SolidColorBrush> brush{};
-	renderTarget->CreateSolidColorBrush(D2D1::ColorF{ m_color }, &brush);
-	renderTarget->SetTransform(D2D1::Matrix3x2F::Translation(static_cast<float>(position.x), static_cast<float>(position.y)));
-	renderTarget->FillRectangle(D2D1::RectF(-m_size.x / 2.0f, -m_size.y / 2.0f, m_size.x / 2.0f, m_size.y / 2.0f), brush.Get());
+	d2dContext->CreateSolidColorBrush(D2D1::ColorF{ m_color }, &brush);
+	d2dContext->SetTransform(D2D1::Matrix3x2F::Translation(static_cast<float>(position.x), static_cast<float>(position.y)));
+	d2dContext->FillRectangle(RECTF{ -m_size.x / 2.0f, -m_size.y / 2.0f, m_size.x / 2.0f, m_size.y / 2.0f }, brush.Get());
 }
 
 void Button::SetButtonID(ButtonID id)

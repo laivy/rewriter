@@ -11,15 +11,14 @@ public:
 	LogoScene();
 	~LogoScene() = default;
 
-	virtual void OnCreate();
-	virtual void OnDestory();
-	virtual void OnMouseEvent(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);
-	virtual void OnKeyboardEvent(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);
+	virtual void OnCreate() final;
+	virtual void OnDestory() final;
+	virtual void OnLButtonDown(int x, int y) final;
+	virtual void OnKeyboardEvent(UINT message, WPARAM wParam, LPARAM lParam) final;
 
-	virtual void Update(FLOAT deltaTime);
-	virtual void Render(const ComPtr<ID2D1DeviceContext2>& d2dContext) const;
+	virtual void Update(FLOAT deltaTime) final;
+	virtual void Render(const ComPtr<ID2D1DeviceContext2>& d2dContext) const final;
 
 private:
 	Property* m_prop;
-	bool m_isFirstUpdate;
 };

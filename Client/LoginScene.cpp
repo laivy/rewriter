@@ -17,23 +17,51 @@ void LoginScene::OnCreate()
 {
 	auto wnd{ std::make_unique<LoginWnd>(INT2{ 230, 300 }) };
 	wnd->SetPosition({ 1920 / 2, 1080 / 2 });
+
+	auto wnd2{ std::make_unique<LoginWnd>(INT2{ 230, 300 }) };
+	wnd2->SetPosition({ 1920 / 2 - 235, 1080 / 2 });
+
+	auto wnd3{ std::make_unique<LoginWnd>(INT2{ 230, 300 }) };
+	wnd3->SetPosition({ 1920 / 2 + 235, 1080 / 2 });
+
 	WndManager::GetInstance()->AddWnd(wnd.release());
+	WndManager::GetInstance()->AddWnd(wnd2.release());
+	WndManager::GetInstance()->AddWnd(wnd3.release());
 }
 
 void LoginScene::OnDestory()
 {
 	ResourceManager::GetInstance()->Unload("Login.nyt");
-	WndManager::GetInstance()->Clear();
 }
 
-void LoginScene::OnMouseEvent(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
+void LoginScene::OnMouseMove(int x, int y)
 {
-	WndManager::GetInstance()->OnMouseEvent(hWnd, message, wParam, lParam);
+	WndManager::GetInstance()->OnMouseMove(x, y);
 }
 
-void LoginScene::OnKeyboardEvent(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
+void LoginScene::OnLButtonDown(int x, int y)
 {
-	WndManager::GetInstance()->OnKeyboardEvent(hWnd, message, wParam, lParam);
+	WndManager::GetInstance()->OnLButtonDown(x, y);
+}
+
+void LoginScene::OnLButtonUp(int x, int y)
+{
+	WndManager::GetInstance()->OnLButtonUp(x, y);
+}
+
+void LoginScene::OnRButtonDown(int x, int y)
+{
+	WndManager::GetInstance()->OnRButtonDown(x, y);
+}
+
+void LoginScene::OnRButtonUp(int x, int y)
+{
+	WndManager::GetInstance()->OnRButtonUp(x, y);
+}
+
+void LoginScene::OnKeyboardEvent(UINT message, WPARAM wParam, LPARAM lParam)
+{
+	WndManager::GetInstance()->OnKeyboardEvent(message, wParam, lParam);
 }
 
 void LoginScene::Update(FLOAT deltaTime)
