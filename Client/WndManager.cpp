@@ -7,7 +7,7 @@
 void WndManager::OnCreate()
 {
 	if (auto em{ EventManager::GetInstance() })
-		em->OnSceneChange += std::bind_front(&WndManager::OnSceneChange, this);
+		em->OnSceneChange.Add(std::bind_front(&WndManager::OnSceneChange, this));
 }
 
 void WndManager::OnMouseMove(int x, int y)

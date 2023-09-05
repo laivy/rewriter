@@ -24,6 +24,7 @@ public:
 	void SetLocalPlayer(const std::shared_ptr<LocalPlayer>& player);
 	void AddRemotePlayer(const std::shared_ptr<RemotePlayer>& player);
 
+	std::weak_ptr<IGameObject> GetGameObject(IGameObject* object) const;
 	std::weak_ptr<Camera> GetCamera() const;
 	std::weak_ptr<Map> GetMap() const;
 	std::weak_ptr<LocalPlayer> GetLocalPlayer() const;

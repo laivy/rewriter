@@ -9,7 +9,7 @@
 void ObjectManager::OnCreate()
 {
 	if (auto em{ EventManager::GetInstance() })
-		em->OnSceneChange += std::bind_front(&ObjectManager::OnSceneChange, this);
+		em->OnSceneChange.Add(std::bind_front(&ObjectManager::OnSceneChange, this));
 }
 
 void ObjectManager::Update(float deltaTime)
@@ -64,6 +64,14 @@ void ObjectManager::SetLocalPlayer(const std::shared_ptr<LocalPlayer>& player)
 void ObjectManager::AddRemotePlayer(const std::shared_ptr<RemotePlayer>& player)
 {
 	m_remotePlayers.insert(std::make_pair(player->GetCharacterID(), player));
+}
+
+std::weak_ptr<IGameObject> ObjectManager::GetGameObject(IGameObject* object) const
+{
+	auto it{ std::ranges::find_if(m_gameObjects, [&](const auto& o) { return o.get() == object; }) };
+	if (it != m_gameObjects.end())
+		return *it;
+	return {};
 }
 
 std::weak_ptr<Camera> ObjectManager::GetCamera() const
