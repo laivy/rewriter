@@ -23,7 +23,7 @@ public:
 
 	static bool IsInstanced()
 	{
-		return m_instance.get() == nullptr ? false : true;
+		return m_instance == nullptr ? false : true;
 	}
 
 protected:

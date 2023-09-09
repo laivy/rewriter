@@ -67,7 +67,7 @@ using ButtonID = unsigned int;
 using CharacterID = unsigned int;
 using GameObjectID = unsigned int;
 
-enum RootParamIndex
+enum class RootParamIndex : unsigned int
 {
 	// 상수버퍼
 	GAMEOBJECT,
@@ -84,13 +84,6 @@ enum RootParamIndex
 	COUNT
 };
 
-enum class Pivot
-{
-	LEFTTOP, CENTERTOP, RIGHTTOP,
-	LEFTCENTER, CENTER, RIGHTCENTER,
-	LEFTBOT, CENTERBOT, RIGHTBOT
-};
-
 enum class Layer
 {
 	// 먼저 선언되있을 수록 위에 그려짐
@@ -102,4 +95,11 @@ enum class Layer
 	BACKGROUND2,
 	BACKGROUND3,
 	COUNT
+};
+
+enum class Pivot
+{
+	LEFTTOP, CENTERTOP, RIGHTTOP,
+	LEFTCENTER, CENTER, RIGHTCENTER,
+	LEFTBOT, CENTERBOT, RIGHTBOT
 };

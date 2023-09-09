@@ -15,9 +15,9 @@ private:
 
 		struct Data
 		{
+			bool doValidCheck{ true };
 			Caller caller{};
 			Callback callback{};
-			bool doValidCheck{ true };
 		};
 
 	public:
@@ -41,12 +41,12 @@ private:
 
 		void Add(const Callback& callback)
 		{
-			m_data.emplace_back(Caller{}, callback, false);
+			m_data.emplace_back(false, Caller{}, callback);
 		}
 
 		void Add(const Caller& caller, const Callback& callback)
 		{
-			m_data.emplace_back(caller, callback, true);
+			m_data.emplace_back(true, caller, callback);
 		}
 
 		void Clear()

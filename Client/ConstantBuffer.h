@@ -11,13 +11,13 @@ private:
 public:
 	ConstantBuffer() : 
 		m_data{ nullptr }
-	{ }
+	{
+	}
 
 	ConstantBuffer(const ConstantBuffer& rhs) :
 		m_buffer{ rhs.m_buffer },
 		m_data{ rhs.m_data }
-	{
-		
+	{		
 	}
 
 	~ConstantBuffer()
@@ -36,8 +36,11 @@ public:
 			D3D12_RESOURCE_STATE_GENERIC_READ,
 			NULL,
 			IID_PPV_ARGS(&m_buffer)));
-		m_buffer->SetName(TEXT("GAMEOBJECT CONSTANT BUFFER"));
+		m_buffer->SetName(TEXT("CONSTANT BUFFER"));
 		DX::ThrowIfFailed(m_buffer->Map(0, nullptr, reinterpret_cast<void**>(&m_data)));
+
+		// 기본 생성자 호출
+		*m_data = {};
 	}
 
 	bool IsValid() const
@@ -45,9 +48,9 @@ public:
 		return m_data ? true : false;
 	}
 
-	void SetShaderVariable(const ComPtr<ID3D12GraphicsCommandList>& commandList, UINT rootParameterIndex) const
+	void SetShaderVariable(const ComPtr<ID3D12GraphicsCommandList>& commandList, RootParamIndex rootParameterIndex) const
 	{
-		commandList->SetGraphicsRootConstantBufferView(rootParameterIndex, m_buffer->GetGPUVirtualAddress());
+		commandList->SetGraphicsRootConstantBufferView(static_cast<UINT>(rootParameterIndex), m_buffer->GetGPUVirtualAddress());
 	}
 
 	T* operator->()

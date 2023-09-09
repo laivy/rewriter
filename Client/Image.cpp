@@ -42,7 +42,7 @@ void Image::SetShaderVariable(const ComPtr<ID3D12GraphicsCommandList>& commandLi
 {
 	const auto& d3dImage{ std::get<D3DImage>(m_data) };
 	auto handle{ ResourceManager::GetInstance()->GetGPUDescriptorHandle(d3dImage.resource.Get()) };
-	commandList->SetGraphicsRootDescriptorTable(rootParameterIndex, handle);
+	commandList->SetGraphicsRootDescriptorTable(static_cast<UINT>(rootParameterIndex), handle);
 	d3dImage.cbImage.SetShaderVariable(commandList, RootParamIndex::TEXTURE);
 }
 

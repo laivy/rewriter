@@ -9,11 +9,25 @@ class IGameObject abstract
 private:
 	struct cbGameObject
 	{
-		DirectX::XMFLOAT4X4 worldMatrix;
-		INT layer;
-		FLOAT alpha;
-		BOOL isFliped;
-		FLOAT dummy;
+		DirectX::XMFLOAT4X4 worldMatrix
+		{
+			1.0f, 0.0f, 0.0f, 0.0f,
+			0.0f, 1.0f, 0.0f, 0.0f,
+			0.0f, 0.0f, 1.0f, 0.0f,
+			0.0f, 0.0f, 0.0f, 1.0f
+		};
+		Layer layer{ Layer::COUNT };
+		FLOAT alpha{ 1.0f };
+		BOOL isFliped{ FALSE };
+		FLOAT dummy{ 0.0f };
+	};
+
+public:
+	enum class Direction
+	{
+		LEFT = -1,
+		NONE = 0,
+		RIGHT = 1
 	};
 
 public:
@@ -32,10 +46,12 @@ public:
 	virtual void SetScale(const FLOAT2& scale);
 	virtual void SetRotation(FLOAT degree);
 	virtual void SetPosition(const FLOAT2& position);
+	virtual void SetDirection(Direction direction);
 
 	bool IsValid() const;
 	FLOAT2 GetSize() const;
 	FLOAT2 GetPosition() const;
+	Direction GetDirection() const;
 	DirectX::XMFLOAT4X4 GetWorldMatrix() const;
 
 protected:
@@ -46,6 +62,8 @@ protected:
 	FLOAT2 m_scale;
 	float m_degree;
 	FLOAT2 m_position;
+	FLOAT2 m_speed;
+	Direction m_direction; // 바라보는 방향
 
 	std::weak_ptr<Shader> m_shader;
 	std::weak_ptr<Mesh> m_mesh;

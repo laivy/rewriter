@@ -4,17 +4,18 @@
 #include "Mesh.h"
 
 IGameObject::IGameObject() :
-	m_isValid{ TRUE },
+	m_isValid{ true },
 	m_layer{ Layer::LOCALPLAYER },
 	m_size{ 0.0f, 0.0f },
 	m_scale{ 1.0f, 1.0f },
 	m_degree{ 0.0f },
 	m_position{ 0.0f, 0.0f },
+	m_speed{ 0.0f, 0.0f },
+	m_direction{ Direction::LEFT },
 	m_pivot{ Pivot::CENTER },
 	m_shader{},
 	m_mesh{}
 {
-	
 }
 
 void IGameObject::Update(FLOAT deltaTime) { }
@@ -35,7 +36,7 @@ void IGameObject::SetLayer(Layer layer)
 {
 	m_layer = layer;
 	if (m_cbGameObject.IsValid())
-		m_cbGameObject->layer = static_cast<INT>(layer);
+		m_cbGameObject->layer = layer;
 }
 
 void IGameObject::SetPivot(Pivot pivot)
@@ -65,6 +66,26 @@ void IGameObject::SetPosition(const FLOAT2& position)
 		m_cbGameObject->worldMatrix = GetWorldMatrix();
 }
 
+void IGameObject::SetDirection(Direction direction)
+{
+	if (direction == Direction::NONE)
+		return;
+
+	m_direction = direction;
+	if (m_cbGameObject.IsValid())
+	{
+		switch (m_direction)
+		{
+		case Direction::LEFT:
+			m_cbGameObject->isFliped = TRUE;
+			break;
+		case Direction::RIGHT:
+			m_cbGameObject->isFliped = FALSE;
+			break;
+		}
+	}
+}
+
 bool IGameObject::IsValid() const
 {
 	return m_isValid;
@@ -78,6 +99,11 @@ FLOAT2 IGameObject::GetPosition() const
 FLOAT2 IGameObject::GetSize() const
 {
 	return m_size;
+}
+
+IGameObject::Direction IGameObject::GetDirection() const
+{
+	return m_direction;
 }
 
 DirectX::XMFLOAT4X4 IGameObject::GetWorldMatrix() const

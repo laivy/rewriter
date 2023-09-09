@@ -485,14 +485,14 @@ void GameApp::CreateRootSignature()
 	std::array<CD3DX12_DESCRIPTOR_RANGE, 1> ranges{};
 	ranges[0].Init(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 1, 0, 0, D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND);
 
-	std::array<CD3DX12_ROOT_PARAMETER, RootParamIndex::COUNT> rootParameter{};
-	rootParameter[RootParamIndex::GAMEOBJECT].InitAsConstantBufferView(RootParamIndex::GAMEOBJECT);
-	rootParameter[RootParamIndex::CAMERA].InitAsConstantBufferView(RootParamIndex::CAMERA);
-	rootParameter[RootParamIndex::TEXTURE].InitAsConstantBufferView(RootParamIndex::TEXTURE);
+	std::array<CD3DX12_ROOT_PARAMETER, static_cast<UINT>(RootParamIndex::COUNT)> rootParameter{};
+	rootParameter[static_cast<UINT>(RootParamIndex::GAMEOBJECT)].InitAsConstantBufferView(static_cast<UINT>(RootParamIndex::GAMEOBJECT));
+	rootParameter[static_cast<UINT>(RootParamIndex::CAMERA)].InitAsConstantBufferView(static_cast<UINT>(RootParamIndex::CAMERA));
+	rootParameter[static_cast<UINT>(RootParamIndex::TEXTURE)].InitAsConstantBufferView(static_cast<UINT>(RootParamIndex::TEXTURE));
 #ifdef _DEBUG
-	rootParameter[RootParamIndex::LINE].InitAsConstantBufferView(RootParamIndex::LINE);
+	rootParameter[static_cast<UINT>(RootParamIndex::LINE)].InitAsConstantBufferView(static_cast<UINT>(RootParamIndex::LINE));
 #endif
-	rootParameter[RootParamIndex::TEXTURE0].InitAsDescriptorTable(1, &ranges[0], D3D12_SHADER_VISIBILITY_PIXEL);
+	rootParameter[static_cast<UINT>(RootParamIndex::TEXTURE0)].InitAsDescriptorTable(1, &ranges[0], D3D12_SHADER_VISIBILITY_PIXEL);
 	
 	std::array<CD3DX12_STATIC_SAMPLER_DESC, 1> samplerDesc{};
 	samplerDesc[0].Init(

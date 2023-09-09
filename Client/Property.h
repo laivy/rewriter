@@ -24,8 +24,8 @@ public:
 	Property(Type type, const Data& data);
 	~Property() = default;
 
-	auto begin() { return m_childProps.begin(); }
-	auto end() { return m_childProps.end(); }
+	auto begin() { return m_child.begin(); }
+	auto end() { return m_child.end(); }
 
 	template<class T>
 	T* Get()
@@ -47,28 +47,28 @@ public:
 		if (pos != std::string::npos)
 		{
 			std::string childName{ name.substr(0, pos) };
-			if (m_childProps.contains(childName))
-				return m_childProps.at(childName)->Get<T>(name.substr(pos + 1));
+			if (m_child.contains(childName))
+				return m_child.at(childName)->Get<T>(name.substr(pos + 1));
 			return nullptr;
 		}
 
 		// 해당 이름의 자식 프로퍼티가 있는지 확인
-		if (!m_childProps.contains(name))
+		if (!m_child.contains(name))
 			return nullptr;
 
 		if constexpr (std::is_same_v<T, Property>)
-			return m_childProps.at(name).get();
+			return m_child.at(name).get();
 
-		return m_childProps.at(name)->Get<T>();
+		return m_child.at(name)->Get<T>();
 	}
 
 	size_t GetChildCount() const
 	{
-		return m_childProps.size();
+		return m_child.size();
 	}
 
 private:
 	Type m_type;
 	Data m_data;
-	std::unordered_map<std::string, std::unique_ptr<Property>> m_childProps;
+	std::unordered_map<std::string, std::unique_ptr<Property>> m_child;
 };

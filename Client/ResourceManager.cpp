@@ -161,7 +161,7 @@ void ResourceManager::Load(std::ifstream& fs, Property* root)
 	for (int i = 0; i < childNodeCount; ++i)
 		Load(fs, node.get());
 
-	root->m_childProps.insert(std::make_pair(name, std::move(node)));
+	root->m_child.insert(std::make_pair(name, std::move(node)));
 }
 
 ID2D1Bitmap* ResourceManager::ReadD2DImage(std::ifstream& fs)
