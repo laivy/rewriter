@@ -37,7 +37,7 @@ void Label::SetFont(const std::shared_ptr<Font>& font)
 void Label::SetText(const std::string& text)
 {
 	m_text = TextUtil::str2wstr(text);
-	GameApp::GetInstance()->GetDwriteFactory()->CreateTextLayout(
+	ClientApp::GetInstance()->GetDwriteFactory()->CreateTextLayout(
 		m_text.c_str(),
 		static_cast<UINT32>(m_text.length()),
 		m_font->GetTextFormat().Get(),

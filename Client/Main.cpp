@@ -6,13 +6,13 @@ int WINAPI WinMain(_In_		HINSTANCE hInstance,
 				   _In_		LPSTR lpCmdLine,
 				   _In_		int nCmdShow)
 {
-	GameApp::Instantiate();
-	if (GameApp::IsInstanced())
+	ClientApp::Instantiate();
+	if (ClientApp::IsInstanced())
 	{
-		GameApp::GetInstance()->OnCreate();
-		GameApp::GetInstance()->Run();
+		ClientApp::GetInstance()->OnCreate();
+		ClientApp::GetInstance()->Run();
 	}
-	GameApp::Destroy();
+	ClientApp::Destroy();
 
 #ifdef _DEBUG
 	ComPtr<IDXGIDebug1> dxgiDebug;

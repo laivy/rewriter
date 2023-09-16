@@ -13,50 +13,17 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
-    <Filter Include="소스 파일\UI">
-      <UniqueIdentifier>{2f7299c4-5a34-4c96-ab4f-f7e090ae9206}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="헤더 파일\UI">
-      <UniqueIdentifier>{dc10fe95-325b-42cb-9152-046df3a5081f}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="소스 파일\Util">
-      <UniqueIdentifier>{b7990f5a-354e-4bfb-98b3-27eeaf60dcd2}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="헤더 파일\Util">
-      <UniqueIdentifier>{ac245af0-89aa-47bf-9274-5d499ef9140f}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="헤더 파일\Scene">
-      <UniqueIdentifier>{38409fea-a705-4241-81f1-e37a6c0c2f11}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="소스 파일\Scene">
-      <UniqueIdentifier>{1702e69a-5a9f-4e8e-91c8-51009d1fc5cb}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="소스 파일\Framework">
-      <UniqueIdentifier>{9e6685e8-326b-418a-a202-ae2b9f6dfa40}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="헤더 파일\Framework">
-      <UniqueIdentifier>{106334fd-f537-4cb5-bf46-1bf89499d29f}</UniqueIdentifier>
-    </Filter>
     <Filter Include="셰이더 파일">
       <UniqueIdentifier>{575ec016-e395-412a-9db5-51f9b09c6e14}</UniqueIdentifier>
     </Filter>
-    <Filter Include="헤더 파일\GameObject">
-      <UniqueIdentifier>{457fa958-c2af-48f2-bbe2-7d318ad525ab}</UniqueIdentifier>
+    <Filter Include="헤더 파일\Common">
+      <UniqueIdentifier>{8775307d-5339-4060-a00d-ed7e0950e823}</UniqueIdentifier>
     </Filter>
-    <Filter Include="소스 파일\GameObject">
-      <UniqueIdentifier>{030e7fab-bc3d-4ad6-a2ee-c4823fda6ed1}</UniqueIdentifier>
+    <Filter Include="헤더 파일\DirectX">
+      <UniqueIdentifier>{d8d1f584-53bb-4181-b452-15bdbd4ec171}</UniqueIdentifier>
     </Filter>
-    <Filter Include="소스 파일\Map">
-      <UniqueIdentifier>{1d719522-c4c8-4354-9eb8-ea027d2f7e0d}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="헤더 파일\Map">
-      <UniqueIdentifier>{657fbd4e-9161-4844-a801-0907762299a5}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="소스 파일\Resource">
-      <UniqueIdentifier>{fd0d75a2-1320-4473-a894-07ada4b1fbee}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="헤더 파일\Resource">
-      <UniqueIdentifier>{13c11019-d459-4a4f-8d4e-de1eb501ef8d}</UniqueIdentifier>
+    <Filter Include="소스 파일\DirectX">
+      <UniqueIdentifier>{54e7a0b8-2ec6-49da-a8d2-de64d2f2bbcd}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -66,208 +33,211 @@
     <ClCompile Include="Stdafx.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
-    <ClCompile Include="Button.cpp">
-      <Filter>소스 파일\UI</Filter>
-    </ClCompile>
-    <ClCompile Include="Wnd.cpp">
-      <Filter>소스 파일\UI</Filter>
-    </ClCompile>
-    <ClCompile Include="EditCtrl.cpp">
-      <Filter>소스 파일\UI</Filter>
-    </ClCompile>
-    <ClCompile Include="Util.cpp">
-      <Filter>소스 파일\Util</Filter>
-    </ClCompile>
-    <ClCompile Include="TextUtil.cpp">
-      <Filter>소스 파일\Util</Filter>
-    </ClCompile>
-    <ClCompile Include="Property.cpp">
-      <Filter>소스 파일\Resource</Filter>
-    </ClCompile>
-    <ClCompile Include="Image.cpp">
-      <Filter>소스 파일\Resource</Filter>
-    </ClCompile>
-    <ClCompile Include="LoginScene.cpp">
-      <Filter>소스 파일\Scene</Filter>
-    </ClCompile>
-    <ClCompile Include="GameApp.cpp">
-      <Filter>소스 파일\Framework</Filter>
-    </ClCompile>
     <ClCompile Include="Camera.cpp">
-      <Filter>소스 파일\Framework</Filter>
-    </ClCompile>
-    <ClCompile Include="Timer.cpp">
-      <Filter>소스 파일\Framework</Filter>
-    </ClCompile>
-    <ClCompile Include="WICTextureLoader12.cpp">
-      <Filter>소스 파일\Resource</Filter>
-    </ClCompile>
-    <ClCompile Include="Player.cpp">
-      <Filter>소스 파일\GameObject</Filter>
-    </ClCompile>
-    <ClCompile Include="LogoScene.cpp">
-      <Filter>소스 파일\Scene</Filter>
-    </ClCompile>
-    <ClCompile Include="Label.cpp">
-      <Filter>소스 파일\UI</Filter>
-    </ClCompile>
-    <ClCompile Include="LoginWnd.cpp">
-      <Filter>소스 파일\UI</Filter>
-    </ClCompile>
-    <ClCompile Include="GameScene.cpp">
-      <Filter>소스 파일\Scene</Filter>
-    </ClCompile>
-    <ClCompile Include="GameObject.cpp">
-      <Filter>소스 파일\GameObject</Filter>
-    </ClCompile>
-    <ClCompile Include="Scene.cpp">
-      <Filter>소스 파일\Scene</Filter>
-    </ClCompile>
-    <ClCompile Include="UI.cpp">
-      <Filter>소스 파일\UI</Filter>
-    </ClCompile>
-    <ClCompile Include="Map.cpp">
-      <Filter>소스 파일\Map</Filter>
-    </ClCompile>
-    <ClCompile Include="Platform.cpp">
-      <Filter>소스 파일\Map</Filter>
-    </ClCompile>
-    <ClCompile Include="Font.cpp">
-      <Filter>소스 파일\Resource</Filter>
-    </ClCompile>
-    <ClCompile Include="ResourceManager.cpp">
-      <Filter>소스 파일\Framework</Filter>
-    </ClCompile>
-    <ClCompile Include="BrushPool.cpp">
-      <Filter>소스 파일\Resource</Filter>
-    </ClCompile>
-    <ClCompile Include="Shader.cpp">
-      <Filter>소스 파일\Resource</Filter>
-    </ClCompile>
-    <ClCompile Include="Mesh.cpp">
-      <Filter>소스 파일\Resource</Filter>
-    </ClCompile>
-    <ClCompile Include="WndManager.cpp">
-      <Filter>소스 파일\Framework</Filter>
-    </ClCompile>
-    <ClCompile Include="ObjectManager.cpp">
-      <Filter>소스 파일\Framework</Filter>
+      <Filter>소스 파일</Filter>
     </ClCompile>
     <ClCompile Include="EventManager.cpp">
-      <Filter>소스 파일\Framework</Filter>
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="GameApp.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="ObjectManager.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="ResourceManager.cpp">
+      <Filter>소스 파일</Filter>
     </ClCompile>
     <ClCompile Include="SceneManager.cpp">
-      <Filter>소스 파일\Framework</Filter>
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="Timer.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="WndManager.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="GameObject.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="Player.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="Map.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="Platform.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="BrushPool.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="Font.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="Image.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="Mesh.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="Property.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="Shader.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="GameScene.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="LoginScene.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="LogoScene.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="Scene.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="Button.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="EditCtrl.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="Label.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="LoginWnd.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="UI.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="Wnd.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="TextUtil.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="Util.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="..\DirectX\WICTextureLoader12.cpp">
+      <Filter>소스 파일\DirectX</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Stdafx.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
-    <ClInclude Include="Button.h">
-      <Filter>헤더 파일\UI</Filter>
-    </ClInclude>
-    <ClInclude Include="Wnd.h">
-      <Filter>헤더 파일\UI</Filter>
-    </ClInclude>
-    <ClInclude Include="EditCtrl.h">
-      <Filter>헤더 파일\UI</Filter>
-    </ClInclude>
-    <ClInclude Include="Util.h">
-      <Filter>헤더 파일\Util</Filter>
-    </ClInclude>
-    <ClInclude Include="TextUtil.h">
-      <Filter>헤더 파일\Util</Filter>
-    </ClInclude>
-    <ClInclude Include="Property.h">
-      <Filter>헤더 파일\Resource</Filter>
-    </ClInclude>
-    <ClInclude Include="Image.h">
-      <Filter>헤더 파일\Resource</Filter>
-    </ClInclude>
-    <ClInclude Include="LoginScene.h">
-      <Filter>헤더 파일\Scene</Filter>
-    </ClInclude>
-    <ClInclude Include="GameApp.h">
-      <Filter>헤더 파일\Framework</Filter>
-    </ClInclude>
     <ClInclude Include="d3dx12.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
+    <ClInclude Include="..\Common\Singleton.h">
+      <Filter>헤더 파일\Common</Filter>
+    </ClInclude>
     <ClInclude Include="Camera.h">
-      <Filter>헤더 파일\Framework</Filter>
-    </ClInclude>
-    <ClInclude Include="Timer.h">
-      <Filter>헤더 파일\Framework</Filter>
-    </ClInclude>
-    <ClInclude Include="WICTextureLoader12.h">
-      <Filter>헤더 파일\Resource</Filter>
-    </ClInclude>
-    <ClInclude Include="Player.h">
-      <Filter>헤더 파일\GameObject</Filter>
-    </ClInclude>
-    <ClInclude Include="ResourceManager.h">
-      <Filter>헤더 파일\Framework</Filter>
-    </ClInclude>
-    <ClInclude Include="LogoScene.h">
-      <Filter>헤더 파일\Scene</Filter>
-    </ClInclude>
-    <ClInclude Include="Label.h">
-      <Filter>헤더 파일\UI</Filter>
-    </ClInclude>
-    <ClInclude Include="LoginWnd.h">
-      <Filter>헤더 파일\UI</Filter>
-    </ClInclude>
-    <ClInclude Include="GameScene.h">
-      <Filter>헤더 파일\Scene</Filter>
-    </ClInclude>
-    <ClInclude Include="GameObject.h">
-      <Filter>헤더 파일\GameObject</Filter>
-    </ClInclude>
-    <ClInclude Include="Scene.h">
-      <Filter>헤더 파일\Scene</Filter>
-    </ClInclude>
-    <ClInclude Include="UI.h">
-      <Filter>헤더 파일\UI</Filter>
-    </ClInclude>
-    <ClInclude Include="Singleton.h">
-      <Filter>헤더 파일\Framework</Filter>
-    </ClInclude>
-    <ClInclude Include="Map.h">
-      <Filter>헤더 파일\Map</Filter>
-    </ClInclude>
-    <ClInclude Include="Platform.h">
-      <Filter>헤더 파일\Map</Filter>
-    </ClInclude>
-    <ClInclude Include="StringTable.h">
-      <Filter>헤더 파일\Resource</Filter>
-    </ClInclude>
-    <ClInclude Include="BrushPool.h">
-      <Filter>헤더 파일\Resource</Filter>
-    </ClInclude>
-    <ClInclude Include="Mesh.h">
-      <Filter>헤더 파일\Resource</Filter>
-    </ClInclude>
-    <ClInclude Include="Shader.h">
-      <Filter>헤더 파일\Resource</Filter>
-    </ClInclude>
-    <ClInclude Include="Font.h">
-      <Filter>헤더 파일\Resource</Filter>
-    </ClInclude>
-    <ClInclude Include="ConstantBuffer.h">
-      <Filter>헤더 파일\Resource</Filter>
-    </ClInclude>
-    <ClInclude Include="WndManager.h">
-      <Filter>헤더 파일\Framework</Filter>
-    </ClInclude>
-    <ClInclude Include="ObjectManager.h">
-      <Filter>헤더 파일\Framework</Filter>
+      <Filter>헤더 파일</Filter>
     </ClInclude>
     <ClInclude Include="EventManager.h">
-      <Filter>헤더 파일\Framework</Filter>
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="GameApp.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="ObjectManager.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="ResourceManager.h">
+      <Filter>헤더 파일</Filter>
     </ClInclude>
     <ClInclude Include="SceneManager.h">
-      <Filter>헤더 파일\Framework</Filter>
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="Timer.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="WndManager.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="GameObject.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="Player.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="Map.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="Platform.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="BrushPool.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="ConstantBuffer.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="Font.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="Image.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="Mesh.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="Property.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="Shader.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="StringTable.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="GameScene.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="LoginScene.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="LogoScene.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="Scene.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="Button.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="EditCtrl.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="Label.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="LoginWnd.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="UI.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="Wnd.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="TextUtil.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="Util.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="..\DirectX\d3dx12.h">
+      <Filter>헤더 파일\DirectX</Filter>
+    </ClInclude>
+    <ClInclude Include="..\DirectX\WICTextureLoader12.h">
+      <Filter>헤더 파일\DirectX</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

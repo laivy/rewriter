@@ -6,8 +6,8 @@ Mesh::Mesh() :
 	m_primitiveTopology{ D3D_PRIMITIVE_TOPOLOGY_POINTLIST }, 
 	m_nVertices{ 1 }
 {
-	auto d3dDevice{ GameApp::GetInstance()->GetD3DDevice() };
-	auto commandList{ GameApp::GetInstance()->GetCommandList() };
+	auto d3dDevice{ ClientApp::GetInstance()->GetD3DDevice() };
+	auto commandList{ ClientApp::GetInstance()->GetCommandList() };
 
 	struct Vertex
 	{

@@ -11,7 +11,7 @@
 #include "Wnd.h"
 #include "WndManager.h"
 
-GameApp::GameApp() : 
+ClientApp::ClientApp() : 
 	m_hWnd{ NULL },
 	m_size{ 1920, 1080 },
 	m_timer{ new Timer }
@@ -22,7 +22,7 @@ GameApp::GameApp() :
 	assert(SUCCEEDED(hr));
 }
 
-void GameApp::OnCreate()
+void ClientApp::OnCreate()
 {
 	ResetCommandList();
 
@@ -47,7 +47,7 @@ void GameApp::OnCreate()
 	m_timer->Tick();
 }
 
-void GameApp::Run()
+void ClientApp::Run()
 {
 	MSG msg{};
 	while (true)
@@ -67,17 +67,17 @@ void GameApp::Run()
 	}
 }
 
-HWND GameApp::GetHwnd() const
+HWND ClientApp::GetHwnd() const
 {
 	return m_hWnd;
 }
 
-INT2 GameApp::GetWindowSize() const
+INT2 ClientApp::GetWindowSize() const
 {
 	return m_size;
 }
 
-INT2 GameApp::GetCursorPosition() const
+INT2 ClientApp::GetCursorPosition() const
 {
 	POINT mouse;
 	GetCursorPos(&mouse);
@@ -85,45 +85,42 @@ INT2 GameApp::GetCursorPosition() const
 	return { mouse.x, mouse.y };
 }
 
-ComPtr<ID3D12Device> GameApp::GetD3DDevice() const
+ComPtr<ID3D12Device> ClientApp::GetD3DDevice() const
 {
 	return m_d3dDevice;
 }
 
-ComPtr<ID3D12GraphicsCommandList> GameApp::GetCommandList() const
+ComPtr<ID3D12GraphicsCommandList> ClientApp::GetCommandList() const
 {
 	return m_commandList;
 }
 
-ComPtr<ID3D12RootSignature> GameApp::GetRootSignature() const
+ComPtr<ID3D12RootSignature> ClientApp::GetRootSignature() const
 {
 	return m_rootSignature;
 }
 
-ComPtr<IDWriteFactory5> GameApp::GetDwriteFactory() const
+ComPtr<IDWriteFactory5> ClientApp::GetDwriteFactory() const
 {
 	return m_dwriteFactory;
 }
 
-ComPtr<ID2D1DeviceContext2> GameApp::GetD2DContext() const
+ComPtr<ID2D1DeviceContext2> ClientApp::GetD2DContext() const
 {
 	return m_d2dDeviceContext;
 }
 
-LRESULT CALLBACK GameApp::WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
+LRESULT CALLBACK ClientApp::WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
-	GameApp* app{};
-	if (message == WM_NCCREATE)
-	{
-		LPCREATESTRUCT pcs{ reinterpret_cast<LPCREATESTRUCT>(lParam) };
-		app = static_cast<GameApp*>(pcs->lpCreateParams);
-		SetWindowLongPtr(hWnd, GWLP_USERDATA, reinterpret_cast<LONG_PTR>(app));
-		return 1;
-	}
-
-	app = reinterpret_cast<GameApp*>(GetWindowLongPtr(hWnd, GWLP_USERDATA));
+	ClientApp* app{ reinterpret_cast<ClientApp*>(GetWindowLongPtr(hWnd, GWLP_USERDATA)) };
 	switch (message)
 	{
+	case WM_NCCREATE:
+	{
+		LPCREATESTRUCT pcs{ reinterpret_cast<LPCREATESTRUCT>(lParam) };
+		SetWindowLongPtr(hWnd, GWLP_USERDATA, reinterpret_cast<LONG_PTR>(pcs->lpCreateParams));
+		return 1;
+	}
 	case WM_SIZE:
 		app->OnResize(GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam));
 		break;
@@ -158,7 +155,7 @@ LRESULT CALLBACK GameApp::WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM
 	return 0;
 }
 
-void GameApp::OnDestroy()
+void ClientApp::OnDestroy()
 {
 	WaitForGPU();
 	CloseHandle(m_fenceEvent);
@@ -171,7 +168,7 @@ void GameApp::OnDestroy()
 	SceneManager::Destroy();
 }
 
-void GameApp::OnResize(int width, int height)
+void ClientApp::OnResize(int width, int height)
 {
 	m_viewport = D3D12_VIEWPORT{ 0.0f, 0.0f, static_cast<float>(width), static_cast<float>(height), 0.0f, 1.0f };
 	m_scissorRect = D3D12_RECT{ 0, 0, static_cast<long>(width), static_cast<long>(height) };
@@ -179,43 +176,43 @@ void GameApp::OnResize(int width, int height)
 		sm->OnResize(width, height);
 }
 
-void GameApp::OnMouseMove(int x, int y)
+void ClientApp::OnMouseMove(int x, int y)
 {
 	if (auto sm{ SceneManager::GetInstance() })
 		sm->OnMouseMove(x, y);
 }
 
-void GameApp::OnLButtonUp(int x, int y)
+void ClientApp::OnLButtonUp(int x, int y)
 {
 	if (auto sm{ SceneManager::GetInstance() })
 		sm->OnLButtonUp(x, y);
 }
 
-void GameApp::OnLButtonDown(int x, int y)
+void ClientApp::OnLButtonDown(int x, int y)
 {
 	if (auto sm{ SceneManager::GetInstance() })
 		sm->OnLButtonDown(x, y);
 }
 
-void GameApp::OnRButtonUp(int x, int y)
+void ClientApp::OnRButtonUp(int x, int y)
 {
 	if (auto sm{ SceneManager::GetInstance() })
 		sm->OnRButtonUp(x, y);
 }
 
-void GameApp::OnRButtonDown(int x, int y)
+void ClientApp::OnRButtonDown(int x, int y)
 {
 	if (auto sm{ SceneManager::GetInstance() })
 		sm->OnRButtonDown(x, y);
 }
 
-void GameApp::OnKeyboardEvent(UINT message, WPARAM wParam, LPARAM lParam)
+void ClientApp::OnKeyboardEvent(UINT message, WPARAM wParam, LPARAM lParam)
 {
 	if (auto sm{ SceneManager::GetInstance() })
 		sm->OnKeyboardEvent(message, wParam, lParam);
 }
 
-HRESULT GameApp::InitWnd()
+HRESULT ClientApp::InitWnd()
 {
 	WNDCLASSEX wcex{};
 	wcex.cbSize = sizeof(WNDCLASSEX);
@@ -256,7 +253,7 @@ HRESULT GameApp::InitWnd()
 	return hr;
 }
 
-HRESULT GameApp::InitDirectX()
+HRESULT ClientApp::InitDirectX()
 {
 	CreateFactory();
 	CreateDevice();
@@ -278,7 +275,7 @@ HRESULT GameApp::InitDirectX()
 	return S_OK;
 }
 
-void GameApp::CreateFactory()
+void ClientApp::CreateFactory()
 {
 	UINT dxgiFactoryFlags{ 0 };
 
@@ -294,7 +291,7 @@ void GameApp::CreateFactory()
 	DX::ThrowIfFailed(CreateDXGIFactory2(dxgiFactoryFlags, IID_PPV_ARGS(&m_factory)));
 }
 
-void GameApp::CreateDevice()
+void ClientApp::CreateDevice()
 {
 	ComPtr<IDXGIAdapter1> hardwareAdapter;
 	for (UINT i = 0; DXGI_ERROR_NOT_FOUND != m_factory->EnumAdapters1(i, &hardwareAdapter); ++i)
@@ -312,7 +309,7 @@ void GameApp::CreateDevice()
 	g_cbvSrvUavDescriptorIncrementSize = m_d3dDevice->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
 }
 
-void GameApp::CreateCommandQueue()
+void ClientApp::CreateCommandQueue()
 {
 	D3D12_COMMAND_QUEUE_DESC queueDesc{};
 	queueDesc.Flags = D3D12_COMMAND_QUEUE_FLAG_NONE;
@@ -320,7 +317,7 @@ void GameApp::CreateCommandQueue()
 	DX::ThrowIfFailed(m_d3dDevice->CreateCommandQueue(&queueDesc, IID_PPV_ARGS(&m_commandQueue)));
 }
 
-void GameApp::CreateD3D11On12Device()
+void ClientApp::CreateD3D11On12Device()
 {
 	ComPtr<ID3D11Device> d3d11Device;
 	DX::ThrowIfFailed(D3D11On12CreateDevice(
@@ -339,12 +336,12 @@ void GameApp::CreateD3D11On12Device()
 	DX::ThrowIfFailed(d3d11Device.As(&m_d3d11On12Device));
 }
 
-void GameApp::CreateD2DFactory()
+void ClientApp::CreateD2DFactory()
 {
 	DX::ThrowIfFailed(D2D1CreateFactory(D2D1_FACTORY_TYPE_SINGLE_THREADED, m_d2dFactory.GetAddressOf()));
 }
 
-void GameApp::CreateD2DDevice()
+void ClientApp::CreateD2DDevice()
 {
 	ComPtr<IDXGIDevice> dxgiDevice;
 	DX::ThrowIfFailed(m_d3d11On12Device.As(&dxgiDevice));
@@ -353,7 +350,7 @@ void GameApp::CreateD2DDevice()
 	DX::ThrowIfFailed(DWriteCreateFactory(DWRITE_FACTORY_TYPE_SHARED, __uuidof(IDWriteFactory), &m_dwriteFactory));
 }
 
-void GameApp::CreateSwapChain()
+void ClientApp::CreateSwapChain()
 {
 	RECT rect{};
 	GetClientRect(m_hWnd, &rect);
@@ -384,7 +381,7 @@ void GameApp::CreateSwapChain()
 	DX::ThrowIfFailed(m_factory->MakeWindowAssociation(m_hWnd, DXGI_MWA_NO_ALT_ENTER));
 }
 
-void GameApp::CreateRtvDsvDescriptorHeap()
+void ClientApp::CreateRtvDsvDescriptorHeap()
 {
 	D3D12_DESCRIPTOR_HEAP_DESC rtvHeapDesc{};
 	rtvHeapDesc.NumDescriptors = FRAME_COUNT;
@@ -402,7 +399,7 @@ void GameApp::CreateRtvDsvDescriptorHeap()
 	DX::ThrowIfFailed(m_d3dDevice->CreateDescriptorHeap(&dsvHeapDesc, IID_PPV_ARGS(&m_dsvHeap)));
 }
 
-void GameApp::CreateRenderTargetView()
+void ClientApp::CreateRenderTargetView()
 {
 	// D2D 렌더타겟 속성
 	UINT dpi{ GetDpiForWindow(m_hWnd) };
@@ -445,7 +442,7 @@ void GameApp::CreateRenderTargetView()
 	}
 }
 
-void GameApp::CreateDepthStencilView()
+void ClientApp::CreateDepthStencilView()
 {
 	D3D12_RESOURCE_DESC desc{};
 	desc.Dimension = D3D12_RESOURCE_DIMENSION_TEXTURE2D;
@@ -480,7 +477,7 @@ void GameApp::CreateDepthStencilView()
 	m_d3dDevice->CreateDepthStencilView(m_depthStencil.Get(), &depthStencilViewDesc, m_dsvHeap->GetCPUDescriptorHandleForHeapStart());
 }
 
-void GameApp::CreateRootSignature()
+void ClientApp::CreateRootSignature()
 {
 	std::array<CD3DX12_DESCRIPTOR_RANGE, 1> ranges{};
 	ranges[0].Init(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 1, 0, 0, D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND);
@@ -519,20 +516,20 @@ void GameApp::CreateRootSignature()
 	DX::ThrowIfFailed(m_d3dDevice->CreateRootSignature(0, signature->GetBufferPointer(), signature->GetBufferSize(), IID_PPV_ARGS(&m_rootSignature)));
 }
 
-void GameApp::CreateCommandList()
+void ClientApp::CreateCommandList()
 {
 	DX::ThrowIfFailed(m_d3dDevice->CreateCommandList(0, D3D12_COMMAND_LIST_TYPE_DIRECT, m_commandAllocators[m_frameIndex].Get(), nullptr, IID_PPV_ARGS(&m_commandList)));
 	DX::ThrowIfFailed(m_commandList->Close());
 }
 
-void GameApp::CreateFence()
+void ClientApp::CreateFence()
 {
 	DX::ThrowIfFailed(m_d3dDevice->CreateFence(0, D3D12_FENCE_FLAG_NONE, IID_PPV_ARGS(&m_fence)));
 	m_fenceEvent = CreateEvent(NULL, FALSE, FALSE, NULL);
 	++m_fenceValues[m_frameIndex];
 }
 
-void GameApp::Update()
+void ClientApp::Update()
 {
 	m_timer->Tick();
 	FLOAT deltaTime{ m_timer->GetDeltaTime() };
@@ -544,7 +541,7 @@ void GameApp::Update()
 		SceneManager::GetInstance()->Update(deltaTime);
 }
 
-void GameApp::Render()
+void ClientApp::Render()
 {
 	m_commandList->SetGraphicsRootSignature(m_rootSignature.Get());
 	m_commandList->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(m_renderTargets[m_frameIndex].Get(), D3D12_RESOURCE_STATE_PRESENT, D3D12_RESOURCE_STATE_RENDER_TARGET));
@@ -586,20 +583,20 @@ void GameApp::Render()
 	WaitPrevFrame();
 }
 
-void GameApp::ResetCommandList()
+void ClientApp::ResetCommandList()
 {
 	DX::ThrowIfFailed(m_commandAllocators[m_frameIndex]->Reset());
 	DX::ThrowIfFailed(m_commandList->Reset(m_commandAllocators[m_frameIndex].Get(), nullptr));
 }
 
-void GameApp::ExecuteCommandList()
+void ClientApp::ExecuteCommandList()
 {
 	DX::ThrowIfFailed(m_commandList->Close());
 	ID3D12CommandList* ppCommandList[]{ m_commandList.Get() };
 	m_commandQueue->ExecuteCommandLists(_countof(ppCommandList), ppCommandList);
 }
 
-void GameApp::WaitPrevFrame()
+void ClientApp::WaitPrevFrame()
 {
 	const UINT64 currentFenceValue{ m_fenceValues[m_frameIndex] };
 	DX::ThrowIfFailed(m_commandQueue->Signal(m_fence.Get(), currentFenceValue));
@@ -614,7 +611,7 @@ void GameApp::WaitPrevFrame()
 	m_fenceValues[m_frameIndex] = currentFenceValue + 1;
 }
 
-void GameApp::WaitForGPU()
+void ClientApp::WaitForGPU()
 {
 	DX::ThrowIfFailed(m_commandQueue->Signal(m_fence.Get(), m_fenceValues[m_frameIndex]));
 	DX::ThrowIfFailed(m_fence->SetEventOnCompletion(m_fenceValues[m_frameIndex], m_fenceEvent));

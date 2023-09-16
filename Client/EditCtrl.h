@@ -5,9 +5,9 @@
 class EditCtrl : public IUserInterface
 {
 private:
-	constexpr static float MARGIN = 1.0f;
-	constexpr static int CARET_THICKNESS = 2;
-	constexpr static float CARET_BLINK_SECOND = 0.5f;
+	static constexpr float MARGIN = 1.0f;
+	static constexpr int CARET_THICKNESS = 2;
+	static constexpr float CARET_BLINK_SECOND = 0.5f;
 
 public:
 	EditCtrl(const INT2& size);

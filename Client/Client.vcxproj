@@ -106,6 +106,7 @@
       <PreprocessorDefinitions>_DEBUG;_WINDOWS;NOMINMAX;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>false</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
+      <PrecompiledHeader>Use</PrecompiledHeader>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -130,6 +131,9 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="..\DirectX\WICTextureLoader12.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
+    </ClCompile>
     <ClCompile Include="BrushPool.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Use</PrecompiledHeader>
     </ClCompile>
@@ -220,7 +224,6 @@
     <ClCompile Include="Timer.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Use</PrecompiledHeader>
     </ClCompile>
-    <ClCompile Include="WICTextureLoader12.cpp" />
     <ClCompile Include="Wnd.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Use</PrecompiledHeader>
     </ClCompile>
@@ -229,6 +232,9 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\Common\Singleton.h" />
+    <ClInclude Include="..\DirectX\d3dx12.h" />
+    <ClInclude Include="..\DirectX\WICTextureLoader12.h" />
     <ClInclude Include="BrushPool.h" />
     <ClInclude Include="Button.h" />
     <ClInclude Include="Camera.h" />
@@ -255,14 +261,12 @@
     <ClInclude Include="Scene.h" />
     <ClInclude Include="SceneManager.h" />
     <ClInclude Include="Shader.h" />
-    <ClInclude Include="Singleton.h" />
     <ClInclude Include="Stdafx.h" />
     <ClInclude Include="StringTable.h" />
     <ClInclude Include="TextUtil.h" />
     <ClInclude Include="Timer.h" />
     <ClInclude Include="UI.h" />
     <ClInclude Include="Util.h" />
-    <ClInclude Include="WICTextureLoader12.h" />
     <ClInclude Include="Wnd.h" />
     <ClInclude Include="WndManager.h" />
   </ItemGroup>

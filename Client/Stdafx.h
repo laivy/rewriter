@@ -10,6 +10,11 @@
 #include <wrl.h>
 using Microsoft::WRL::ComPtr;
 
+#ifndef HINST_THISCOMPONENT
+EXTERN_C IMAGE_DOS_HEADER __ImageBase;
+#define HINST_THISCOMPONENT ((HINSTANCE)&__ImageBase)
+#endif
+
 // C/C++
 #include <algorithm>
 #include <array>
@@ -40,25 +45,20 @@ using Microsoft::WRL::ComPtr;
 #include <d3d11on12.h>
 #include <d3d12.h>
 #include <d3dcompiler.h>
-#include "d3dx12.h"
 #include <dwrite.h>
 #include <dwrite_3.h>
 #include <dxgi1_6.h>
 #ifdef _DEBUG
 #include <dxgidebug.h>
 #endif
+#include "../DirectX/d3dx12.h"
+#include "../DirectX/WICTextureLoader12.h"
 
 // Game
-#include "Singleton.h"
+#include "../Common/Singleton.h"
 #include "StringTable.h"
 #include "TextUtil.h"
 #include "Util.h"
-#include "WICTextureLoader12.h"
-
-#ifndef HINST_THISCOMPONENT
-EXTERN_C IMAGE_DOS_HEADER __ImageBase;
-#define HINST_THISCOMPONENT ((HINSTANCE)&__ImageBase)
-#endif
 
 // 전역 변수
 extern UINT g_cbvSrvUavDescriptorIncrementSize;

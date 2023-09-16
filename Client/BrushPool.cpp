@@ -4,7 +4,7 @@
 
 BrushPool::BrushPool()
 {
-	auto ctx{ GameApp::GetInstance()->GetD2DContext() };
+	auto ctx{ ClientApp::GetInstance()->GetD2DContext() };
 	ctx->CreateSolidColorBrush(D2D1::ColorF{ D2D1::ColorF::Black }, &m_pool[BLACK]);
 	ctx->CreateSolidColorBrush(D2D1::ColorF{ D2D1::ColorF::White }, &m_pool[WHITE]);
 	ctx->CreateSolidColorBrush(D2D1::ColorF{ D2D1::ColorF::Red }, &m_pool[RED]);

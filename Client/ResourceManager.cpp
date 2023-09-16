@@ -55,7 +55,7 @@ void ResourceManager::CreateShaderResourceView(ID3D12Resource* const resource)
 	if (m_shaderResources.contains(resource))
 		return;
 
-	auto d3dDevice{ GameApp::GetInstance()->GetD3DDevice() };
+	auto d3dDevice{ ClientApp::GetInstance()->GetD3DDevice() };
 	auto index{ static_cast<int>(m_shaderResources.size()) };
 
 	CD3DX12_CPU_DESCRIPTOR_HANDLE srvDescriptorHandle{ m_srvHeap->GetCPUDescriptorHandleForHeapStart() };
@@ -115,7 +115,7 @@ void ResourceManager::CreateShaders()
 
 void ResourceManager::CreateSRVHeap()
 {
-	auto d3dDevice{ GameApp::GetInstance()->GetD3DDevice() };
+	auto d3dDevice{ ClientApp::GetInstance()->GetD3DDevice() };
 
 	D3D12_DESCRIPTOR_HEAP_DESC srvHeapDesc{};
 	srvHeapDesc.NumDescriptors = static_cast<UINT>(SRV_HEAP_COUNT);
@@ -130,6 +130,7 @@ void ResourceManager::Load(std::ifstream& fs, Property* root)
 	node->m_type = static_cast<Property::Type>(Read<BYTE>(fs));
 
 	std::string name{ Read<std::string>(fs) };
+	std::ranges::transform(name, name.begin(), [](unsigned char c) { return std::tolower(c); });
 
 	switch (node->m_type)
 	{
@@ -186,7 +187,7 @@ ID2D1Bitmap* ResourceManager::ReadD2DImage(std::ifstream& fs)
 	hr = decoder->GetFrame(0, &frameDecode);
 	hr = converter->Initialize(frameDecode.Get(), GUID_WICPixelFormat32bppPBGRA, WICBitmapDitherTypeNone, NULL, 0.0f, WICBitmapPaletteTypeMedianCut);
 
-	auto d2dContext{ GameApp::GetInstance()->GetD2DContext() };
+	auto d2dContext{ ClientApp::GetInstance()->GetD2DContext() };
 	hr = d2dContext->CreateBitmapFromWicBitmap(converter.Get(), &bitmap);
 	assert(SUCCEEDED(hr));
 
@@ -199,11 +200,11 @@ ID3D12Resource* ResourceManager::ReadD3DImage(std::ifstream& fs)
 	std::unique_ptr<BYTE> buffer{ new BYTE[length] };
 	fs.read(reinterpret_cast<char*>(buffer.get()), length);
 
+	auto d3dDevice{ ClientApp::GetInstance()->GetD3DDevice() };
 	ID3D12Resource* bitmap{ nullptr };
-	ComPtr<ID3D12Resource> uploadBuffer;
-	auto d3dDevice{ GameApp::GetInstance()->GetD3DDevice() };
 	std::unique_ptr<uint8_t[]> decodedData;
 	D3D12_SUBRESOURCE_DATA subresource;
+
 	DirectX::LoadWICTextureFromMemoryEx(
 		d3dDevice.Get(),
 		buffer.get(),
@@ -216,18 +217,18 @@ ID3D12Resource* ResourceManager::ReadD3DImage(std::ifstream& fs)
 		subresource
 	);
 
-	UINT64 nBytes{ GetRequiredIntermediateSize(bitmap, 0, 1) };
-	nBytes += D3D12_DEFAULT_RESOURCE_PLACEMENT_ALIGNMENT;
+	ComPtr<ID3D12Resource> uploadBuffer;
+	UINT64 bufferSize{ GetRequiredIntermediateSize(bitmap, 0, 1) };
 	DX::ThrowIfFailed(d3dDevice->CreateCommittedResource(
 		&CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_UPLOAD),
 		D3D12_HEAP_FLAG_NONE,
-		&CD3DX12_RESOURCE_DESC::Buffer(nBytes),
+		&CD3DX12_RESOURCE_DESC::Buffer(bufferSize),
 		D3D12_RESOURCE_STATE_GENERIC_READ,
 		NULL,
 		IID_PPV_ARGS(&uploadBuffer)
 	));
 
-	auto commandList{ GameApp::GetInstance()->GetCommandList() };
+	auto commandList{ ClientApp::GetInstance()->GetCommandList() };
 	UpdateSubresources(commandList.Get(), bitmap, uploadBuffer.Get(), 0, 0, 1, &subresource);
 
 	// GPU 메모리에 복사가 끝난 뒤에 해제해야함

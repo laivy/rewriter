@@ -1,0 +1,120 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="소스 파일">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;c++;cppm;ixx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="헤더 파일">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hh;hpp;hxx;h++;hm;inl;inc;ipp;xsd</Extensions>
+    </Filter>
+    <Filter Include="리소스 파일">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
+    </Filter>
+    <Filter Include="헤더 파일\Common">
+      <UniqueIdentifier>{9208068c-1ec2-4a86-9b71-ba70df3c56d6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="헤더 파일\Imgui">
+      <UniqueIdentifier>{e68f1517-c524-4833-9809-d8393c8149e3}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="소스 파일\Imgui">
+      <UniqueIdentifier>{b54bdae7-5517-4640-bc4c-dc870a0590dc}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="헤더 파일\DirectX">
+      <UniqueIdentifier>{2db65ccc-5dcd-4e95-85de-e10f9517c3c1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="소스 파일\Common">
+      <UniqueIdentifier>{e6a9f60f-e517-4fbf-ad18-eae51af8cc10}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="Main.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="Stdafx.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="LoginApp.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Imgui\imgui.cpp">
+      <Filter>소스 파일\Imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Imgui\imgui_demo.cpp">
+      <Filter>소스 파일\Imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Imgui\imgui_draw.cpp">
+      <Filter>소스 파일\Imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Imgui\imgui_impl_dx12.cpp">
+      <Filter>소스 파일\Imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Imgui\imgui_impl_win32.cpp">
+      <Filter>소스 파일\Imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Imgui\imgui_tables.cpp">
+      <Filter>소스 파일\Imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Imgui\imgui_widgets.cpp">
+      <Filter>소스 파일\Imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Common\Types.cpp">
+      <Filter>소스 파일\Common</Filter>
+    </ClCompile>
+    <ClCompile Include="DBThread.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Common\Request.cpp">
+      <Filter>소스 파일\Common</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="Stdafx.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Common\Singleton.h">
+      <Filter>헤더 파일\Common</Filter>
+    </ClInclude>
+    <ClInclude Include="LoginApp.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Imgui\imconfig.h">
+      <Filter>헤더 파일\Imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Imgui\imgui.h">
+      <Filter>헤더 파일\Imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Imgui\imgui_impl_dx12.h">
+      <Filter>헤더 파일\Imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Imgui\imgui_impl_win32.h">
+      <Filter>헤더 파일\Imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Imgui\imgui_internal.h">
+      <Filter>헤더 파일\Imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Imgui\imstb_rectpack.h">
+      <Filter>헤더 파일\Imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Imgui\imstb_textedit.h">
+      <Filter>헤더 파일\Imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Imgui\imstb_truetype.h">
+      <Filter>헤더 파일\Imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\DirectX\d3dx12.h">
+      <Filter>헤더 파일\DirectX</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Common\Types.h">
+      <Filter>헤더 파일\Common</Filter>
+    </ClInclude>
+    <ClInclude Include="DBThread.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Common\Request.h">
+      <Filter>헤더 파일\Common</Filter>
+    </ClInclude>
+  </ItemGroup>
+</Project>

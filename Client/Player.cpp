@@ -10,25 +10,31 @@
 #include "Shader.h"
 
 Player::InputComponent::InputComponent(Player* player) :
-	m_player{ player },
+	Player::IComponent{ player },
 	m_inputDirection{ Direction::NONE }
 {
+}
+
+void Player::InputComponent::OnMove(Direction direction)
+{
+	m_inputDirection = static_cast<Direction>(direction);
 }
 
 void Player::InputComponent::Update(float deltaTime)
 {
 	// 이동
-	int dir{ 0 };
-	if (GetAsyncKeyState(VK_LEFT) & 0x8000)
-		--dir;
-	if (GetAsyncKeyState(VK_RIGHT) & 0x8000)
-		++dir;
-	m_inputDirection = static_cast<Direction>(dir);
-
-	m_player->OnMove(static_cast<Direction>(dir));
+	if (m_player->IsCanMove())
+	{
+		int dir{ 0 };
+		if (GetAsyncKeyState(VK_LEFT) & 0x8000)
+			--dir;
+		if (GetAsyncKeyState(VK_RIGHT) & 0x8000)
+			++dir;
+		m_player->OnMove(static_cast<Direction>(dir));
+	}
 
 	// 점프
-	if (GetAsyncKeyState('C') & 0x8000 && m_player->IsCanJump())
+	if (m_player->IsCanJump() && GetAsyncKeyState('C') & 0x8000)
 		m_player->OnJump();
 }
 
@@ -38,7 +44,7 @@ IGameObject::Direction Player::InputComponent::GetInputDirection() const
 }
 
 Player::PhysicsComponent::PhysicsComponent(Player* player) :
-	m_player{ player },
+	Player::IComponent{ player },
 	m_platform{},
 	m_isOnPlatform{ false },
 	m_isJumping{ false }
@@ -99,7 +105,6 @@ void Player::PhysicsComponent::Update(float deltaTime)
 
 void Player::PhysicsComponent::OnMove(Direction direction)
 {
-	m_player->SetDirection(direction);
 	m_player->m_speed.x = PhysicsComponent::DEFAULT_X_SPEED * static_cast<int>(direction);
 }
 
@@ -138,7 +143,7 @@ void Player::PhysicsComponent::UpdateMovement(float deltaTime)
 }
 
 Player::AnimationComponent::AnimationComponent(Player* player) : 
-	m_player{ player },
+	Player::IComponent{ player },
 	m_type{ AnimationType::IDLE },
 	m_frame{ 0 },
 	m_timer{ 0.0f },
@@ -155,6 +160,8 @@ void Player::AnimationComponent::OnMove(Direction direction)
 {
 	using enum AnimationType;
 	using enum Direction;
+
+	m_player->SetDirection(direction);
 
 	if (m_type == JUMP || m_type == FALL)
 		return;
@@ -257,11 +264,6 @@ void Player::AnimationComponent::SetShaderVariable(const ComPtr<ID3D12GraphicsCo
 	m_currAniProp->Get<Image>(std::to_string(m_frame))->SetShaderVariable(commandList);
 }
 
-Player::AnimationComponent::AnimationType Player::AnimationComponent::GetAnimationType() const
-{
-	return m_type;
-}
-
 void Player::AnimationComponent::UpdateFrame(float deltaTime)
 {
 	m_timer += deltaTime;
@@ -269,7 +271,7 @@ void Player::AnimationComponent::UpdateFrame(float deltaTime)
 	FLOAT interval{ DEFAULT_FRAME_INTERVAL };
 	do
 	{
-		if (auto currFrameInterval{ m_currFrameProp->Get<FLOAT>("interval") })
+		if (auto currFrameInterval{ m_currFrameProp->Get<FLOAT>(StringTable::INTERVAL) })
 			interval = *currFrameInterval;
 
 		if (m_timer >= interval)
@@ -342,39 +344,49 @@ bool Player::IsCanJump() const
 
 void Player::OnMove(Direction direction)
 {
+	m_inputComponent.OnMove(direction);
 	m_physicsComponent.OnMove(direction);
 	m_animationComponent.OnMove(direction);
 }
 
 void Player::OnJump()
 {
+	m_inputComponent.OnJump();
 	m_physicsComponent.OnJump();
 	m_animationComponent.OnJump();
 }
 
 void Player::OnLanding()
 {
+	m_inputComponent.OnLanding();
 	m_physicsComponent.OnLanding();
 	m_animationComponent.OnLanding();
 }
 
 void Player::OnFalling()
 {
+	m_inputComponent.OnFalling();
 	m_physicsComponent.OnFalling();
 	m_animationComponent.OnFalling();
 }
 
-void Player::OnAnimationStart(AnimationComponent::AnimationType type)
+void Player::OnAnimationStart(AnimationType type)
 {
+	m_inputComponent.OnAnimationStart(type);
+	m_physicsComponent.OnAnimationStart(type);
 	m_animationComponent.OnAnimationStart(type);
 }
 
-void Player::OnAnimationEnd(AnimationComponent::AnimationType type)
+void Player::OnAnimationEnd(AnimationType type)
 {
+	m_inputComponent.OnAnimationEnd(type);
+	m_physicsComponent.OnAnimationEnd(type);
 	m_animationComponent.OnAnimationEnd(type);
 }
 
-void Player::OnAnimationFrameChange(AnimationComponent::AnimationType type, int frame)
+void Player::OnAnimationFrameChange(AnimationType type, int frame)
 {
+	m_inputComponent.OnAnimationFrameChange(type, frame);
+	m_physicsComponent.OnAnimationFrameChange(type, frame);
 	m_animationComponent.OnAnimationFrameChange(type, frame);
 }

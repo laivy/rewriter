@@ -6,7 +6,7 @@ template <class T>
 class ConstantBuffer
 {
 private:
-	constexpr static UINT BUFFER_SIZE = (sizeof(T) + 255) & ~255;
+	static constexpr UINT BUFFER_SIZE = (sizeof(T) + 255) & ~255;
 
 public:
 	ConstantBuffer() : 
@@ -28,7 +28,7 @@ public:
 
 	void Init()
 	{
-		auto device{ GameApp::GetInstance()->GetD3DDevice() };
+		auto device{ ClientApp::GetInstance()->GetD3DDevice() };
 		DX::ThrowIfFailed(device->CreateCommittedResource(
 			&CD3DX12_HEAP_PROPERTIES{ D3D12_HEAP_TYPE_UPLOAD },
 			D3D12_HEAP_FLAG_NONE,

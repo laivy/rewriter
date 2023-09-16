@@ -2,11 +2,11 @@
 
 class Timer;
 
-class GameApp : public TSingleton<GameApp>
+class ClientApp : public TSingleton<ClientApp>
 {
 public:
-	GameApp();
-	~GameApp() = default;
+	ClientApp();
+	~ClientApp() = default;
 
 	void OnCreate();
 
@@ -59,14 +59,13 @@ private:
 	void WaitForGPU();
 
 private:
-	static constexpr UINT FRAME_COUNT = 3;
-
 	// Window
 	HINSTANCE m_hInstance;
 	HWND m_hWnd;
 	INT2 m_size;
 
 	// DirectX12
+	static constexpr UINT FRAME_COUNT = 3;
 	ComPtr<IDXGIFactory4> m_factory;
 	ComPtr<ID3D12Device> m_d3dDevice;
 	ComPtr<IDXGISwapChain3>	m_swapChain;

@@ -91,7 +91,7 @@ void Wnd::Update(FLOAT deltaTime)
 	// 선택된 윈도우 마우스로 옮기기
 	if (m_isPick)
 	{
-		INT2 mouse{ GameApp::GetInstance()->GetCursorPosition() };
+		INT2 mouse{ ClientApp::GetInstance()->GetCursorPosition() };
 		SetPosition({ mouse.x + m_pickDelta.x, mouse.y + m_pickDelta.y });
 	}
 	
@@ -145,7 +145,7 @@ void Wnd::SetPick(bool isPick)
 	m_isPick = isPick;
 	if (isPick)
 	{
-		INT2 mouse{ GameApp::GetInstance()->GetCursorPosition() };
+		INT2 mouse{ ClientApp::GetInstance()->GetCursorPosition() };
 		m_pickDelta = m_position - mouse;
 		SetFocus(true); // pick은 focus의 상위호환
 	}

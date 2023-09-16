@@ -6,40 +6,63 @@ class Property;
 
 class Player : public IGameObject
 {
-public:
-	class InputComponent
+private:
+	enum class AnimationType
+	{
+		IDLE, RUN, JUMP, FALL
+	};
+
+	class IComponent abstract
+	{
+	public:
+		IComponent(Player* player) : m_player{ player } { }
+		virtual ~IComponent() = default;
+
+		virtual void OnMove(Direction direction) { }
+		virtual void OnJump() { }
+		virtual void OnLanding() { }
+		virtual void OnFalling() { }
+		virtual void OnAnimationStart(AnimationType type) { }
+		virtual void OnAnimationEnd(AnimationType type) { }
+		virtual void OnAnimationFrameChange(AnimationType type, int frame) { }
+		virtual void Update(float deltaTime) { }
+
+	protected:
+		Player* m_player;
+	};
+
+	class InputComponent : public IComponent
 	{
 	public:
 		InputComponent(Player* player);
 		~InputComponent() = default;
 
-		void Update(float deltaTime);
+		virtual void OnMove(Direction direction) final;
+		virtual void Update(float deltaTime) final;
 
 		Direction GetInputDirection() const;
 
 	private:
-		Player* m_player;
-		Direction m_inputDirection; // 키보드 입력에 따른 현재 이동 방향 (좌(-1), 제자리(0), 우(+1))
+		Direction m_inputDirection; // 지금 이동 방향 (좌(-1), 제자리(0), 우(+1))
 	};
 
-	class PhysicsComponent
+	class PhysicsComponent : public IComponent
 	{
 	public:
-		constexpr static auto GRAVITY = 980.0f;
-		constexpr static auto MIN_Y_SPEED = -980.0f;
-		constexpr static auto DEFAULT_X_SPEED = 150.0f;
-		constexpr static auto DEFAULT_JUMP_POWER = 450.0f;
+		static constexpr auto GRAVITY = 980.0f;
+		static constexpr auto MIN_Y_SPEED = -980.0f;
+		static constexpr auto DEFAULT_X_SPEED = 150.0f;
+		static constexpr auto DEFAULT_JUMP_POWER = 450.0f;
 
 	public:
 		PhysicsComponent(Player* player);
 		~PhysicsComponent() = default;
 
-		void OnMove(Direction direction);
-		void OnJump();
-		void OnLanding();
-		void OnFalling();
-
-		void Update(float deltaTime);
+		virtual void OnMove(Direction direction) final;
+		virtual void OnJump() final;
+		virtual void OnLanding() final;
+		virtual void OnFalling() final;
+		virtual void Update(float deltaTime) final;
 
 		bool IsCanJump() const;
 
@@ -47,51 +70,36 @@ public:
 		void UpdateMovement(float deltaTime);
 
 	private:
-		Player* m_player;
 		std::weak_ptr<Platform> m_platform;		
 		bool m_isOnPlatform;
 		bool m_isJumping;
 	};
 
-	class AnimationComponent
+	class AnimationComponent : public IComponent
 	{
 	public:
-		constexpr static auto DEFAULT_FRAME_INTERVAL = 0.2f;
-
-		enum class AnimationType
-		{
-			IDLE,
-			RUN,
-			JUMP,
-			FALL
-		};
+		static constexpr auto DEFAULT_FRAME_INTERVAL = 0.2f;
 
 	public:
 		AnimationComponent(Player* player);
 		~AnimationComponent() = default;
 
-		void OnMove(Direction direction);
-		void OnJump();
-		void OnLanding();
-		void OnFalling();
-
-		void OnAnimationStart(AnimationType type);
-		void OnAnimationEnd(AnimationType type);
-		void OnAnimationFrameChange(AnimationType type, int frame);
-
-		void Update(float deltaTime);
+		virtual void OnMove(Direction direction) final;
+		virtual void OnJump() final;
+		virtual void OnLanding() final;
+		virtual void OnFalling() final;
+		virtual void OnAnimationStart(AnimationType type) final;
+		virtual void OnAnimationEnd(AnimationType type) final;
+		virtual void OnAnimationFrameChange(AnimationType type, int frame) final;
+		virtual void Update(float deltaTime) final;
 
 		void PlayAnimation(AnimationType type);
 		void SetShaderVariable(const ComPtr<ID3D12GraphicsCommandList>& commandList) const;
-
-		AnimationType GetAnimationType() const;
 
 	private:
 		void UpdateFrame(float deltaTime);
 
 	private:
-		Player* m_player;
-
 		AnimationType m_type;
 		int m_frame;
 		float m_timer;
@@ -117,9 +125,9 @@ private:
 	void OnJump();
 	void OnLanding();
 	void OnFalling();
-	void OnAnimationStart(AnimationComponent::AnimationType type);
-	void OnAnimationEnd(AnimationComponent::AnimationType type);
-	void OnAnimationFrameChange(AnimationComponent::AnimationType type, int frame);
+	void OnAnimationStart(AnimationType type);
+	void OnAnimationEnd(AnimationType type);
+	void OnAnimationFrameChange(AnimationType type, int frame);
 
 private:
 	CharacterID m_characterID;

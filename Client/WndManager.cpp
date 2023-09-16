@@ -12,7 +12,7 @@ void WndManager::OnCreate()
 
 void WndManager::OnMouseMove(int x, int y)
 {
-	INT2 cursor{ GameApp::GetInstance()->GetCursorPosition() };
+	INT2 cursor{ ClientApp::GetInstance()->GetCursorPosition() };
 	for (const auto& w : m_wnds 
 		| std::views::filter([](const auto& w) { return w->IsValid(); }))
 	{
@@ -29,7 +29,7 @@ void WndManager::OnLButtonUp(int x, int y)
 	for (const auto& w : m_wnds)
 		w->SetPick(false);
 
-	INT2 cursor{ GameApp::GetInstance()->GetCursorPosition() };
+	INT2 cursor{ ClientApp::GetInstance()->GetCursorPosition() };
 	for (const auto& w : m_wnds
 		| std::views::filter([x, y](const auto& w) { return w->IsValid() && w->IsContain({ x, y }); }))
 	{
@@ -43,7 +43,7 @@ void WndManager::OnLButtonUp(int x, int y)
 
 void WndManager::OnLButtonDown(int x, int y)
 {
-	INT2 cursor{ GameApp::GetInstance()->GetCursorPosition() };
+	INT2 cursor{ ClientApp::GetInstance()->GetCursorPosition() };
 
 	Wnd* pickWnd{ nullptr };
 	Wnd* focusWnd{ nullptr };
