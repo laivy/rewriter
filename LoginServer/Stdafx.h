@@ -3,7 +3,12 @@
 // Windows
 #define WIN32_LEAN_AND_MEAN 
 #include <Windows.h>
+#include <WS2tcpip.h>
+#include <MSWSock.h>
+#include <WinSock2.h>
 #include <wrl.h>
+#pragma comment(lib, "MSWSock.lib")
+#pragma comment(lib, "ws2_32.lib")
 using Microsoft::WRL::ComPtr;
 
 #ifndef HINST_THISCOMPONENT
@@ -13,10 +18,12 @@ EXTERN_C IMAGE_DOS_HEADER __ImageBase;
 
 // C/C++
 #include <atlstr.h>
+#include <array>
 #include <format>
+#include <memory>
 #include <string>
 #include <thread>
-#include <memory>
+#include <unordered_map>
 
 // DirectX
 #pragma comment(lib, "dxgi.lib")
@@ -36,6 +43,7 @@ EXTERN_C IMAGE_DOS_HEADER __ImageBase;
 extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
 
 // Game
+#include "../Common/Network.h"
 #include "../Common/Request.h"
 #include "../Common/Singleton.h"
 #include "../Common/Types.h"

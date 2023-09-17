@@ -30,3 +30,5 @@ private:
 	friend FLOAT2 operator*(const FLOAT2& lhs, FLOAT rhs);
 	friend FLOAT2 operator/(const FLOAT2& lhs, FLOAT rhs);
 };
+
+using CharacterID = unsigned int;

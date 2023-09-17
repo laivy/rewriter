@@ -161,6 +161,7 @@
     <ClCompile Include="..\Imgui\imgui_widgets.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="ClientSocket.cpp" />
     <ClCompile Include="DBThread.cpp" />
     <ClCompile Include="LoginApp.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Use</PrecompiledHeader>
@@ -171,8 +172,11 @@
     <ClCompile Include="Stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="User.cpp" />
+    <ClCompile Include="IOCPThread.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\Common\Network.h" />
     <ClInclude Include="..\Common\Request.h" />
     <ClInclude Include="..\Common\Singleton.h" />
     <ClInclude Include="..\Common\Types.h" />
@@ -185,9 +189,12 @@
     <ClInclude Include="..\Imgui\imstb_rectpack.h" />
     <ClInclude Include="..\Imgui\imstb_textedit.h" />
     <ClInclude Include="..\Imgui\imstb_truetype.h" />
+    <ClInclude Include="ClientSocket.h" />
     <ClInclude Include="DBThread.h" />
     <ClInclude Include="LoginApp.h" />
     <ClInclude Include="Stdafx.h" />
+    <ClInclude Include="User.h" />
+    <ClInclude Include="IOCPThread.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

@@ -10,6 +10,7 @@ DBThread::DBThread() :
 	m_username{ TEXT("sa") },
 	m_password{ TEXT("1234") }
 {
+	detach();
 }
 
 DBThread::~DBThread()
@@ -82,10 +83,21 @@ void DBThread::Render()
 	ImGui::End();
 }
 
+void DBThread::Init()
+{
+	auto rc{ Database::Connect(m_ipport, m_dbname, m_username, m_password) };
+	if (rc != Database::DBRESULT::SUCCESS)
+	{
+		assert(false && "FAIL TO CONNECT DATABASE");
+		return;
+	}
+	m_isConnected = true;
+}
+
 void DBThread::Run()
 {
 	// 데이터베이스에 연결
-	Connect();
+	Init();
 
 	HANDLE handle{ CreateEvent(NULL, TRUE, FALSE, TEXT("DBThread"))};
 	while (m_isActive)
@@ -100,17 +112,7 @@ void DBThread::Run()
 			std::make_wformat_args(i++)
 		);
 
-		std::unique_lock lock{ m_logsMutex };
-		m_logs.push_back(log);
+		if (std::unique_lock lock{ m_logsMutex })
+			m_logs.push_back(log);
 	}
-}
-void DBThread::Connect()
-{
-	auto rc{ Database::Connect(m_ipport, m_dbname, m_username, m_password) };
-	if (rc != Database::DBRESULT::SUCCESS)
-	{
-		assert(false && "FAIL TO CONNECT DATABASE");
-		return;
-	}
-	m_isConnected = true;
 }

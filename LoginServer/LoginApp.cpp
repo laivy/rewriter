@@ -1,6 +1,7 @@
 ﻿#include "Stdafx.h"
-#include "LoginApp.h"
 #include "DBThread.h"
+#include "IOCPThread.h"
+#include "LoginApp.h"
 
 LoginApp::LoginApp() :
 	m_hWnd{ NULL },
@@ -21,6 +22,7 @@ void LoginApp::OnCreate()
 	InitImgui();
 
 	DBThread::Instantiate();
+	IOCPThread::Instantiate();
 }
 
 void LoginApp::Run()
@@ -299,6 +301,9 @@ void LoginApp::OnResize(const INT2& size)
 
 void LoginApp::OnDestroy()
 {
+	DBThread::Destroy();
+	IOCPThread::Destroy();
+
 	ImGui_ImplDX12_Shutdown();
 	ImGui_ImplWin32_Shutdown();
 	ImGui::DestroyContext();
@@ -330,6 +335,8 @@ void LoginApp::Render()
 	RenderBackgroundWindow();
 	if (auto dbThread{ DBThread::GetInstance() })
 		dbThread->Render();
+	if (auto userThread{ IOCPThread::GetInstance() })
+		userThread->Render();
 
 	ImGui::EndFrame();
 	ImGui::Render();
@@ -360,9 +367,5 @@ void LoginApp::RenderBackgroundWindow()
 	ImGui::SetWindowSize({ static_cast<float>(rect.right), static_cast<float>(rect.bottom) });
 	ImGui::SetWindowPos({ 0.0f, 0.0f });
 	ImGui::DockSpace(ImGui::GetID("Background"), {}, ImGuiDockNodeFlags_PassthruCentralNode);
-	ImGui::End();
-
-	ImGui::Begin(CW2A{ TEXT("테스트"), CP_UTF8 });
-	ImGui::Text(CW2A{ TEXT("한글도 잘 나오나?"), CP_UTF8 });
 	ImGui::End();
 }

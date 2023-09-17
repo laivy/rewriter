@@ -13,8 +13,8 @@ public:
 	void Render();
 
 private:
+	void Init();
 	void Run();
-	void Connect();
 
 private:
 	bool m_isActive;

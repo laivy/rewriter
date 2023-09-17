@@ -35,7 +35,6 @@ private:
 
 private:
 	void RenderBackgroundWindow();
-	void RenderDBThreadWindow();
 
 private:
 	// Window
