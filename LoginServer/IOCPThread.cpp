@@ -8,6 +8,7 @@ IOCPThread::IOCPThread() :
 	m_isAcceptable{ false },
 	m_hIOCP{ INVALID_HANDLE_VALUE },
 	m_overlappedEx{},
+	m_lastSocketID{},
 	m_listenSocket{ INVALID_SOCKET }
 {
 	detach();
@@ -53,7 +54,7 @@ void IOCPThread::Render()
 		{
 			if (ImGui::BeginChild("LogView"))
 			{
-				std::unique_lock lock{ m_logsMutex };
+				std::unique_lock lock{ m_logMutex };
 				for (const auto& log : m_logs)
 				{
 					ImGui::Text(CW2A{ log.c_str(), CP_UTF8 });
@@ -165,8 +166,22 @@ void IOCPThread::Work()
 
 		if (!GetQueuedCompletionStatus(m_hIOCP, &ioSize, reinterpret_cast<PULONG_PTR>(&iocpKey), &overlapped, INFINITE))
 		{
-			assert(false && "FAIL GetQueuedCompletionStatus()");
-			return;
+			int err{ WSAGetLastError() };
+			switch (WSAGetLastError())
+			{
+			case ERROR_NETNAME_DELETED: // 클라이언트에서 강제로 연결 끊음
+			{
+				m_socketMutex.lock();
+				const auto& clientSocket{ m_clientSockets.at(iocpKey) };
+				closesocket(clientSocket.m_socket);
+				m_clientSockets.erase(iocpKey);
+				m_socketMutex.unlock();
+				break;
+			}
+			default:
+				assert(false && "FAIL GetQueuedCompletionStatus()");
+			}
+			continue;
 		}
 
 		OVERLAPPEDEX* overlappedEx{ reinterpret_cast<OVERLAPPEDEX*>(overlapped) };
@@ -177,6 +192,26 @@ void IOCPThread::Work()
 			OnAccept(overlappedEx);
 			break;
 		}
+		case IOOperation::RECV:
+		{
+			m_socketMutex.lock();
+			const auto& clientSocket{ m_clientSockets.at(iocpKey) };
+			m_socketMutex.unlock();
+			int* value{ reinterpret_cast<int*>(clientSocket.m_overlappedEx.m_wsaBuf.buf) };
+
+			std::wstring log{};
+			std::vformat_to(
+				std::back_inserter(log),
+				TEXT("[알림] RECV | IOCP KEY : {} | VALUE : {}\n"),
+				std::make_wformat_args(iocpKey, *value));
+
+			if (std::unique_lock lock{ m_logMutex })
+				m_logs.push_back(log);
+			break;
+		}
+		default:
+			assert(false && "INVALID IO OPERATION");
+			break;
 		}
 	}
 }
@@ -208,26 +243,47 @@ void IOCPThread::OnAccept(OVERLAPPEDEX* overlappedEx)
 
 	std::wstring log{ TEXT("[알림] ") };
 	log += CA2W{ buffer[1].c_str(), CP_UTF8 };
-	log += TEXT(" 클라이언트가 접속했습니다.");
-
-	if (std::unique_lock lock{ m_logsMutex })
+	log += TEXT("클라이언트가 접속했습니다.");
+	if (std::unique_lock lock{ m_logMutex })
 		m_logs.push_back(log);
 
-	/*
-	* TODO 유저 객체 생성
-	*/
+	if (setsockopt(overlappedEx->socket, SOL_SOCKET, SO_UPDATE_ACCEPT_CONTEXT, reinterpret_cast<char*>(&m_listenSocket), sizeof(m_listenSocket)))
+	{
+		assert(false && "ACCEPT FAIL - setsockopt");
+		return;
+	}
 
-	// 새로운 연결을 위한 소켓 생성
-	CreateIoCompletionPort(reinterpret_cast<HANDLE>(overlappedEx->socket), m_hIOCP, 0, 0);
+	// 해당 소켓을 IOCP에 등록
+	CreateIoCompletionPort(reinterpret_cast<HANDLE>(m_overlappedEx.socket), m_hIOCP, m_lastSocketID, 0);
+
+	// ClientSocket 추가
+	ClientSocket clientSocket{ m_lastSocketID, m_overlappedEx.socket };
+
+	// 해당 소켓을 수신 상태로 변경
+	DWORD flag{};
+	if (WSARecv(clientSocket.m_socket, &clientSocket.m_overlappedEx.m_wsaBuf, 1, 0, &flag, &clientSocket.m_overlappedEx, NULL))
+	{
+		if (WSAGetLastError() != ERROR_IO_PENDING)
+		{
+			assert(false && "ACCEPT FAIL - WSARecv");
+			return;
+		}
+	}
+	clientSocket.m_overlappedEx.op = IOOperation::RECV;
+	m_socketMutex.lock();
+	m_clientSockets.emplace(m_lastSocketID++, std::move(clientSocket));
+	m_socketMutex.unlock();
+
+	// 새로운 Accept 소켓 생성
 	overlappedEx->socket = WSASocket(AF_INET, SOCK_STREAM, IPPROTO_TCP, 0, 0, WSA_FLAG_OVERLAPPED);
 	AcceptEx(
 		m_listenSocket,
-		overlappedEx->socket,
-		overlappedEx->buffer,
+		m_overlappedEx.socket,
+		m_overlappedEx.buffer,
 		0,
 		sizeof(SOCKADDR_IN) + 16,
 		sizeof(SOCKADDR_IN) + 16,
 		NULL,
-		overlappedEx
+		&m_overlappedEx
 	);
 }

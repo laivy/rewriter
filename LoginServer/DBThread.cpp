@@ -10,7 +10,6 @@ DBThread::DBThread() :
 	m_username{ TEXT("sa") },
 	m_password{ TEXT("1234") }
 {
-	detach();
 }
 
 DBThread::~DBThread()

@@ -1,7 +1,13 @@
 ﻿#include "Stdafx.h"
 #include "ClientSocket.h"
 
-ClientSocket::ClientSocket(SOCKET socket) :
-	m_socket{ socket }
+ClientSocket::ClientSocket(int socketID, SOCKET socket) :
+	m_socketID{ socketID },
+	m_socket{ socket },
+	m_overlappedEx{}
+{
+}
+
+ClientSocket::~ClientSocket()
 {
 }
