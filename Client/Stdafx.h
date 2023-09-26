@@ -3,11 +3,14 @@
 // Windows
 #define WIN32_LEAN_AND_MEAN 
 #pragma comment(lib, "imm32.lib")
+#pragma comment(lib, "ws2_32.lib")
 #include <SDKDDKVer.h>
+#include <wincodec.h>
 #include <windows.h>
 #include <windowsx.h>
-#include <wincodec.h>
+#include <winsock2.h>
 #include <wrl.h>
+#include <WS2tcpip.h>
 using Microsoft::WRL::ComPtr;
 
 #ifndef HINST_THISCOMPONENT
@@ -55,7 +58,9 @@ EXTERN_C IMAGE_DOS_HEADER __ImageBase;
 #include "../DirectX/WICTextureLoader12.h"
 
 // Game
+#include "../Common/Packet.h"
 #include "../Common/Singleton.h"
+#include "Server.h"
 #include "StringTable.h"
 #include "TextUtil.h"
 #include "Util.h"

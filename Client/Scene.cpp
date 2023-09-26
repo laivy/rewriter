@@ -2,7 +2,7 @@
 #include "Scene.h"
 
 void IScene::OnCreate() { }
-void IScene::OnDestory() { }
+void IScene::OnDestroy() { }
 void IScene::OnResize(int width, int height) { }
 void IScene::OnMouseMove(int x, int y) { }
 void IScene::OnLButtonUp(int x, int y) { }

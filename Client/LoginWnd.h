@@ -8,4 +8,10 @@ public:
 	~LoginWnd() = default;
 
 	virtual void OnButtonClick(ButtonID id) final;
+
+private:
+	enum Buttons
+	{
+		LOGIN
+	};
 };

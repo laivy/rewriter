@@ -6,10 +6,8 @@ class SceneManager : public TSingleton<SceneManager>
 {
 public:
 	SceneManager();
-	~SceneManager() = default;
+	~SceneManager();
 
-	void OnCreate();
-	void OnDestroy();
 	void OnResize(int width, int height);
 	void OnMouseMove(int x, int y);
 	void OnLButtonUp(int x, int y);
@@ -32,7 +30,7 @@ public:
 		if (auto em{ EventManager::GetInstance() })
 			em->OnSceneChange(scene);
 		if (m_scene)
-			m_scene->OnDestory();
+			m_scene->OnDestroy();
 		if (scene)
 			scene->OnCreate();
 		m_scene = scene;

@@ -7,7 +7,7 @@ public:
 	virtual ~IScene() = default;
 
 	virtual void OnCreate();
-	virtual void OnDestory();
+	virtual void OnDestroy();
 	virtual void OnResize(int width, int height);
 	virtual void OnMouseMove(int x, int y);
 	virtual void OnLButtonUp(int x, int y);

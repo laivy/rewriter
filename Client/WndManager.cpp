@@ -1,11 +1,14 @@
 ﻿#include "Stdafx.h"
 #include "WndManager.h"
 #include "Wnd.h"
-#include "GameApp.h"
+#include "ClientApp.h"
 #include "EventManager.h"
 
-void WndManager::OnCreate()
+WndManager::WndManager()
 {
+	if (!EventManager::IsInstanced())
+		EventManager::Instantiate();
+
 	if (auto em{ EventManager::GetInstance() })
 		em->OnSceneChange.Add(std::bind_front(&WndManager::OnSceneChange, this));
 }

@@ -1,6 +1,6 @@
 ﻿#include "Stdafx.h"
 #include "BrushPool.h"
-#include "GameApp.h"
+#include "ClientApp.h"
 
 BrushPool::BrushPool()
 {
@@ -10,11 +10,6 @@ BrushPool::BrushPool()
 	ctx->CreateSolidColorBrush(D2D1::ColorF{ D2D1::ColorF::Red }, &m_pool[RED]);
 	ctx->CreateSolidColorBrush(D2D1::ColorF{ D2D1::ColorF::Green }, &m_pool[GREEN]);
 	ctx->CreateSolidColorBrush(D2D1::ColorF{ D2D1::ColorF::Blue }, &m_pool[BLUE]);
-}
-
-BrushPool::~BrushPool()
-{
-
 }
 
 ID2D1SolidColorBrush* BrushPool::GetBrush(Type type) const

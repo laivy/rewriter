@@ -60,7 +60,8 @@ namespace Database
 		rc = SQLBindCol(hStmt, 4, SQL_DATE, std::addressof(regDate), sizeof(regDate), NULL);
 		while (SQLFetch(hStmt) != SQL_NO_DATA)
 		{
-			int i = 0;
+			auto str{ std::vformat(TEXT("aid : {}, id : {}, pw : {}, regdate : {}-{}-{}\n"), std::make_wformat_args(aid, id, pw, regDate.year, regDate.month, regDate.day)) };
+			OutputDebugString(str.c_str());
 		}
 
 		return DBRESULT::SUCCESS;

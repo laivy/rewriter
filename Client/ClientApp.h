@@ -6,9 +6,9 @@ class ClientApp : public TSingleton<ClientApp>
 {
 public:
 	ClientApp();
-	~ClientApp() = default;
+	~ClientApp();
 
-	void OnCreate();
+	bool OnCreate();
 
 	void Run();
 
@@ -60,11 +60,12 @@ private:
 
 private:
 	// Window
+	bool m_isActive;
 	HINSTANCE m_hInstance;
 	HWND m_hWnd;
 	INT2 m_size;
 
-	// DirectX12
+	// Direct3D 12
 	static constexpr UINT FRAME_COUNT = 3;
 	ComPtr<IDXGIFactory4> m_factory;
 	ComPtr<ID3D12Device> m_d3dDevice;

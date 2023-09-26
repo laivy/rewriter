@@ -10,7 +10,7 @@ public:
 	~GameScene() = default;
 
 	virtual void OnCreate() final;
-	virtual void OnDestory() final;
+	virtual void OnDestroy() final;
 	virtual void OnResize(int width, int height) final;
 	virtual void OnMouseMove(int x, int y) final;
 	virtual void OnLButtonDown(int x, int y) final;

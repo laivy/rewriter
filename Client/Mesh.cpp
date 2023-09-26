@@ -1,6 +1,6 @@
 ﻿#include "Stdafx.h"
 #include "Mesh.h"
-#include "GameApp.h"
+#include "ClientApp.h"
 
 Mesh::Mesh() : 
 	m_primitiveTopology{ D3D_PRIMITIVE_TOPOLOGY_POINTLIST }, 

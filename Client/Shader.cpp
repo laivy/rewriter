@@ -1,6 +1,6 @@
 ﻿#include "Stdafx.h"
 #include "Shader.h"
-#include "GameApp.h"
+#include "ClientApp.h"
 
 Shader::Shader()
 {

@@ -1,6 +1,6 @@
 ﻿#include "Stdafx.h"
 #include "Camera.h"
-#include "GameApp.h"
+#include "ClientApp.h"
 #include "GameObject.h"
 #include "Map.h"
 #include "ObjectManager.h"

@@ -8,10 +8,8 @@
 class ResourceManager : public TSingleton<ResourceManager>
 {
 public:
-	ResourceManager() = default;
+	ResourceManager();
 	~ResourceManager() = default;
-
-	void OnCreate();
 
 	Property* Load(const std::string& filePath);
 	void Unload(const std::string& filePath);

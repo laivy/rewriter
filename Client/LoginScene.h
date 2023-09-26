@@ -13,7 +13,7 @@ public:
 	~LoginScene() = default;
 
 	virtual void OnCreate() final;
-	virtual void OnDestory() final;
+	virtual void OnDestroy() final;
 	virtual void OnMouseMove(int x, int y) final;
 	virtual void OnLButtonDown(int x, int y) final;
 	virtual void OnLButtonUp(int x, int y) final;

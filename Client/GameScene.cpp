@@ -31,7 +31,7 @@ void GameScene::OnCreate()
 	om->SetMap(map);
 }
 
-void GameScene::OnDestory()
+void GameScene::OnDestroy()
 {
 }
 

@@ -1,6 +1,6 @@
 ﻿#include "Stdafx.h"
 #include "Font.h"
-#include "GameApp.h"
+#include "ClientApp.h"
 
 Font::Font(const std::string& fontPath, float size, DWRITE_FONT_WEIGHT weight, DWRITE_FONT_STYLE style, DWRITE_FONT_STRETCH stretch)
 {

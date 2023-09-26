@@ -2,7 +2,7 @@
 #include "BrushPool.h"
 #include "EditCtrl.h"
 #include "Font.h"
-#include "GameApp.h"
+#include "ClientApp.h"
 #include "ResourceManager.h"
 #include "Wnd.h"
 

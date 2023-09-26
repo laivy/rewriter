@@ -1,8 +1,9 @@
 ﻿#include "Stdafx.h"
 #include "BrushPool.h"
+#include "ClientApp.h"
 #include "EventManager.h"
-#include "GameApp.h"
 #include "Image.h"
+#include "LoginServer.h"
 #include "ObjectManager.h"
 #include "Property.h"
 #include "ResourceManager.h"
@@ -11,32 +12,51 @@
 #include "Wnd.h"
 #include "WndManager.h"
 
-ClientApp::ClientApp() : 
+ClientApp::ClientApp() :
+	m_isActive{ true },
+	m_hInstance{ NULL },
 	m_hWnd{ NULL },
 	m_size{ 1920, 1080 },
+	m_viewport{},
+	m_scissorRect{},
+	m_frameIndex{ 0 },
+	m_fenceEvent{ NULL },
+	m_fenceValues{ 0, },
+	m_rtvDescriptorSize{ 0 },
 	m_timer{ new Timer }
 {
-	HRESULT hr{ E_FAIL };
-	hr = InitWnd();
-	hr |= InitDirectX();
-	assert(SUCCEEDED(hr));
 }
 
-void ClientApp::OnCreate()
+ClientApp::~ClientApp()
 {
+#ifdef _DEBUG
+	ComPtr<IDXGIDebug1> dxgiDebug;
+	if (SUCCEEDED(DXGIGetDebugInterface1(0, IID_PPV_ARGS(&dxgiDebug))))
+	{
+		dxgiDebug->ReportLiveObjects(DXGI_DEBUG_ALL, DXGI_DEBUG_RLO_FLAGS::DXGI_DEBUG_RLO_ALL);
+	}
+#endif
+}
+
+bool ClientApp::OnCreate()
+{
+	// 로그인 서버 연결에 실패하면 바로 클라이언트 종료
+	if (auto lgnSvr{ LoginServer::Instantiate() }; !lgnSvr->Connect())
+	{
+		m_isActive = false;
+		return false;
+	}
+
+	InitWnd();
+	InitDirectX();
 	ResetCommandList();
 
-	// 인스턴스 생성 순서가 중요하다.
 	BrushPool::Instantiate();
-	ResourceManager::Instantiate();
-	ResourceManager::GetInstance()->OnCreate();
 	EventManager::Instantiate();
 	ObjectManager::Instantiate();
-	ObjectManager::GetInstance()->OnCreate();
-	WndManager::Instantiate();
-	WndManager::GetInstance()->OnCreate();
+	ResourceManager::Instantiate();
 	SceneManager::Instantiate();
-	SceneManager::GetInstance()->OnCreate();
+	WndManager::Instantiate();
 
 	ExecuteCommandList();
 	WaitForGPU();
@@ -45,12 +65,13 @@ void ClientApp::OnCreate()
 		rm->ReleaseUploadBuffers();
 
 	m_timer->Tick();
+	return true;
 }
 
 void ClientApp::Run()
 {
 	MSG msg{};
-	while (true)
+	while (m_isActive)
 	{
 		if (PeekMessage(&msg, NULL, 0, 0, PM_REMOVE))
 		{

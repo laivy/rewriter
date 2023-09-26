@@ -9,19 +9,14 @@
 
 SceneManager::SceneManager() : m_scene{ nullptr }
 {
-
-}
-
-void SceneManager::OnCreate()
-{
 	LoginScene::Instantiate();
 	SetScene(LoginScene::GetInstance());
 }
 
-void SceneManager::OnDestroy()
+SceneManager::~SceneManager()
 {
 	if (m_scene)
-		m_scene->OnDestory();
+		m_scene->OnDestroy();
 }
 
 void SceneManager::OnResize(int width, int height)

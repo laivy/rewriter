@@ -10,10 +10,8 @@ class RemotePlayer;
 class ObjectManager : public TSingleton<ObjectManager>
 {
 public:
-	ObjectManager() = default;
+	ObjectManager();
 	~ObjectManager() = default;
-
-	void OnCreate();
 
 	void Update(float deltaTime);
 	void Render(const ComPtr<ID3D12GraphicsCommandList>& commandList) const;

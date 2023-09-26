@@ -1,6 +1,6 @@
 ﻿#include "Stdafx.h"
 #include "BrushPool.h"
-#include "GameApp.h"
+#include "ClientApp.h"
 #include "Label.h"
 #include "ResourceManager.h"
 #include "Wnd.h"

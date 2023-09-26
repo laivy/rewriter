@@ -22,6 +22,9 @@
     <Filter Include="헤더 파일\DirectX">
       <UniqueIdentifier>{d8d1f584-53bb-4181-b452-15bdbd4ec171}</UniqueIdentifier>
     </Filter>
+    <Filter Include="소스 파일\Common">
+      <UniqueIdentifier>{7c7c8e48-65f8-4fe0-9b65-6921e1eda03a}</UniqueIdentifier>
+    </Filter>
     <Filter Include="소스 파일\DirectX">
       <UniqueIdentifier>{54e7a0b8-2ec6-49da-a8d2-de64d2f2bbcd}</UniqueIdentifier>
     </Filter>
@@ -39,7 +42,7 @@
     <ClCompile Include="EventManager.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
-    <ClCompile Include="GameApp.cpp">
+    <ClCompile Include="ClientApp.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
     <ClCompile Include="ObjectManager.cpp">
@@ -126,12 +129,18 @@
     <ClCompile Include="..\DirectX\WICTextureLoader12.cpp">
       <Filter>소스 파일\DirectX</Filter>
     </ClCompile>
+    <ClCompile Include="LoginServer.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="Server.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Common\Packet.cpp">
+      <Filter>소스 파일\Common</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Stdafx.h">
-      <Filter>헤더 파일</Filter>
-    </ClInclude>
-    <ClInclude Include="d3dx12.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
     <ClInclude Include="..\Common\Singleton.h">
@@ -143,7 +152,7 @@
     <ClInclude Include="EventManager.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
-    <ClInclude Include="GameApp.h">
+    <ClInclude Include="ClientApp.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
     <ClInclude Include="ObjectManager.h">
@@ -238,6 +247,15 @@
     </ClInclude>
     <ClInclude Include="..\DirectX\WICTextureLoader12.h">
       <Filter>헤더 파일\DirectX</Filter>
+    </ClInclude>
+    <ClInclude Include="LoginServer.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="Server.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Common\Packet.h">
+      <Filter>헤더 파일\Common</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

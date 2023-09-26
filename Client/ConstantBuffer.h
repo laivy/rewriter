@@ -1,6 +1,6 @@
 ﻿#pragma once
 #include "Stdafx.h"
-#include "GameApp.h"
+#include "ClientApp.h"
 
 template <class T>
 class ConstantBuffer

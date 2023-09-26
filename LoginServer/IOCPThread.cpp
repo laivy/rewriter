@@ -11,7 +11,6 @@ IOCPThread::IOCPThread() :
 	m_lastSocketID{},
 	m_listenSocket{ INVALID_SOCKET }
 {
-	detach();
 }
 
 IOCPThread::~IOCPThread()
@@ -146,9 +145,8 @@ void IOCPThread::Run()
 	m_isAcceptable = true;
 
 	// 워커쓰레드 생성
-	SYSTEM_INFO si{};
-	GetSystemInfo(&si);
-	for (UINT i = 0; i < si.dwNumberOfProcessors * 2; ++i)
+	auto hardwareThreadCount = std::thread::hardware_concurrency();
+	for (UINT i = 0; i < hardwareThreadCount * 2; ++i)
 		m_workerThreads.emplace_back(&IOCPThread::Work, this);
 
 	for (auto& t : m_workerThreads)
@@ -158,26 +156,22 @@ void IOCPThread::Run()
 
 void IOCPThread::Work()
 {
-	while (true)
+	while (m_isActive)
 	{
 		DWORD ioSize{};
-		LONG64 iocpKey{};
+		int socketID{};
 		OVERLAPPED* overlapped{};
 
-		if (!GetQueuedCompletionStatus(m_hIOCP, &ioSize, reinterpret_cast<PULONG_PTR>(&iocpKey), &overlapped, INFINITE))
+		if (!GetQueuedCompletionStatus(m_hIOCP, &ioSize, reinterpret_cast<PULONG_PTR>(&socketID), &overlapped, SOCKET_TIMEOUT_MILLISEC))
 		{
-			int err{ WSAGetLastError() };
-			switch (WSAGetLastError())
+			int errCode{ WSAGetLastError() };
+			switch (errCode)
 			{
 			case ERROR_NETNAME_DELETED: // 클라이언트에서 강제로 연결 끊음
-			{
-				m_socketMutex.lock();
-				const auto& clientSocket{ m_clientSockets.at(iocpKey) };
-				closesocket(clientSocket.m_socket);
-				m_clientSockets.erase(iocpKey);
-				m_socketMutex.unlock();
+				OnDisconnect(socketID);
 				break;
-			}
+			case WAIT_TIMEOUT:
+				continue;
 			default:
 				assert(false && "FAIL GetQueuedCompletionStatus()");
 			}
@@ -194,19 +188,7 @@ void IOCPThread::Work()
 		}
 		case IOOperation::RECV:
 		{
-			m_socketMutex.lock();
-			const auto& clientSocket{ m_clientSockets.at(iocpKey) };
-			m_socketMutex.unlock();
-			int* value{ reinterpret_cast<int*>(clientSocket.m_overlappedEx.m_wsaBuf.buf) };
-
-			std::wstring log{};
-			std::vformat_to(
-				std::back_inserter(log),
-				TEXT("[알림] RECV | IOCP KEY : {} | VALUE : {}\n"),
-				std::make_wformat_args(iocpKey, *value));
-
-			if (std::unique_lock lock{ m_logMutex })
-				m_logs.push_back(log);
+			OnRecv(socketID);
 			break;
 		}
 		default:
@@ -270,9 +252,9 @@ void IOCPThread::OnAccept(OVERLAPPEDEX* overlappedEx)
 		}
 	}
 	clientSocket.m_overlappedEx.op = IOOperation::RECV;
-	m_socketMutex.lock();
+	std::unique_lock lock{ m_socketMutex };
 	m_clientSockets.emplace(m_lastSocketID++, std::move(clientSocket));
-	m_socketMutex.unlock();
+	lock.unlock();
 
 	// 새로운 Accept 소켓 생성
 	overlappedEx->socket = WSASocket(AF_INET, SOCK_STREAM, IPPROTO_TCP, 0, 0, WSA_FLAG_OVERLAPPED);
@@ -286,4 +268,23 @@ void IOCPThread::OnAccept(OVERLAPPEDEX* overlappedEx)
 		NULL,
 		&m_overlappedEx
 	);
+}
+
+void IOCPThread::OnRecv(int socketID)
+{
+	std::unique_lock lock{ m_socketMutex };
+	const auto& clientSocket{ m_clientSockets.at(socketID) };
+	auto buffer{ clientSocket.m_overlappedEx.m_wsaBuf.buf };
+	auto size{ reinterpret_cast<int*>(buffer) };
+
+	Packet packet{ buffer, *size };
+	const auto& [i, f, d, s] { packet.Decode<int, float, double, std::string>() };
+}
+
+void IOCPThread::OnDisconnect(int socketID)
+{
+	std::unique_lock lock{ m_socketMutex };
+	const auto& clientSocket{ m_clientSockets.at(socketID) };
+	closesocket(clientSocket.m_socket);
+	m_clientSockets.erase(socketID);
 }

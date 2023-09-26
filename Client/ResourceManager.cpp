@@ -1,7 +1,7 @@
 ﻿#include "Stdafx.h"
 #include "ResourceManager.h"
 
-void ResourceManager::OnCreate()
+ResourceManager::ResourceManager()
 {
 	m_shaderResources.reserve(SRV_HEAP_COUNT);
 	CreateFonts();
@@ -197,7 +197,7 @@ ID2D1Bitmap* ResourceManager::ReadD2DImage(std::ifstream& fs)
 ID3D12Resource* ResourceManager::ReadD3DImage(std::ifstream& fs)
 {
 	int length{ Read<int>(fs) };
-	std::unique_ptr<BYTE> buffer{ new BYTE[length] };
+	std::unique_ptr<BYTE[]> buffer{ new BYTE[length] };
 	fs.read(reinterpret_cast<char*>(buffer.get()), length);
 
 	auto d3dDevice{ ClientApp::GetInstance()->GetD3DDevice() };

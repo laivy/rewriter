@@ -15,6 +15,9 @@
 
 void LoginScene::OnCreate()
 {
+	if (!WndManager::IsInstanced())
+		WndManager::Instantiate();
+
 	auto wnd{ std::make_unique<LoginWnd>(INT2{ 230, 300 }) };
 	wnd->SetPosition({ 1920 / 2, 1080 / 2 });
 
@@ -29,7 +32,7 @@ void LoginScene::OnCreate()
 	WndManager::GetInstance()->AddWnd(wnd3.release());
 }
 
-void LoginScene::OnDestory()
+void LoginScene::OnDestroy()
 {
 	ResourceManager::GetInstance()->Unload("Login.nyt");
 }

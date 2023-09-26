@@ -1,5 +1,5 @@
 ﻿#include "Stdafx.h"
-#include "GameApp.h"
+#include "ClientApp.h"
 
 int WINAPI WinMain(_In_		HINSTANCE hInstance,
 				   _In_opt_ HINSTANCE hPrevInstance,
@@ -7,18 +7,10 @@ int WINAPI WinMain(_In_		HINSTANCE hInstance,
 				   _In_		int nCmdShow)
 {
 	ClientApp::Instantiate();
-	if (ClientApp::IsInstanced())
+	if (auto app{ ClientApp::GetInstance() })
 	{
-		ClientApp::GetInstance()->OnCreate();
-		ClientApp::GetInstance()->Run();
+		app->OnCreate();
+		app->Run();
 	}
 	ClientApp::Destroy();
-
-#ifdef _DEBUG
-	ComPtr<IDXGIDebug1> dxgiDebug;
-	if (SUCCEEDED(DXGIGetDebugInterface1(0, IID_PPV_ARGS(&dxgiDebug))))
-	{
-		dxgiDebug->ReportLiveObjects(DXGI_DEBUG_ALL, DXGI_DEBUG_RLO_FLAGS::DXGI_DEBUG_RLO_ALL);
-	}
-#endif
 }

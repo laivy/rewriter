@@ -6,7 +6,7 @@
 #include "ObjectManager.h"
 #include "Player.h"
 
-void ObjectManager::OnCreate()
+ObjectManager::ObjectManager()
 {
 	if (auto em{ EventManager::GetInstance() })
 		em->OnSceneChange.Add(std::bind_front(&ObjectManager::OnSceneChange, this));

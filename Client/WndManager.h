@@ -6,10 +6,8 @@ class IScene;
 class WndManager : public TSingleton<WndManager>
 {
 public:
-	WndManager() = default;
+	WndManager();
 	~WndManager() = default;
-
-	void OnCreate();
 
 	void OnMouseMove(int x, int y);
 	void OnLButtonUp(int x, int y);

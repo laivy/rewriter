@@ -2,7 +2,7 @@
 #include "LoginScene.h"
 #include "LogoScene.h"
 #include "Mesh.h"
-#include "GameApp.h"
+#include "ClientApp.h"
 #include "Image.h"
 #include "Property.h"
 #include "ResourceManager.h"

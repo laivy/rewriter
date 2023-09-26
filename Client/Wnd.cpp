@@ -1,7 +1,7 @@
 ﻿#include "Stdafx.h"
 #include "Wnd.h"
 #include "WndManager.h"
-#include "GameApp.h"
+#include "ClientApp.h"
 #include "Button.h"
 #include "EditCtrl.h"
 

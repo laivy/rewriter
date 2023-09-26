@@ -44,6 +44,7 @@ extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg
 
 // Game
 #include "../Common/Network.h"
+#include "../Common/Packet.h"
 #include "../Common/Request.h"
 #include "../Common/Singleton.h"
 #include "../Common/Types.h"
