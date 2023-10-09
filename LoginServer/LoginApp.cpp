@@ -131,7 +131,7 @@ void LoginApp::InitImgui()
 	
 	io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
 	io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
-	io.Fonts->AddFontFromFileTTF("C:/Users/laivy/Downloads/NEXON_Lv2_Gothic_total/A_NEXON_Lv2_Gothic/NEXON Lv2 Gothic.ttf", 18.0f, nullptr, io.Fonts->GetGlyphRangesKorean());
+	io.Fonts->AddFontFromFileTTF("C:/Dev/ReWriter/Client/Data/morris9.ttf", 12.0f, nullptr, io.Fonts->GetGlyphRangesKorean());
 	ImGui::GetStyle().WindowMenuButtonPosition = ImGuiDir_None;
 	ImGui::StyleColorsDark();
 

@@ -1,18 +1,7 @@
 ﻿#pragma once
 
-#ifndef DLLEXPORT
-#define DLLEXPORT __declspec(dllexport)
-#endif
-
 namespace Database
 {
-	enum class DBRESULT
-	{
-		SUCCESS,
-		E_NOT_INITIALIZED,
-		E_UNKNOWN
-	};
-
 	class Connection : public TSingleton<Connection>
 	{
 	public:
@@ -20,6 +9,7 @@ namespace Database
 		~Connection() = default;
 
 		void OnCreate();
+		void OnDestroy();
 
 	public:
 		SQLHENV m_hEnv;

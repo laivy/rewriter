@@ -1,5 +1,8 @@
 ﻿#pragma once
 
+// DLL
+#define DLLEXPORT __declspec(dllexport)
+
 // Windows
 #define WIN32_LEAN_AND_MEAN 
 #include <Windows.h>
@@ -58,4 +61,6 @@ extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg
 #include <sql.h>
 #include <sqlext.h>
 #include <sqltypes.h>
+#include "../Database/Include/DBResult.h"
 #include "../Database/Include/Connection.h"
+#include "../Database/Include/Login.h"
