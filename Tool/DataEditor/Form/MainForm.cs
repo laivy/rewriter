@@ -5,7 +5,7 @@ namespace Editor
 {
 	public partial class MainForm : Form
 	{
-		private FileViewForm _fileViewForm;	// 활성화 상태인 트리뷰폼
+		private ViewForm _fileViewForm;	// 활성화 상태인 트리뷰폼
 
 		public MainForm()
 		{
@@ -17,7 +17,7 @@ namespace Editor
 
 		private void OnFileViewActivated(object sender, EventArgs e)
 		{
-			_fileViewForm = (FileViewForm)sender;
+			_fileViewForm = (ViewForm)sender;
 		}
 
 		private void OnNewFileMenuClick(object sender, EventArgs e)
@@ -36,7 +36,7 @@ namespace Editor
 				MessageBox.Show("해당 경로에 저장할 수 없습니다.");
 				return;
 			}
-			_fileViewForm = new FileViewForm(saveFileDialog.FileName);
+			_fileViewForm = new ViewForm(saveFileDialog.FileName);
 			_fileViewForm.Activated += OnFileViewActivated;
 			_fileViewForm.MdiParent = this;
 			_fileViewForm.SetIsModified(true);
@@ -60,7 +60,7 @@ namespace Editor
 				return;
 			}
 
-			_fileViewForm = new FileViewForm(openFileDialog.FileName);
+			_fileViewForm = new ViewForm(openFileDialog.FileName);
 			_fileViewForm.Activated += OnFileViewActivated;
 			_fileViewForm.MdiParent = this;
 			_fileViewForm.LoadFile();
@@ -77,17 +77,7 @@ namespace Editor
 			if (_fileViewForm == null)
 				return;
 
-			SaveFileDialog saveFileDialog = new SaveFileDialog
-			{
-				Filter = "nyt files (*.nyt)|*.nyt",
-				Title = "저장할 파일 위치를 선택해주세요."
-			};
-			if (saveFileDialog.ShowDialog() != DialogResult.OK)
-			{
-				MessageBox.Show("해당 파일을 열 수 없습니다.");
-				return;
-			}
-			_fileViewForm.SaveAsFile(saveFileDialog.FileName);
+			_fileViewForm.SaveAsFile();
 		}
 		
 		private void OnDragEnter(object sender, DragEventArgs e)
@@ -104,12 +94,17 @@ namespace Editor
 				if (!file.EndsWith(".nyt"))
 					continue;
 
-				_fileViewForm = new FileViewForm(file);
+				_fileViewForm = new ViewForm(file);
 				_fileViewForm.Activated += OnFileViewActivated;
 				_fileViewForm.MdiParent = this;
 				_fileViewForm.LoadFile();
 				_fileViewForm.Show();
 			}
 		}
-	}
+
+        private void MainForm_Load(object sender, EventArgs e)
+        {
+
+        }
+    }
 }

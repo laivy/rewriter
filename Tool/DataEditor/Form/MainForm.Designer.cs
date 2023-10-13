@@ -97,7 +97,8 @@
             this.Controls.Add(this.MainMenu);
             this.IsMdiContainer = true;
             this.Name = "MainForm";
-            this.Text = "Nyaight Data Editor 1.0v";
+            this.Text = "Rewriter Data Editor 1.0";
+            this.Load += new System.EventHandler(this.MainForm_Load);
             this.MainMenu.ResumeLayout(false);
             this.MainMenu.PerformLayout();
             this.ResumeLayout(false);

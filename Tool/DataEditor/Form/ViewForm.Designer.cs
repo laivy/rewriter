@@ -1,6 +1,6 @@
 ﻿namespace Editor
 {
-	partial class FileViewForm
+	partial class ViewForm
 	{
 		/// <summary>
 		/// Required designer variable.
@@ -29,22 +29,22 @@
 		private void InitializeComponent()
 		{
             this.components = new System.ComponentModel.Container();
-            this.Menu = new System.Windows.Forms.ContextMenuStrip(this.components);
+            this.MenuStrip = new System.Windows.Forms.ContextMenuStrip(this.components);
             this.AddNodeMenu = new System.Windows.Forms.ToolStripMenuItem();
             this.ModifyNodeMenu = new System.Windows.Forms.ToolStripMenuItem();
             this.DeleteNodeMenu = new System.Windows.Forms.ToolStripMenuItem();
-            this.NytTreeView = new Editor.Nyt.NytTreeView();
-            this.Menu.SuspendLayout();
+            this._treeView = new System.Windows.Forms.TreeView();
+            this.MenuStrip.SuspendLayout();
             this.SuspendLayout();
             // 
-            // Menu
+            // MenuStrip
             // 
-            this.Menu.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.MenuStrip.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.AddNodeMenu,
             this.ModifyNodeMenu,
             this.DeleteNodeMenu});
-            this.Menu.Name = "contextMenuStrip1";
-            this.Menu.Size = new System.Drawing.Size(99, 70);
+            this.MenuStrip.Name = "contextMenuStrip1";
+            this.MenuStrip.Size = new System.Drawing.Size(99, 70);
             // 
             // AddNodeMenu
             // 
@@ -67,37 +67,38 @@
             this.DeleteNodeMenu.Text = "삭제";
             this.DeleteNodeMenu.Click += new System.EventHandler(this.OnDeleteNodeMenuClick);
             // 
-            // NytTreeView
+            // _treeView
             // 
-            this.NytTreeView.AllowDrop = true;
-            this.NytTreeView.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.NytTreeView.LabelEdit = true;
-            this.NytTreeView.Location = new System.Drawing.Point(0, 0);
-            this.NytTreeView.Name = "NytTreeView";
-            this.NytTreeView.ShowNodeToolTips = true;
-            this.NytTreeView.Size = new System.Drawing.Size(207, 561);
-            this.NytTreeView.TabIndex = 0;
+            this._treeView.AllowDrop = true;
+            this._treeView.Dock = System.Windows.Forms.DockStyle.Fill;
+            this._treeView.LabelEdit = true;
+            this._treeView.Location = new System.Drawing.Point(0, 0);
+            this._treeView.Name = "_treeView";
+            this._treeView.ShowNodeToolTips = true;
+            this._treeView.Size = new System.Drawing.Size(284, 561);
+            this._treeView.TabIndex = 0;
             // 
-            // FileViewForm
+            // ViewForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(207, 561);
-            this.ContextMenuStrip = this.Menu;
-            this.Controls.Add(this.NytTreeView);
-            this.Name = "FileViewForm";
-            this.Text = "NytTreeView";
-            this.Menu.ResumeLayout(false);
+            this.ClientSize = new System.Drawing.Size(284, 561);
+            this.ContextMenuStrip = this.MenuStrip;
+            this.Controls.Add(this._treeView);
+            this.KeyPreview = true;
+            this.Name = "ViewForm";
+            this.Text = "FileView";
+            this.MenuStrip.ResumeLayout(false);
             this.ResumeLayout(false);
 
 		}
 
 		#endregion
 
-		private Nyt.NytTreeView NytTreeView;
-		private System.Windows.Forms.ContextMenuStrip Menu;
+		private System.Windows.Forms.TreeView _treeView;
+		private System.Windows.Forms.ContextMenuStrip MenuStrip;
 		private System.Windows.Forms.ToolStripMenuItem AddNodeMenu;
 		private System.Windows.Forms.ToolStripMenuItem ModifyNodeMenu;
 		private System.Windows.Forms.ToolStripMenuItem DeleteNodeMenu;
-	}
+    }
 }

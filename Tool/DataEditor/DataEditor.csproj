@@ -47,22 +47,18 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Common\NytTreeNodeInfo.cs" />
-    <Compile Include="Common\NytTreeView.cs">
-      <SubType>Component</SubType>
-    </Compile>
-    <Compile Include="Form\NodeEditForm.cs">
+    <Compile Include="Form\NodeForm.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="Form\NodeEditForm.Designer.cs">
-      <DependentUpon>NodeEditForm.cs</DependentUpon>
+    <Compile Include="Form\NodeForm.Designer.cs">
+      <DependentUpon>NodeForm.cs</DependentUpon>
     </Compile>
-    <Compile Include="Common\NytNode.cs" />
-    <Compile Include="Form\FileViewForm.cs">
+    <Compile Include="DataNode.cs" />
+    <Compile Include="Form\ViewForm.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="Form\FileViewForm.Designer.cs">
-      <DependentUpon>FileViewForm.cs</DependentUpon>
+    <Compile Include="Form\ViewForm.Designer.cs">
+      <DependentUpon>ViewForm.cs</DependentUpon>
     </Compile>
     <Compile Include="Form\MainForm.cs">
       <SubType>Form</SubType>
@@ -72,11 +68,11 @@
     </Compile>
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <EmbeddedResource Include="Form\NodeEditForm.resx">
-      <DependentUpon>NodeEditForm.cs</DependentUpon>
+    <EmbeddedResource Include="Form\NodeForm.resx">
+      <DependentUpon>NodeForm.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="Form\FileViewForm.resx">
-      <DependentUpon>FileViewForm.cs</DependentUpon>
+    <EmbeddedResource Include="Form\ViewForm.resx">
+      <DependentUpon>ViewForm.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Form\MainForm.resx">
       <DependentUpon>MainForm.cs</DependentUpon>
