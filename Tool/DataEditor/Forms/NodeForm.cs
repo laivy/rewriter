@@ -1,9 +1,8 @@
 ﻿using System;
 using System.IO;
 using System.Windows.Forms;
-using Editor.Nyt;
 
-namespace Editor
+namespace DataEditor
 {
 	public partial class NodeForm : Form
 	{

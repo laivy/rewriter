@@ -1,4 +1,4 @@
-﻿namespace Editor
+﻿namespace DataEditor
 {
 	partial class ViewForm
 	{

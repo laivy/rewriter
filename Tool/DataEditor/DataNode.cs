@@ -2,7 +2,7 @@
 using System.IO;
 using System.Windows.Forms;
 
-namespace Editor.Nyt
+namespace DataEditor
 {
 	public enum DataType
 	{
@@ -36,7 +36,7 @@ namespace Editor.Nyt
 		public void Set(DataType type, string name, string value, byte[] data = null)
 		{
 			_type = type;
-			SetName(_name);
+			SetName(name);
 			_value = value;
 
 			if (data != null)

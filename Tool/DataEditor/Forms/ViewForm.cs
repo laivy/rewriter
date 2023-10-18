@@ -1,11 +1,10 @@
-﻿using Editor.Nyt;
-using System;
+﻿using System;
 using System.Collections;
 using System.Drawing;
 using System.IO;
 using System.Windows.Forms;
 
-namespace Editor
+namespace DataEditor
 {
 	public partial class ViewForm : Form
 	{
@@ -15,13 +14,13 @@ namespace Editor
 		public ViewForm(string filePath)
 		{
 			InitializeComponent();
-
-			KeyDown += OnKeyDown;
+			LoadFile(filePath);
 
 			Text = Path.GetFileName(filePath);
 			_filePath = filePath;
 			_isModified = false;
 
+			KeyDown += OnKeyDown;
 			_treeView.AfterLabelEdit += OnTreeViewAfterLabelEdit;
 			_treeView.MouseDown += OnTreeViewMouseDown;
 			_treeView.NodeMouseClick += OnTreeViewNodeMouseClick;
@@ -47,7 +46,7 @@ namespace Editor
 
 				e.Node.EndEdit(false);
 
-				DataNode node = (DataNode)e.Node;
+				DataNode node = e.Node as DataNode;
 				node.SetName(e.Label);
 				SetIsModified(true);
 			});
@@ -55,24 +54,10 @@ namespace Editor
 
 		private void OnKeyDown(object sender, KeyEventArgs e)
 		{
-			// 다른 이름으로 저장
-			if (e.Control && e.Shift && e.KeyCode == Keys.S)
-			{
-				SaveAsFile();
-				return;
-			}
-
-			// 저장
-			if (e.Control && e.KeyCode == Keys.S)
-			{
-				SaveFile();
-				return;
-			}
-
 			// 노드명 변경
 			if (e.KeyCode == Keys.F2)
 			{
-				DataNode node = (DataNode)_treeView.SelectedNode;
+				DataNode node = _treeView.SelectedNode as DataNode;
 				if (node != null && !node.IsEditing)
 				{
 					node.Text = node.GetName();
@@ -96,7 +81,7 @@ namespace Editor
 
 		private void OnModifyNodeMenuClick(object sender, EventArgs e)
 		{
-			DataNode node = GetSelectedNode();
+			DataNode node = _treeView.SelectedNode as DataNode;
 			if (node == null)
 				return;
 
@@ -107,7 +92,8 @@ namespace Editor
 
 		private void OnDeleteNodeMenuClick(object sender, EventArgs e)
 		{
-			GetSelectedNode()?.Remove();
+			DataNode node = _treeView.SelectedNode as DataNode;
+			node?.Remove();
 		}
 
 		private void OnTreeViewNodeMouseClick(object sender, TreeNodeMouseClickEventArgs e)
@@ -120,7 +106,7 @@ namespace Editor
 
 		private void OnTreeviewNodeMouseDoubleClick(object sender, TreeNodeMouseClickEventArgs e)
 		{
-			DataNode node = GetSelectedNode();
+			DataNode node = _treeView.SelectedNode as DataNode;
 			if (node == null)
 				return;
 
@@ -149,15 +135,16 @@ namespace Editor
 		private void OnTreeViewDragOver(object sender, DragEventArgs e)
 		{
 			Point targetPoint = _treeView.PointToClient(new Point(e.X, e.Y));
-			_treeView.SelectedNode = _treeView.GetNodeAt(targetPoint);
+			DataNode targetNode = _treeView.GetNodeAt(targetPoint) as DataNode;
+			_treeView.SelectedNode = targetNode;
 		}
 
 		private void OnTreeViewDragDrop(object sender, DragEventArgs e)
 		{
 			// 마우스 좌표로 노드를 가져옴
 			Point targetPoint = _treeView.PointToClient(new Point(e.X, e.Y));
-			DataNode targetNode = (DataNode)_treeView.GetNodeAt(targetPoint);
-			DataNode draggedNode = (DataNode)e.Data.GetData(typeof(DataNode));
+            DataNode targetNode = _treeView.GetNodeAt(targetPoint) as DataNode;
+			DataNode draggedNode = e.Data.GetData(typeof(DataNode)) as DataNode;
 
 			// 타겟이 없을 경우 최상위로 옮김
 			if (targetNode == null)
@@ -186,18 +173,29 @@ namespace Editor
 			}
 		}
 
-		private DataNode GetSelectedNode()
-		{
-			if (_treeView.SelectedNode != null)
-				return (DataNode)_treeView.SelectedNode;
-			return null;
-		}
-
 		private bool IsContain(TreeNode node1, TreeNode node2)
 		{
-			if (node2.Parent == null) return false;
-			if (node2.Parent.Equals(node1)) return true;
+			if (node2.Parent == null)
+				return false;
+			if (node2.Parent.Equals(node1))
+				return true;
 			return IsContain(node1, node2.Parent);
+		}
+
+		private void LoadFile(string filePath)
+		{
+			FileStream fileStream = new FileStream(filePath, FileMode.Open);
+			BinaryReader binaryReader = new BinaryReader(fileStream);
+			int nodeCount = binaryReader.ReadInt32();
+			for (int i = 0; i < nodeCount; ++i)
+			{
+				DataNode node = new DataNode();
+				node.Load(binaryReader);
+				AddNode(node);
+				_treeView.SelectedNode = null;
+			}
+			binaryReader.Close();
+			fileStream.Close();
 		}
 
 		public void AddNode(DataNode node)
@@ -221,7 +219,6 @@ namespace Editor
 
 			_filePath = saveFileDialog.FileName;
 			SaveFile();
-			SetIsModified(false);
 		}
 
 		public void SaveFile()
@@ -240,22 +237,6 @@ namespace Editor
 			fileStream.Close();
 
 			SetIsModified(false);
-		}
-
-		public void LoadFile()
-		{
-			FileStream fileStream = new FileStream(_filePath, FileMode.Open);
-			BinaryReader binaryReader = new BinaryReader(fileStream);
-			int nodeCount = binaryReader.ReadInt32();
-			for (int i = 0; i < nodeCount; ++i)
-			{
-				DataNode node = new DataNode();
-				node.Load(binaryReader);
-				AddNode(node);
-				_treeView.SelectedNode = null;
-			}
-			binaryReader.Close();
-			fileStream.Close();
 		}
 
 		public void SetIsModified(bool isModified)

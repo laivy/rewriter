@@ -1,4 +1,4 @@
-﻿namespace Editor
+﻿namespace DataEditor
 {
     partial class MainForm
     {
@@ -62,28 +62,33 @@
             // Menu_File_New
             // 
             this.Menu_File_New.Name = "Menu_File_New";
-            this.Menu_File_New.Size = new System.Drawing.Size(178, 22);
+            this.Menu_File_New.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.N)));
+            this.Menu_File_New.Size = new System.Drawing.Size(252, 22);
             this.Menu_File_New.Text = "새로 만들기";
             this.Menu_File_New.Click += new System.EventHandler(this.OnNewFileMenuClick);
             // 
             // Menu_File_Open
             // 
             this.Menu_File_Open.Name = "Menu_File_Open";
-            this.Menu_File_Open.Size = new System.Drawing.Size(178, 22);
+            this.Menu_File_Open.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.O)));
+            this.Menu_File_Open.Size = new System.Drawing.Size(252, 22);
             this.Menu_File_Open.Text = "열기";
             this.Menu_File_Open.Click += new System.EventHandler(this.OnFileOpenMenuClick);
             // 
             // Menu_File_Save
             // 
             this.Menu_File_Save.Name = "Menu_File_Save";
-            this.Menu_File_Save.Size = new System.Drawing.Size(178, 22);
+            this.Menu_File_Save.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.S)));
+            this.Menu_File_Save.Size = new System.Drawing.Size(252, 22);
             this.Menu_File_Save.Text = "저장";
             this.Menu_File_Save.Click += new System.EventHandler(this.OnFileSaveMenuClick);
             // 
             // Menu_File_SaveAs
             // 
             this.Menu_File_SaveAs.Name = "Menu_File_SaveAs";
-            this.Menu_File_SaveAs.Size = new System.Drawing.Size(178, 22);
+            this.Menu_File_SaveAs.ShortcutKeys = ((System.Windows.Forms.Keys)(((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.Shift)
+            | System.Windows.Forms.Keys.S)));
+            this.Menu_File_SaveAs.Size = new System.Drawing.Size(252, 22);
             this.Menu_File_SaveAs.Text = "다른 이름으로 저장";
             this.Menu_File_SaveAs.Click += new System.EventHandler(this.OnFileSaveAsMenuClick);
             // 
@@ -98,7 +103,6 @@
             this.IsMdiContainer = true;
             this.Name = "MainForm";
             this.Text = "Rewriter Data Editor 1.0";
-            this.Load += new System.EventHandler(this.MainForm_Load);
             this.MainMenu.ResumeLayout(false);
             this.MainMenu.PerformLayout();
             this.ResumeLayout(false);
@@ -106,13 +110,13 @@
 
         }
 
-		#endregion
-		private System.Windows.Forms.MenuStrip MainMenu;
-		private System.Windows.Forms.ToolStripMenuItem Menu_File;
-		private System.Windows.Forms.ToolStripMenuItem Menu_File_Open;
-		private System.Windows.Forms.ToolStripMenuItem Menu_File_Save;
-		private System.Windows.Forms.ToolStripMenuItem Menu_File_SaveAs;
-		private System.Windows.Forms.ToolStripMenuItem Menu_File_New;
-	}
+        #endregion
+        private System.Windows.Forms.MenuStrip MainMenu;
+        private System.Windows.Forms.ToolStripMenuItem Menu_File;
+        private System.Windows.Forms.ToolStripMenuItem Menu_File_Open;
+        private System.Windows.Forms.ToolStripMenuItem Menu_File_Save;
+        private System.Windows.Forms.ToolStripMenuItem Menu_File_SaveAs;
+        private System.Windows.Forms.ToolStripMenuItem Menu_File_New;
+    }
 }
 

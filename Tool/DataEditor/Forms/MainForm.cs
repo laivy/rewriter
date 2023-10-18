@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Windows.Forms;
 
-namespace Editor
+namespace DataEditor
 {
 	public partial class MainForm : Form
 	{
@@ -24,7 +24,7 @@ namespace Editor
 		{
 			SaveFileDialog saveFileDialog = new SaveFileDialog
 			{
-				Filter = "nyt files (*.nyt)|*.nyt",
+				Filter = "dat files (*.dat)|*.dat",
 				Title = "저장할 파일 위치를 선택해주세요."
 			};
 
@@ -47,7 +47,7 @@ namespace Editor
 		{
 			OpenFileDialog openFileDialog = new OpenFileDialog
 			{
-				Filter = "nyt files (*.nyt)|*.nyt",
+				Filter = "dat files (*.dat)|*.dat",
 				Title = "불러올 파일을 선택해주세요."
 			};
 
@@ -63,7 +63,6 @@ namespace Editor
 			_fileViewForm = new ViewForm(openFileDialog.FileName);
 			_fileViewForm.Activated += OnFileViewActivated;
 			_fileViewForm.MdiParent = this;
-			_fileViewForm.LoadFile();
 			_fileViewForm.Show();
 		}
 
@@ -74,10 +73,7 @@ namespace Editor
 
 		private void OnFileSaveAsMenuClick(object sender, EventArgs e)
 		{
-			if (_fileViewForm == null)
-				return;
-
-			_fileViewForm.SaveAsFile();
+			_fileViewForm?.SaveAsFile();
 		}
 		
 		private void OnDragEnter(object sender, DragEventArgs e)
@@ -88,23 +84,17 @@ namespace Editor
 
 		private void OnDragDrop(object sender, DragEventArgs e)
 		{
-			string[] files = (string[])e.Data.GetData(DataFormats.FileDrop);
-			foreach (string file in files)
+			string[] filePaths = (string[])e.Data.GetData(DataFormats.FileDrop);
+			foreach (string filePath in filePaths)
 			{
-				if (!file.EndsWith(".nyt"))
+				if (!filePath.EndsWith(".dat"))
 					continue;
 
-				_fileViewForm = new ViewForm(file);
+				_fileViewForm = new ViewForm(filePath);
 				_fileViewForm.Activated += OnFileViewActivated;
 				_fileViewForm.MdiParent = this;
-				_fileViewForm.LoadFile();
 				_fileViewForm.Show();
 			}
 		}
-
-        private void MainForm_Load(object sender, EventArgs e)
-        {
-
-        }
     }
 }

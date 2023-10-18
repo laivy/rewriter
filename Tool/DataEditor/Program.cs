@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Windows.Forms;
 
-namespace Editor
+namespace DataEditor
 {
     internal static class Program
     {

@@ -47,34 +47,43 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Form\NodeForm.cs">
+    <Compile Include="Forms\ImageForm.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="Form\NodeForm.Designer.cs">
+    <Compile Include="Forms\ImageForm.Designer.cs">
+      <DependentUpon>ImageForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Forms\NodeForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\NodeForm.Designer.cs">
       <DependentUpon>NodeForm.cs</DependentUpon>
     </Compile>
     <Compile Include="DataNode.cs" />
-    <Compile Include="Form\ViewForm.cs">
+    <Compile Include="Forms\ViewForm.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="Form\ViewForm.Designer.cs">
+    <Compile Include="Forms\ViewForm.Designer.cs">
       <DependentUpon>ViewForm.cs</DependentUpon>
     </Compile>
-    <Compile Include="Form\MainForm.cs">
+    <Compile Include="Forms\MainForm.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="Form\MainForm.Designer.cs">
+    <Compile Include="Forms\MainForm.Designer.cs">
       <DependentUpon>MainForm.cs</DependentUpon>
     </Compile>
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <EmbeddedResource Include="Form\NodeForm.resx">
+    <EmbeddedResource Include="Forms\ImageForm.resx">
+      <DependentUpon>ImageForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Forms\NodeForm.resx">
       <DependentUpon>NodeForm.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="Form\ViewForm.resx">
+    <EmbeddedResource Include="Forms\ViewForm.resx">
       <DependentUpon>ViewForm.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="Form\MainForm.resx">
+    <EmbeddedResource Include="Forms\MainForm.resx">
       <DependentUpon>MainForm.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Properties\Resources.resx">
