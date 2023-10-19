@@ -9,24 +9,20 @@
       <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
       <Extensions>h;hh;hpp;hxx;h++;hm;inl;inc;ipp;xsd</Extensions>
     </Filter>
-    <Filter Include="리소스 파일">
-      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
-      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
-    </Filter>
-    <Filter Include="셰이더 파일">
-      <UniqueIdentifier>{575ec016-e395-412a-9db5-51f9b09c6e14}</UniqueIdentifier>
-    </Filter>
     <Filter Include="헤더 파일\Common">
       <UniqueIdentifier>{8775307d-5339-4060-a00d-ed7e0950e823}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="헤더 파일\DirectX">
-      <UniqueIdentifier>{d8d1f584-53bb-4181-b452-15bdbd4ec171}</UniqueIdentifier>
     </Filter>
     <Filter Include="소스 파일\Common">
       <UniqueIdentifier>{7c7c8e48-65f8-4fe0-9b65-6921e1eda03a}</UniqueIdentifier>
     </Filter>
-    <Filter Include="소스 파일\DirectX">
-      <UniqueIdentifier>{54e7a0b8-2ec6-49da-a8d2-de64d2f2bbcd}</UniqueIdentifier>
+    <Filter Include="외부 파일">
+      <UniqueIdentifier>{f6ab6c27-e5e4-42de-8e87-da49e5cd6ea4}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="외부 파일\DirectX">
+      <UniqueIdentifier>{864fa0de-5b4d-446d-8b14-2ceb25f09dfb}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="외부 파일\Imgui">
+      <UniqueIdentifier>{d4f20e7f-ac59-4ac6-b32a-565069b1e37a}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -123,12 +119,6 @@
     <ClCompile Include="TextUtil.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
-    <ClCompile Include="Util.cpp">
-      <Filter>소스 파일</Filter>
-    </ClCompile>
-    <ClCompile Include="..\DirectX\WICTextureLoader12.cpp">
-      <Filter>소스 파일\DirectX</Filter>
-    </ClCompile>
     <ClCompile Include="LoginServer.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
@@ -136,6 +126,36 @@
       <Filter>소스 파일</Filter>
     </ClCompile>
     <ClCompile Include="..\Common\Packet.cpp">
+      <Filter>소스 파일\Common</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\External\DirectX\WICTextureLoader12.cpp">
+      <Filter>외부 파일\DirectX</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\External\Imgui\imgui.cpp">
+      <Filter>외부 파일\Imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\External\Imgui\imgui_demo.cpp">
+      <Filter>외부 파일\Imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\External\Imgui\imgui_draw.cpp">
+      <Filter>외부 파일\Imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\External\Imgui\imgui_impl_dx12.cpp">
+      <Filter>외부 파일\Imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\External\Imgui\imgui_impl_win32.cpp">
+      <Filter>외부 파일\Imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\External\Imgui\imgui_tables.cpp">
+      <Filter>외부 파일\Imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\External\Imgui\imgui_widgets.cpp">
+      <Filter>외부 파일\Imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Common\Types.cpp">
+      <Filter>소스 파일\Common</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Common\Time.cpp">
       <Filter>소스 파일\Common</Filter>
     </ClCompile>
   </ItemGroup>
@@ -203,9 +223,6 @@
     <ClInclude Include="Shader.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
-    <ClInclude Include="StringTable.h">
-      <Filter>헤더 파일</Filter>
-    </ClInclude>
     <ClInclude Include="GameScene.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
@@ -239,15 +256,6 @@
     <ClInclude Include="TextUtil.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
-    <ClInclude Include="Util.h">
-      <Filter>헤더 파일</Filter>
-    </ClInclude>
-    <ClInclude Include="..\DirectX\d3dx12.h">
-      <Filter>헤더 파일\DirectX</Filter>
-    </ClInclude>
-    <ClInclude Include="..\DirectX\WICTextureLoader12.h">
-      <Filter>헤더 파일\DirectX</Filter>
-    </ClInclude>
     <ClInclude Include="LoginServer.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
@@ -257,21 +265,47 @@
     <ClInclude Include="..\Common\Packet.h">
       <Filter>헤더 파일\Common</Filter>
     </ClInclude>
-  </ItemGroup>
-  <ItemGroup>
-    <Text Include="..\README.md" />
-  </ItemGroup>
-  <ItemGroup>
-    <FxCompile Include="Default.hlsl">
-      <Filter>셰이더 파일</Filter>
-    </FxCompile>
-    <FxCompile Include="Line.hlsl">
-      <Filter>셰이더 파일</Filter>
-    </FxCompile>
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Common.hlsli">
-      <Filter>셰이더 파일</Filter>
-    </None>
+    <ClInclude Include="..\..\External\DirectX\d3dx12.h">
+      <Filter>외부 파일\DirectX</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\External\DirectX\WICTextureLoader12.h">
+      <Filter>외부 파일\DirectX</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\External\Imgui\imconfig.h">
+      <Filter>외부 파일\Imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\External\Imgui\imgui.h">
+      <Filter>외부 파일\Imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\External\Imgui\imgui_impl_dx12.h">
+      <Filter>외부 파일\Imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\External\Imgui\imgui_impl_win32.h">
+      <Filter>외부 파일\Imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\External\Imgui\imgui_internal.h">
+      <Filter>외부 파일\Imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\External\Imgui\imstb_rectpack.h">
+      <Filter>외부 파일\Imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\External\Imgui\imstb_textedit.h">
+      <Filter>외부 파일\Imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\External\Imgui\imstb_truetype.h">
+      <Filter>외부 파일\Imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Common\Types.h">
+      <Filter>헤더 파일\Common</Filter>
+    </ClInclude>
+    <ClInclude Include="DXUtil.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Common\StringTable.h">
+      <Filter>헤더 파일\Common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Common\Time.h">
+      <Filter>헤더 파일\Common</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

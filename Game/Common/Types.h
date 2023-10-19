@@ -31,4 +31,34 @@ private:
 	friend FLOAT2 operator/(const FLOAT2& lhs, FLOAT rhs);
 };
 
+class RECTI
+{
+public:
+	RECTI();
+	RECTI(int left, int top, int right, int bottom);
+
+	void Offset(int x, int y);
+	bool IsContain(const INT2& point);
+
+public:
+	int left;
+	int top;
+	int right;
+	int bottom;
+};
+
+class RECTF : public D2D1_RECT_F
+{
+public:
+	RECTF();
+	RECTF(FLOAT left, FLOAT top, FLOAT right, FLOAT bottom);
+
+	void Offset(FLOAT x, FLOAT y);
+	bool IsContain(FLOAT2 point);
+};
+
+using MATRIX = D2D1::Matrix3x2F;
+
+using ButtonID = unsigned int;
 using CharacterID = unsigned int;
+using GameObjectID = unsigned int;

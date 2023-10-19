@@ -6,7 +6,7 @@
 class Packet
 {
 public:
-	enum class Type : int
+	enum class Type
 	{
 		CLIENT_TryLogin,
 		LOGIN_TryLogin,

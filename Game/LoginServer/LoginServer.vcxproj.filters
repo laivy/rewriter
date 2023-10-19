@@ -9,24 +9,20 @@
       <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
       <Extensions>h;hh;hpp;hxx;h++;hm;inl;inc;ipp;xsd</Extensions>
     </Filter>
-    <Filter Include="리소스 파일">
-      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
-      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
-    </Filter>
     <Filter Include="헤더 파일\Common">
       <UniqueIdentifier>{9208068c-1ec2-4a86-9b71-ba70df3c56d6}</UniqueIdentifier>
     </Filter>
-    <Filter Include="헤더 파일\Imgui">
-      <UniqueIdentifier>{e68f1517-c524-4833-9809-d8393c8149e3}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="소스 파일\Imgui">
-      <UniqueIdentifier>{b54bdae7-5517-4640-bc4c-dc870a0590dc}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="헤더 파일\DirectX">
-      <UniqueIdentifier>{2db65ccc-5dcd-4e95-85de-e10f9517c3c1}</UniqueIdentifier>
-    </Filter>
     <Filter Include="소스 파일\Common">
       <UniqueIdentifier>{e6a9f60f-e517-4fbf-ad18-eae51af8cc10}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="외부 파일">
+      <UniqueIdentifier>{a78b9ac1-721e-4fc2-abe8-3a667f6ca06d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="외부 파일\DirectX">
+      <UniqueIdentifier>{84253777-8533-417f-927e-6daf7a5b5f46}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="외부 파일\Imgui">
+      <UniqueIdentifier>{e395ed58-b3ca-4a19-882c-d51b882a8818}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -38,27 +34,6 @@
     </ClCompile>
     <ClCompile Include="LoginApp.cpp">
       <Filter>소스 파일</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Imgui\imgui.cpp">
-      <Filter>소스 파일\Imgui</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Imgui\imgui_demo.cpp">
-      <Filter>소스 파일\Imgui</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Imgui\imgui_draw.cpp">
-      <Filter>소스 파일\Imgui</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Imgui\imgui_impl_dx12.cpp">
-      <Filter>소스 파일\Imgui</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Imgui\imgui_impl_win32.cpp">
-      <Filter>소스 파일\Imgui</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Imgui\imgui_tables.cpp">
-      <Filter>소스 파일\Imgui</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Imgui\imgui_widgets.cpp">
-      <Filter>소스 파일\Imgui</Filter>
     </ClCompile>
     <ClCompile Include="..\Common\Types.cpp">
       <Filter>소스 파일\Common</Filter>
@@ -81,6 +56,27 @@
     <ClCompile Include="..\Common\Packet.cpp">
       <Filter>소스 파일\Common</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\External\Imgui\imgui.cpp">
+      <Filter>외부 파일\Imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\External\Imgui\imgui_demo.cpp">
+      <Filter>외부 파일\Imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\External\Imgui\imgui_draw.cpp">
+      <Filter>외부 파일\Imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\External\Imgui\imgui_impl_dx12.cpp">
+      <Filter>외부 파일\Imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\External\Imgui\imgui_impl_win32.cpp">
+      <Filter>외부 파일\Imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\External\Imgui\imgui_tables.cpp">
+      <Filter>외부 파일\Imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\External\Imgui\imgui_widgets.cpp">
+      <Filter>외부 파일\Imgui</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Stdafx.h">
@@ -91,33 +87,6 @@
     </ClInclude>
     <ClInclude Include="LoginApp.h">
       <Filter>헤더 파일</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Imgui\imconfig.h">
-      <Filter>헤더 파일\Imgui</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Imgui\imgui.h">
-      <Filter>헤더 파일\Imgui</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Imgui\imgui_impl_dx12.h">
-      <Filter>헤더 파일\Imgui</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Imgui\imgui_impl_win32.h">
-      <Filter>헤더 파일\Imgui</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Imgui\imgui_internal.h">
-      <Filter>헤더 파일\Imgui</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Imgui\imstb_rectpack.h">
-      <Filter>헤더 파일\Imgui</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Imgui\imstb_textedit.h">
-      <Filter>헤더 파일\Imgui</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Imgui\imstb_truetype.h">
-      <Filter>헤더 파일\Imgui</Filter>
-    </ClInclude>
-    <ClInclude Include="..\DirectX\d3dx12.h">
-      <Filter>헤더 파일\DirectX</Filter>
     </ClInclude>
     <ClInclude Include="..\Common\Types.h">
       <Filter>헤더 파일\Common</Filter>
@@ -142,6 +111,33 @@
     </ClInclude>
     <ClInclude Include="..\Common\Packet.h">
       <Filter>헤더 파일\Common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\External\DirectX\d3dx12.h">
+      <Filter>외부 파일\DirectX</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\External\Imgui\imconfig.h">
+      <Filter>외부 파일\Imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\External\Imgui\imgui.h">
+      <Filter>외부 파일\Imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\External\Imgui\imgui_impl_dx12.h">
+      <Filter>외부 파일\Imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\External\Imgui\imgui_impl_win32.h">
+      <Filter>외부 파일\Imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\External\Imgui\imgui_internal.h">
+      <Filter>외부 파일\Imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\External\Imgui\imstb_rectpack.h">
+      <Filter>외부 파일\Imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\External\Imgui\imstb_textedit.h">
+      <Filter>외부 파일\Imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\External\Imgui\imstb_truetype.h">
+      <Filter>외부 파일\Imgui</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

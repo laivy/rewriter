@@ -53,11 +53,6 @@ extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg
 #include "Game/Common/Types.h"
 
 // Database
-#ifdef _DEBUG
-#pragma comment(lib, "x64/Debug/Database.lib")
-#else
-#pragma comment(lib, "x64/Release/Database.lib")
-#endif
 #include <sql.h>
 #include <sqlext.h>
 #include <sqltypes.h>

@@ -74,3 +74,63 @@ FLOAT2 operator/(const FLOAT2& lhs, FLOAT rhs)
 {
 	return { lhs.x / rhs, lhs.y / rhs };
 }
+
+RECTF::RECTF()
+{
+	left = 0.0f;
+	top = 0.0f;
+	right = 0.0f;
+	bottom = 0.0f;
+}
+
+RECTF::RECTF(FLOAT left, FLOAT top, FLOAT right, FLOAT bottom)
+{
+	this->left = left;
+	this->top = top;
+	this->right = right;
+	this->bottom = bottom;
+}
+
+void RECTF::Offset(FLOAT x, FLOAT y)
+{
+	left += x;
+	top += y;
+	right += x;
+	bottom += y;
+}
+
+bool RECTF::IsContain(FLOAT2 point)
+{
+	if (left <= point.x && point.x <= right &&
+		top <= point.y && point.y <= bottom)
+		return true;
+	return false;
+}
+
+RECTI::RECTI() :
+	left{ 0 }, top{ 0 }, right{ 0 }, bottom{ 0 }
+{
+
+}
+
+RECTI::RECTI(int left, int top, int right, int bottom) :
+	left{ left }, top{ top }, right{ right }, bottom{ bottom }
+{
+
+}
+
+void RECTI::Offset(int x, int y)
+{
+	left += x;
+	top += y;
+	right += x;
+	bottom += y;
+}
+
+bool RECTI::IsContain(const INT2& point)
+{
+	if (left <= point.x && point.x <= right &&
+		top <= point.y && point.y <= bottom)
+		return true;
+	return false;
+}

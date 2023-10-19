@@ -1,5 +1,8 @@
 ﻿#pragma once
 
+// DLL
+#define DLLEXPORT __declspec(dllexport)
+
 // Windows
 #define WIN32_LEAN_AND_MEAN 
 #pragma comment(lib, "imm32.lib")
@@ -35,6 +38,7 @@ EXTERN_C IMAGE_DOS_HEADER __ImageBase;
 #include <thread>
 #include <variant>
 #include <vector>
+using namespace std::chrono_literals;
 
 // DirectX
 #pragma comment(lib, "d2d1.lib")
@@ -60,17 +64,16 @@ EXTERN_C IMAGE_DOS_HEADER __ImageBase;
 // Game
 #include "Game/Common/Packet.h"
 #include "Game/Common/Singleton.h"
-#include "Server.h"
-#include "StringTable.h"
+#include "Game/Common/StringTable.h"
+#include "Game/Common/Types.h"
+#include "DXUtil.h"
 #include "TextUtil.h"
-#include "Util.h"
+
+// Resource
+#include "Module/Resource/Include/Property.h"
 
 // 전역 변수
 extern UINT g_cbvSrvUavDescriptorIncrementSize;
-
-using ButtonID = unsigned int;
-using CharacterID = unsigned int;
-using GameObjectID = unsigned int;
 
 enum class RootParamIndex : unsigned int
 {
