@@ -2,23 +2,17 @@
 #include <chrono>
 
 template <class T>
-concept IsChronoDuration = requires
-{
-	std::is_same_v<T, std::chrono::year>;
-	std::is_same_v<T, std::chrono::years>;
-	std::is_same_v<T, std::chrono::month>;
-	std::is_same_v<T, std::chrono::months>;
-	std::is_same_v<T, std::chrono::day>;
-	std::is_same_v<T, std::chrono::days>;
-	std::is_same_v<T, std::chrono::hours>;
-	std::is_same_v<T, std::chrono::minutes>;
+concept IsChronoDuration = 
+	std::is_same_v<T, std::chrono::day> ||
+	std::is_same_v<T, std::chrono::days> ||
+	std::is_same_v<T, std::chrono::hours> ||
+	std::is_same_v<T, std::chrono::minutes> ||
 	std::is_same_v<T, std::chrono::seconds>;
-};
 
 class Time
 {
 public:
-	Time();
+	Time(int year = 0, int month = 0, int day = 0, int hour = 0, int min = 0, int sec = 0);
 
 	static Time Now();
 
@@ -32,17 +26,7 @@ public:
 	requires IsChronoDuration<T>
 	Time operator+(const T& duration)
 	{
-		if constexpr (std::is_same_v<T, std::chrono::year>)
-		{
-			std::chrono::years years{ static_cast<int>(duration) };
-			return *this + years;
-		}
-		else if constexpr (std::is_same_v<T, std::chrono::month>)
-		{
-			std::chrono::months months{ static_cast<unsigned int>(duration) };
-			return *this + months;
-		}
-		else if constexpr (std::is_same_v<T, std::chrono::day>)
+		if constexpr (std::is_same_v<T, std::chrono::day>)
 		{
 			std::chrono::days days{ static_cast<unsigned int>(duration) };
 			return *this + days;
@@ -53,13 +37,52 @@ public:
 		}
 	}
 
-	//template <class T>
-	//requires IsChronoYMD<T> || IsChronoHMS<T>
-	//Time& operator+=(const T& duration)
-	//{
-	//	m_time += std::chrono::duration_cast<std::chrono::seconds>(duration);
-	//	return *this;
-	//}
+	template <class T>
+	requires IsChronoDuration<T>
+	Time& operator+=(const T& duration)
+	{
+		if constexpr (std::is_same_v<T, std::chrono::day>)
+		{
+			std::chrono::days days{ static_cast<unsigned int>(duration) };
+			m_time += std::chrono::duration_cast<std::chrono::seconds>(days).count();
+		}
+		else
+		{
+			m_time += std::chrono::duration_cast<std::chrono::seconds>(duration).count();
+		}
+		return *this;
+	}
+
+	template <class T>
+	requires IsChronoDuration<T>
+	Time operator-(const T& duration)
+	{
+		if constexpr (std::is_same_v<T, std::chrono::day>)
+		{
+			std::chrono::days days{ static_cast<unsigned int>(duration) };
+			return *this - days;
+		}
+		else
+		{
+			return Time{ m_time - std::chrono::duration_cast<std::chrono::seconds>(duration).count() };
+		}
+	}
+
+	template <class T>
+	requires IsChronoDuration<T>
+	Time& operator-=(const T& duration)
+	{
+		if constexpr (std::is_same_v<T, std::chrono::day>)
+		{
+			std::chrono::days days{ static_cast<unsigned int>(duration) };
+			m_time -= std::chrono::duration_cast<std::chrono::seconds>(days).count();
+		}
+		else
+		{
+			m_time -= std::chrono::duration_cast<std::chrono::seconds>(duration).count();
+		}
+		return *this;
+	}
 
 	int Year() const;
 	unsigned int Month() const;
@@ -67,7 +90,6 @@ public:
 	int Hour() const;
 	int Min() const;
 	int Sec() const;
-	int Milli() const;
 	std::tuple<int, int, int> YMD() const;
 	std::tuple<int, int, int> HMS() const;
 

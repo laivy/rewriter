@@ -3,8 +3,19 @@
 using namespace std::chrono;
 using namespace std::chrono_literals;
 
-Time::Time() : m_time{}
+Time::Time(int year, int month, int day, int hour, int min, int sec) : m_time{ 0 }
 {
+	std::time(&m_time);
+
+	std::tm tm{};
+	localtime_s(&tm, &m_time);
+	tm.tm_year = year - 1900;
+	tm.tm_mon = month - 1;
+	tm.tm_mday = day;
+	tm.tm_hour = hour;
+	tm.tm_min = min;
+	tm.tm_sec = sec;
+	m_time = std::mktime(&tm);
 }
 
 Time Time::Now()
@@ -65,11 +76,6 @@ int Time::Min() const
 int Time::Sec() const
 {
 	return static_cast<int>(GetHMS().seconds().count());
-}
-
-int Time::Milli() const
-{
-	return static_cast<int>(GetHMS().subseconds().count());
 }
 
 std::tuple<int, int, int> Time::YMD() const
