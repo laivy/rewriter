@@ -184,6 +184,9 @@ namespace DataEditor
 
 		private void LoadFile(string filePath)
 		{
+			if (!File.Exists(filePath))
+				return;
+
 			FileStream fileStream = new FileStream(filePath, FileMode.Open);
 			BinaryReader binaryReader = new BinaryReader(fileStream);
 			int nodeCount = binaryReader.ReadInt32();

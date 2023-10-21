@@ -71,33 +71,28 @@ namespace DataEditor
 
 		public void Save(BinaryWriter binaryWriter)
 		{
+			binaryWriter.Write(_name);
 			binaryWriter.Write((byte)_type);
 			switch (_type)
 			{
 				case DataType.GROUP:
-					binaryWriter.Write(_name);
 					break;
 				case DataType.INT:
-					binaryWriter.Write(_name);
 					binaryWriter.Write(int.Parse(_value));
 					break;
 				case DataType.INT2:
-					binaryWriter.Write(_name);
 					string[] values = _value.Split(',');
 					foreach (string value in values)
 						binaryWriter.Write(int.Parse(value.Trim()));
 					break;
 				case DataType.FLOAT:
-					binaryWriter.Write(_name);
 					binaryWriter.Write(float.Parse(_value));
 					break;
 				case DataType.STRING:
-					binaryWriter.Write(_name);
 					binaryWriter.Write(_value);
 					break;
 				case DataType.D2DImage:
 				case DataType.D3DImage:
-					binaryWriter.Write(_name);
 					binaryWriter.Write(_data.Length);
 					binaryWriter.Write(_data);
 					break;
@@ -114,31 +109,26 @@ namespace DataEditor
 
 		public void Load(BinaryReader binaryReader)
 		{
+			_name = binaryReader.ReadString();
 			_type = (DataType)binaryReader.ReadByte();
 			switch (_type)
 			{
 				case DataType.GROUP:
-					_name = binaryReader.ReadString();
 					break;
 				case DataType.INT:
-					_name = binaryReader.ReadString();
 					_value = binaryReader.ReadInt32().ToString();
 					break;
 				case DataType.INT2:
-					_name = binaryReader.ReadString();
 					_value = $"{binaryReader.ReadInt32()},{binaryReader.ReadInt32()}";
 					break;
 				case DataType.FLOAT:
-					_name = binaryReader.ReadString();
 					_value = binaryReader.ReadSingle().ToString();
 					break;
 				case DataType.STRING:
-					_name = binaryReader.ReadString();
 					_value = binaryReader.ReadString();
 					break;
 				case DataType.D2DImage:
 				case DataType.D3DImage:
-					_name = binaryReader.ReadString();
 					_data = binaryReader.ReadBytes(binaryReader.ReadInt32());
 					break;
 			}
