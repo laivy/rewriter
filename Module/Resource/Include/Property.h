@@ -44,7 +44,9 @@ namespace Resource
 		std::string GetString() const;
 
 	private:
+		// ResourceManager에서 사용하는 함수들
 		void Load(std::ifstream& file, std::string& name);
+		void Flush();
 
 	public:
 		Type m_type;

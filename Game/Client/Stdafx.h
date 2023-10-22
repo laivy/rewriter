@@ -71,6 +71,7 @@ using namespace std::chrono_literals;
 
 // Resource
 #include "Module/Resource/Include/Property.h"
+#include "Module/Resource/Include/ResourceManager.h"
 
 // 전역 변수
 extern UINT g_cbvSrvUavDescriptorIncrementSize;

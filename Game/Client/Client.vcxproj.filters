@@ -24,6 +24,12 @@
     <Filter Include="외부 파일\Imgui">
       <UniqueIdentifier>{d4f20e7f-ac59-4ac6-b32a-565069b1e37a}</UniqueIdentifier>
     </Filter>
+    <Filter Include="모듈 파일">
+      <UniqueIdentifier>{022d3334-6f57-44dc-9c0b-dac3caf4ae66}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="모듈 파일\Resource">
+      <UniqueIdentifier>{ceba596a-ee30-443a-ae81-d205b7cc9472}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Main.cpp">
@@ -306,6 +312,12 @@
     </ClInclude>
     <ClInclude Include="..\Common\Time.h">
       <Filter>헤더 파일\Common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Module\Resource\Include\Property.h">
+      <Filter>모듈 파일\Resource</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Module\Resource\Include\ResourceManager.h">
+      <Filter>모듈 파일\Resource</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

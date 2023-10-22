@@ -22,6 +22,18 @@ namespace Resource
 		return Load(path);
 	}
 
+	void ResourceManager::Flush()
+	{
+		for (const auto& [_, p] : m_resources)
+			p->Flush();
+
+		std::erase_if(m_resources,
+			[](const auto& r)
+			{
+				return r.second->m_children.empty();
+			});
+	}
+
 	std::shared_ptr<Property> ResourceManager::Load(const std::string& path)
 	{
 		std::string fileName{ path };
@@ -151,7 +163,7 @@ namespace Resource
 	DLLEXPORT std::shared_ptr<Property> Get(const std::string& path)
 	{
 		if (auto rm{ ResourceManager::GetInstance() })
-			rm->Get(path);
+			return rm->Get(path);
 		return nullptr;
 	}
 
@@ -263,5 +275,11 @@ namespace Resource
 			return child->GetString();
 
 		return "";
+	}
+
+	DLLEXPORT void Flush()
+	{
+		if (auto rm{ ResourceManager::GetInstance() })
+			rm->Flush();
 	}
 }

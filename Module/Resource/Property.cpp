@@ -178,4 +178,9 @@ namespace Resource
 			}
 		}
 	}
+
+	void Resource::Property::Flush()
+	{
+		std::erase_if(m_children, [](const auto& c) { return c.use_count() <= 1; });
+	}
 }

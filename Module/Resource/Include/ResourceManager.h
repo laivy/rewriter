@@ -11,6 +11,7 @@ namespace Resource
 		~ResourceManager() = default;
 
 		std::shared_ptr<Property> Get(const std::string& fileName);
+		void Flush();
 
 	private:
 		std::shared_ptr<Property> Load(const std::string& fileName);
@@ -28,4 +29,5 @@ namespace Resource
 	DLLEXPORT INT2 GetInt2(const std::shared_ptr<Property>& prop, const std::string& path = "");
 	DLLEXPORT float GetFloat(const std::shared_ptr<Property>& prop, const std::string& path = "");
 	DLLEXPORT std::string GetString(const std::shared_ptr<Property>& prop, const std::string& path = "");
+	DLLEXPORT void Flush();
 }

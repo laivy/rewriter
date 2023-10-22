@@ -8,9 +8,6 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DataEditor", "Tool\DataEditor\DataEditor.csproj", "{01ACE3AB-756E-48D9-B8C6-57089A6B1E2A}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "LoginServer", "Game\LoginServer\LoginServer.vcxproj", "{7C4AE94D-8E6B-43FB-8B96-E5AA7A82FF95}"
-	ProjectSection(ProjectDependencies) = postProject
-		{3A60F38B-6BF8-4CFF-B6C3-DBFE015F9860} = {3A60F38B-6BF8-4CFF-B6C3-DBFE015F9860}
-	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Game", "Game", "{E8048ACE-7CBD-43BA-85E3-D24FE2639874}"
 EndProject
@@ -19,6 +16,8 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Module", "Module", "{88EEA67C-E4BF-44CC-AEE1-1B3B2AB83767}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Database", "Module\Database\Database.vcxproj", "{3A60F38B-6BF8-4CFF-B6C3-DBFE015F9860}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Resource", "Module\Resource\Resource.vcxproj", "{ECE58EE1-CBF9-4731-9CA5-C89FA63034E8}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -60,6 +59,14 @@ Global
 		{3A60F38B-6BF8-4CFF-B6C3-DBFE015F9860}.Release|Any CPU.Build.0 = Release|x64
 		{3A60F38B-6BF8-4CFF-B6C3-DBFE015F9860}.Release|x64.ActiveCfg = Release|x64
 		{3A60F38B-6BF8-4CFF-B6C3-DBFE015F9860}.Release|x64.Build.0 = Release|x64
+		{ECE58EE1-CBF9-4731-9CA5-C89FA63034E8}.Debug|Any CPU.ActiveCfg = Debug|x64
+		{ECE58EE1-CBF9-4731-9CA5-C89FA63034E8}.Debug|Any CPU.Build.0 = Debug|x64
+		{ECE58EE1-CBF9-4731-9CA5-C89FA63034E8}.Debug|x64.ActiveCfg = Debug|x64
+		{ECE58EE1-CBF9-4731-9CA5-C89FA63034E8}.Debug|x64.Build.0 = Debug|x64
+		{ECE58EE1-CBF9-4731-9CA5-C89FA63034E8}.Release|Any CPU.ActiveCfg = Release|x64
+		{ECE58EE1-CBF9-4731-9CA5-C89FA63034E8}.Release|Any CPU.Build.0 = Release|x64
+		{ECE58EE1-CBF9-4731-9CA5-C89FA63034E8}.Release|x64.ActiveCfg = Release|x64
+		{ECE58EE1-CBF9-4731-9CA5-C89FA63034E8}.Release|x64.Build.0 = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -69,6 +76,7 @@ Global
 		{01ACE3AB-756E-48D9-B8C6-57089A6B1E2A} = {7A0BE613-2CF7-4107-8D35-5A9BEC2F63FA}
 		{7C4AE94D-8E6B-43FB-8B96-E5AA7A82FF95} = {E8048ACE-7CBD-43BA-85E3-D24FE2639874}
 		{3A60F38B-6BF8-4CFF-B6C3-DBFE015F9860} = {88EEA67C-E4BF-44CC-AEE1-1B3B2AB83767}
+		{ECE58EE1-CBF9-4731-9CA5-C89FA63034E8} = {88EEA67C-E4BF-44CC-AEE1-1B3B2AB83767}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {0A22C2EE-A1CE-420F-8886-35BEED50F885}

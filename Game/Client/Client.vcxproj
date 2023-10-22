@@ -220,6 +220,8 @@
     <ClInclude Include="..\..\External\Imgui\imstb_rectpack.h" />
     <ClInclude Include="..\..\External\Imgui\imstb_textedit.h" />
     <ClInclude Include="..\..\External\Imgui\imstb_truetype.h" />
+    <ClInclude Include="..\..\Module\Resource\Include\Property.h" />
+    <ClInclude Include="..\..\Module\Resource\Include\ResourceManager.h" />
     <ClInclude Include="..\Common\Packet.h" />
     <ClInclude Include="..\Common\Singleton.h" />
     <ClInclude Include="..\Common\StringTable.h" />

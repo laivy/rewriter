@@ -85,7 +85,7 @@ void DBThread::Render()
 void DBThread::Init()
 {
 	auto rc{ Database::Connect(m_ipport, m_dbname, m_username, m_password) };
-	if (rc != DBRESULT::SUCCESS)
+	if (rc != Database::DBRESULT::SUCCESS)
 	{
 		assert(false && "FAIL TO CONNECT DATABASE");
 		return;
