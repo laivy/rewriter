@@ -10,19 +10,19 @@ namespace Resource
 	{
 	}
 
-	Property::Iterator& Property::Iterator::operator++()
+	DLLEXPORT Property::Iterator& Property::Iterator::operator++()
 	{
 		++m_childIndex;
 		return *this;
 	}
 
-	Property::Iterator& Property::Iterator::operator--()
+	DLLEXPORT Property::Iterator& Property::Iterator::operator--()
 	{
 		--m_childIndex;
 		return *this;
 	}
 
-	bool Property::Iterator::operator!=(const Iterator& it) const
+	DLLEXPORT bool Property::Iterator::operator!=(const Iterator& it) const
 	{
 		if (m_property != it.m_property)
 			return true;
@@ -31,7 +31,7 @@ namespace Resource
 		return false;
 	}
 
-	std::pair<std::string, std::shared_ptr<Property>> Property::Iterator::operator*() const
+	DLLEXPORT std::pair<std::string, std::shared_ptr<Property>> Property::Iterator::operator*() const
 	{
 		return std::make_pair(
 			m_property->m_children[m_childIndex]->m_name,
@@ -50,12 +50,12 @@ namespace Resource
 	{
 	}
 
-	Property::Iterator Property::begin() const
+	DLLEXPORT Property::Iterator Property::begin() const
 	{
 		return Iterator{ this, 0 };
 	}
 
-	Property::Iterator Property::end() const
+	DLLEXPORT Property::Iterator Property::end() const
 	{
 		return Iterator{ this, m_children.size() - 1 };
 	}

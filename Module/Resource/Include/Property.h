@@ -12,17 +12,16 @@ namespace Resource
 			GROUP, INT, INT2, FLOAT, STRING, IMAGE
 		};
 
-	private:
 		class Iterator
 		{
 		public:
 			Iterator(const Property* const p, size_t index);
 			~Iterator() = default;
 
-			Iterator& operator++();
-			Iterator& operator--();
-			bool operator!=(const Iterator& it) const;
-			std::pair<std::string, std::shared_ptr<Property>> operator*() const;
+			DLLEXPORT Iterator& operator++();
+			DLLEXPORT Iterator& operator--();
+			DLLEXPORT bool operator!=(const Iterator& it) const;
+			DLLEXPORT std::pair<std::string, std::shared_ptr<Property>> operator*() const;
 
 		private:
 			const Property* const m_property;
@@ -33,8 +32,8 @@ namespace Resource
 		Property();
 		~Property();
 
-		Iterator begin() const;
-		Iterator end() const;
+		DLLEXPORT Iterator begin() const;
+		DLLEXPORT Iterator end() const;
 
 		Type GetType() const;
 		std::shared_ptr<Property> Get(const std::string& path) const;
