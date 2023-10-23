@@ -19,7 +19,9 @@ namespace Resource
 
 		if (m_resources.contains(fileName))
 			return m_resources.at(fileName)->Get(remain);
-		return Load(path);
+
+		Load(path);
+		return Get(path);
 	}
 
 	void ResourceManager::Flush()
@@ -275,6 +277,31 @@ namespace Resource
 			return child->GetString();
 
 		return "";
+	}
+
+	DLLEXPORT const std::vector<BYTE>& GetBinary(const std::shared_ptr<Property>& prop, const std::string& path)
+	{
+		return prop->GetBinary();
+	}
+
+	DLLEXPORT ComPtr<ID2D1Bitmap> GetD2DImage(const std::shared_ptr<Property>& prop, const std::string& path)
+	{
+		return prop->GetD2DImage();
+	}
+
+	DLLEXPORT ComPtr<ID3D12Resource> GetD3DImage(const std::shared_ptr<Property>& prop, const std::string& path)
+	{
+		return prop->GetD3DImage();
+	}
+
+	DLLEXPORT void SetD2DImage(const std::shared_ptr<Property>& prop, const ComPtr<ID2D1Bitmap>& image)
+	{
+		prop->SetD2DImage(image);
+	}
+
+	DLLEXPORT void SetD3DImage(const std::shared_ptr<Property>& prop, const ComPtr<ID3D12Resource>& image)
+	{
+		prop->SetD3DImage(image);
 	}
 
 	DLLEXPORT void Flush()

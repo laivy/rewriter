@@ -5,7 +5,10 @@
 
 // Windows
 #define WIN32_LEAN_AND_MEAN
+#include <wincodec.h>
 #include <Windows.h>
+#include <wrl.h>
+using Microsoft::WRL::ComPtr;
 
 // C++
 #include <array>
@@ -14,6 +17,9 @@
 #include <memory>
 #include <string>
 #include <unordered_map>
+
+// DirectX
+#include <d3d12.h>
 
 // Game
 #include "Game/Common/Singleton.h"

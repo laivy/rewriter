@@ -41,13 +41,18 @@ namespace Resource
 		INT2 GetInt2() const;
 		float GetFloat() const;
 		std::string GetString() const;
+		const std::vector<BYTE>& GetBinary() const;
+		ComPtr<ID2D1Bitmap> GetD2DImage() const;
+		ComPtr<ID3D12Resource> GetD3DImage() const;
+		void SetD2DImage(const ComPtr<ID2D1Bitmap>& image);
+		void SetD3DImage(const ComPtr<ID3D12Resource>& image);
 
 	private:
 		// ResourceManager에서 사용하는 함수들
 		void Load(std::ifstream& file, std::string& name);
 		void Flush();
 
-	public:
+	private:
 		Type m_type;
 		std::string m_name;
 		union
@@ -56,7 +61,12 @@ namespace Resource
 			INT2 m_int2;
 			float m_float;
 			std::string m_string;
-			std::vector<char> m_binary;
+			struct
+			{
+				std::vector<BYTE> m_binary;
+				ComPtr<ID2D1Bitmap> m_d2dBitmap;
+				ComPtr<ID3D12Resource> m_d3dResource;
+			};
 		};
 		std::vector<std::shared_ptr<Property>> m_children;
 	};

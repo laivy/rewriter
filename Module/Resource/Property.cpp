@@ -1,6 +1,7 @@
 ﻿#include "Stdafx.h"
 #include "Include/Property.h"
 #include "Include/ResourceManager.h"
+#include "External/DirectX/WICTextureLoader12.h"
 
 namespace Resource
 {
@@ -108,6 +109,36 @@ namespace Resource
 		return m_string;
 	}
 
+	const std::vector<BYTE>& Property::GetBinary() const
+	{
+		assert(m_type == Type::IMAGE);
+		return m_binary;
+	}
+
+	ComPtr<ID2D1Bitmap> Property::GetD2DImage() const
+	{
+		assert(m_type == Type::IMAGE || !m_binary.empty());
+		return m_d2dBitmap;
+	}
+
+	ComPtr<ID3D12Resource> Property::GetD3DImage() const
+	{
+		assert(m_type == Type::IMAGE || !m_binary.empty());
+		return m_d3dResource;
+	}
+
+	void Property::SetD2DImage(const ComPtr<ID2D1Bitmap>& image)
+	{
+		assert(m_type == Type::IMAGE);
+		m_d2dBitmap = image;
+	}
+
+	void Property::SetD3DImage(const ComPtr<ID3D12Resource>& image)
+	{
+		assert(m_type == Type::IMAGE);
+		m_d3dResource = image;
+	}
+
 	void Property::Load(std::ifstream& file, std::string& name)
 	{
 		// 이름
@@ -150,7 +181,10 @@ namespace Resource
 			int len{};
 			file.read(reinterpret_cast<char*>(&len), sizeof(len));
 			m_binary.resize(len);
-			file.read(m_binary.data(), len);
+			file.read(reinterpret_cast<char*>(m_binary.data()), len);
+
+			m_d2dBitmap.Reset();
+			m_d3dResource.Reset();
 			break;
 		}
 		default:
