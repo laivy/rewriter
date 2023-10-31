@@ -1,10 +1,6 @@
 ﻿#include "Stdafx.h"
 #include "Platform.h"
 
-#ifdef _DEBUG
-#include "ResourceManager.h"
-#endif
-
 Platform::Platform(INT2 startPosition, INT2 endPosition)
 {
 	// x값이 작은 것을 startPosition으로 설정한다.
@@ -19,28 +15,28 @@ Platform::Platform(INT2 startPosition, INT2 endPosition)
 		m_endPosition = endPosition;
 	}
 
-#ifdef _DEBUG
-	m_cbLine.Init();
-	m_cbLine->position1 = { static_cast<float>(m_startPosition.x), static_cast<float>(m_startPosition.y) };
-	m_cbLine->position2 = { static_cast<float>(m_endPosition.x), static_cast<float>(m_endPosition.y) };
-	m_cbLine->color = { 1.0f, 1.0f, 1.0f, 1.0f };
-
-	auto rm{ ResourceManager::GetInstance() };
-	m_mesh = rm->GetMesh(Mesh::Type::DEFAULT);
-	m_shader = rm->GetShader(Shader::Type::LINE);
-#endif
+//#ifdef _DEBUG
+//	m_cbLine.Init();
+//	m_cbLine->position1 = { static_cast<float>(m_startPosition.x), static_cast<float>(m_startPosition.y) };
+//	m_cbLine->position2 = { static_cast<float>(m_endPosition.x), static_cast<float>(m_endPosition.y) };
+//	m_cbLine->color = { 1.0f, 1.0f, 1.0f, 1.0f };
+//
+//	auto rm{ ResourceManager::GetInstance() };
+//	m_mesh = rm->GetMesh(Mesh::Type::DEFAULT);
+//	m_shader = rm->GetShader(Shader::Type::LINE);
+//#endif
 }
 
 void Platform::Render(const ComPtr<ID3D12GraphicsCommandList>& commandList) const
 {
-#ifdef _DEBUG
-	if (m_cbLine.IsValid())
-		m_cbLine.SetShaderVariable(commandList, RootParamIndex::LINE);
-	if (auto s{ m_shader.lock() })
-		commandList->SetPipelineState(s->GetPipelineState());
-	if (auto m{ m_mesh.lock() })
-		m->Render(commandList);
-#endif
+//#ifdef _DEBUG
+//	if (m_cbLine.IsValid())
+//		m_cbLine.SetShaderVariable(commandList, RootParamIndex::LINE);
+//	if (auto s{ m_shader.lock() })
+//		commandList->SetPipelineState(s->GetPipelineState());
+//	if (auto m{ m_mesh.lock() })
+//		m->Render(commandList);
+//#endif
 }
 
 std::pair<INT2, INT2> Platform::GetStartEndPosition() const

@@ -33,6 +33,12 @@ void Packet::EncodeBuffer(const char* buffer, int size)
 	m_offset += size;
 }
 
+void Packet::End()
+{
+	// 패킷 크기를 0 위치에 씀
+	EncodeAt(0, GetSize());
+}
+
 Packet::Type Packet::GetType() const
 {
 	return m_type;

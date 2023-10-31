@@ -1,4 +1,5 @@
 ﻿#pragma once
+#include "../Image.h"
 
 namespace Resource
 {
@@ -29,10 +30,6 @@ namespace Resource
 	DLLEXPORT INT2 GetInt2(const std::shared_ptr<Property>& prop, const std::string& path = "");
 	DLLEXPORT float GetFloat(const std::shared_ptr<Property>& prop, const std::string& path = "");
 	DLLEXPORT std::string GetString(const std::shared_ptr<Property>& prop, const std::string& path = "");
-	DLLEXPORT const std::vector<BYTE>& GetBinary(const std::shared_ptr<Property>& prop, const std::string& path = "");
-	DLLEXPORT ComPtr<ID2D1Bitmap> GetD2DImage(const std::shared_ptr<Property>& prop, const std::string& path = "");
-	DLLEXPORT ComPtr<ID3D12Resource> GetD3DImage(const std::shared_ptr<Property>& prop, const std::string& path = "");
-	DLLEXPORT void SetD2DImage(const std::shared_ptr<Property>& prop, const ComPtr<ID2D1Bitmap>& image);
-	DLLEXPORT void SetD3DImage(const std::shared_ptr<Property>& prop, const ComPtr<ID3D12Resource>& image);
+	DLLEXPORT Image* GetImage(const std::shared_ptr<Property>& prop, const std::string& path = "");
 	DLLEXPORT void Flush();
 }

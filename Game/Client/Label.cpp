@@ -2,17 +2,16 @@
 #include "BrushPool.h"
 #include "ClientApp.h"
 #include "Label.h"
-#include "ResourceManager.h"
 #include "Wnd.h"
 
 Label::Label(const INT2& size)
 {
 	SetSize(size);
-	if (auto rm{ ResourceManager::GetInstance() })
-	{
-		SetFont(rm->GetFont(Font::Type::MORRIS12));
-		SetText("");
-	}
+	//if (auto rm{ ResourceManager::GetInstance() })
+	//{
+	//	SetFont(rm->GetFont(Font::Type::MORRIS12));
+	//	SetText("");
+	//}
 }
 
 void Label::Render(const ComPtr<ID2D1DeviceContext2>& d2dContext) const

@@ -64,6 +64,8 @@ public:
 		return value;
 	}
 
+	void End();
+
 	Type GetType() const;
 	const char* GetBuffer() const;
 	int GetSize() const;

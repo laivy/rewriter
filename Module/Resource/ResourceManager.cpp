@@ -18,7 +18,12 @@ namespace Resource
 		}
 
 		if (m_resources.contains(fileName))
-			return m_resources.at(fileName)->Get(remain);
+		{
+			if (remain.empty())
+				return m_resources.at(fileName);
+			else
+				return m_resources.at(fileName)->Get(remain);
+		}
 
 		Load(path);
 		return Get(path);
@@ -279,29 +284,26 @@ namespace Resource
 		return "";
 	}
 
-	DLLEXPORT const std::vector<BYTE>& GetBinary(const std::shared_ptr<Property>& prop, const std::string& path)
+	DLLEXPORT Image* GetImage(const std::shared_ptr<Property>& prop, const std::string& path)
 	{
-		return prop->GetBinary();
-	}
+		if (path.empty())
+			return prop->GetImage();
 
-	DLLEXPORT ComPtr<ID2D1Bitmap> GetD2DImage(const std::shared_ptr<Property>& prop, const std::string& path)
-	{
-		return prop->GetD2DImage();
-	}
+		std::string name{ path };
+		std::string remain{};
 
-	DLLEXPORT ComPtr<ID3D12Resource> GetD3DImage(const std::shared_ptr<Property>& prop, const std::string& path)
-	{
-		return prop->GetD3DImage();
-	}
+		size_t pos{ path.find('/') };
+		if (pos != std::string::npos)
+		{
+			name = path.substr(0, pos);
+			remain = path.substr(pos + 1);
+			return GetImage(prop->Get(name), remain);
+		}
 
-	DLLEXPORT void SetD2DImage(const std::shared_ptr<Property>& prop, const ComPtr<ID2D1Bitmap>& image)
-	{
-		prop->SetD2DImage(image);
-	}
+		if (const auto& child{ prop->Get(name) })
+			return child->GetImage();
 
-	DLLEXPORT void SetD3DImage(const std::shared_ptr<Property>& prop, const ComPtr<ID3D12Resource>& image)
-	{
-		prop->SetD3DImage(image);
+		return nullptr;
 	}
 
 	DLLEXPORT void Flush()

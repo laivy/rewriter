@@ -3,7 +3,6 @@
 #include "EditCtrl.h"
 #include "Font.h"
 #include "ClientApp.h"
-#include "ResourceManager.h"
 #include "Wnd.h"
 
 EditCtrl::EditCtrl(const INT2& size) : 
@@ -16,12 +15,12 @@ EditCtrl::EditCtrl(const INT2& size) :
 	SetSize(size);
 	SetPosition({ 0, 0 });
 
-	if (auto rm{ ResourceManager::GetInstance() })
-	{
-		SetFont(rm->GetFont(Font::Type::MORRIS12));
-		SetText("");
-		MoveCaret(0);
-	}
+	//if (auto rm{ ResourceManager::GetInstance() })
+	//{
+	//	SetFont(rm->GetFont(Font::Type::MORRIS12));
+	//	SetText("");
+	//	MoveCaret(0);
+	//}
 }
 
 void EditCtrl::OnKeyboardEvent(UINT message, WPARAM wParam, LPARAM lParam)

@@ -51,7 +51,7 @@ bool LoginServer::Connect()
 	return true;
 }
 
-void LoginServer::Send(Packet& packet)
+void LoginServer::Send(const Packet& packet)
 {
 	if (!m_isConnected)
 		return;

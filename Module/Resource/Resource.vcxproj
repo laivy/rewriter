@@ -84,6 +84,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="..\..\Game\Common\Types.h" />
+    <ClInclude Include="Image.h" />
     <ClInclude Include="Include\Property.h" />
     <ClInclude Include="Include\ResourceManager.h" />
     <ClInclude Include="Stdafx.h" />
@@ -93,6 +94,7 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="DllMain.cpp" />
+    <ClCompile Include="Image.cpp" />
     <ClCompile Include="Property.cpp" />
     <ClCompile Include="ResourceManager.cpp" />
     <ClCompile Include="Stdafx.cpp">

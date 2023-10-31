@@ -1,12 +1,9 @@
 ﻿#include "Stdafx.h"
 #include "Map.h"
 #include "Mesh.h"
-#include "Image.h"
 #include "ObjectManager.h"
 #include "Platform.h"
 #include "Player.h"
-#include "Property.h"
-#include "ResourceManager.h"
 #include "Shader.h"
 
 Player::InputComponent::InputComponent(Player* player) :
@@ -151,9 +148,9 @@ Player::AnimationComponent::AnimationComponent(Player* player) :
 	m_currAniProp{ nullptr },
 	m_currFrameProp{ nullptr }
 {
-	auto rm{ ResourceManager::GetInstance() };
-	m_root = rm->Load("Player.nyt");
-	PlayAnimation(AnimationType::FALL);
+	//auto rm{ ResourceManager::GetInstance() };
+	//m_root = rm->Load("Player.nyt");
+	//PlayAnimation(AnimationType::FALL);
 }
 
 void Player::AnimationComponent::OnMove(Direction direction)
@@ -223,7 +220,7 @@ void Player::AnimationComponent::OnAnimationEnd(AnimationType type)
 
 void Player::AnimationComponent::OnAnimationFrameChange(AnimationType type, int frame)
 {
-	m_currFrameProp = m_currAniProp->Get<Property>(std::to_string(frame));
+	//m_currFrameProp = m_currAniProp->Get<Property>(std::to_string(frame));
 }
 
 void Player::AnimationComponent::Update(float deltaTime)
@@ -237,23 +234,23 @@ void Player::AnimationComponent::PlayAnimation(AnimationType type)
 	m_frame = 0;
 	m_timer = 0.0f;
 
-	switch (m_type)
-	{
-	case AnimationType::IDLE:
-		m_currAniProp = m_root->Get<Property>("Idle");
-		break;
-	case AnimationType::RUN:
-		m_currAniProp = m_root->Get<Property>("Run");
-		break;
-	case AnimationType::JUMP:
-		m_currAniProp = m_root->Get<Property>("Jump");
-		break;
-	case AnimationType::FALL:
-		m_currAniProp = m_root->Get<Property>("Fall");
-		break;
-	default:
-		break;
-	}
+	//switch (m_type)
+	//{
+	//case AnimationType::IDLE:
+	//	m_currAniProp = m_root->Get<Property>("Idle");
+	//	break;
+	//case AnimationType::RUN:
+	//	m_currAniProp = m_root->Get<Property>("Run");
+	//	break;
+	//case AnimationType::JUMP:
+	//	m_currAniProp = m_root->Get<Property>("Jump");
+	//	break;
+	//case AnimationType::FALL:
+	//	m_currAniProp = m_root->Get<Property>("Fall");
+	//	break;
+	//default:
+	//	break;
+	//}
 
 	m_player->OnAnimationStart(m_type);
 	m_player->OnAnimationFrameChange(m_type, m_frame);
@@ -261,35 +258,35 @@ void Player::AnimationComponent::PlayAnimation(AnimationType type)
 
 void Player::AnimationComponent::SetShaderVariable(const ComPtr<ID3D12GraphicsCommandList>& commandList) const
 {
-	m_currAniProp->Get<Image>(std::to_string(m_frame))->SetShaderVariable(commandList);
+	//m_currAniProp->Get<Image>(std::to_string(m_frame))->SetShaderVariable(commandList);
 }
 
 void Player::AnimationComponent::UpdateFrame(float deltaTime)
 {
 	m_timer += deltaTime;
 
-	FLOAT interval{ DEFAULT_FRAME_INTERVAL };
-	do
-	{
-		if (auto currFrameInterval{ m_currFrameProp->Get<FLOAT>(StringTable::INTERVAL) })
-			interval = *currFrameInterval;
+	//FLOAT interval{ DEFAULT_FRAME_INTERVAL };
+	//do
+	//{
+	//	if (auto currFrameInterval{ m_currFrameProp->Get<FLOAT>(StringTable::INTERVAL) })
+	//		interval = *currFrameInterval;
 
-		if (m_timer >= interval)
-		{
-			if (m_frame >= m_currAniProp->GetChildCount() - 1)
-			{
-				// OnAnimationEnd에서 PlayAnimation을 호출하여 m_timer값이 0이되버리므로 저장해줬다가 다시 설정해줌
-				FLOAT timer{ m_timer };
-				m_player->OnAnimationEnd(m_type);
-				m_timer = timer - interval;
-				continue;
-			}
+	//	if (m_timer >= interval)
+	//	{
+	//		if (m_frame >= m_currAniProp->GetChildCount() - 1)
+	//		{
+	//			// OnAnimationEnd에서 PlayAnimation을 호출하여 m_timer값이 0이되버리므로 저장해줬다가 다시 설정해줌
+	//			FLOAT timer{ m_timer };
+	//			m_player->OnAnimationEnd(m_type);
+	//			m_timer = timer - interval;
+	//			continue;
+	//		}
 
-			++m_frame;
-			m_timer -= interval;
-			m_player->OnAnimationFrameChange(m_type, m_frame);
-		}
-	} while (m_timer >= interval);
+	//		++m_frame;
+	//		m_timer -= interval;
+	//		m_player->OnAnimationFrameChange(m_type, m_frame);
+	//	}
+	//} while (m_timer >= interval);
 }
 
 Player::Player() :
@@ -298,12 +295,12 @@ Player::Player() :
 	m_animationComponent{ this },
 	m_characterID{ 0 }
 {
-	m_cbGameObject.Init();
-	m_cbGameObject->layer = Layer::LOCALPLAYER;
+	//m_cbGameObject.Init();
+	//m_cbGameObject->layer = Layer::LOCALPLAYER;
 
-	auto rm{ ResourceManager::GetInstance() };
-	m_mesh = rm->GetMesh(Mesh::Type::DEFAULT);
-	m_shader = rm->GetShader(Shader::Type::DEFAULT);
+	//auto rm{ ResourceManager::GetInstance() };
+	//m_mesh = rm->GetMesh(Mesh::Type::DEFAULT);
+	//m_shader = rm->GetShader(Shader::Type::DEFAULT);
 
 	SetSize({ 50.0f, 37.0f });
 	SetPivot(Pivot::CENTERBOT);

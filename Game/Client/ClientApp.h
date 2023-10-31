@@ -18,7 +18,6 @@ public:
 	ComPtr<ID3D12Device> GetD3DDevice() const;
 	ComPtr<ID3D12GraphicsCommandList> GetCommandList() const;
 	ComPtr<ID3D12RootSignature> GetRootSignature() const;
-	ComPtr<ID2D1DeviceContext2> GetD2DContext() const;
 	ComPtr<IDWriteFactory5> GetDwriteFactory() const;
 
 private:
@@ -94,7 +93,6 @@ private:
 	// Direct2D
 	ComPtr<ID2D1Factory3> m_d2dFactory;
 	ComPtr<ID2D1Device2> m_d2dDevice;
-	ComPtr<ID2D1DeviceContext2> m_d2dDeviceContext;
 	ComPtr<ID2D1Bitmap1> m_d2dRenderTargets[FRAME_COUNT];
 
 	// DirectWrite

@@ -6,10 +6,7 @@
 #include "LoginScene.h"
 #include "LoginWnd.h"
 #include "Mesh.h"
-#include "Image.h"
-#include "Property.h"
 #include "Player.h"
-#include "ResourceManager.h"
 #include "Shader.h"
 #include "WndManager.h"
 
@@ -32,10 +29,7 @@ void LoginScene::OnCreate()
 	WndManager::GetInstance()->AddWnd(wnd3.release());
 }
 
-void LoginScene::OnDestroy()
-{
-	ResourceManager::GetInstance()->Unload("Login.nyt");
-}
+void LoginScene::OnDestroy() { }
 
 void LoginScene::OnMouseMove(int x, int y)
 {
@@ -72,10 +66,7 @@ void LoginScene::Update(FLOAT deltaTime)
 	WndManager::GetInstance()->Update(deltaTime);
 }
 
-void LoginScene::Render(const ComPtr<ID3D12GraphicsCommandList>& commandList) const
-{
-
-}
+void LoginScene::Render(const ComPtr<ID3D12GraphicsCommandList>& commandList) const { }
 
 void LoginScene::Render(const ComPtr<ID2D1DeviceContext2>& d2dContext) const
 {

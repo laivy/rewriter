@@ -1,4 +1,5 @@
 ﻿#pragma once
+#include "../Image.h"
 
 namespace Resource
 {
@@ -41,10 +42,9 @@ namespace Resource
 		INT2 GetInt2() const;
 		float GetFloat() const;
 		std::string GetString() const;
-		const std::vector<BYTE>& GetBinary() const;
-		ComPtr<ID2D1Bitmap> GetD2DImage() const;
+		Image* GetImage() const;
+		ID2D1Bitmap* GetD2DImage() const;
 		ComPtr<ID3D12Resource> GetD3DImage() const;
-		void SetD2DImage(const ComPtr<ID2D1Bitmap>& image);
 		void SetD3DImage(const ComPtr<ID3D12Resource>& image);
 
 	private:
@@ -61,12 +61,7 @@ namespace Resource
 			INT2 m_int2;
 			float m_float;
 			std::string m_string;
-			struct
-			{
-				std::vector<BYTE> m_binary;
-				ComPtr<ID2D1Bitmap> m_d2dBitmap;
-				ComPtr<ID3D12Resource> m_d3dResource;
-			};
+			std::unique_ptr<Image> m_image;
 		};
 		std::vector<std::shared_ptr<Property>> m_children;
 	};

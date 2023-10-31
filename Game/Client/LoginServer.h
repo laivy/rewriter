@@ -10,7 +10,7 @@ public:
 	~LoginServer();
 
 	virtual bool Connect() final;
-	virtual void Send(Packet& packet) final;
+	virtual void Send(const Packet& packet) final;
 
 	virtual bool IsConnected() const final;
 

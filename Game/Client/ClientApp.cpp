@@ -2,11 +2,9 @@
 #include "BrushPool.h"
 #include "ClientApp.h"
 #include "EventManager.h"
-#include "Image.h"
 #include "LoginServer.h"
 #include "ObjectManager.h"
-#include "Property.h"
-#include "ResourceManager.h"
+#include "Renderer2D.h"
 #include "SceneManager.h"
 #include "Timer.h"
 #include "Wnd.h"
@@ -54,15 +52,11 @@ bool ClientApp::OnCreate()
 	BrushPool::Instantiate();
 	EventManager::Instantiate();
 	ObjectManager::Instantiate();
-	ResourceManager::Instantiate();
 	SceneManager::Instantiate();
 	WndManager::Instantiate();
 
 	ExecuteCommandList();
 	WaitForGPU();
-
-	if (auto rm{ ResourceManager::GetInstance() })
-		rm->ReleaseUploadBuffers();
 
 	m_timer->Tick();
 	return true;
@@ -126,11 +120,6 @@ ComPtr<IDWriteFactory5> ClientApp::GetDwriteFactory() const
 	return m_dwriteFactory;
 }
 
-ComPtr<ID2D1DeviceContext2> ClientApp::GetD2DContext() const
-{
-	return m_d2dDeviceContext;
-}
-
 LRESULT CALLBACK ClientApp::WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
 	ClientApp* app{ reinterpret_cast<ClientApp*>(GetWindowLongPtr(hWnd, GWLP_USERDATA)) };
@@ -182,7 +171,6 @@ void ClientApp::OnDestroy()
 	CloseHandle(m_fenceEvent);
 
 	BrushPool::Destroy();
-	ResourceManager::Destroy();
 	ObjectManager::Destroy();
 	WndManager::Destroy();
 	EventManager::Destroy();
@@ -367,7 +355,7 @@ void ClientApp::CreateD2DDevice()
 	ComPtr<IDXGIDevice> dxgiDevice;
 	DX::ThrowIfFailed(m_d3d11On12Device.As(&dxgiDevice));
 	DX::ThrowIfFailed(m_d2dFactory->CreateDevice(dxgiDevice.Get(), &m_d2dDevice));
-	DX::ThrowIfFailed(m_d2dDevice->CreateDeviceContext(D2D1_DEVICE_CONTEXT_OPTIONS_NONE, &m_d2dDeviceContext));
+	DX::ThrowIfFailed(m_d2dDevice->CreateDeviceContext(D2D1_DEVICE_CONTEXT_OPTIONS_NONE, &Renderer2D::g_ctx));
 	DX::ThrowIfFailed(DWriteCreateFactory(DWRITE_FACTORY_TYPE_SHARED, __uuidof(IDWriteFactory), &m_dwriteFactory));
 }
 
@@ -452,7 +440,7 @@ void ClientApp::CreateRenderTargetView()
 		// D2D
 		ComPtr<IDXGISurface> surface;
 		DX::ThrowIfFailed(m_wrappedBackBuffers[i].As(&surface));
-		DX::ThrowIfFailed(m_d2dDeviceContext->CreateBitmapFromDxgiSurface(
+		DX::ThrowIfFailed(Renderer2D::g_ctx->CreateBitmapFromDxgiSurface(
 			surface.Get(),
 			&bitmapProperties,
 			&m_d2dRenderTargets[i]
@@ -577,24 +565,24 @@ void ClientApp::Render()
 	m_commandList->ClearRenderTargetView(rtvHandle, clearColor, 0, NULL);
 	m_commandList->ClearDepthStencilView(dsvHandle, D3D12_CLEAR_FLAG_DEPTH | D3D12_CLEAR_FLAG_STENCIL, 1.0f, 0, 0, NULL);
 
-	if (auto srvDescHeap{ ResourceManager::GetInstance()->GetSrvDescriptorHeap() })
-		m_commandList->SetDescriptorHeaps(1, srvDescHeap);
+	//if (auto srvDescHeap{ ResourceManager::GetInstance()->GetSrvDescriptorHeap() })
+	//	m_commandList->SetDescriptorHeaps(1, srvDescHeap);
 
-	if (SceneManager::IsInstanced())
-		SceneManager::GetInstance()->Render(m_commandList);
+	//if (SceneManager::IsInstanced())
+	//	SceneManager::GetInstance()->Render(m_commandList);
 
 	ExecuteCommandList();
 
 	// ------------
 
 	m_d3d11On12Device->AcquireWrappedResources(m_wrappedBackBuffers[m_frameIndex].GetAddressOf(), 1);
-	m_d2dDeviceContext->SetTarget(m_d2dRenderTargets[m_frameIndex].Get());
-	m_d2dDeviceContext->BeginDraw();
+	Renderer2D::g_ctx->SetTarget(m_d2dRenderTargets[m_frameIndex].Get());
+	Renderer2D::g_ctx->BeginDraw();
 
 	if (SceneManager::IsInstanced())
-		SceneManager::GetInstance()->Render(m_d2dDeviceContext);
+		SceneManager::GetInstance()->Render(Renderer2D::g_ctx);
 
-	DX::ThrowIfFailed(m_d2dDeviceContext->EndDraw());
+	DX::ThrowIfFailed(Renderer2D::g_ctx->EndDraw());
 	m_d3d11On12Device->ReleaseWrappedResources(m_wrappedBackBuffers[m_frameIndex].GetAddressOf(), 1);
 	m_d3d11DeviceContext->Flush();
 

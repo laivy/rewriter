@@ -5,7 +5,6 @@
 #include "ObjectManager.h"
 #include "Platform.h"
 #include "Player.h"
-#include "ResourceManager.h"
 #include "UI.h"
 #include "WndManager.h"
 
