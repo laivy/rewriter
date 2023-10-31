@@ -25,6 +25,9 @@ namespace Resource
 		ComPtr<ID3D12Resource> m_d3dResource;
 	};
 
-	DLLEXPORT FLOAT2 GetSize(Image* image);
-	DLLEXPORT void UseAsD2D(const ComPtr<ID2D1DeviceContext2>& ctx, Image* image);
+	// 이미지의 가로, 세로 크기를 반환
+	DLLEXPORT FLOAT2 GetSize(const std::shared_ptr<Resource::Image>& image);
+
+	// 해당 이미지를 Direct2D 렌더링에 사용함
+	DLLEXPORT void UseAsD2D(const ComPtr<ID2D1DeviceContext2>& ctx, const std::shared_ptr<Resource::Image>& image);
 }

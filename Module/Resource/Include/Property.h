@@ -43,7 +43,7 @@ namespace Resource
 		INT2 GetInt2() const;
 		float GetFloat() const;
 		std::string GetString() const;
-		Image* GetImage() const;
+		std::shared_ptr<Image> GetImage() const;
 		ID2D1Bitmap* GetD2DImage() const;
 		ComPtr<ID3D12Resource> GetD3DImage() const;
 		void SetD3DImage(const ComPtr<ID3D12Resource>& image);
@@ -62,7 +62,7 @@ namespace Resource
 			INT2 m_int2;
 			float m_float;
 			std::string m_string;
-			std::unique_ptr<Image> m_image;
+			std::shared_ptr<Image> m_image;
 		};
 		std::vector<std::shared_ptr<Property>> m_children;
 	};

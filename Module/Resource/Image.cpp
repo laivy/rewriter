@@ -47,12 +47,14 @@ namespace Resource
 		return FLOAT2{};
 	}
 
-	DLLEXPORT FLOAT2 GetSize(Image* image)
+	DLLEXPORT FLOAT2 GetSize(const std::shared_ptr<Resource::Image>& image)
 	{
-		return image->GetSize();
+		if (image)
+			return image->GetSize();
+		return FLOAT2{ 0.0f, 0.0f };
 	}
 
-	DLLEXPORT void UseAsD2D(const ComPtr<ID2D1DeviceContext2>& ctx, Image* image)
+	DLLEXPORT void UseAsD2D(const ComPtr<ID2D1DeviceContext2>& ctx, const std::shared_ptr<Resource::Image>& image)
 	{
 		if (!ctx || !image)
 			return;

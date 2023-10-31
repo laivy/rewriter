@@ -6,7 +6,7 @@ namespace Renderer2D
 {
 	ComPtr<ID2D1DeviceContext2> g_ctx{};
 
-	void DrawImage(Resource::Image* image, const INT2& position, float opacity)
+	void DrawImage(const std::shared_ptr<Resource::Image>& image, const INT2& position, float opacity)
 	{
 		Resource::UseAsD2D(g_ctx, image);
 		FLOAT2 size{ Resource::GetSize(image) };

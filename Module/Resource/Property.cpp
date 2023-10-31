@@ -110,10 +110,10 @@ namespace Resource
 		return m_string;
 	}
 
-	Image* Property::GetImage() const
+	std::shared_ptr<Image> Property::GetImage() const
 	{
 		assert(m_type == Type::IMAGE);
-		return m_image.get();
+		return m_image;
 	}
 
 	ID2D1Bitmap* Property::GetD2DImage() const

@@ -30,6 +30,6 @@ namespace Resource
 	DLLEXPORT INT2 GetInt2(const std::shared_ptr<Property>& prop, const std::string& path = "");
 	DLLEXPORT float GetFloat(const std::shared_ptr<Property>& prop, const std::string& path = "");
 	DLLEXPORT std::string GetString(const std::shared_ptr<Property>& prop, const std::string& path = "");
-	DLLEXPORT Image* GetImage(const std::shared_ptr<Property>& prop, const std::string& path = "");
+	DLLEXPORT std::shared_ptr<Image> GetImage(const std::shared_ptr<Property>& prop, const std::string& path = "");
 	DLLEXPORT void Unload(const std::string& path = "");
 }

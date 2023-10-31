@@ -317,7 +317,7 @@ namespace Resource
 		return "";
 	}
 
-	DLLEXPORT Image* GetImage(const std::shared_ptr<Property>& prop, const std::string& path)
+	DLLEXPORT std::shared_ptr<Image> GetImage(const std::shared_ptr<Property>& prop, const std::string& path)
 	{
 		if (path.empty())
 			return prop->GetImage();
