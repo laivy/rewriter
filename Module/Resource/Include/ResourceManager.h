@@ -1,8 +1,8 @@
 ﻿#pragma once
-#include "../Image.h"
 
 namespace Resource
 {
+	class Image;
 	class Property;
 
 	class ResourceManager : public TSingleton<ResourceManager>
@@ -12,7 +12,7 @@ namespace Resource
 		~ResourceManager() = default;
 
 		std::shared_ptr<Property> Get(const std::string& fileName);
-		void Flush();
+		void Unload(const std::string& path = "");
 
 	private:
 		std::shared_ptr<Property> Load(const std::string& fileName);
@@ -31,5 +31,5 @@ namespace Resource
 	DLLEXPORT float GetFloat(const std::shared_ptr<Property>& prop, const std::string& path = "");
 	DLLEXPORT std::string GetString(const std::shared_ptr<Property>& prop, const std::string& path = "");
 	DLLEXPORT Image* GetImage(const std::shared_ptr<Property>& prop, const std::string& path = "");
-	DLLEXPORT void Flush();
+	DLLEXPORT void Unload(const std::string& path = "");
 }

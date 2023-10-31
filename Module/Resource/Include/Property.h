@@ -1,8 +1,9 @@
 ﻿#pragma once
-#include "../Image.h"
 
 namespace Resource
 {
+	class Image;
+
 	class Property
 	{
 	public:

@@ -1,4 +1,5 @@
 ﻿#include "Stdafx.h"
+#include "Include/Image.h"
 #include "Include/Property.h"
 #include "Include/ResourceManager.h"
 #include "External/DirectX/WICTextureLoader12.h"

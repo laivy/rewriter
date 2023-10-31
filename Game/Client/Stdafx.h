@@ -70,6 +70,7 @@ using namespace std::chrono_literals;
 #include "TextUtil.h"
 
 // Resource
+#include "Module/Resource/Include/Image.h"
 #include "Module/Resource/Include/Property.h"
 #include "Module/Resource/Include/ResourceManager.h"
 

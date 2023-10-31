@@ -36,8 +36,8 @@
     <ClInclude Include="Include\Property.h">
       <Filter>헤더 파일\Include</Filter>
     </ClInclude>
-    <ClInclude Include="Image.h">
-      <Filter>헤더 파일</Filter>
+    <ClInclude Include="Include\Image.h">
+      <Filter>헤더 파일\Include</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

@@ -1,6 +1,6 @@
 ﻿#pragma once
 
-class Resource::Property;
+class Resource::Image;
 
 namespace Renderer2D
 {

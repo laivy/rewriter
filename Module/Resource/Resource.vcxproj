@@ -84,7 +84,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="..\..\Game\Common\Types.h" />
-    <ClInclude Include="Image.h" />
+    <ClInclude Include="Include\Image.h" />
     <ClInclude Include="Include\Property.h" />
     <ClInclude Include="Include\ResourceManager.h" />
     <ClInclude Include="Stdafx.h" />

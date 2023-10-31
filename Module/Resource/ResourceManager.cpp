@@ -1,4 +1,5 @@
 ﻿#include "Stdafx.h"
+#include "Include/Image.h"
 #include "Include/Property.h"
 #include "Include/ResourceManager.h"
 #include "Game/Common/StringTable.h"
@@ -29,16 +30,48 @@ namespace Resource
 		return Get(path);
 	}
 
-	void ResourceManager::Flush()
+	void ResourceManager::Unload(const std::string& path)
 	{
-		for (const auto& [_, p] : m_resources)
-			p->Flush();
+		// 로드 된 모든 리소스 해제
+		if (path.empty())
+		{
+			for (const auto& [_, p] : m_resources)
+				p->Flush();
 
-		std::erase_if(m_resources,
-			[](const auto& r)
-			{
-				return r.second->m_children.empty();
-			});
+			std::erase_if(m_resources,
+				[](const auto& r)
+				{
+					return r.second->m_children.empty();
+				});
+
+			return;
+		}
+
+		// path를 포함한 하위 리소스 해제
+		size_t pos{ path.find_last_of('/') };
+		if (pos == std::string::npos && m_resources.contains(path)) // '/'가 없다는건 파일을 Unload 한다는 것
+		{
+			auto p{ m_resources.at(path) };
+			p->Flush();
+			if (p->m_children.empty())
+				m_resources.erase(path);
+		}
+		else
+		{
+			std::string parent{ path.substr(0, pos) };
+			std::string remain{ path.substr(pos + 1) };
+			auto p{ Get(parent) };
+			if (!p)
+				return;
+
+			auto c{ p->Get(remain) };
+			if (!c)
+				return;
+
+			c->Flush();
+			if (c->m_children.empty())
+				std::erase(p->m_children, c);
+		}
 	}
 
 	std::shared_ptr<Property> ResourceManager::Load(const std::string& path)
@@ -306,9 +339,9 @@ namespace Resource
 		return nullptr;
 	}
 
-	DLLEXPORT void Flush()
+	DLLEXPORT void Unload(const std::string& path)
 	{
 		if (auto rm{ ResourceManager::GetInstance() })
-			rm->Flush();
+			rm->Unload(path);
 	}
 }
