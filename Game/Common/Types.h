@@ -37,7 +37,7 @@ public:
 	RECTI();
 	RECTI(int left, int top, int right, int bottom);
 
-	void Offset(int x, int y);
+	RECTI& Offset(int x, int y);
 	bool IsContain(const INT2& point);
 
 public:
@@ -53,7 +53,7 @@ public:
 	RECTF();
 	RECTF(FLOAT left, FLOAT top, FLOAT right, FLOAT bottom);
 
-	void Offset(FLOAT x, FLOAT y);
+	RECTF& Offset(FLOAT x, FLOAT y);
 	bool IsContain(FLOAT2 point);
 };
 

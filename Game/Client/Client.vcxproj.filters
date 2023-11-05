@@ -158,6 +158,9 @@
     <ClCompile Include="Renderer2D.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
+    <ClCompile Include="Renderer3D.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Stdafx.h">
@@ -305,6 +308,9 @@
       <Filter>모듈 파일\Resource</Filter>
     </ClInclude>
     <ClInclude Include="Renderer2D.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="Renderer3D.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
   </ItemGroup>

@@ -38,12 +38,14 @@ ClientApp::~ClientApp()
 
 bool ClientApp::OnCreate()
 {
+#ifndef _NO_SERVER
 	// 로그인 서버 연결에 실패하면 바로 클라이언트 종료
 	if (auto lgnSvr{ LoginServer::Instantiate() }; !lgnSvr->Connect())
 	{
 		m_isActive = false;
 		return false;
 	}
+#endif
 
 	InitWnd();
 	InitDirectX();

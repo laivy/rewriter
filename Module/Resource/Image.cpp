@@ -30,28 +30,28 @@ namespace Resource
 		return m_d2dBitmap.Get();
 	}
 
-	FLOAT2 Image::GetSize() const
+	INT2 Image::GetSize() const
 	{
 		if (m_d2dBitmap)
 		{
 			auto [w, h] { m_d2dBitmap->GetSize() };
-			return FLOAT2{ w, h };
+			return INT2{ static_cast<int>(w), static_cast<int>(h) };
 		}
 
 		if (m_d3dResource)
 		{
 			auto desc{ m_d3dResource->GetDesc() };
-			return FLOAT2{ static_cast<float>(desc.Width), static_cast<float>(desc.Height) };
+			return INT2{ static_cast<int>(desc.Width), static_cast<int>(desc.Height) };
 		}
 
-		return FLOAT2{};
+		return INT2{};
 	}
 
-	DLLEXPORT FLOAT2 GetSize(const std::shared_ptr<Resource::Image>& image)
+	DLLEXPORT INT2 GetSize(const std::shared_ptr<Resource::Image>& image)
 	{
 		if (image)
 			return image->GetSize();
-		return FLOAT2{ 0.0f, 0.0f };
+		return INT2{ 0, 0 };
 	}
 
 	DLLEXPORT void UseAsD2D(const ComPtr<ID2D1DeviceContext2>& ctx, const std::shared_ptr<Resource::Image>& image)

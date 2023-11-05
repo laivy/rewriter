@@ -6,11 +6,10 @@ IUserInterface::IUserInterface() :
 	m_parent{ nullptr },
 	m_isValid{ true },
 	m_isFocus{ false },
-	m_pivot{ Pivot::CENTER },
+	m_pivot{ Pivot::LEFTTOP },
 	m_size{ 0, 0 },
 	m_position{ 0, 0 }
 {
-
 }
 
 void IUserInterface::OnMouseMove(int x, int y) { }
@@ -100,7 +99,7 @@ bool IUserInterface::IsFocus() const
 bool IUserInterface::IsContain(const INT2& point) const
 {
 	// point는 부모 좌표계 기준의 좌표
-	RECTI rect{ -m_size.x / 2, -m_size.y / 2, m_size.x / 2, m_size.y / 2 };
+	RECTI rect{ 0, 0, m_size.x, m_size.y };
 	rect.Offset(m_position.x, m_position.y);
 	return rect.IsContain(point);
 }

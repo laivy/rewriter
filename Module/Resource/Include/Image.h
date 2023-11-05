@@ -16,7 +16,7 @@ namespace Resource
 
 		std::pair<BYTE*, DWORD> GetBinary() const;
 		ID2D1Bitmap* GetD2DBitmap() const;
-		FLOAT2 GetSize() const;
+		INT2 GetSize() const;
 
 	public:
 		std::unique_ptr<BYTE[]> m_binary;
@@ -26,7 +26,7 @@ namespace Resource
 	};
 
 	// 이미지의 가로, 세로 크기를 반환
-	DLLEXPORT FLOAT2 GetSize(const std::shared_ptr<Resource::Image>& image);
+	DLLEXPORT INT2 GetSize(const std::shared_ptr<Resource::Image>& image);
 
 	// 해당 이미지를 Direct2D 렌더링에 사용함
 	DLLEXPORT void UseAsD2D(const ComPtr<ID2D1DeviceContext2>& ctx, const std::shared_ptr<Resource::Image>& image);

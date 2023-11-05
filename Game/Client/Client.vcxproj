@@ -48,7 +48,7 @@
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>_DEBUG;_WINDOWS;_CLIENT;NOMINMAX;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_DEBUG;_WINDOWS;_CLIENT;_NO_SERVER;NOMINMAX;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>false</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
       <PrecompiledHeader>Use</PrecompiledHeader>
@@ -138,6 +138,7 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Use</PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="Renderer2D.cpp" />
+    <ClCompile Include="Renderer3D.cpp" />
     <ClCompile Include="Server.cpp" />
     <ClCompile Include="Label.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Use</PrecompiledHeader>
@@ -229,6 +230,7 @@
     <ClInclude Include="Font.h" />
     <ClInclude Include="GameScene.h" />
     <ClInclude Include="Renderer2D.h" />
+    <ClInclude Include="Renderer3D.h" />
     <ClInclude Include="Server.h" />
     <ClInclude Include="Label.h" />
     <ClInclude Include="LoginScene.h" />
