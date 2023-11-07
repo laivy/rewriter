@@ -20,6 +20,6 @@ public:
 	virtual void OnKeyboardEvent(UINT message, WPARAM wParam, LPARAM lParam) final;
 
 	virtual void Update(FLOAT deltaTime) final;
-	virtual void Render(const ComPtr<ID3D12GraphicsCommandList>& commandList) const final;
-	virtual void Render(const ComPtr<ID2D1DeviceContext2>& d2dContext) const final;
+	virtual void Render3D(const ComPtr<ID3D12GraphicsCommandList>& commandList) const final;
+	virtual void Render2D() const final;
 };

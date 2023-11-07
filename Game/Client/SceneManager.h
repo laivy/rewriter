@@ -1,6 +1,8 @@
 ﻿#pragma once
-#include "Scene.h"
 #include "EventManager.h"
+#include "Game/Common/Time.h"
+
+class Scene;
 
 class SceneManager : public TSingleton<SceneManager>
 {
@@ -16,9 +18,9 @@ public:
 	void OnRButtonDown(int x, int y);
 	void OnKeyboardEvent(UINT message, WPARAM wParam, LPARAM lParam);
 
-	void Update(FLOAT deltaTime);
+	void Update(float deltaTime);
 	void Render(const ComPtr<ID3D12GraphicsCommandList>& commandList) const;
-	void Render(const ComPtr<ID2D1DeviceContext2>& renderTarget) const;
+	void Render2D() const;
 
 	void SetFadeIn(FLOAT second, const std::function<void()>& callback = []() {});
 	void SetFadeOut(FLOAT second, const std::function<void()>& callback = []() {});
@@ -45,9 +47,8 @@ private:
 	struct FadeInfo
 	{
 		FadeType type{ FadeType::NONE };
-		std::chrono::time_point<std::chrono::high_resolution_clock> startTime;
-		std::chrono::time_point<std::chrono::high_resolution_clock> endTime;
-		std::function<void()> callback{};
+		Time start{};
+		Time end{};
 		FLOAT alpha{ 1.0f };
 	};
 

@@ -16,7 +16,7 @@ void Timer::Tick()
 	m_lastClockCount = currClockCount;
 }
 
-FLOAT Timer::GetDeltaTime() const
+float Timer::GetDeltaTime() const
 {
 	return m_deltaTime;
 }

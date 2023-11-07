@@ -1,22 +1,19 @@
 ﻿#include "Stdafx.h"
-#include "Button.h"
-#include "EditCtrl.h"
 #include "LoginWnd.h"
-#include "LoginScene.h"
-#include "LoginServer.h"
 #include "Renderer2D.h"
-#include "SceneManager.h"
 
 LoginWnd::LoginWnd(const INT2& size) : Wnd{ size }
 {
 }
 
-void LoginWnd::Render(const ComPtr<ID2D1DeviceContext2>& d2dContext)
+void LoginWnd::Update(float deltaTime)
 {
-	auto root{ Resource::Get("UI.dat/Login") };
-	auto background{ Resource::GetImage(root, "Background") };
+	__super::Update(deltaTime);
+}
 
-	auto patch{ Resource::Get(root, "9Patch") };
+void LoginWnd::Render() const
+{
+	auto patch{ Resource::Get("UI.dat/Login/9Patch") };
 	auto lt{ Resource::GetImage(patch, "LT") };
 	auto t{ Resource::GetImage(patch, "T") };
 	auto rt{ Resource::GetImage(patch, "RT") };

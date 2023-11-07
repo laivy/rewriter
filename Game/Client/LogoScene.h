@@ -1,14 +1,12 @@
 ﻿#pragma once
 #include "Scene.h"
 
-class Property;
-
 class LogoScene :
 	public IScene,
 	public TSingleton<LogoScene>
 {
 public:
-	LogoScene();
+	LogoScene() = default;
 	~LogoScene() = default;
 
 	virtual void OnCreate() final;
@@ -17,8 +15,5 @@ public:
 	virtual void OnKeyboardEvent(UINT message, WPARAM wParam, LPARAM lParam) final;
 
 	virtual void Update(FLOAT deltaTime) final;
-	virtual void Render(const ComPtr<ID2D1DeviceContext2>& d2dContext) const final;
-
-private:
-	Property* m_prop;
+	virtual void Render2D() const final;
 };

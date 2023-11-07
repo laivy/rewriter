@@ -6,7 +6,7 @@ class ClientApp : public TSingleton<ClientApp>
 {
 public:
 	ClientApp();
-	~ClientApp();
+	~ClientApp() = default;
 
 	bool OnCreate();
 
@@ -32,7 +32,7 @@ private:
 	void OnRButtonDown(int x, int y);
 	void OnKeyboardEvent(UINT message, WPARAM wParam, LPARAM lParam);
 
-	HRESULT InitWnd();
+	HRESULT InitWindow();
 	HRESULT InitDirectX();
 	void CreateFactory();
 	void CreateDevice();
@@ -51,8 +51,8 @@ private:
 	void Update();
 	void Render();
 
-	void ResetCommandList();
-	void ExecuteCommandList();
+	void ResetCommandList() const;
+	void ExecuteCommandList() const;
 
 	void WaitPrevFrame();
 	void WaitForGPU();

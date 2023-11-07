@@ -7,5 +7,6 @@ public:
 	LoginWnd(const INT2& size);
 	~LoginWnd() = default;
 
-	virtual void Render(const ComPtr<ID2D1DeviceContext2>& d2dContext) final;
+	virtual void Update(float deltaTime) final;
+	virtual void Render() const final;
 };

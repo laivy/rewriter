@@ -71,9 +71,6 @@
     <ClCompile Include="Platform.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
-    <ClCompile Include="BrushPool.cpp">
-      <Filter>소스 파일</Filter>
-    </ClCompile>
     <ClCompile Include="Font.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
@@ -200,9 +197,6 @@
       <Filter>헤더 파일</Filter>
     </ClInclude>
     <ClInclude Include="Platform.h">
-      <Filter>헤더 파일</Filter>
-    </ClInclude>
-    <ClInclude Include="BrushPool.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
     <ClInclude Include="ConstantBuffer.h">

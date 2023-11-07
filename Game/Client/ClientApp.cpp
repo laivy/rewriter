@@ -1,5 +1,4 @@
 ﻿#include "Stdafx.h"
-#include "BrushPool.h"
 #include "ClientApp.h"
 #include "EventManager.h"
 #include "LoginServer.h"
@@ -25,17 +24,6 @@ ClientApp::ClientApp() :
 {
 }
 
-ClientApp::~ClientApp()
-{
-#ifdef _DEBUG
-	ComPtr<IDXGIDebug1> dxgiDebug;
-	if (SUCCEEDED(DXGIGetDebugInterface1(0, IID_PPV_ARGS(&dxgiDebug))))
-	{
-		dxgiDebug->ReportLiveObjects(DXGI_DEBUG_ALL, DXGI_DEBUG_RLO_FLAGS::DXGI_DEBUG_RLO_ALL);
-	}
-#endif
-}
-
 bool ClientApp::OnCreate()
 {
 #ifndef _NO_SERVER
@@ -47,15 +35,14 @@ bool ClientApp::OnCreate()
 	}
 #endif
 
-	InitWnd();
+	InitWindow();
 	InitDirectX();
 	ResetCommandList();
 
-	BrushPool::Instantiate();
 	EventManager::Instantiate();
 	ObjectManager::Instantiate();
-	SceneManager::Instantiate();
 	WndManager::Instantiate();
+	SceneManager::Instantiate();
 
 	ExecuteCommandList();
 	WaitForGPU();
@@ -172,11 +159,18 @@ void ClientApp::OnDestroy()
 	WaitForGPU();
 	CloseHandle(m_fenceEvent);
 
-	BrushPool::Destroy();
 	ObjectManager::Destroy();
 	WndManager::Destroy();
 	EventManager::Destroy();
 	SceneManager::Destroy();
+
+#ifdef _DEBUG
+	ComPtr<IDXGIDebug1> dxgiDebug;
+	if (SUCCEEDED(DXGIGetDebugInterface1(0, IID_PPV_ARGS(&dxgiDebug))))
+	{
+		dxgiDebug->ReportLiveObjects(DXGI_DEBUG_ALL, DXGI_DEBUG_RLO_FLAGS::DXGI_DEBUG_RLO_ALL);
+	}
+#endif
 }
 
 void ClientApp::OnResize(int width, int height)
@@ -223,7 +217,7 @@ void ClientApp::OnKeyboardEvent(UINT message, WPARAM wParam, LPARAM lParam)
 		sm->OnKeyboardEvent(message, wParam, lParam);
 }
 
-HRESULT ClientApp::InitWnd()
+HRESULT ClientApp::InitWindow()
 {
 	WNDCLASSEX wcex{};
 	wcex.cbSize = sizeof(WNDCLASSEX);
@@ -254,6 +248,7 @@ HRESULT ClientApp::InitWnd()
 		HINST_THISCOMPONENT,
 		this
 	);
+	SetWindowText(m_hWnd, TEXT("Rewriter"));
 
 	HRESULT hr{ m_hWnd ? S_OK : E_FAIL };
 	if (SUCCEEDED(hr))
@@ -542,14 +537,14 @@ void ClientApp::CreateFence()
 
 void ClientApp::Update()
 {
-	m_timer->Tick();
-	FLOAT deltaTime{ m_timer->GetDeltaTime() };
-
 	// Update에서도 커맨드리스트에 명령을 추가하는 경우가 있음
 	ResetCommandList();
 
-	if (SceneManager::IsInstanced())
-		SceneManager::GetInstance()->Update(deltaTime);
+	m_timer->Tick();
+
+	float deltaTime{ m_timer->GetDeltaTime() };
+	if (auto sm{ SceneManager::GetInstance() })
+		sm->Update(deltaTime);
 }
 
 void ClientApp::Render()
@@ -563,7 +558,7 @@ void ClientApp::Render()
 	m_commandList->RSSetViewports(1, &m_viewport);
 	m_commandList->RSSetScissorRects(1, &m_scissorRect);
 
-	constexpr FLOAT clearColor[]{ 0.15625f, 0.171875f, 0.203125f, 1.0f };
+	constexpr float clearColor[]{ 0.15625f, 0.171875f, 0.203125f, 1.0f };
 	m_commandList->ClearRenderTargetView(rtvHandle, clearColor, 0, NULL);
 	m_commandList->ClearDepthStencilView(dsvHandle, D3D12_CLEAR_FLAG_DEPTH | D3D12_CLEAR_FLAG_STENCIL, 1.0f, 0, 0, NULL);
 
@@ -581,8 +576,8 @@ void ClientApp::Render()
 	Renderer2D::g_ctx->SetTarget(m_d2dRenderTargets[m_frameIndex].Get());
 	Renderer2D::g_ctx->BeginDraw();
 
-	if (SceneManager::IsInstanced())
-		SceneManager::GetInstance()->Render(Renderer2D::g_ctx);
+	if (auto sm{ SceneManager::GetInstance() })
+		sm->Render2D();
 
 	DX::ThrowIfFailed(Renderer2D::g_ctx->EndDraw());
 	m_d3d11On12Device->ReleaseWrappedResources(m_wrappedBackBuffers[m_frameIndex].GetAddressOf(), 1);
@@ -594,13 +589,13 @@ void ClientApp::Render()
 	WaitPrevFrame();
 }
 
-void ClientApp::ResetCommandList()
+void ClientApp::ResetCommandList() const
 {
 	DX::ThrowIfFailed(m_commandAllocators[m_frameIndex]->Reset());
 	DX::ThrowIfFailed(m_commandList->Reset(m_commandAllocators[m_frameIndex].Get(), nullptr));
 }
 
-void ClientApp::ExecuteCommandList()
+void ClientApp::ExecuteCommandList() const
 {
 	DX::ThrowIfFailed(m_commandList->Close());
 	ID3D12CommandList* ppCommandList[]{ m_commandList.Get() };

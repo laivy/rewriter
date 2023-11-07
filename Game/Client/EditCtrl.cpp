@@ -1,5 +1,4 @@
 ﻿#include "Stdafx.h"
-#include "BrushPool.h"
 #include "EditCtrl.h"
 #include "Font.h"
 #include "ClientApp.h"
@@ -39,7 +38,7 @@ void EditCtrl::OnKeyboardEvent(UINT message, WPARAM wParam, LPARAM lParam)
 				EraseText(1);
 			break;
 		default:
-			InsertText(std::wstring{ static_cast<TCHAR>(wParam) });
+			InsertText(std::wstring{ static_cast<WCHAR>(wParam) });
 			break;
 		}
 		m_isCompositing = false;
@@ -108,16 +107,16 @@ void EditCtrl::Render(const ComPtr<ID2D1DeviceContext2>& d2dContext) const
 		1.0f,
 		1.0f
 	};
-	d2dContext->FillRoundedRectangle(rect, BrushPool::GetInstance()->GetBrush(BrushPool::WHITE));
+	//d2dContext->FillRoundedRectangle(rect, BrushPool::GetInstance()->GetBrush(BrushPool::WHITE));
 
 	// 텍스트
 	d2dContext->PushAxisAlignedClip(RECTF{ 0.0f, 0.0f, static_cast<float>(m_size.x), static_cast<float>(m_size.y) }, D2D1_ANTIALIAS_MODE_ALIASED);
-	d2dContext->DrawTextLayout(FLOAT2{ -m_xOffset, 0.0f }, m_textLayout.Get(), BrushPool::GetInstance()->GetBrush(BrushPool::BLACK));
+	//d2dContext->DrawTextLayout(FLOAT2{ -m_xOffset, 0.0f }, m_textLayout.Get(), BrushPool::GetInstance()->GetBrush(BrushPool::BLACK));
 	d2dContext->PopAxisAlignedClip();
 
 	// 캐럿
-	if (m_isFocus && m_parent->IsFocus() && 0.0f <= m_caretTimer && m_caretTimer < CARET_BLINK_SECOND)
-		d2dContext->FillRectangle(m_caretRect, BrushPool::GetInstance()->GetBrush(BrushPool::BLACK));
+	//if (m_isFocus && m_parent->IsFocus() && 0.0f <= m_caretTimer && m_caretTimer < CARET_BLINK_SECOND)
+	//	d2dContext->FillRectangle(m_caretRect, BrushPool::GetInstance()->GetBrush(BrushPool::BLACK));
 }
 
 void EditCtrl::SetFont(const std::shared_ptr<Font>& font)

@@ -15,9 +15,13 @@ void LoginScene::OnCreate()
 	if (!WndManager::IsInstanced())
 		WndManager::Instantiate();
 
-	auto wnd{ std::make_unique<LoginWnd>(INT2{ 230, 300 }) };
-	//wnd->SetPosition({ 1920 / 2, 1080 / 2 });
+	auto wnd{ std::make_unique<LoginWnd>(INT2{ 400, 300 }) };
+	wnd->SetPosition({ 1920 / 2, 1080 / 2 });
 	WndManager::GetInstance()->AddWnd(wnd.release());
+
+	auto wnd2{ std::make_unique<LoginWnd>(INT2{ 400, 300 }) };
+	wnd2->SetPosition({ 1920 / 2, 1080 / 2 }, Pivot::CENTER);
+	WndManager::GetInstance()->AddWnd(wnd2.release());
 }
 
 void LoginScene::OnDestroy() { }
@@ -57,9 +61,11 @@ void LoginScene::Update(FLOAT deltaTime)
 	WndManager::GetInstance()->Update(deltaTime);
 }
 
-void LoginScene::Render(const ComPtr<ID3D12GraphicsCommandList>& commandList) const { }
-
-void LoginScene::Render(const ComPtr<ID2D1DeviceContext2>& d2dContext) const
+void LoginScene::Render3D(const ComPtr<ID3D12GraphicsCommandList>& commandList) const
 {
-	WndManager::GetInstance()->Render(d2dContext);
+}
+
+void LoginScene::Render2D() const
+{
+	WndManager::GetInstance()->Render();
 }

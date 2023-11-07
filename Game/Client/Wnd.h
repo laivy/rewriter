@@ -18,8 +18,8 @@ public:
 	virtual void OnKeyboardEvent(UINT message, WPARAM wParam, LPARAM lParam);
 	virtual void OnButtonClick(ButtonID id);
 
-	virtual void Update(FLOAT deltaTime);
-	virtual void Render(const ComPtr<ID2D1DeviceContext2>& d2dContext);
+	virtual void Update(float deltaTime);
+	virtual void Render() const;
 
 	virtual void SetFocus(bool isFocus);
 

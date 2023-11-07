@@ -80,10 +80,9 @@ void Wnd::OnKeyboardEvent(UINT message, WPARAM wParam, LPARAM lParam)
 
 void Wnd::OnButtonClick(ButtonID id)
 {
-
 }
 
-void Wnd::Update(FLOAT deltaTime)
+void Wnd::Update(float deltaTime)
 {
 	if (!m_isValid)
 		return;
@@ -99,34 +98,14 @@ void Wnd::Update(FLOAT deltaTime)
 		ui->Update(deltaTime);
 }
 
-void Wnd::Render(const ComPtr<ID2D1DeviceContext2>& d2dContext)
+void Wnd::Render() const
 {
 	if (!m_isValid)
 		return;
 
-	ComPtr<ID2D1SolidColorBrush> brush{};
-	d2dContext->CreateSolidColorBrush(D2D1::ColorF{ D2D1::ColorF::Black }, &brush);
-	d2dContext->SetTransform(D2D1::Matrix3x2F::Translation(static_cast<float>(m_position.x), static_cast<float>(m_position.y)));
-
-	// 포커스 되어있다면 테두리를 그린다.
-	if (m_isFocus)
-	{
-		ComPtr<ID2D1SolidColorBrush> focusBrush{};
-		d2dContext->CreateSolidColorBrush(D2D1::ColorF{ D2D1::ColorF::Aqua }, &focusBrush);
-		d2dContext->DrawRectangle(RECTF{ -m_size.x / 2.0f, -m_size.y / 2.0f, m_size.x / 2.0f, m_size.y / 2.0f }, focusBrush.Get(), 10.0f);
-	}
-
-	// 창
-	d2dContext->FillRectangle(RECTF{ -m_size.x / 2.0f, -m_size.y / 2.0f, m_size.x / 2.0f, m_size.y / 2.0f }, brush.Get());
-
-	// 타이틀
-	ComPtr<ID2D1SolidColorBrush> titleBrush{};
-	d2dContext->CreateSolidColorBrush(D2D1::ColorF{ D2D1::ColorF::CadetBlue }, &titleBrush);
-	d2dContext->FillRectangle(RECTF{ -m_size.x / 2.0f, -m_size.y / 2.0f, m_size.x / 2.0f, -m_size.y / 2.0f + 15.0f }, titleBrush.Get());
-
 	// UI
 	for (const auto& ui : m_userInterfaces)
-		ui->Render(d2dContext);
+		ui->Render();
 }
 
 void Wnd::SetFocus(bool isFocus)
@@ -163,7 +142,7 @@ bool Wnd::IsPick() const
 bool Wnd::IsInPickArea(const INT2& point)
 {
 	// point는 윈도우 좌표계의 좌표
-	RECTI pickArea{ m_pickArea };
-	pickArea.Offset(m_position.x - m_size.x / 2, m_position.y - m_size.y / 2);
-	return pickArea.IsContain(point);
+	RECTI rect{ m_pickArea };
+	rect.Offset(m_position.x, m_position.y);
+	return rect.IsContain(point);
 }

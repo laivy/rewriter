@@ -1,5 +1,4 @@
 ﻿#include "Stdafx.h"
-#include "BrushPool.h"
 #include "ClientApp.h"
 #include "Label.h"
 #include "Wnd.h"
@@ -24,7 +23,7 @@ void Label::Render(const ComPtr<ID2D1DeviceContext2>& d2dContext) const
 
 	if (m_textLayout)
 	{
-		d2dContext->DrawTextLayout(FLOAT2{ 0.0f, 0.0f }, m_textLayout.Get(), BrushPool::GetInstance()->GetBrush(BrushPool::WHITE), D2D1_DRAW_TEXT_OPTIONS_CLIP);
+		//d2dContext->DrawTextLayout(FLOAT2{ 0.0f, 0.0f }, m_textLayout.Get(), BrushPool::GetInstance()->GetBrush(BrushPool::WHITE), D2D1_DRAW_TEXT_OPTIONS_CLIP);
 	}
 }
 

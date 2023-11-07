@@ -62,12 +62,12 @@ using namespace std::chrono_literals;
 #include "External/DirectX/WICTextureLoader12.h"
 
 // Game
+#include "DXUtil.h"
+#include "TextUtil.h"
 #include "Game/Common/Packet.h"
 #include "Game/Common/Singleton.h"
 #include "Game/Common/StringTable.h"
 #include "Game/Common/Types.h"
-#include "DXUtil.h"
-#include "TextUtil.h"
 
 // Resource
 #include "Module/Resource/Include/Image.h"

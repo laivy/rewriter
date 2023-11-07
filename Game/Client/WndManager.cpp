@@ -16,13 +16,10 @@ WndManager::WndManager()
 void WndManager::OnMouseMove(int x, int y)
 {
 	INT2 cursor{ ClientApp::GetInstance()->GetCursorPosition() };
-	for (const auto& w : m_wnds 
-		| std::views::filter([](const auto& w) { return w->IsValid(); }))
+	for (const auto& w : m_wnds | std::views::filter([](const auto& w) { return w->IsValid(); }))
 	{
 		INT2 pos{ cursor };
 		pos -= w->GetPosition();
-		pos.x += w->GetSize().x / 2;
-		pos.y += w->GetSize().y / 2;
 		w->OnMouseMove(pos.x, pos.y);
 	}
 }
@@ -33,13 +30,10 @@ void WndManager::OnLButtonUp(int x, int y)
 		w->SetPick(false);
 
 	INT2 cursor{ ClientApp::GetInstance()->GetCursorPosition() };
-	for (const auto& w : m_wnds
-		| std::views::filter([x, y](const auto& w) { return w->IsValid() && w->IsContain({ x, y }); }))
+	for (const auto& w : m_wnds | std::views::filter([x, y](const auto& w) { return w->IsValid() && w->IsContain({ x, y }); }))
 	{
 		INT2 pos{ cursor };
 		pos -= w->GetPosition();
-		pos.x += w->GetSize().x / 2;
-		pos.y += w->GetSize().y / 2;
 		w->OnLButtonUp(pos.x, pos.y);
 	}
 }
@@ -47,7 +41,6 @@ void WndManager::OnLButtonUp(int x, int y)
 void WndManager::OnLButtonDown(int x, int y)
 {
 	INT2 cursor{ ClientApp::GetInstance()->GetCursorPosition() };
-
 	Wnd* pickWnd{ nullptr };
 	Wnd* focusWnd{ nullptr };
 	for (const auto& w : m_wnds | std::views::reverse)
@@ -69,13 +62,10 @@ void WndManager::OnLButtonDown(int x, int y)
 		SetTopWnd(focusWnd);
 	}
 
-	for (const auto& w : m_wnds
-		| std::views::filter([x, y](const auto& w) { return w->IsValid() && w->IsContain({ x, y }); }))
+	for (const auto& w : m_wnds | std::views::filter([x, y](const auto& w) { return w->IsValid() && w->IsContain({ x, y }); }))
 	{
 		INT2 pos{ cursor };
 		pos -= w->GetPosition();
-		pos.x += w->GetSize().x / 2;
-		pos.y += w->GetSize().y / 2;
 		w->OnLButtonDown(pos.x, pos.y);
 	}
 }
@@ -94,17 +84,17 @@ void WndManager::OnKeyboardEvent(UINT message, WPARAM wParam, LPARAM lParam)
 		w->OnKeyboardEvent(message, wParam, lParam);
 }
 
-void WndManager::Update(FLOAT deltaTime)
+void WndManager::Update(float deltaTime)
 {
 	for (const auto& w : m_wnds)
 		w->Update(deltaTime);
 	RemoveInvalidWnds();
 }
 
-void WndManager::Render(const ComPtr<ID2D1DeviceContext2>& d2dContext) const
+void WndManager::Render() const
 {
 	for (const auto& w : m_wnds)
-		w->Render(d2dContext);
+		w->Render();
 }
 
 void WndManager::Clear()

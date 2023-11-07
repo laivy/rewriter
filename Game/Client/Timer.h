@@ -7,10 +7,10 @@ public:
 
 	void Tick();
 
-	FLOAT GetDeltaTime() const;
+	float GetDeltaTime() const;
 
 private:
-	LARGE_INTEGER	m_frequency;
-	LARGE_INTEGER	m_lastClockCount;
-	FLOAT			m_deltaTime;
+	LARGE_INTEGER m_frequency;
+	LARGE_INTEGER m_lastClockCount;
+	float m_deltaTime;
 };

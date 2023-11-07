@@ -16,8 +16,8 @@ public:
 	void OnRButtonDown(int x, int y);
 	void OnKeyboardEvent(UINT message, WPARAM wParam, LPARAM lParam);
 
-	void Update(FLOAT deltaTime);
-	void Render(const ComPtr<ID2D1DeviceContext2>& d2dContext) const;
+	void Update(float deltaTime);
+	void Render() const;
 
 	void Clear();
 

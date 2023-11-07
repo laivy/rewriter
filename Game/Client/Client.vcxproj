@@ -113,9 +113,6 @@
     <ClCompile Include="..\Common\Types.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
     </ClCompile>
-    <ClCompile Include="BrushPool.cpp">
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Use</PrecompiledHeader>
-    </ClCompile>
     <ClCompile Include="Button.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Use</PrecompiledHeader>
     </ClCompile>
@@ -220,7 +217,6 @@
     <ClInclude Include="..\Common\StringTable.h" />
     <ClInclude Include="..\Common\Time.h" />
     <ClInclude Include="..\Common\Types.h" />
-    <ClInclude Include="BrushPool.h" />
     <ClInclude Include="Button.h" />
     <ClInclude Include="Camera.h" />
     <ClInclude Include="ConstantBuffer.h" />

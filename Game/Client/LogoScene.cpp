@@ -5,10 +5,6 @@
 #include "ClientApp.h"
 #include "SceneManager.h"
 
-LogoScene::LogoScene() : m_prop{ nullptr }
-{
-}
-
 void LogoScene::OnCreate()
 {
 	SceneManager::GetInstance()->SetFadeOut(0.5f,
@@ -31,4 +27,4 @@ void LogoScene::OnKeyboardEvent(UINT message, WPARAM wParam, LPARAM lParam) { }
 
 void LogoScene::Update(FLOAT deltaTime) { }
 
-void LogoScene::Render(const ComPtr<ID2D1DeviceContext2>& d2dContext) const { }
+void LogoScene::Render2D() const { }

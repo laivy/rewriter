@@ -16,27 +16,25 @@ public:
 	virtual void OnKeyboardEvent(UINT message, WPARAM wParam, LPARAM lParam);
 
 	virtual void Update(float deltaTime);
-	virtual void Render(const ComPtr<ID2D1DeviceContext2>& d2dContext) const;
+	virtual void Render() const;
 	virtual void Destroy();
 
 	virtual void SetParent(Wnd* const wnd);
 	virtual void SetFocus(bool focus);
-	virtual void SetPivot(Pivot pivot);
 	virtual void SetSize(const INT2& size);
-	virtual void SetPosition(const INT2& position);
+	virtual void SetPosition(const INT2& position, Pivot pivot = Pivot::LEFTTOP);
 
 	Wnd* const GetParent() const;
 	bool IsValid() const;
 	bool IsFocus() const;
 	bool IsContain(const INT2& point) const;
 	INT2 GetSize() const;
-	INT2 GetPosition(Pivot pivot = Pivot::CENTER) const;
+	INT2 GetPosition(Pivot pivot = Pivot::LEFTTOP) const;
 
 protected:
 	Wnd* m_parent;
 	bool m_isValid;
 	bool m_isFocus;
-	Pivot m_pivot;
 	INT2 m_size;
-	INT2 m_position;
+	INT2 m_position; // 좌측 상단 좌표
 };
