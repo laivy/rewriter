@@ -1,4 +1,5 @@
 ﻿#pragma once
+#include "Common/Types.h"
 
 struct ID2D1DeviceContext2;
 
@@ -10,7 +11,7 @@ namespace Resource
 		Image(BYTE* binary, DWORD binarySize);
 		~Image() = default;
 
-		DLLEXPORT operator ID2D1Bitmap*() const;
+		__declspec(dllexport) operator ID2D1Bitmap*() const;
 
 		void SetD2DBitmap(ID2D1Bitmap* bitmap);
 
@@ -26,8 +27,8 @@ namespace Resource
 	};
 
 	// 이미지의 가로, 세로 크기를 반환
-	DLLEXPORT INT2 GetSize(const std::shared_ptr<Resource::Image>& image);
+	__declspec(dllexport) INT2 GetSize(const std::shared_ptr<Resource::Image>& image);
 
 	// 해당 이미지를 Direct2D 렌더링에 사용함
-	DLLEXPORT void UseAsD2D(const ComPtr<ID2D1DeviceContext2>& ctx, const std::shared_ptr<Resource::Image>& image);
+	__declspec(dllexport) void UseAsD2D(const ComPtr<ID2D1DeviceContext2>& ctx, const std::shared_ptr<Resource::Image>& image);
 }

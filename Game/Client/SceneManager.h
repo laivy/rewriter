@@ -1,6 +1,6 @@
 ﻿#pragma once
 #include "EventManager.h"
-#include "Game/Common/Time.h"
+#include "Common/Time.h"
 
 class Scene;
 

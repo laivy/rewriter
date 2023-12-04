@@ -61,18 +61,18 @@ using namespace std::chrono_literals;
 #include "External/DirectX/d3dx12.h"
 #include "External/DirectX/WICTextureLoader12.h"
 
-// Game
-#include "DXUtil.h"
-#include "TextUtil.h"
-#include "Game/Common/Packet.h"
-#include "Game/Common/Singleton.h"
-#include "Game/Common/StringTable.h"
-#include "Game/Common/Types.h"
-
 // Resource
 #include "Module/Resource/Include/Image.h"
 #include "Module/Resource/Include/Property.h"
 #include "Module/Resource/Include/ResourceManager.h"
+
+// Game
+#include "DXUtil.h"
+#include "TextUtil.h"
+#include "Common/Packet.h"
+#include "Common/Singleton.h"
+#include "Common/StringTable.h"
+#include "Common/Types.h"
 
 // 전역 변수
 extern UINT g_cbvSrvUavDescriptorIncrementSize;

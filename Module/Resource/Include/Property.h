@@ -1,4 +1,5 @@
 ﻿#pragma once
+#include "Common/Types.h"
 
 namespace Resource
 {
@@ -20,10 +21,10 @@ namespace Resource
 			Iterator(const Property* const p, size_t index);
 			~Iterator() = default;
 
-			DLLEXPORT Iterator& operator++();
-			DLLEXPORT Iterator& operator--();
-			DLLEXPORT bool operator!=(const Iterator& it) const;
-			DLLEXPORT std::pair<std::string, std::shared_ptr<Property>> operator*() const;
+			__declspec(dllexport) Iterator& operator++();
+			__declspec(dllexport) Iterator& operator--();
+			__declspec(dllexport) bool operator!=(const Iterator& it) const;
+			__declspec(dllexport) std::pair<std::string, std::shared_ptr<Property>> operator*() const;
 
 		private:
 			const Property* const m_property;
@@ -34,8 +35,8 @@ namespace Resource
 		Property();
 		~Property();
 
-		DLLEXPORT Iterator begin() const;
-		DLLEXPORT Iterator end() const;
+		__declspec(dllexport) Iterator begin() const;
+		__declspec(dllexport) Iterator end() const;
 
 		Type GetType() const;
 		std::shared_ptr<Property> Get(const std::string& path) const;

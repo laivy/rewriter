@@ -28,7 +28,7 @@ namespace Database
 			SQLFreeHandle(SQL_HANDLE_ENV, m_hEnv);
 	}
 
-	DLLEXPORT DBRESULT Connect(const std::wstring& server, const std::wstring& dbnamae, const std::wstring& username, const std::wstring& password)
+	__declspec(dllexport) DBRESULT Connect(const std::wstring& server, const std::wstring& dbnamae, const std::wstring& username, const std::wstring& password)
 	{
 		auto conn{ Connection::GetInstance() };
 		if (!conn)

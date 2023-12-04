@@ -1,4 +1,5 @@
 ﻿#pragma once
+#include "Common/Singleton.h"
 
 namespace Database
 {
@@ -16,5 +17,5 @@ namespace Database
 		SQLHDBC m_hDbc;
 	};
 
-	DLLEXPORT DBRESULT Connect(const std::wstring& server, const std::wstring& database, const std::wstring& username, const std::wstring& password);
+	__declspec(dllexport) DBRESULT Connect(const std::wstring& server, const std::wstring& database, const std::wstring& username, const std::wstring& password);
 }

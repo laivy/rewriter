@@ -8,7 +8,7 @@ namespace Resource
 		m_binary.reset(binary);
 	}
 
-	DLLEXPORT Image::operator ID2D1Bitmap*() const
+	Image::operator ID2D1Bitmap*() const
 	{
 		return m_d2dBitmap.Get();
 	}
@@ -47,14 +47,14 @@ namespace Resource
 		return INT2{};
 	}
 
-	DLLEXPORT INT2 GetSize(const std::shared_ptr<Resource::Image>& image)
+	INT2 GetSize(const std::shared_ptr<Resource::Image>& image)
 	{
 		if (image)
 			return image->GetSize();
 		return INT2{ 0, 0 };
 	}
 
-	DLLEXPORT void UseAsD2D(const ComPtr<ID2D1DeviceContext2>& ctx, const std::shared_ptr<Resource::Image>& image)
+	void UseAsD2D(const ComPtr<ID2D1DeviceContext2>& ctx, const std::shared_ptr<Resource::Image>& image)
 	{
 		if (!ctx || !image)
 			return;

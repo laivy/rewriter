@@ -1,8 +1,8 @@
 ﻿#include "Stdafx.h"
+#include "Common/StringTable.h"
 #include "Include/Image.h"
 #include "Include/Property.h"
 #include "Include/ResourceManager.h"
-#include "Game/Common/StringTable.h"
 
 namespace Resource
 {
@@ -26,8 +26,9 @@ namespace Resource
 				return m_resources.at(fileName)->Get(remain);
 		}
 
-		Load(path);
-		return Get(path);
+		if (Load(path))
+			return Get(path);
+		return nullptr;
 	}
 
 	void ResourceManager::Unload(const std::string& path)
@@ -74,7 +75,7 @@ namespace Resource
 		}
 	}
 
-	std::shared_ptr<Property> ResourceManager::Load(const std::string& path)
+	bool ResourceManager::Load(const std::string& path)
 	{
 		std::string fileName{ path };
 		std::string remain{};
@@ -89,8 +90,8 @@ namespace Resource
 		std::ifstream file{ StringTable::DATA_FOLDER_PATH + fileName, std::ios::binary };
 		if (!file)
 		{
-			assert(false && "CAN NOT OPEN FILE");
-			return nullptr;
+			//assert(false && "CAN NOT OPEN FILE");
+			return false;
 		}
 
 		int nodeCount{};
@@ -115,7 +116,7 @@ namespace Resource
 		}
 
 		m_resources.emplace(fileName, root);
-		return root;
+		return true;
 	}
 
 	bool IsSkip(std::ifstream& file, std::string& name)
@@ -200,14 +201,14 @@ namespace Resource
 			Skip(file);
 	}
 
-	DLLEXPORT std::shared_ptr<Property> Get(const std::string& path)
+	std::shared_ptr<Property> Get(const std::string& path)
 	{
 		if (auto rm{ ResourceManager::GetInstance() })
 			return rm->Get(path);
 		return nullptr;
 	}
 
-	DLLEXPORT std::shared_ptr<Property> Get(const std::shared_ptr<Property>& prop, const std::string& path)
+	std::shared_ptr<Property> Get(const std::shared_ptr<Property>& prop, const std::string& path)
 	{
 		if (path.empty())
 			return prop;
@@ -229,7 +230,7 @@ namespace Resource
 		return nullptr;
 	}
 
-	DLLEXPORT int GetInt(const std::shared_ptr<Property>& prop, const std::string& path)
+	int GetInt(const std::shared_ptr<Property>& prop, const std::string& path)
 	{
 		if (path.empty())
 			return prop->GetInt();
@@ -251,7 +252,7 @@ namespace Resource
 		return 0;
 	}
 
-	DLLEXPORT INT2 GetInt2(const std::shared_ptr<Property>& prop, const std::string& path)
+	INT2 GetInt2(const std::shared_ptr<Property>& prop, const std::string& path)
 	{
 		if (path.empty())
 			return prop->GetInt2();
@@ -273,7 +274,7 @@ namespace Resource
 		return INT2{};
 	}
 
-	DLLEXPORT float GetFloat(const std::shared_ptr<Property>& prop, const std::string& path)
+	float GetFloat(const std::shared_ptr<Property>& prop, const std::string& path)
 	{
 		if (path.empty())
 			return prop->GetFloat();
@@ -295,7 +296,7 @@ namespace Resource
 		return 0.0f;
 	}
 
-	DLLEXPORT std::string GetString(const std::shared_ptr<Property>& prop, const std::string& path)
+	std::string GetString(const std::shared_ptr<Property>& prop, const std::string& path)
 	{
 		if (path.empty())
 			return prop->GetString();
@@ -317,7 +318,7 @@ namespace Resource
 		return "";
 	}
 
-	DLLEXPORT std::shared_ptr<Image> GetImage(const std::shared_ptr<Property>& prop, const std::string& path)
+	std::shared_ptr<Image> GetImage(const std::shared_ptr<Property>& prop, const std::string& path)
 	{
 		if (path.empty())
 			return prop->GetImage();
@@ -339,7 +340,7 @@ namespace Resource
 		return nullptr;
 	}
 
-	DLLEXPORT void Unload(const std::string& path)
+	void Unload(const std::string& path)
 	{
 		if (auto rm{ ResourceManager::GetInstance() })
 			rm->Unload(path);
