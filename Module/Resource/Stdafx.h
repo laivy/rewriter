@@ -14,6 +14,7 @@ using Microsoft::WRL::ComPtr;
 #include <memory>
 #include <string>
 #include <unordered_map>
+#include <variant>
 
 // DirectX
 #include <d2d1_3.h>

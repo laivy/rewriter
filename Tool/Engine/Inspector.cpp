@@ -65,16 +65,16 @@ namespace Inspector
 			if (ImGui::InputText("##Name", m_name.data(), m_name.size(), flags))
 			{
 				if (m_node)
-					m_node->SetName(m_name.data());
+					Resource::SetName(m_node->GetProperty(), m_name.data());
 			}
 
 			ImGui::Text("Type"); ImGui::SameLine(100);
-			if (ImGui::BeginCombo("##Type", m_node ? TypeToString(m_node->GetType()).c_str() : "-"))
+			if (ImGui::BeginCombo("##Type", m_node ? TypeToString(Resource::GetType(m_node->GetProperty())).c_str() : "-"))
 			{
 				for (const std::string& s : { "GROUP", "INT", "INT2", "FLOAT", "STRING", "IMAGE" })
 				{
 					if (ImGui::Selectable(s.c_str()) && m_node)
-						m_node->SetType(StringToType(s));
+						Resource::SetType(m_node->GetProperty(), StringToType(s));
 				}
 				ImGui::EndCombo();
 			}
@@ -88,7 +88,7 @@ namespace Inspector
 		if (!m_node)
 			return;
 
-		std::string name{ m_node->GetName() };
+		std::string name{ Resource::GetName(m_node->GetProperty()) };
 		name.resize(BUFFER_SIZE);
 		std::ranges::copy(name, m_name.data());
 	}

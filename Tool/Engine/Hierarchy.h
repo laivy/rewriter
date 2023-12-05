@@ -12,15 +12,12 @@ namespace Hierarchy
 
 		void OnNodeSelected(Node* node);
 
-		void SetParent(Node* node);
-		void SetName(std::string_view name);
-		void SetType(Resource::Property::Type type);
 		void SetSelect(bool select);
+		void SetParent(Node* node);
 
-		Node* GetParent() const;
-		std::string GetName() const;
-		Resource::Property::Type GetType() const;
 		bool IsSelected() const;
+		std::shared_ptr<Resource::Property> GetProperty() const;
+		Node* GetParent() const;
 
 	private:
 		void RenderContextMenu();
@@ -28,12 +25,11 @@ namespace Hierarchy
 	protected:
 		static constexpr auto DEFAULT_NODE_NAME{ "NewNode" };
 
-		Node* m_parent; // 부모 노드
-		std::vector<std::unique_ptr<Node>> m_children; // 자식 노드
+		bool m_isSelected;
+		std::shared_ptr<Resource::Property> m_property;
 
-		std::string m_name; // 노드 이름
-		Resource::Property::Type m_type; // 노드 타입
-		bool m_isSelected; // 선택된 상태인지
+		Node* m_parent;
+		std::vector<std::unique_ptr<Node>> m_children;
 	};
 
 	class RootNode : public Node

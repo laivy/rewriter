@@ -5,9 +5,9 @@
 namespace Hierarchy
 {
 	Node::Node() :
-		m_parent{ nullptr },
-		m_type{ Resource::Property::Type::GROUP },
-		m_isSelected{ false }
+		m_isSelected{ false },
+		m_property{ Resource::Create() },
+		m_parent{ nullptr }
 	{
 	}
 
@@ -16,7 +16,7 @@ namespace Hierarchy
 		// 자식 노드가 없으면 Selectable
 		if (m_children.empty())
 		{
-			if (ImGui::Selectable(m_name.c_str(), &m_isSelected))
+			if (ImGui::Selectable(Resource::GetName(m_property).c_str(), &m_isSelected))
 			{
 				if (auto w{ Window::GetInstance() })
 					w->OnNodeSelected(this);
@@ -29,7 +29,7 @@ namespace Hierarchy
 		ImGuiTreeNodeFlags flag{ ImGuiTreeNodeFlags_OpenOnDoubleClick };
 		if (IsSelected())
 			flag |= ImGuiTreeNodeFlags_Selected;
-		if (ImGui::TreeNodeEx(m_name.c_str(), flag))
+		if (ImGui::TreeNodeEx(Resource::GetName(m_property).c_str(), flag))
 		{
 			if (ImGui::IsItemClicked())
 			{
@@ -68,16 +68,6 @@ namespace Hierarchy
 		m_parent = node;
 	}
 
-	void Node::SetName(std::string_view name)
-	{
-		m_name = name;
-	}
-
-	void Node::SetType(Resource::Property::Type type)
-	{
-		m_type = type;
-	}
-
 	void Node::SetSelect(bool select)
 	{
 		m_isSelected = select;
@@ -88,19 +78,14 @@ namespace Hierarchy
 		return m_parent;
 	}
 
-	std::string Node::GetName() const
-	{
-		return m_name;
-	}
-
-	Resource::Property::Type Node::GetType() const
-	{
-		return m_type;
-	}
-
 	bool Node::IsSelected() const
 	{
 		return m_isSelected;
+	}
+
+	std::shared_ptr<Resource::Property> Node::GetProperty() const
+	{
+		return m_property;
 	}
 
 	void Node::RenderContextMenu()
@@ -113,7 +98,11 @@ namespace Hierarchy
 				std::string name{ DEFAULT_NODE_NAME };
 				while (true)
 				{
-					auto it{ std::ranges::find_if(m_children, [&name](const auto& p) { return p->GetName() == name; }) };
+					auto it{ std::ranges::find_if(m_children, 
+						[&name](const auto& p)
+						{
+							return Resource::GetName(p->GetProperty()) == name;
+						}) };
 					if (it == m_children.cend())
 						break;
 					name = std::format("{}{}", DEFAULT_NODE_NAME, number++);
@@ -121,7 +110,7 @@ namespace Hierarchy
 
 				auto node{ std::make_unique<Node>() };
 				node->SetParent(this);
-				node->SetName(name);
+				Resource::SetName(node->GetProperty(), name);
 				m_children.push_back(std::move(node));
 			}
 			ImGui::EndPopup();
@@ -134,7 +123,7 @@ namespace Hierarchy
 
 	void RootNode::Render()
 	{
-		if (ImGui::CollapsingHeader(m_name.c_str(), ImGuiTreeNodeFlags_OpenOnDoubleClick))
+		if (ImGui::CollapsingHeader(Resource::GetName(m_property).c_str(), ImGuiTreeNodeFlags_OpenOnDoubleClick))
 		{
 			RenderContextMenu();
 
@@ -159,7 +148,7 @@ namespace Hierarchy
 
 	void RootNode::RenderContextMenu()
 	{
-		if (ImGui::BeginPopupContextItem(m_name.c_str()))
+		if (ImGui::BeginPopupContextItem(Resource::GetName(m_property).c_str()))
 		{
 			if (ImGui::Selectable("Add"))
 			{
@@ -167,7 +156,11 @@ namespace Hierarchy
 				std::string name{ DEFAULT_NODE_NAME };
 				while (true)
 				{
-					auto it{ std::ranges::find_if(m_children, [&name](const auto& p) { return p->GetName() == name; }) };
+					auto it{ std::ranges::find_if(m_children,
+						[&name](const auto& p)
+						{
+							return Resource::GetName(p->GetProperty()) == name;
+						}) };
 					if (it == m_children.cend())
 						break;
 					name = std::format("{}{}", DEFAULT_NODE_NAME, index++);
@@ -175,7 +168,7 @@ namespace Hierarchy
 
 				auto node{ std::make_unique<Node>() };
 				node->SetParent(this);
-				node->SetName(name);
+				Resource::SetName(node->GetProperty(), name);
 				m_children.push_back(std::move(node));
 			}
 			ImGui::EndPopup();
@@ -243,14 +236,18 @@ namespace Hierarchy
 		std::string name{ "NewFile" };
 		while (true)
 		{
-			auto it{ std::ranges::find_if(m_roots, [&name](const auto& p) { return p->GetName() == name; }) };
+			auto it{ std::ranges::find_if(m_roots, 
+				[&name](const auto& p) 
+				{ 
+					return Resource::GetName(p->GetProperty()) == name;
+				}) };
 			if (it == m_roots.cend())
 				break;
 			name = std::format("NewFile{}", index++);
 		}
 
 		auto prop{ std::make_unique<RootNode>() };
-		prop->SetName(name);
+		Resource::SetName(prop->GetProperty(), name);
 		m_roots.push_back(std::move(prop));
 	}
 

@@ -43,8 +43,7 @@ namespace Resource
 
 	Property::Property() :
 		m_type{ Property::Type::GROUP },
-		m_name{ "" },
-		m_int{ 0 }
+		m_name{ "" }
 	{
 	}
 
@@ -62,9 +61,79 @@ namespace Resource
 		return Iterator{ this, m_children.size() - 1 };
 	}
 
+	void Property::SetType(Type type)
+	{
+		m_type = type;
+	}
+
+	void Property::SetName(const std::string& name)
+	{
+		m_name = name;
+	}
+
+	void Property::Set(int data)
+	{
+		m_data = data;
+	}
+
+	void Property::Set(const INT2& data)
+	{
+		m_data = data;
+	}
+
+	void Property::Set(float data)
+	{
+		m_data = data;
+	}
+
+	void Property::Set(const std::string& data)
+	{
+		m_data = data;
+	}
+
+	void Property::Set(const std::shared_ptr<Image>& data)
+	{
+		m_data = data;
+	}
+
 	Property::Type Property::GetType() const
 	{
 		return m_type;
+	}
+
+	std::string Property::GetName() const
+	{
+		return m_name;
+	}
+
+	int Property::GetInt() const
+	{
+		assert(m_type == Type::INT);
+		return std::get<int>(m_data);
+	}
+
+	INT2 Property::GetInt2() const
+	{
+		assert(m_type == Type::INT2);
+		return std::get<INT2>(m_data);
+	}
+
+	float Property::GetFloat() const
+	{
+		assert(m_type == Type::FLOAT);
+		return std::get<float>(m_data);
+	}
+
+	std::string Property::GetString() const
+	{
+		assert(m_type == Type::STRING);
+		return std::get<std::string>(m_data);
+	}
+
+	std::shared_ptr<Image> Property::GetImage() const
+	{
+		assert(m_type == Type::IMAGE);
+		return std::get<std::shared_ptr<Image>>(m_data);
 	}
 
 	std::shared_ptr<Property> Property::Get(const std::string& path) const
@@ -84,57 +153,6 @@ namespace Resource
 		if (it == m_children.end())
 			return nullptr;
 		return *it;
-	}
-
-	int Property::GetInt() const
-	{
-		assert(m_type == Type::INT);
-		return m_int;
-	}
-
-	INT2 Property::GetInt2() const
-	{
-		assert(m_type == Type::INT2);
-		return m_int2;
-	}
-
-	float Property::GetFloat() const
-	{
-		assert(m_type == Type::FLOAT);
-		return m_float;
-	}
-
-	std::string Property::GetString() const
-	{
-		assert(m_type == Type::STRING);
-		return m_string;
-	}
-
-	std::shared_ptr<Image> Property::GetImage() const
-	{
-		assert(m_type == Type::IMAGE);
-		return m_image;
-	}
-
-	ID2D1Bitmap* Property::GetD2DImage() const
-	{
-		assert(m_type == Type::IMAGE);
-		//return m_image.GetD2DImage();
-		return nullptr;
-	}
-
-	ComPtr<ID3D12Resource> Property::GetD3DImage() const
-	{
-		//assert(m_type == Type::IMAGE || !m_binary.empty());
-		//return m_d3dResource;
-		return nullptr;
-	}
-
-	void Property::SetD3DImage(const ComPtr<ID3D12Resource>& image)
-	{
-		assert(m_type == Type::IMAGE);
-		//m_binary.clear();
-		//m_d3dResource = image;
 	}
 
 	void Property::Load(std::ifstream& file, std::string& name)
@@ -157,21 +175,35 @@ namespace Resource
 		case Type::GROUP:
 			break;
 		case Type::INT:
-			file.read(reinterpret_cast<char*>(&m_int), sizeof(m_int));
+		{
+			int data{};
+			file.read(reinterpret_cast<char*>(&data), sizeof(data));
+			m_data = data;
 			break;
+		}
 		case Type::INT2:
-			file.read(reinterpret_cast<char*>(&m_int2), sizeof(m_int2));
+		{
+			INT2 data{};
+			file.read(reinterpret_cast<char*>(&data), sizeof(data));
+			m_data = data;
 			break;
+		}
 		case Type::FLOAT:
-			file.read(reinterpret_cast<char*>(&m_float), sizeof(m_float));
+		{
+			float data{};
+			file.read(reinterpret_cast<char*>(&data), sizeof(data));
+			m_data = data;
 			break;
+		}
 		case Type::STRING:
 		{
 			length = 0;
 			file.read(reinterpret_cast<char*>(&length), sizeof(length));
+
 			buffer.fill(0);
 			file.read(buffer.data(), length);
-			m_string = std::string{ buffer.data(), static_cast<size_t>(length) };
+
+			m_data = std::string{ buffer.data(), static_cast<size_t>(length) };
 			break;
 		}
 		case Type::IMAGE:
@@ -179,10 +211,10 @@ namespace Resource
 			int len{};
 			file.read(reinterpret_cast<char*>(&len), sizeof(len));
 
-			std::unique_ptr<BYTE[]> binary{ new BYTE[len] };
+			std::unique_ptr<BYTE[]> binary{ new BYTE[len]{} };
 			file.read(reinterpret_cast<char*>(binary.get()), len);
 
-			m_image = std::make_unique<Image>(binary.release(), static_cast<DWORD>(len));
+			m_data = std::make_unique<Image>(binary.get(), static_cast<DWORD>(len));
 			break;
 		}
 		default:
@@ -214,5 +246,165 @@ namespace Resource
 	void Resource::Property::Flush()
 	{
 		std::erase_if(m_children, [](const auto& c) { return c.use_count() <= 1; });
+	}
+
+	Property::Type GetType(const std::shared_ptr<Property>& prop)
+	{
+		return prop->GetType();
+	}
+
+	std::string GetName(const std::shared_ptr<Property>& prop)
+	{
+		return prop->GetName();
+	}
+
+	int GetInt(const std::shared_ptr<Property>& prop, const std::string& path)
+	{
+		if (path.empty())
+			return prop->GetInt();
+
+		std::string name{ path };
+		std::string remain{};
+
+		size_t pos{ path.find('/') };
+		if (pos != std::string::npos)
+		{
+			name = path.substr(0, pos);
+			remain = path.substr(pos + 1);
+			return GetInt(prop->Get(name), remain);
+		}
+
+		if (const auto & child{ prop->Get(name) })
+			return child->GetInt();
+
+		return 0;
+	}
+
+	INT2 GetInt2(const std::shared_ptr<Property>& prop, const std::string& path)
+	{
+		if (path.empty())
+			return prop->GetInt2();
+
+		std::string name{ path };
+		std::string remain{};
+
+		size_t pos{ path.find('/') };
+		if (pos != std::string::npos)
+		{
+			name = path.substr(0, pos);
+			remain = path.substr(pos + 1);
+			return GetInt2(prop->Get(name), remain);
+		}
+
+		if (const auto & child{ prop->Get(name) })
+			return child->GetInt2();
+
+		return INT2{};
+	}
+
+	float GetFloat(const std::shared_ptr<Property>& prop, const std::string& path)
+	{
+		if (path.empty())
+			return prop->GetFloat();
+
+		std::string name{ path };
+		std::string remain{};
+
+		size_t pos{ path.find('/') };
+		if (pos != std::string::npos)
+		{
+			name = path.substr(0, pos);
+			remain = path.substr(pos + 1);
+			return GetFloat(prop->Get(name), remain);
+		}
+
+		if (const auto & child{ prop->Get(name) })
+			return child->GetFloat();
+
+		return 0.0f;
+	}
+
+	std::string GetString(const std::shared_ptr<Property>& prop, const std::string& path)
+	{
+		if (path.empty())
+			return prop->GetString();
+
+		std::string name{ path };
+		std::string remain{};
+
+		size_t pos{ path.find('/') };
+		if (pos != std::string::npos)
+		{
+			name = path.substr(0, pos);
+			remain = path.substr(pos + 1);
+			return GetString(prop->Get(name), remain);
+		}
+
+		if (const auto & child{ prop->Get(name) })
+			return child->GetString();
+
+		return "";
+	}
+
+	std::shared_ptr<Image> GetImage(const std::shared_ptr<Property>& prop, const std::string& path)
+	{
+		if (path.empty())
+			return prop->GetImage();
+
+		std::string name{ path };
+		std::string remain{};
+
+		size_t pos{ path.find('/') };
+		if (pos != std::string::npos)
+		{
+			name = path.substr(0, pos);
+			remain = path.substr(pos + 1);
+			return GetImage(prop->Get(name), remain);
+		}
+
+		if (const auto & child{ prop->Get(name) })
+			return child->GetImage();
+
+		return nullptr;
+	}
+
+	std::shared_ptr<Property> Create()
+	{
+		return std::make_shared<Property>();
+	}
+
+	void SetType(const std::shared_ptr<Property>& prop, Property::Type type)
+	{
+		prop->SetType(type);
+	}
+
+	void SetName(const std::shared_ptr<Property>& prop, const std::string& name)
+	{
+		prop->SetName(name);
+	}
+
+	void Set(const std::shared_ptr<Property>& prop, int value)
+	{
+		prop->Set(value);
+	}
+
+	void Set(const std::shared_ptr<Property>& prop, const INT2& value)
+	{
+		prop->Set(value);
+	}
+
+	void Set(const std::shared_ptr<Property>&prop, float value)
+	{
+		prop->Set(value);
+	}
+
+	void Set(const std::shared_ptr<Property>&prop, const std::string& value)
+	{
+		prop->Set(value);
+	}
+
+	void Set(const std::shared_ptr<Property>&prop, const std::shared_ptr<Image>& value)
+	{
+		prop->Set(value);
 	}
 }

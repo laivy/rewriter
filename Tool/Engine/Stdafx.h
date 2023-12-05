@@ -15,6 +15,7 @@ using Microsoft::WRL::ComPtr;
 #include <ranges>
 #include <set>
 #include <unordered_map>
+#include <variant>
 
 // DirectX
 #include <dxgi1_6.h>

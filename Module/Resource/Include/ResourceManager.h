@@ -28,10 +28,5 @@ namespace Resource
 
 	__declspec(dllexport) std::shared_ptr<Property> Get(const std::string& path);
 	__declspec(dllexport) std::shared_ptr<Property> Get(const std::shared_ptr<Property>& prop, const std::string& path);
-	__declspec(dllexport) int GetInt(const std::shared_ptr<Property>& prop, const std::string& path = "");
-	__declspec(dllexport) INT2 GetInt2(const std::shared_ptr<Property>& prop, const std::string& path = "");
-	__declspec(dllexport) float GetFloat(const std::shared_ptr<Property>& prop, const std::string& path = "");
-	__declspec(dllexport) std::string GetString(const std::shared_ptr<Property>& prop, const std::string& path = "");
-	__declspec(dllexport) std::shared_ptr<Image> GetImage(const std::shared_ptr<Property>& prop, const std::string& path = "");
 	__declspec(dllexport) void Unload(const std::string& path = "");
 }
