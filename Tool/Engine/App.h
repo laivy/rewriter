@@ -1,5 +1,4 @@
 ﻿#pragma once
-#include "ProjectWindow.h"
 
 class App : public TSingleton<App>
 {
@@ -25,9 +24,8 @@ private:
 	void RenderImGui();
 	void RenderImGuiMainDockSpace();
 	void RenderImGuiConsole();
-	void RenderImGuiInspector();
 
-private:
+public:
 	// Window
 	static constexpr auto TITLE_NAME{ L"RW Engine 1.0v" };
 	bool m_isActive;
@@ -52,7 +50,4 @@ private:
 	HANDLE m_fenceEvent;
 	UINT64 m_fenceValues[FRAME_COUNT];
 	UINT m_rtvDescriptorSize;
-
-	// ImGui
-	ProjectWindow m_projectWindow;
 };

@@ -4,7 +4,6 @@
 
 namespace Resource
 {
-	class Image;
 	class Property;
 
 	class ResourceManager : public TSingleton<ResourceManager>
@@ -20,11 +19,11 @@ namespace Resource
 		bool Load(const std::string& fileName);
 
 	private:
-		std::unordered_map<std::string, std::shared_ptr<Property>> m_resources; // <파일이름, 프로퍼티>
+		std::unordered_map<std::string, std::shared_ptr<Property>> m_resources; // <파일이름, 루트프로퍼티>
 	};
 
-	bool IsSkip(std::ifstream& file, std::string& name);
-	void Skip(std::ifstream& file);
+	bool IsSkip(std::istream& file, std::string& name);
+	void Skip(std::istream& file);
 
 	__declspec(dllexport) std::shared_ptr<Property> Get(const std::string& path);
 	__declspec(dllexport) std::shared_ptr<Property> Get(const std::shared_ptr<Property>& prop, const std::string& path);

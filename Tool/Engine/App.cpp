@@ -1,5 +1,6 @@
 ﻿#include "Stdafx.h"
 #include "App.h"
+#include "ExPlorer.h"
 #include "Hierarchy.h"
 #include "Inspector.h"
 
@@ -7,8 +8,7 @@ App::App(HINSTANCE hInstance) :
 	m_isActive{ false },
 	m_hInstance{ hInstance },
 	m_hWnd{ NULL },
-	m_size{ 1920, 1080 },
-	m_projectWindow{}
+	m_size{ 1920, 1080 }
 {
 	InitWindow();
 	InitDirectX();
@@ -218,9 +218,9 @@ void App::InitImGui()
 	);
 
 	// 윈도우 싱글턴 생성
-	ProjectWindow::Instantiate();
-	Hierarchy::Window::Instantiate();
-	Inspector::Window::Instantiate();
+	Explorer::Instantiate();
+	Hierarchy::Instantiate();
+	Inspector::Instantiate();
 }
 
 void App::OnResize(int width, int height)
@@ -302,10 +302,10 @@ void App::RenderImGui()
 	ImGui::NewFrame();
 
 	RenderImGuiMainDockSpace();
-	ProjectWindow::GetInstance()->Render();
+	Explorer::GetInstance()->Render();
 	RenderImGuiConsole();
-	Hierarchy::Window::GetInstance()->Render();
-	Inspector::Window::GetInstance()->Render();
+	Hierarchy::GetInstance()->Render();
+	Inspector::GetInstance()->Render();
 	ImGui::ShowDemoWindow();
 
 	ImGui::EndFrame();
@@ -333,14 +333,6 @@ void App::RenderImGuiMainDockSpace()
 	ImGuiDockNodeFlags dockSpaceFlag{ ImGuiDockNodeFlags_PassthruCentralNode };
 	ImGui::Begin("MainDockSpace", NULL, windowFlag);
 	ImGui::DockSpace(ImGui::GetID("MainDockSpace"), ImVec2{}, dockSpaceFlag);
-	ImGui::End();
-}
-
-void App::RenderImGuiInspector()
-{
-	if (ImGui::Begin("Inspector"))
-	{
-	}
 	ImGui::End();
 }
 

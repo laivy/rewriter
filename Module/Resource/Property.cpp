@@ -3,6 +3,7 @@
 #include "Include/Property.h"
 #include "Include/ResourceManager.h"
 #include "External/DirectX/WICTextureLoader12.h"
+#include <functional>
 
 namespace Resource
 {
@@ -42,7 +43,7 @@ namespace Resource
 	}
 
 	Property::Property() :
-		m_type{ Property::Type::GROUP },
+		m_type{ Property::Type::FOLDER },
 		m_name{ "" }
 	{
 	}
@@ -59,6 +60,85 @@ namespace Resource
 	Property::Iterator Property::end() const
 	{
 		return Iterator{ this, m_children.size() - 1 };
+	}
+
+	void Property::Save(std::ostream& file)
+	{
+		std::function<void(Property*)> lambda = [&](Property* prop)
+			{
+				// 이름
+				int32_t length{ static_cast<int32_t>(prop->m_name.size()) };
+				file.write(reinterpret_cast<char*>(&length), sizeof(length));
+				file.write(prop->m_name.data(), sizeof(length));
+
+				// 타입
+				file.write(reinterpret_cast<char*>(prop->m_type), sizeof(prop->m_type));
+
+				// 데이터
+				switch (prop->m_type)
+				{
+				case Type::INT:
+				{
+					auto data{ std::get<int32_t>(prop->m_data) };
+					file.write(reinterpret_cast<char*>(&data), sizeof(data));
+					break;
+				}
+				case Type::INT2:
+				{
+					auto data{ std::get<INT2>(prop->m_data) };
+					file.write(reinterpret_cast<char*>(&data), sizeof(data));
+					break;
+				}
+				case Type::FLOAT:
+				{
+					auto data{ std::get<float>(prop->m_data) };
+					file.write(reinterpret_cast<char*>(&data), sizeof(data));
+					break;
+				}
+				case Type::STRING:
+				{
+					auto data{ std::get<std::string>(prop->m_data) };
+					length = static_cast<int32_t>(data.size());
+					file.write(reinterpret_cast<char*>(&length), sizeof(length));
+					file.write(data.data(), sizeof(length));
+					break;
+				}
+				case Type::IMAGE:
+				{
+					auto data{ std::get<std::shared_ptr<Image>>(prop->m_data) };
+					auto [binary, size] { data->GetBinary() };
+					file.write(reinterpret_cast<char*>(&size), sizeof(size));
+					file.write(reinterpret_cast<char*>(binary), size);
+					break;
+				}
+				default:
+					assert(false && "INVALID PROPERTY TYPE");
+					break;
+				}
+
+				for (const auto& child : prop->m_children)
+					lambda(child.get());
+			};
+
+		int32_t count{ static_cast<int32_t>(m_children.size()) };
+		file.write(reinterpret_cast<char*>(&count), sizeof(count));
+
+		for (const auto& child : m_children)
+			lambda(child.get());
+	}
+
+	void Property::Load(std::istream& file)
+	{
+		std::string dummy{};
+
+		uint32_t count{};
+		file.read(reinterpret_cast<char*>(&count), sizeof(count));
+
+		for (uint32_t i = 0; i < count; ++i)
+		{
+			m_children.emplace_back(new Property);
+			m_children.back()->Load(file, dummy);
+		}
 	}
 
 	void Property::SetType(Type type)
@@ -155,7 +235,7 @@ namespace Resource
 		return *it;
 	}
 
-	void Property::Load(std::ifstream& file, std::string& name)
+	void Property::Load(std::istream& file, std::string& name)
 	{
 		// 이름
 		char length{};
@@ -172,7 +252,7 @@ namespace Resource
 		// 데이터
 		switch (m_type)
 		{
-		case Type::GROUP:
+		case Type::FOLDER:
 			break;
 		case Type::INT:
 		{
@@ -223,13 +303,13 @@ namespace Resource
 		}
 
 		// 자식 노드
-		int nodeCount{};
+		uint32_t nodeCount{};
 		file.read(reinterpret_cast<char*>(&nodeCount), sizeof(nodeCount));
 
 		if (nodeCount > 0)
 		{
 			m_children.reserve(nodeCount);
-			for (int i = 0; i < nodeCount; ++i)
+			for (uint32_t i = 0; i < nodeCount; ++i)
 			{
 				std::string temp{ name };
 				if (IsSkip(file, temp))
@@ -383,7 +463,7 @@ namespace Resource
 		prop->SetName(name);
 	}
 
-	void Set(const std::shared_ptr<Property>& prop, int value)
+	void Set(const std::shared_ptr<Property>& prop, int32_t value)
 	{
 		prop->Set(value);
 	}
@@ -407,4 +487,20 @@ namespace Resource
 	{
 		prop->Set(value);
 	}
+
+#ifdef _TOOL
+	void Save(const std::shared_ptr<Property>& prop, std::ostream& file)
+	{
+		prop->Save(file);
+	}
+
+	std::shared_ptr<Property> Load(std::istream& file)
+	{
+		auto root{ std::make_shared<Property>() };
+		root->SetType(Property::Type::FOLDER);
+		root->SetName("root");
+		root->Load(file);
+		return root;
+	}
+#endif
 }

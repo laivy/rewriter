@@ -1,275 +1,159 @@
 ﻿#include "Stdafx.h"
 #include "Hierarchy.h"
 #include "Inspector.h"
+#include "Node.h"
 
-namespace Hierarchy
+Hierarchy::Hierarchy()
 {
-	Node::Node() :
-		m_isSelected{ false },
-		m_property{ Resource::Create() },
-		m_parent{ nullptr }
-	{
-	}
+}
 
-	void Node::Render()
+Hierarchy::~Hierarchy()
+{
+}
+
+void Hierarchy::Render()
+{
+	if (ImGui::Begin(WINDOW_NAME, NULL, ImGuiWindowFlags_MenuBar))
 	{
-		// 자식 노드가 없으면 Selectable
-		if (m_children.empty())
+		ProcessDragDrop();
+		RenderMenu();
+		RenderNode();
+	}
+	ImGui::End();
+}
+
+void Hierarchy::RenderMenu()
+{
+	if (ImGui::BeginMenuBar())
+	{
+		if (ImGui::BeginMenu(MENU_FILE))
 		{
-			if (ImGui::Selectable(Resource::GetName(m_property).c_str(), &m_isSelected))
+			if (ImGui::MenuItem(MENU_FILE_NEW))
+				OnMenuFileNew();
+			if (ImGui::MenuItem(MENU_FILE_OPEN))
+				OnMenuFileOpen();
+			if (ImGui::MenuItem(MENU_FILE_SAVE))
+				OnMenuFileSave();
+			if (ImGui::MenuItem(MENU_FILE_SAVEAS))
+				OnMenuFileSaveAs();
+			ImGui::EndMenu();
+		}
+		ImGui::EndMenuBar();
+	}
+}
+
+void Hierarchy::RenderNode()
+{
+	for (const auto& root : m_roots)
+		root->Render();
+}
+
+void Hierarchy::ProcessDragDrop()
+{
+	auto window{ ImGui::GetCurrentWindow() };
+	if (ImGui::BeginDragDropTargetCustom(window->ContentRegionRect, window->ID))
+	{
+		if (auto payload{ ImGui::AcceptDragDropPayload("FILE_TO_HIERARCHY") })
+		{
+			std::string_view filePath{ static_cast<const char*>(payload->Data) };
+			OnFileDragDrop(filePath.data());
+		}
+		ImGui::EndDragDropTarget();
+	}
+}
+
+void Hierarchy::OnFileDragDrop(std::string_view path)
+{
+}
+
+void Hierarchy::OnMenuFileNew()
+{
+	int index{ 1 };
+	std::string name{ "NewFile" };
+	while (true)
+	{
+		auto it{ std::ranges::find_if(m_roots,
+			[&name](const auto& p)
 			{
-				if (auto w{ Window::GetInstance() })
-					w->OnNodeSelected(this);
-			}
-			RenderContextMenu();
-			return;
-		}
+				return p->GetName() == name;
+			}) };
+		if (it == m_roots.cend())
+			break;
+		name = std::format("NewFile{}", index++);
+	}
 
-		// 자식 노드가 있으면 TreeNode
-		ImGuiTreeNodeFlags flag{ ImGuiTreeNodeFlags_OpenOnDoubleClick };
-		if (IsSelected())
-			flag |= ImGuiTreeNodeFlags_Selected;
-		if (ImGui::TreeNodeEx(Resource::GetName(m_property).c_str(), flag))
+	auto node{ std::make_unique<RootNode>() };
+	node->SetName(name);
+	m_roots.push_back(std::move(node));
+}
+
+void Hierarchy::OnMenuFileOpen()
+{
+	std::array<wchar_t, MAX_PATH> filename{};
+
+	OPENFILENAME ofn{};
+	ofn.lStructSize = sizeof(ofn);
+	ofn.lpstrFilter = L"Data Files (*.dat)\0*.dat\0";
+	ofn.lpstrFile = filename.data();
+	ofn.nMaxFile = MAX_PATH;
+	ofn.Flags = OFN_EXPLORER | OFN_FILEMUSTEXIST | OFN_HIDEREADONLY;
+	ofn.lpstrDefExt = L"dat";
+	GetOpenFileName(&ofn);
+
+	std::wstring temp{ filename.data() };
+	std::string path{};
+	path.assign(temp.begin(), temp.end());
+	
+	size_t pos{};
+	while (pos != std::string::npos)
+	{
+		pos = path.find('\\');
+		if (pos != std::string::npos)
+			path[pos] = '/';
+	}
+
+	std::ifstream file{ path, std::ios::binary };
+	auto prop = Resource::Load(file);
+}
+
+void Hierarchy::OnMenuFileSave()
+{
+	Node* node{ nullptr };
+	if (auto inspector{ Inspector::GetInstance() })
+		node = inspector->GetNode();
+	if (!node)
+		return;
+	while (node->GetParent())
+		node = node->GetParent();
+	assert(node->IsRootNode() && "NODE MUST BE ROOT NODE");
+	static_cast<RootNode*>(node)->Save();
+}
+
+void Hierarchy::OnMenuFileSaveAs()
+{
+}
+
+void Hierarchy::OnNodeSelected(Node* node)
+{
+	std::function<void(Node*)> lambda = [&](Node* n)
 		{
-			if (ImGui::IsItemClicked())
+			// Ctrl키를 누르고 있으면 누른 노드 추가 선택
+			if (ImGui::GetIO().KeyCtrl)
 			{
-				if (auto w{ Window::GetInstance() })
-					w->OnNodeSelected(this);
+				if (n == node)
+					n->SetSelect(true);
+				return;
 			}
 
-			RenderContextMenu();
+			// 선택한 노드 외에 전부 선택 해제
+			n->SetSelect(n == node ? true : false);
 
-			for (const auto& p : m_children)
-				p->Render();
+			// 재귀
+			for (auto& child : *n)
+				lambda(child.get());
+		};
 
-			ImGui::TreePop();
-		}
-	}
-
-	void Node::OnNodeSelected(Node* node)
-	{
-		// Ctrl키를 누르고 있어야 다중 선택 가능
-		if (ImGui::GetIO().KeyCtrl)
-		{
-			// 트리 노드의 경우는 선택됨을 수동으로 설정해야함
-			if (!m_children.empty() && this == node)
-				SetSelect(true);
-			return;
-		}
-
-		// 선택된 노드를 제외하고 모든 노드 선택 상태 해제
-		SetSelect(this == node ? true : false);
-		for (auto& child : m_children)
-			child->OnNodeSelected(node);
-	}
-
-	void Node::SetParent(Node* node)
-	{
-		m_parent = node;
-	}
-
-	void Node::SetSelect(bool select)
-	{
-		m_isSelected = select;
-	}
-
-	Node* Node::GetParent() const
-	{
-		return m_parent;
-	}
-
-	bool Node::IsSelected() const
-	{
-		return m_isSelected;
-	}
-
-	std::shared_ptr<Resource::Property> Node::GetProperty() const
-	{
-		return m_property;
-	}
-
-	void Node::RenderContextMenu()
-	{
-		if (ImGui::BeginPopupContextItem())
-		{
-			if (ImGui::Selectable("Add"))
-			{
-				int number{ 1 };
-				std::string name{ DEFAULT_NODE_NAME };
-				while (true)
-				{
-					auto it{ std::ranges::find_if(m_children, 
-						[&name](const auto& p)
-						{
-							return Resource::GetName(p->GetProperty()) == name;
-						}) };
-					if (it == m_children.cend())
-						break;
-					name = std::format("{}{}", DEFAULT_NODE_NAME, number++);
-				}
-
-				auto node{ std::make_unique<Node>() };
-				node->SetParent(this);
-				Resource::SetName(node->GetProperty(), name);
-				m_children.push_back(std::move(node));
-			}
-			ImGui::EndPopup();
-		}
-	}
-
-	RootNode::RootNode() : m_isModified{ false }
-    {
-    }
-
-	void RootNode::Render()
-	{
-		if (ImGui::CollapsingHeader(Resource::GetName(m_property).c_str(), ImGuiTreeNodeFlags_OpenOnDoubleClick))
-		{
-			RenderContextMenu();
-
-			if (ImGui::IsItemClicked())
-			{
-				if (auto w{ Window::GetInstance() })
-					w->OnNodeSelected(this);
-			}
-
-			ImGui::Indent();
-			for (const auto& node : m_children)
-				node->Render();
-			ImGui::Unindent();
-		}
-	}
-
-	void RootNode::OnNodeSelected(Node* node)
-	{
-		for (auto& child : m_children)
-			child->OnNodeSelected(node);
-	}
-
-	void RootNode::RenderContextMenu()
-	{
-		if (ImGui::BeginPopupContextItem(Resource::GetName(m_property).c_str()))
-		{
-			if (ImGui::Selectable("Add"))
-			{
-				int index{ 1 };
-				std::string name{ DEFAULT_NODE_NAME };
-				while (true)
-				{
-					auto it{ std::ranges::find_if(m_children,
-						[&name](const auto& p)
-						{
-							return Resource::GetName(p->GetProperty()) == name;
-						}) };
-					if (it == m_children.cend())
-						break;
-					name = std::format("{}{}", DEFAULT_NODE_NAME, index++);
-				}
-
-				auto node{ std::make_unique<Node>() };
-				node->SetParent(this);
-				Resource::SetName(node->GetProperty(), name);
-				m_children.push_back(std::move(node));
-			}
-			ImGui::EndPopup();
-		}
-	}
-
-	void Window::Render()
-	{
-		if (ImGui::Begin(WINDOW_NAME, NULL, ImGuiWindowFlags_MenuBar))
-		{
-			ProcessDragDrop();
-			RenderMenu();
-			RenderNode();
-		}
-		ImGui::End();
-	}
-
-	void Window::RenderMenu()
-	{
-		if (ImGui::BeginMenuBar())
-		{
-			if (ImGui::BeginMenu(MENU_FILE))
-			{
-				if (ImGui::MenuItem(MENU_FILE_NEW))
-					OnMenuFileNew();
-				if (ImGui::MenuItem(MENU_FILE_OPEN))
-					OnMenuFileOpen();
-				if (ImGui::MenuItem(MENU_FILE_SAVE))
-					OnMenuFileSave();
-				if (ImGui::MenuItem(MENU_FILE_SAVEAS))
-					OnMenuFileSaveAs();
-				ImGui::EndMenu();
-			}
-			ImGui::EndMenuBar();
-		}
-	}
-
-	void Window::RenderNode()
-	{
-		for (const auto& root : m_roots)
-			root->Render();
-	}
-
-	void Window::ProcessDragDrop()
-	{
-		auto window{ ImGui::GetCurrentWindow() };
-		if (ImGui::BeginDragDropTargetCustom(window->ContentRegionRect, window->ID))
-		{
-			if (auto payload{ ImGui::AcceptDragDropPayload("FILE_TO_HIERARCHY") })
-			{
-				std::string_view filePath{ static_cast<const char*>(payload->Data) };
-				OnFileDragDrop(filePath.data());
-			}
-			ImGui::EndDragDropTarget();
-		}
-	}
-
-	void Window::OnFileDragDrop(std::string_view path)
-	{
-	}
-
-	void Window::OnMenuFileNew()
-	{
-		int index{ 1 };
-		std::string name{ "NewFile" };
-		while (true)
-		{
-			auto it{ std::ranges::find_if(m_roots, 
-				[&name](const auto& p) 
-				{ 
-					return Resource::GetName(p->GetProperty()) == name;
-				}) };
-			if (it == m_roots.cend())
-				break;
-			name = std::format("NewFile{}", index++);
-		}
-
-		auto prop{ std::make_unique<RootNode>() };
-		Resource::SetName(prop->GetProperty(), name);
-		m_roots.push_back(std::move(prop));
-	}
-
-	void Window::OnMenuFileOpen()
-	{
-	}
-
-	void Window::OnMenuFileSave()
-	{
-	}
-
-	void Window::OnMenuFileSaveAs()
-	{
-	}
-
-	void Window::OnNodeSelected(Node* const node)
-	{
-		for (const auto& root : m_roots)
-			root->OnNodeSelected(node);
-
-		// 인스펙터 윈도우에 알려줌
-		if (auto w{ Inspector::Window::GetInstance() })
-			w->OnNodeSelected(node);
-	}
+	for (auto& root : m_roots)
+		for (auto& child : *root)
+			lambda(child.get());
 }

@@ -4,6 +4,7 @@
 #define WIN32_LEAN_AND_MEAN
 #include <windows.h>
 #include <windowsx.h>
+#include <commdlg.h>
 #include <wrl.h>
 using Microsoft::WRL::ComPtr;
 
@@ -11,6 +12,7 @@ using Microsoft::WRL::ComPtr;
 #include <array>
 #include <filesystem>
 #include <fstream>
+#include <functional>
 #include <memory>
 #include <ranges>
 #include <set>

@@ -18,6 +18,14 @@ namespace Resource
 			remain = path.substr(pos + 1);
 		}
 
+#ifdef _DEBUG
+		if (!fileName.ends_with(".dat"))
+		{
+			assert(false && "INVALID FILENAME");
+			return nullptr;
+		}
+#endif
+
 		if (m_resources.contains(fileName))
 		{
 			if (remain.empty())
@@ -49,7 +57,7 @@ namespace Resource
 		}
 
 		// path를 포함한 하위 리소스 해제
-		size_t pos{ path.find_last_of('/') };
+		size_t pos{ path.rfind('/') };
 		if (pos == std::string::npos && m_resources.contains(path)) // '/'가 없다는건 파일을 Unload 한다는 것
 		{
 			auto p{ m_resources.at(path) };
@@ -90,19 +98,19 @@ namespace Resource
 		std::ifstream file{ StringTable::DATA_FOLDER_PATH + fileName, std::ios::binary };
 		if (!file)
 		{
-			//assert(false && "CAN NOT OPEN FILE");
+			assert(false && "CAN NOT OPEN DATA FILE");
 			return false;
 		}
 
-		int nodeCount{};
+		uint32_t nodeCount{};
 		file.read(reinterpret_cast<char*>(&nodeCount), sizeof(nodeCount));
 
 		auto root{ std::make_shared<Property>() };
-		root->m_type = Property::Type::GROUP;
+		root->m_type = Property::Type::FOLDER;
 		root->m_name = "root";
 		root->m_children.reserve(nodeCount);
 
-		for (int i = 0; i < nodeCount; ++i)
+		for (uint32_t i = 0; i < nodeCount; ++i)
 		{
 			std::string temp{ remain };
 			if (IsSkip(file, temp))
@@ -119,7 +127,7 @@ namespace Resource
 		return true;
 	}
 
-	bool IsSkip(std::ifstream& file, std::string& name)
+	bool IsSkip(std::istream& file, std::string& name)
 	{
 		if (name.empty())
 			return false;
@@ -142,10 +150,10 @@ namespace Resource
 
 		if (!isSkip)
 		{
-			if (pos != std::string::npos)
-				name = name.substr(pos + 1);
-			else
+			if (pos == std::string::npos)
 				name.clear();
+			else
+				name = name.substr(pos + 1);
 		}
 
 		// 이 뒤에서 스트림으로부터 이름을 읽을 수 있도록 커서를 string만큼 뒤로 옮김
@@ -154,18 +162,18 @@ namespace Resource
 		return isSkip;
 	}
 
-	void Skip(std::ifstream& file)
+	void Skip(std::istream& file)
 	{
 		char length{};
 		file.read(reinterpret_cast<char*>(&length), sizeof(length));
 		file.ignore(length);
 
-		auto type{ Property::Type::GROUP };
+		auto type{ Property::Type::FOLDER };
 		file.read(reinterpret_cast<char*>(&type), sizeof(type));
 
 		switch (type)
 		{
-		case Property::Type::GROUP:
+		case Property::Type::FOLDER:
 			break;
 		case Property::Type::INT:
 			file.ignore(sizeof(int));
@@ -224,7 +232,7 @@ namespace Resource
 			return Get(prop->Get(name), remain);
 		}
 
-		if (const auto & child{ prop->Get(name) })
+		if (const auto& child{ prop->Get(name) })
 			return child;
 
 		return nullptr;

@@ -1,14 +1,14 @@
 ﻿#include "stdafx.h"
-#include "ProjectWindow.h"
+#include "Explorer.h"
 
-ProjectWindow::ProjectWindow() :
+Explorer::Explorer() :
 	m_path{ std::filesystem::current_path() }
 {
 }
 
-void ProjectWindow::Render()
+void Explorer::Render()
 {
-	if (ImGui::Begin("Project"))
+	if (ImGui::Begin("Explorer"))
 	{
 		ImGuiWindowFlags windowFlag{ ImGuiWindowFlags_HorizontalScrollbar };
 		if (ImGui::BeginChild("ChildL"))
@@ -30,11 +30,15 @@ void ProjectWindow::Render()
 			}
 
 			ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2{});
-			for (const auto& f : folders)
+			for (int i = 0; i < folders.size(); ++i)
 			{
+				const auto& f{ folders[i] };
 				if (f == folders.front())
 				{
-					ImGui::Button((f + "/").c_str());
+					if (ImGui::Button((f + "/").c_str()))
+					{
+						m_path = std::filesystem::path{ f + "\\" };
+					}
 					if (folders.size() != 1)
 					{
 						ImGui::SameLine();
@@ -48,7 +52,15 @@ void ProjectWindow::Render()
 				}
 				else
 				{
-					ImGui::Button((f + "/").c_str());
+					if (ImGui::Button((f + "/").c_str()))
+					{
+						std::string subPath{ folders.front() };
+						for (int j = 1; j <= i; ++j)
+						{
+							subPath = std::format("{}\\{}", subPath, folders[j]);
+						}
+						m_path = std::filesystem::path{ subPath };
+					}
 					ImGui::SameLine();
 				}
 			}

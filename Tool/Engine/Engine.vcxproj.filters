@@ -84,13 +84,16 @@
     <ClInclude Include="..\..\Common\Types.h">
       <Filter>헤더 파일\Common</Filter>
     </ClInclude>
-    <ClInclude Include="ProjectWindow.h">
+    <ClInclude Include="Explorer.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
     <ClInclude Include="Hierarchy.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
     <ClInclude Include="Inspector.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="Node.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
   </ItemGroup>
@@ -128,13 +131,16 @@
     <ClCompile Include="..\..\Common\Types.cpp">
       <Filter>소스 파일\Common</Filter>
     </ClCompile>
-    <ClCompile Include="ProjectWindow.cpp">
+    <ClCompile Include="Explorer.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
     <ClCompile Include="Hierarchy.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
     <ClCompile Include="Inspector.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="Node.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
   </ItemGroup>
