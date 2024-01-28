@@ -1,5 +1,5 @@
 ﻿#include "Stdafx.h"
-#include "Include/ResourceManager.h"
+#include "Include/Manager.h"
 
 BOOL APIENTRY DllMain(HMODULE	hModule,
 					  DWORD		ul_reason_for_call,
@@ -10,12 +10,12 @@ BOOL APIENTRY DllMain(HMODULE	hModule,
     switch (ul_reason_for_call)
     {
     case DLL_PROCESS_ATTACH:
-		if (!ResourceManager::IsInstanced())
-			ResourceManager::Instantiate();
+		if (!Manager::IsInstanced())
+			Manager::Instantiate();
 		break;
     case DLL_PROCESS_DETACH:
-		if (ResourceManager::IsInstanced())
-			ResourceManager::Destroy();
+		if (Manager::IsInstanced())
+			Manager::Destroy();
         break;
     }
     return TRUE;

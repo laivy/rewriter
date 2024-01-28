@@ -1,8 +1,12 @@
 ﻿#pragma once
-#include "Common/Types.h"
 
 template<class T>
-concept is_property_data_type_v = std::is_same_v<T, int32_t> || std::is_same_v<T, INT2> || std::is_same_v<T, float> || std::is_same_v<T, std::string> || std::is_same_v<T, std::shared_ptr<Resource::Image>>;
+concept is_property_data_type_v = 
+	std::is_same_v<T, int32_t> ||
+	std::is_same_v<T, INT2> ||
+	std::is_same_v<T, float> ||
+	std::is_same_v<T, std::wstring> ||
+	std::is_same_v<T, std::shared_ptr<Resource::Image>>;
 
 namespace Resource
 {
@@ -11,7 +15,7 @@ namespace Resource
 	class Property
 	{
 	public:
-		friend class ResourceManager;
+		friend class Manager;
 
 		enum class Type : unsigned char
 		{
@@ -26,8 +30,8 @@ namespace Resource
 
 			__declspec(dllexport) Iterator& operator++();
 			__declspec(dllexport) Iterator& operator--();
-			__declspec(dllexport) bool operator!=(const Iterator& it) const;
-			__declspec(dllexport) std::pair<std::string, std::shared_ptr<Property>> operator*() const;
+			bool operator!=(const Iterator& it) const;
+			std::pair<std::wstring, std::shared_ptr<Property>> operator*() const;
 
 		private:
 			const Property* const m_property;
@@ -36,68 +40,47 @@ namespace Resource
 
 	public:
 		Property();
-		~Property();
+		~Property() = default;
 
-		__declspec(dllexport) Iterator begin() const;
-		__declspec(dllexport) Iterator end() const;
+		Iterator begin() const;
+		Iterator end() const;
 
-		void Save(std::ostream& file);
-		void Load(std::istream& file);
+		__declspec(dllexport) void Save(const std::filesystem::path& path);
+		__declspec(dllexport) void Add(const std::shared_ptr<Property>& child);
 
-		void SetType(Type type);
-		void SetName(const std::string& name);
-		void Set(int data);
-		void Set(const INT2& data);
-		void Set(float data);
-		void Set(const std::string& data);
-		void Set(const std::shared_ptr<Image>& data);
+		__declspec(dllexport) void SetType(Type type);
+		__declspec(dllexport) void SetName(const std::wstring& name);
+		__declspec(dllexport) void Set(int value);
+		__declspec(dllexport) void Set(const INT2& value);
+		__declspec(dllexport) void Set(float value);
+		__declspec(dllexport) void Set(const std::wstring& value);
+		__declspec(dllexport) void Set(const std::shared_ptr<Image>& value);
 
-		Type GetType() const;
-		std::string GetName() const;
-		int GetInt() const;
-		INT2 GetInt2() const;
-		float GetFloat() const;
-		std::string GetString() const;
-		std::shared_ptr<Image> GetImage() const;
-		std::shared_ptr<Property> Get(const std::string& path) const;
+		__declspec(dllexport) Type GetType() const;
+		__declspec(dllexport) std::wstring GetName() const;
+		__declspec(dllexport) int GetInt() const;
+		__declspec(dllexport) INT2 GetInt2() const;
+		__declspec(dllexport) float GetFloat() const;
+		__declspec(dllexport) std::wstring GetString() const;
+		__declspec(dllexport) std::shared_ptr<Image> GetImage(const std::wstring& path = L"") const;
+		__declspec(dllexport) std::shared_ptr<Property> Get(const std::wstring& path) const;
 
 	private:
-		// ResourceManager에서 사용하는 함수들
-		void Load(std::istream& file, std::string& name);
+		// Manager에서 사용하는 함수들
 		void Flush();
 
 	private:
 		Type m_type;
-		std::string m_name;
+		std::wstring m_name;
 		std::variant<
 			int32_t,
 			INT2,
 			float,
-			std::string,
+			std::wstring,
 			std::shared_ptr<Image>
 		> m_data;
 		std::vector<std::shared_ptr<Property>> m_children;
 	};
 
-	__declspec(dllexport) Property::Type GetType(const std::shared_ptr<Property>& prop);
-	__declspec(dllexport) std::string GetName(const std::shared_ptr<Property>& prop);
-	__declspec(dllexport) int32_t GetInt(const std::shared_ptr<Property>& prop, const std::string& path = "");
-	__declspec(dllexport) INT2 GetInt2(const std::shared_ptr<Property>& prop, const std::string& path = "");
-	__declspec(dllexport) float GetFloat(const std::shared_ptr<Property>& prop, const std::string& path = "");
-	__declspec(dllexport) std::string GetString(const std::shared_ptr<Property>& prop, const std::string& path = "");
-	__declspec(dllexport) std::shared_ptr<Image> GetImage(const std::shared_ptr<Property>& prop, const std::string& path = "");
-
-	__declspec(dllexport) std::shared_ptr<Property> Create();
-	__declspec(dllexport) void SetType(const std::shared_ptr<Property>& prop, Property::Type type);
-	__declspec(dllexport) void SetName(const std::shared_ptr<Property>& prop, const std::string& value);
-	__declspec(dllexport) void Set(const std::shared_ptr<Property>& prop, int32_t value);
-	__declspec(dllexport) void Set(const std::shared_ptr<Property>& prop, const INT2& value);
-	__declspec(dllexport) void Set(const std::shared_ptr<Property>& prop, float value);
-	__declspec(dllexport) void Set(const std::shared_ptr<Property>& prop, const std::string& value);
-	__declspec(dllexport) void Set(const std::shared_ptr<Property>& prop, const std::shared_ptr<Image>& value);
-
-#ifdef _TOOL
-	__declspec(dllexport) void Save(const std::shared_ptr<Property>& prop, std::ostream& file);
-	__declspec(dllexport) std::shared_ptr<Property> Load(std::istream& file);
-#endif
+	__declspec(dllexport) std::shared_ptr<Property> Load(const std::filesystem::path& path, const std::wstring& subPath = L"");
 }

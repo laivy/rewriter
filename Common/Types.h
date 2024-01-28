@@ -1,10 +1,11 @@
 ﻿#pragma once
+#include <cstdint>
 #include <d2d1.h>
 
 class INT2
 {
 public:
-	INT2(int x = 0, int y = 0);
+	INT2(int32_t x = 0, int32_t y = 0);
 
 private:
 	friend INT2 operator+(const INT2& lhs, const INT2& rhs);
@@ -13,8 +14,8 @@ private:
 	friend void operator-=(INT2& lhs, const INT2& rhs);
 
 public:
-	int x;
-	int y;
+	int32_t x;
+	int32_t y;
 };
 
 class FLOAT2 : public D2D1_POINT_2F

@@ -1,52 +1,22 @@
 ﻿#pragma once
-
-// DLL
-#define DLLEXPORT __declspec(dllexport)
+#include "Common/Stdafx.h"
 
 // Windows
-#define WIN32_LEAN_AND_MEAN 
+
 #pragma comment(lib, "imm32.lib")
 #pragma comment(lib, "ws2_32.lib")
 #include <SDKDDKVer.h>
 #include <wincodec.h>
-#include <windows.h>
 #include <windowsx.h>
 #include <winsock2.h>
-#include <wrl.h>
 #include <WS2tcpip.h>
-using Microsoft::WRL::ComPtr;
 
 #ifndef HINST_THISCOMPONENT
 EXTERN_C IMAGE_DOS_HEADER __ImageBase;
 #define HINST_THISCOMPONENT ((HINSTANCE)&__ImageBase)
 #endif
 
-// C/C++
-#include <algorithm>
-#include <array>
-#include <cassert>
-#include <chrono>
-#include <codecvt>
-#include <fstream>
-#include <functional>
-#include <list>
-#include <map>
-#include <memory>
-#include <mutex>
-#include <ranges>
-#include <string>
-#include <thread>
-#include <variant>
-#include <vector>
-using namespace std::chrono_literals;
-
 // DirectX
-#pragma comment(lib, "d2d1.lib")
-#pragma comment(lib, "d3d11.lib")
-#pragma comment(lib, "d3d12.lib")
-#pragma comment(lib, "d3dcompiler.lib")
-#pragma comment(lib, "dwrite.lib")
-#pragma comment(lib, "dxgi.lib")
 #include <DirectXMath.h>
 #include <d2d1_3.h>
 #include <d3d11on12.h>
@@ -63,16 +33,13 @@ using namespace std::chrono_literals;
 
 // Resource
 #include "Module/Resource/Include/Image.h"
+#include "Module/Resource/Include/Manager.h"
 #include "Module/Resource/Include/Property.h"
-#include "Module/Resource/Include/ResourceManager.h"
 
 // Game
 #include "DXUtil.h"
 #include "TextUtil.h"
 #include "Common/Packet.h"
-#include "Common/Singleton.h"
-#include "Common/StringTable.h"
-#include "Common/Types.h"
 
 // 전역 변수
 extern UINT g_cbvSrvUavDescriptorIncrementSize;

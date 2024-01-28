@@ -1,34 +1,36 @@
 ﻿#pragma once
-#include "Common/Types.h"
 
+struct ID2D1Bitmap;
 struct ID2D1DeviceContext2;
+struct ID3D12Resource;
 
 namespace Resource
 {
 	class Image
 	{
 	public:
-		Image(BYTE* binary, DWORD binarySize);
-		~Image() = default;
-
-		__declspec(dllexport) operator ID2D1Bitmap*() const;
-
-		void SetD2DBitmap(ID2D1Bitmap* bitmap);
-
-		std::pair<BYTE*, DWORD> GetBinary() const;
-		ID2D1Bitmap* GetD2DBitmap() const;
-		INT2 GetSize() const;
+		enum class Type
+		{
+			D2D, D3D
+		};
 
 	public:
-		std::unique_ptr<BYTE[]> m_binary;
-		DWORD m_binarySize;
+		Image();
+		~Image() = default;
+
+		void SetBuffer(std::byte* buffer, size_t size);
+		void SetD2DBitmap(ID2D1Bitmap* bitmap);
+
+		std::span<std::byte> GetBuffer() const;
+
+		__declspec(dllexport) ID2D1Bitmap* GetD2DBitmap() const;
+		__declspec(dllexport) INT2 GetSize() const;
+		__declspec(dllexport) void UseAs(const ComPtr<ID2D1DeviceContext2>& ctx, Type type);
+
+	private:
+		std::unique_ptr<std::byte[]> m_buffer;
+		size_t m_bufferSize;
 		ComPtr<ID2D1Bitmap> m_d2dBitmap;
 		ComPtr<ID3D12Resource> m_d3dResource;
 	};
-
-	// 이미지의 가로, 세로 크기를 반환
-	__declspec(dllexport) INT2 GetSize(const std::shared_ptr<Resource::Image>& image);
-
-	// 해당 이미지를 Direct2D 렌더링에 사용함
-	__declspec(dllexport) void UseAsD2D(const ComPtr<ID2D1DeviceContext2>& ctx, const std::shared_ptr<Resource::Image>& image);
 }

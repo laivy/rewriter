@@ -1,28 +1,31 @@
 ﻿#include "Stdafx.h"
 #include "Include/Image.h"
+#include <d2d1_3.h>
+#include <d3d12.h>
+#include <wincodec.h>
 
 namespace Resource
 {
-	Image::Image(BYTE* binary, DWORD binarySize) : m_binarySize{ binarySize }
+	Image::Image() : m_bufferSize{ 0 }
 	{
-		m_binary.reset(binary);
 	}
 
-	Image::operator ID2D1Bitmap*() const
+	void Image::SetBuffer(std::byte* buffer, size_t size)
 	{
-		return m_d2dBitmap.Get();
+		m_buffer.reset(buffer);
+		m_bufferSize = size;
 	}
 
 	void Image::SetD2DBitmap(ID2D1Bitmap* bitmap)
 	{
-		m_binary.reset();
-		m_binarySize = 0;
 		m_d2dBitmap = bitmap;
+		m_buffer.reset();
+		m_bufferSize = 0;
 	}
 
-	std::pair<BYTE*, DWORD> Image::GetBinary() const
+	std::span<std::byte> Image::GetBuffer() const
 	{
-		return std::make_pair(m_binary.get(), m_binarySize);
+		return std::span{ m_buffer.get(), m_bufferSize };
 	}
 
 	ID2D1Bitmap* Image::GetD2DBitmap() const
@@ -47,23 +50,13 @@ namespace Resource
 		return INT2{};
 	}
 
-	INT2 GetSize(const std::shared_ptr<Resource::Image>& image)
+	void Image::UseAs(const ComPtr<ID2D1DeviceContext2>& ctx, Type type)
 	{
-		if (image)
-			return image->GetSize();
-		return INT2{ 0, 0 };
-	}
-
-	void UseAsD2D(const ComPtr<ID2D1DeviceContext2>& ctx, const std::shared_ptr<Resource::Image>& image)
-	{
-		if (!ctx || !image)
+		if (!ctx)
 			return;
 
-		auto bitmap{ image->GetD2DBitmap() };
-		if (bitmap)
+		if (m_d2dBitmap)
 			return;
-
-		auto [binary, binarySize] { image->GetBinary() };
 
 		ComPtr<IWICImagingFactory> factory;
 		ComPtr<IWICBitmapDecoder> decoder;
@@ -74,14 +67,15 @@ namespace Resource
 		HRESULT hr{ E_FAIL };
 		hr = CoCreateInstance(CLSID_WICImagingFactory, NULL, CLSCTX_INPROC_SERVER, IID_PPV_ARGS(&factory));
 		hr = factory->CreateStream(&stream);
-		hr = stream->InitializeFromMemory(binary, binarySize);
+		hr = stream->InitializeFromMemory(
+			reinterpret_cast<WICInProcPointer>(m_buffer.get()),
+			static_cast<DWORD>(m_bufferSize)
+		);
 		hr = factory->CreateDecoderFromStream(stream.Get(), NULL, WICDecodeMetadataCacheOnLoad, &decoder);
 		hr = factory->CreateFormatConverter(&converter);
 		hr = decoder->GetFrame(0, &frameDecode);
 		hr = converter->Initialize(frameDecode.Get(), GUID_WICPixelFormat32bppPBGRA, WICBitmapDitherTypeNone, NULL, 0.0f, WICBitmapPaletteTypeMedianCut);
-		hr = ctx->CreateBitmapFromWicBitmap(converter.Get(), &bitmap);
+		hr = ctx->CreateBitmapFromWicBitmap(converter.Get(), &m_d2dBitmap);
 		assert(SUCCEEDED(hr));
-
-		image->SetD2DBitmap(bitmap);
 	}
 }

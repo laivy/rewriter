@@ -8,10 +8,10 @@ namespace Renderer2D
 
 	void DrawImage(const std::shared_ptr<Resource::Image>& image, const INT2& position, float opacity)
 	{
-		Resource::UseAsD2D(g_ctx, image);
-		INT2 size{ Resource::GetSize(image) };
+		image->UseAs(g_ctx, Resource::Image::Type::D2D);
+		INT2 size{ image->GetSize() };
 		g_ctx->DrawBitmap(
-			static_cast<ID2D1Bitmap*>(*image),
+			image->GetD2DBitmap(),
 			RECTF{ 
 				static_cast<float>(position.x), 
 				static_cast<float>(position.y),
@@ -24,9 +24,9 @@ namespace Renderer2D
 
 	void DrawImage(const std::shared_ptr<Resource::Image>& image, const RECTI& rect, float opacity)
 	{
-		Resource::UseAsD2D(g_ctx, image);
+		image->UseAs(g_ctx, Resource::Image::Type::D2D);
 		g_ctx->DrawBitmap(
-			static_cast<ID2D1Bitmap*>(*image),
+			image->GetD2DBitmap(),
 			RECTF{
 				static_cast<float>(rect.left),
 				static_cast<float>(rect.top),

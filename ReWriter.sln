@@ -4,8 +4,15 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 VisualStudioVersion = 17.3.32929.385
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Client", "Game\Client\Client.vcxproj", "{D00ABCB1-630E-4A0E-BBCB-F54B221AAA1D}"
+	ProjectSection(ProjectDependencies) = postProject
+		{ECE58EE1-CBF9-4731-9CA5-C89FA63034E8} = {ECE58EE1-CBF9-4731-9CA5-C89FA63034E8}
+	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "LoginServer", "Game\LoginServer\LoginServer.vcxproj", "{7C4AE94D-8E6B-43FB-8B96-E5AA7A82FF95}"
+	ProjectSection(ProjectDependencies) = postProject
+		{3A60F38B-6BF8-4CFF-B6C3-DBFE015F9860} = {3A60F38B-6BF8-4CFF-B6C3-DBFE015F9860}
+		{ECE58EE1-CBF9-4731-9CA5-C89FA63034E8} = {ECE58EE1-CBF9-4731-9CA5-C89FA63034E8}
+	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Game", "Game", "{E8048ACE-7CBD-43BA-85E3-D24FE2639874}"
 EndProject
@@ -25,35 +32,27 @@ EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
-		DebugTool|x64 = DebugTool|x64
 		Release|x64 = Release|x64
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
 		{D00ABCB1-630E-4A0E-BBCB-F54B221AAA1D}.Debug|x64.ActiveCfg = Debug|x64
 		{D00ABCB1-630E-4A0E-BBCB-F54B221AAA1D}.Debug|x64.Build.0 = Debug|x64
-		{D00ABCB1-630E-4A0E-BBCB-F54B221AAA1D}.DebugTool|x64.ActiveCfg = Debug|x64
 		{D00ABCB1-630E-4A0E-BBCB-F54B221AAA1D}.Release|x64.ActiveCfg = Release|x64
 		{D00ABCB1-630E-4A0E-BBCB-F54B221AAA1D}.Release|x64.Build.0 = Release|x64
 		{7C4AE94D-8E6B-43FB-8B96-E5AA7A82FF95}.Debug|x64.ActiveCfg = Debug|x64
 		{7C4AE94D-8E6B-43FB-8B96-E5AA7A82FF95}.Debug|x64.Build.0 = Debug|x64
-		{7C4AE94D-8E6B-43FB-8B96-E5AA7A82FF95}.DebugTool|x64.ActiveCfg = Debug|x64
 		{7C4AE94D-8E6B-43FB-8B96-E5AA7A82FF95}.Release|x64.ActiveCfg = Release|x64
 		{7C4AE94D-8E6B-43FB-8B96-E5AA7A82FF95}.Release|x64.Build.0 = Release|x64
 		{3A60F38B-6BF8-4CFF-B6C3-DBFE015F9860}.Debug|x64.ActiveCfg = Debug|x64
 		{3A60F38B-6BF8-4CFF-B6C3-DBFE015F9860}.Debug|x64.Build.0 = Debug|x64
-		{3A60F38B-6BF8-4CFF-B6C3-DBFE015F9860}.DebugTool|x64.ActiveCfg = Debug|x64
 		{3A60F38B-6BF8-4CFF-B6C3-DBFE015F9860}.Release|x64.ActiveCfg = Release|x64
 		{3A60F38B-6BF8-4CFF-B6C3-DBFE015F9860}.Release|x64.Build.0 = Release|x64
 		{6C1500F3-A088-4B6E-9236-BCB3CBB17B26}.Debug|x64.ActiveCfg = Debug|x64
 		{6C1500F3-A088-4B6E-9236-BCB3CBB17B26}.Debug|x64.Build.0 = Debug|x64
-		{6C1500F3-A088-4B6E-9236-BCB3CBB17B26}.DebugTool|x64.ActiveCfg = DebugTool|x64
-		{6C1500F3-A088-4B6E-9236-BCB3CBB17B26}.DebugTool|x64.Build.0 = DebugTool|x64
 		{6C1500F3-A088-4B6E-9236-BCB3CBB17B26}.Release|x64.ActiveCfg = Release|x64
 		{6C1500F3-A088-4B6E-9236-BCB3CBB17B26}.Release|x64.Build.0 = Release|x64
 		{ECE58EE1-CBF9-4731-9CA5-C89FA63034E8}.Debug|x64.ActiveCfg = Debug|x64
 		{ECE58EE1-CBF9-4731-9CA5-C89FA63034E8}.Debug|x64.Build.0 = Debug|x64
-		{ECE58EE1-CBF9-4731-9CA5-C89FA63034E8}.DebugTool|x64.ActiveCfg = DebugTool|x64
-		{ECE58EE1-CBF9-4731-9CA5-C89FA63034E8}.DebugTool|x64.Build.0 = DebugTool|x64
 		{ECE58EE1-CBF9-4731-9CA5-C89FA63034E8}.Release|x64.ActiveCfg = Release|x64
 		{ECE58EE1-CBF9-4731-9CA5-C89FA63034E8}.Release|x64.Build.0 = Release|x64
 	EndGlobalSection
