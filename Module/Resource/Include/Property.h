@@ -17,7 +17,7 @@ namespace Resource
 	public:
 		friend class Manager;
 
-		enum class Type : unsigned char
+		enum class Type
 		{
 			FOLDER, INT, INT2, FLOAT, STRING, IMAGE
 		};
@@ -25,25 +25,25 @@ namespace Resource
 		class Iterator
 		{
 		public:
-			Iterator(const Property* const p, size_t index);
+			Iterator(const Property* const prop, size_t index);
 			~Iterator() = default;
 
 			__declspec(dllexport) Iterator& operator++();
 			__declspec(dllexport) Iterator& operator--();
-			bool operator!=(const Iterator& it) const;
-			std::pair<std::wstring, std::shared_ptr<Property>> operator*() const;
+			__declspec(dllexport) bool operator!=(const Iterator& it) const;
+			__declspec(dllexport) std::pair<std::wstring, std::shared_ptr<Property>> operator*() const;
 
 		private:
 			const Property* const m_property;
-			size_t m_childIndex;
+			size_t m_index;
 		};
 
 	public:
-		Property();
+		__declspec(dllexport) Property();
 		~Property() = default;
 
-		Iterator begin() const;
-		Iterator end() const;
+		__declspec(dllexport) Iterator begin() const;
+		__declspec(dllexport) Iterator end() const;
 
 		__declspec(dllexport) void Save(const std::filesystem::path& path);
 		__declspec(dllexport) void Add(const std::shared_ptr<Property>& child);
@@ -58,10 +58,10 @@ namespace Resource
 
 		__declspec(dllexport) Type GetType() const;
 		__declspec(dllexport) std::wstring GetName() const;
-		__declspec(dllexport) int GetInt() const;
-		__declspec(dllexport) INT2 GetInt2() const;
-		__declspec(dllexport) float GetFloat() const;
-		__declspec(dllexport) std::wstring GetString() const;
+		__declspec(dllexport) int GetInt(const std::wstring& path = L"") const;
+		__declspec(dllexport) INT2 GetInt2(const std::wstring& path = L"") const;
+		__declspec(dllexport) float GetFloat(const std::wstring& path = L"") const;
+		__declspec(dllexport) std::wstring GetString(const std::wstring& path = L"") const;
 		__declspec(dllexport) std::shared_ptr<Image> GetImage(const std::wstring& path = L"") const;
 		__declspec(dllexport) std::shared_ptr<Property> Get(const std::wstring& path) const;
 
@@ -81,6 +81,4 @@ namespace Resource
 		> m_data;
 		std::vector<std::shared_ptr<Property>> m_children;
 	};
-
-	__declspec(dllexport) std::shared_ptr<Property> Load(const std::filesystem::path& path, const std::wstring& subPath = L"");
 }

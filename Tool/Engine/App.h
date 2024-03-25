@@ -1,5 +1,7 @@
 ﻿#pragma once
 
+class Timer;
+
 class App : public TSingleton<App>
 {
 public:
@@ -13,6 +15,7 @@ private:
 	void InitWindow();
 	void InitDirectX();
 	void InitImGui();
+	void InitApp();
 
 	void OnResize(int width, int height);
 
@@ -28,9 +31,9 @@ private:
 public:
 	// Window
 	static constexpr auto TITLE_NAME{ L"RW Engine 1.0v" };
-	bool m_isActive;
 	HINSTANCE m_hInstance;
 	HWND m_hWnd;
+	bool m_isActive;
 	std::pair<int, int> m_size;
 
 	// DirectX
@@ -50,4 +53,6 @@ public:
 	HANDLE m_fenceEvent;
 	UINT64 m_fenceValues[FRAME_COUNT];
 	UINT m_rtvDescriptorSize;
+
+	std::unique_ptr<Timer> m_timer;
 };

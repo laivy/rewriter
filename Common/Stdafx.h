@@ -32,6 +32,7 @@ using Microsoft::WRL::ComPtr;
 using namespace std::chrono_literals;
 
 // Project
+#include "Common/Event.h"
 #include "Common/Singleton.h"
 #include "Common/StringTable.h"
 #include "Common/Types.h"

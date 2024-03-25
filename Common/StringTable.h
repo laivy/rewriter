@@ -1,6 +1,6 @@
 ﻿#pragma once
 
-namespace StringTable
+namespace Stringtable
 {
 	constexpr auto DATA_FOLDER_PATH		= L"Data/";
 	constexpr auto DATA_FILE_EXT		= L".dat";

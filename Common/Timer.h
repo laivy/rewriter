@@ -5,12 +5,10 @@ class Timer
 public:
 	Timer();
 
-	void Tick();
-
-	float GetDeltaTime() const;
+	float Tick();
 
 private:
-	LARGE_INTEGER m_frequency;
 	LARGE_INTEGER m_lastClockCount;
+	float m_frequency;
 	float m_deltaTime;
 };

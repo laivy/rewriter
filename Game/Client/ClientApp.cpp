@@ -5,9 +5,9 @@
 #include "ObjectManager.h"
 #include "Renderer2D.h"
 #include "SceneManager.h"
-#include "Timer.h"
 #include "Wnd.h"
 #include "WndManager.h"
+#include "Common/Timer.h"
 
 ClientApp::ClientApp() :
 	m_isActive{ true },

@@ -16,7 +16,7 @@ namespace Resource
 
 	public:
 		Image();
-		~Image() = default;
+		~Image();
 
 		void SetBuffer(std::byte* buffer, size_t size);
 		void SetD2DBitmap(ID2D1Bitmap* bitmap);

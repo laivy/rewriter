@@ -44,6 +44,12 @@
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <OutDir>$(SolutionDir)Bin\$(Configuration)\</OutDir>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <OutDir>$(SolutionDir)Bin\$(Configuration)\</OutDir>
+  </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
@@ -87,6 +93,7 @@
     <ClCompile Include="..\..\Common\Time.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="..\..\Common\Timer.cpp" />
     <ClCompile Include="..\..\Common\Types.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
     </ClCompile>
@@ -190,9 +197,6 @@
     <ClCompile Include="Stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
     </ClCompile>
-    <ClCompile Include="Timer.cpp">
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Use</PrecompiledHeader>
-    </ClCompile>
     <ClCompile Include="Wnd.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Use</PrecompiledHeader>
     </ClCompile>
@@ -203,8 +207,9 @@
   <ItemGroup>
     <ClInclude Include="..\..\Common\Packet.h" />
     <ClInclude Include="..\..\Common\Singleton.h" />
-    <ClInclude Include="..\..\Common\StringTable.h" />
+    <ClInclude Include="..\..\Common\Stringtable.h" />
     <ClInclude Include="..\..\Common\Time.h" />
+    <ClInclude Include="..\..\Common\Timer.h" />
     <ClInclude Include="..\..\Common\Types.h" />
     <ClInclude Include="..\..\External\DirectX\d3dx12.h" />
     <ClInclude Include="..\..\External\DirectX\WICTextureLoader12.h" />
@@ -247,7 +252,6 @@
     <ClInclude Include="Shader.h" />
     <ClInclude Include="Stdafx.h" />
     <ClInclude Include="TextUtil.h" />
-    <ClInclude Include="Timer.h" />
     <ClInclude Include="UI.h" />
     <ClInclude Include="Wnd.h" />
     <ClInclude Include="WndManager.h" />

@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug|x64">
@@ -46,6 +46,10 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <IntDir>$(Platform)\$(Configuration)\</IntDir>
     <LibraryPath>$(LibraryPath)</LibraryPath>
+    <OutDir>$(SolutionDir)Bin\$(Configuration)\</OutDir>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <OutDir>$(SolutionDir)Bin\$(Configuration)\</OutDir>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
@@ -134,7 +138,7 @@
     <ClInclude Include="..\..\Common\Packet.h" />
     <ClInclude Include="..\..\Common\Request.h" />
     <ClInclude Include="..\..\Common\Singleton.h" />
-    <ClInclude Include="..\..\Common\StringTable.h" />
+    <ClInclude Include="..\..\Common\Stringtable.h" />
     <ClInclude Include="..\..\Common\Types.h" />
     <ClInclude Include="..\..\External\DirectX\d3dx12.h" />
     <ClInclude Include="..\..\External\Imgui\imconfig.h" />

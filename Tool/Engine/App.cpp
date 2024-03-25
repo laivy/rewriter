@@ -1,18 +1,22 @@
 ﻿#include "Stdafx.h"
 #include "App.h"
-#include "ExPlorer.h"
+#include "Explorer.h"
 #include "Hierarchy.h"
 #include "Inspector.h"
+#include "Common/Timer.h"
 
 App::App(HINSTANCE hInstance) :
-	m_isActive{ false },
 	m_hInstance{ hInstance },
 	m_hWnd{ NULL },
-	m_size{ 1920, 1080 }
+	m_isActive{ false },
+	m_size{ 1920, 1080 },
+	m_timer{ new Timer }
 {
 	InitWindow();
 	InitDirectX();
 	InitImGui();
+	InitApp();
+	m_timer->Tick();
 	m_isActive = true;
 }
 
@@ -48,23 +52,27 @@ LRESULT App::WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 	if (ImGui_ImplWin32_WndProcHandler(hWnd, message, wParam, lParam))
 		return true;
 
-	App* app{ reinterpret_cast<App*>(GetWindowLongPtr(hWnd, GWLP_USERDATA)) };
+	App* app{ reinterpret_cast<App*>(::GetWindowLongPtr(hWnd, GWLP_USERDATA)) };
 	switch (message)
 	{
 	case WM_NCCREATE:
 	{
 		LPCREATESTRUCT pcs{ reinterpret_cast<LPCREATESTRUCT>(lParam) };
-		SetWindowLongPtr(hWnd, GWLP_USERDATA, reinterpret_cast<LONG_PTR>(pcs->lpCreateParams));
+		::SetWindowLongPtr(hWnd, GWLP_USERDATA, reinterpret_cast<LONG_PTR>(pcs->lpCreateParams));
 		return 1;
 	}
 	case WM_SIZE:
+	{
 		app->OnResize(GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam));
 		break;
+	}
 	case WM_DESTROY:
+	{
 		PostQuitMessage(0);
 		break;
+	}
 	default:
-		return DefWindowProc(hWnd, message, wParam, lParam);
+		return ::DefWindowProc(hWnd, message, wParam, lParam);
 	}
 	return 0;
 }
@@ -82,13 +90,13 @@ void App::InitWindow()
 	wcex.hbrBackground = NULL;
 	wcex.lpszMenuName = NULL;
 	wcex.lpszClassName = TITLE_NAME;
-	RegisterClassEx(&wcex);
+	::RegisterClassEx(&wcex);
 
 	// 화면 최대 크기로 윈도우 생성
 	RECT rect{ 0, 0, m_size.first, m_size.second };
-	AdjustWindowRect(&rect, WS_OVERLAPPEDWINDOW, FALSE);
+	::AdjustWindowRect(&rect, WS_OVERLAPPEDWINDOW, FALSE);
 
-	m_hWnd = CreateWindow(
+	m_hWnd = ::CreateWindow(
 		wcex.lpszClassName,
 		TITLE_NAME,
 		WS_OVERLAPPEDWINDOW,
@@ -101,10 +109,10 @@ void App::InitWindow()
 		wcex.hInstance,
 		this
 	);
-	SetWindowText(m_hWnd, TITLE_NAME);
+	::SetWindowText(m_hWnd, TITLE_NAME);
 
-	ShowWindow(m_hWnd, SW_SHOWMAXIMIZED);
-	UpdateWindow(m_hWnd);
+	::ShowWindow(m_hWnd, SW_SHOWMAXIMIZED);
+	::UpdateWindow(m_hWnd);
 }
 
 void App::InitDirectX()
@@ -198,10 +206,12 @@ void App::InitDirectX()
 void App::InitImGui()
 {
 	IMGUI_CHECKVERSION();
+
 	ImGui::CreateContext();
 	ImGuiIO& io{ ImGui::GetIO() };
 	io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
 	io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
+	io.Fonts->AddFontFromFileTTF("D:/Programming/Rewriter/Data/NEXON Lv2 Gothic.ttf", 16.0f, nullptr, io.Fonts->GetGlyphRangesKorean());
 	
 	ImGui::GetStyle().WindowMenuButtonPosition = ImGuiDir_None;
 	ImGui::GetStyle().DockingSeparatorSize = 1.0f;
@@ -216,8 +226,11 @@ void App::InitImGui()
 		m_srvDescHeap->GetCPUDescriptorHandleForHeapStart(),
 		m_srvDescHeap->GetGPUDescriptorHandleForHeapStart()
 	);
+}
 
-	// 윈도우 싱글턴 생성
+void App::InitApp()
+{
+	// 싱글턴 생성
 	Explorer::Instantiate();
 	Hierarchy::Instantiate();
 	Inspector::Instantiate();
@@ -253,6 +266,13 @@ void App::OnResize(int width, int height)
 
 void App::Update()
 {
+	float deltaTime{ m_timer->Tick() };
+	if (auto explorer{ Explorer::GetInstance() })
+		explorer->Update(deltaTime);
+	if (auto hierarchy{ Hierarchy::GetInstance() })
+		hierarchy->Update(deltaTime);
+	if (auto inspector{ Inspector::GetInstance() })
+		inspector->Update(deltaTime);
 }
 
 void App::Render()
@@ -265,7 +285,7 @@ void App::Render()
 	CD3DX12_CPU_DESCRIPTOR_HANDLE rtvHandle{ m_rtvHeap->GetCPUDescriptorHandleForHeapStart(), static_cast<int>(m_frameIndex), m_rtvDescriptorSize };
 	m_commandList->OMSetRenderTargets(1, &rtvHandle, FALSE, nullptr);
 
-	constexpr FLOAT clearColor[]{ 0.15625f, 0.171875f, 0.203125f, 1.0f };
+	constexpr float clearColor[]{ 0.15625f, 0.171875f, 0.203125f, 1.0f };
 	m_commandList->ClearRenderTargetView(rtvHandle, clearColor, 0, NULL);
 	m_commandList->SetDescriptorHeaps(1, m_srvDescHeap.GetAddressOf());
 

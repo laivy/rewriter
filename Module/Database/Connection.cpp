@@ -48,7 +48,7 @@ namespace Database
 			std::make_wformat_args(server, dbnamae, username, password)
 		);
 
-		rc = SQLDriverConnect(conn->m_hDbc, NULL, const_cast<SQLWCHAR*>(connStr.c_str()), SQL_NTS, NULL, 0, NULL, SQL_DRIVER_COMPLETE);
+		rc = SQLDriverConnect(conn->m_hDbc, NULL, connStr.data(), SQL_NTS, NULL, 0, NULL, SQL_DRIVER_COMPLETE);
 		if (!SQL_SUCCEEDED(rc))
 			return DBRESULT::ERR_CAN_NOT_CONNECT;
 

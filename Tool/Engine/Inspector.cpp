@@ -45,30 +45,56 @@ Inspector::Inspector() :
 	m_node{ nullptr },
 	m_int{},
 	m_int2{},
-	m_float{},
-	m_string{}
+	m_float{}
 {
 	m_name.resize(STRING_LENGTH_MAX);
 	m_string.resize(STRING_LENGTH_MAX);
+	//Event::OnNodeDelete.Add(std::bind_front(&Inspector::OnNodeDelete, this));
+	//Event::OnNodeSelect.Add(std::bind_front(&Inspector::OnNodeSelect, this));
+}
+
+void Inspector::Update(float deltaTime)
+{
 }
 
 void Inspector::Render()
 {
 	if (ImGui::Begin(WINDOW_NAME))
 	{
+		ImGui::PushID("Inspector");
 		RenderBasicInfo();
+		ImGui::PopID();
 	}
 	ImGui::End();
 }
 
-void Inspector::OnNodeSelected(Node* node)
+Node* Inspector::GetNode() const
+{
+	return m_node;
+}
+
+bool Inspector::OnNodeDelete(Node* node)
+{
+	if (m_node == node)
+		m_node = nullptr;
+	return false;
+}
+
+bool Inspector::OnNodeSelect(Node* node)
 {
 	m_node = node;
 	if (!m_node)
-		return;
+		return false;
 
 	// 이름 설정
-	m_name = node->GetName();
+	if (node->IsRoot())
+	{
+		m_name = node->GetFilePath().filename().string();
+	}
+	else
+	{
+		m_name = node->GetName();
+	}
 	m_name.resize(STRING_LENGTH_MAX);
 
 	// 값 설정
@@ -79,9 +105,7 @@ void Inspector::OnNodeSelected(Node* node)
 		break;
 	case Resource::Property::Type::INT2:
 	{
-		auto int2{ m_node->GetInt2() };
-		m_int2[0] = int2.x;
-		m_int2[1] = int2.y;
+		m_int2 = m_node->GetInt2();
 		break;
 	}
 	case Resource::Property::Type::FLOAT:
@@ -91,11 +115,8 @@ void Inspector::OnNodeSelected(Node* node)
 		m_string = m_node->GetString();
 		break;
 	}
-}
 
-Node* Inspector::GetNode() const
-{
-	return m_node;
+	return false;
 }
 
 void Inspector::RenderBasicInfo()
@@ -106,25 +127,35 @@ void Inspector::RenderBasicInfo()
 	ImGui::SeparatorText("Property Info");
 
 	ImGuiInputTextFlags flag{ ImGuiInputTextFlags_CharsNoBlank };
-	if (m_node->IsRootNode())
+	if (m_node->IsRoot())
 		flag |= ImGuiInputTextFlags_ReadOnly;
 	ImGui::AlignTextToFramePadding();
+
 	ImGui::Text("Name"); ImGui::SameLine(100);
 	if (ImGui::InputText("##Name", m_name.data(), STRING_LENGTH_MAX + 1, flag))
 	{
 		m_node->SetName(m_name);
 	}
 
-	if (m_node->IsRootNode())
+	if (m_node->IsRoot())
+	{
+		ImGui::Text("FilePath"); ImGui::SameLine(100);
+
+		auto path{ m_node->GetFilePath() };
+		if (path.is_absolute())
+			ImGui::Text(path.string().c_str());
+		else
+			ImGui::Text("-");
 		return;
+	}
 
 	ImGui::AlignTextToFramePadding();
 	ImGui::Text("Type"); ImGui::SameLine(100);
-	if (ImGui::BeginCombo("##Type", m_node ? TypeToString(m_node->GetType()).c_str() : "-"))
+	if (ImGui::BeginCombo("##Inspector/Type", m_node ? TypeToString(m_node->GetType()).c_str() : "-"))
 	{
 		for (const std::string& s : PROPERTY_TYPES)
 		{
-			if (ImGui::Selectable(s.c_str()) && m_node)
+			if (ImGui::Selectable(s.c_str()))
 				m_node->SetType(StringToType(s));
 		}
 		ImGui::EndCombo();
@@ -141,26 +172,30 @@ void Inspector::RenderBasicInfo()
 	{
 	case Resource::Property::Type::INT:
 	{
-		if (ImGui::InputInt("##Int", &m_int))
+		if (ImGui::InputInt("##Inspector/Int", &m_int))
 			m_node->Set(m_int);
 		break;
 	}
 	case Resource::Property::Type::INT2:
 	{
-		if (ImGui::InputInt2("##Int2", m_int2.data()))
-			m_node->Set(INT2{ m_int2[0], m_int2[1] });
+		if (ImGui::InputInt2("##Inspector/Int2", reinterpret_cast<int*>(&m_int2)))
+			m_node->Set(m_int2);
 		break;
 	}
 	case Resource::Property::Type::FLOAT:
 	{
-		if (ImGui::InputFloat("##Float", &m_float))
+		if (ImGui::InputFloat("##Inspector/Float", &m_float))
 			m_node->Set(m_float);
 		break;
 	}
 	case Resource::Property::Type::STRING:
 	{
-		if (ImGui::InputText("##String", m_string.data(), STRING_LENGTH_MAX + 1))
-			m_node->Set(m_string);
+		if (ImGui::InputText("##Inspector/String", m_string.data(), STRING_LENGTH_MAX + 1))
+		{
+			std::wstring wstring{};
+			wstring.assign(m_string.begin(), m_string.end());
+			m_node->Set(wstring);
+		}
 		break;
 	}
 	}

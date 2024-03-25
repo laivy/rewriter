@@ -1,23 +1,9 @@
 ﻿#pragma once
+#include "Common/Stdafx.h"
 
 // Windows
-#define WIN32_LEAN_AND_MEAN
-#include <windows.h>
 #include <windowsx.h>
 #include <commdlg.h>
-#include <wrl.h>
-using Microsoft::WRL::ComPtr;
-
-// C, C++
-#include <array>
-#include <filesystem>
-#include <fstream>
-#include <functional>
-#include <memory>
-#include <ranges>
-#include <set>
-#include <unordered_map>
-#include <variant>
 
 // DirectX
 #include <dxgi1_6.h>
@@ -33,9 +19,5 @@ extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg
 
 // Module
 #include "Module/Resource/Include/Image.h"
+#include "Module/Resource/Include/Manager.h"
 #include "Module/Resource/Include/Property.h"
-#include "Module/Resource/Include/ResourceManager.h"
-
-// Project
-#include "Common/Singleton.h"
-#include "Common/Types.h"

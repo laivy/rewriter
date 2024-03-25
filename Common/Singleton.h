@@ -26,7 +26,7 @@ public:
 
 	static bool IsInstanced()
 	{
-		return m_instance == nullptr ? false : true;
+		return m_instance ? true : false;
 	}
 
 protected:
@@ -34,5 +34,5 @@ protected:
 	virtual ~TSingleton() = default;
 
 private:
-	inline static std::unique_ptr<T> m_instance{ nullptr };
+	static inline std::unique_ptr<T> m_instance{ nullptr };
 };

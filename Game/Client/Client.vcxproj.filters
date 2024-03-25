@@ -53,9 +53,6 @@
     <ClCompile Include="SceneManager.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
-    <ClCompile Include="Timer.cpp">
-      <Filter>소스 파일</Filter>
-    </ClCompile>
     <ClCompile Include="WndManager.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
@@ -158,6 +155,9 @@
     <ClCompile Include="..\..\Common\Types.cpp">
       <Filter>소스 파일\Common</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\Common\Timer.cpp">
+      <Filter>소스 파일\Common</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Stdafx.h">
@@ -176,9 +176,6 @@
       <Filter>헤더 파일</Filter>
     </ClInclude>
     <ClInclude Include="SceneManager.h">
-      <Filter>헤더 파일</Filter>
-    </ClInclude>
-    <ClInclude Include="Timer.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
     <ClInclude Include="WndManager.h">
@@ -308,6 +305,9 @@
       <Filter>헤더 파일\Common</Filter>
     </ClInclude>
     <ClInclude Include="..\..\Common\Types.h">
+      <Filter>헤더 파일\Common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Common\Timer.h">
       <Filter>헤더 파일\Common</Filter>
     </ClInclude>
   </ItemGroup>

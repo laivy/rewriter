@@ -10,6 +10,10 @@ namespace Resource
 	{
 	}
 
+	Image::~Image()
+	{
+	}
+
 	void Image::SetBuffer(std::byte* buffer, size_t size)
 	{
 		m_buffer.reset(buffer);

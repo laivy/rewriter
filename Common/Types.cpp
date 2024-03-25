@@ -4,7 +4,6 @@ INT2::INT2(int32_t x, int32_t y) :
 	x{ x },
 	y{ y }
 {
-
 }
 
 INT2 operator+(const INT2& lhs, const INT2& rhs)

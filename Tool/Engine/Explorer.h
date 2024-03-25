@@ -6,8 +6,18 @@ public:
 	Explorer();
 	~Explorer() = default;
 
+	void Update(float deltaTime);
 	void Render();
 
 private:
+	void SetPath(const std::filesystem::path& path);
+	void RenderAddressBar();
+	void RenderFileView();
+
+private:
+	static constexpr auto MAIN_WINDOW_NAME{ "Explorer" };
+	static constexpr auto CHILD_WINDOW_NAME{ "FileViewer" };
+
 	std::filesystem::path m_path;
+	std::vector<std::string> m_folders;
 };

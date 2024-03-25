@@ -18,6 +18,6 @@ namespace Resource
 	};
 
 	__declspec(dllexport) std::shared_ptr<Property> Get(const std::wstring& path);
-	__declspec(dllexport) std::shared_ptr<Property> Get(const std::shared_ptr<Property>& prop, const std::wstring& path);
+	__declspec(dllexport) std::shared_ptr<Property> Load(const std::filesystem::path& path, const std::wstring& subPath = L"");
 	__declspec(dllexport) void Unload(const std::wstring& path = L"");
 }
