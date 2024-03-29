@@ -15,7 +15,7 @@ private:
 	void RenderFileView();
 
 private:
-	static constexpr auto MAIN_WINDOW_NAME{ "Explorer" };
+	static constexpr auto WINDOW_NAME{ "Explorer" };
 	static constexpr auto CHILD_WINDOW_NAME{ "FileViewer" };
 
 	std::filesystem::path m_path;

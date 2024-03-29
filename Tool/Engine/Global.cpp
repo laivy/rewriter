@@ -3,5 +3,7 @@
 
 namespace Global
 {
-	Event<int> OnNodeAdd;
+	Event<Node*> OnNodeAdd;
+	Event<Node*> OnNodeDelete;
+	Event<Node*> OnNodeSelect;
 }

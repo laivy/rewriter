@@ -13,13 +13,13 @@ void Explorer::Update(float deltaTime)
 
 void Explorer::Render()
 {
-	ImGui::PushID(MAIN_WINDOW_NAME);
-	if (ImGui::Begin(MAIN_WINDOW_NAME))
+	ImGui::PushID(WINDOW_NAME);
+	if (ImGui::Begin(WINDOW_NAME))
 	{
 		RenderAddressBar();
 		ImGui::Spacing();
 		ImGui::Separator();
-		if (ImGui::BeginChild(CHILD_WINDOW_NAME, ImVec2{}, false, ImGuiWindowFlags_HorizontalScrollbar))
+		if (ImGui::BeginChild(CHILD_WINDOW_NAME, {}, false, ImGuiWindowFlags_HorizontalScrollbar))
 		{
 			RenderFileView();
 		}
@@ -39,10 +39,10 @@ void Explorer::SetPath(const std::filesystem::path& path)
 			continue;
 		if (p.has_root_name())
 		{
-			m_folders.push_back(Util::u8tos(p.u8string() + u8"/"));
+			m_folders.push_back(p.string() + "/");
 			continue;
 		}
-		m_folders.push_back(Util::u8tos(p.u8string()));
+		m_folders.push_back(p.string());
 	}
 }
 
@@ -90,14 +90,14 @@ void Explorer::RenderFileView()
 					   | std::views::filter([](const auto& d) { return d.is_directory(); }))
 	{
 		std::wstring name{ d.path().filename().wstring() };
-		if (ImGui::Button(Util::wstos(name).c_str()))
+		if (ImGui::Button(Util::wstou8s(name).c_str()))
 			SetPath(std::filesystem::canonical(m_path / name.c_str()));
 	}
 
 	for (const auto& d : std::filesystem::directory_iterator{ m_path }
 					   | std::views::filter([](const auto& d) { return d.is_regular_file(); }))
 	{
-		std::string name{ Util::wstos(d.path().filename().wstring()) };
+		std::string name{ Util::wstou8s(d.path().filename().wstring()) };
 		ImGui::Selectable(name.c_str());
 		if (ImGui::BeginDragDropSource())
 		{

@@ -22,6 +22,11 @@ App::App(HINSTANCE hInstance) :
 
 App::~App()
 {
+	// 싱글톤 삭제
+	Explorer::Destroy();
+	Hierarchy::Destroy();
+	Inspector::Destroy();
+
 	ImGui_ImplDX12_Shutdown();
 	ImGui_ImplWin32_Shutdown();
 	ImGui::DestroyContext();
@@ -32,12 +37,12 @@ void App::Run()
 	MSG msg{};
 	while (m_isActive)
 	{
-		if (PeekMessage(&msg, NULL, 0, 0, PM_REMOVE))
+		if (::PeekMessage(&msg, NULL, 0, 0, PM_REMOVE))
 		{
 			if (msg.message == WM_QUIT)
 				break;
-			TranslateMessage(&msg);
-			DispatchMessage(&msg);
+			::TranslateMessage(&msg);
+			::DispatchMessage(&msg);
 		}
 		else
 		{
@@ -68,7 +73,7 @@ LRESULT App::WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 	}
 	case WM_DESTROY:
 	{
-		PostQuitMessage(0);
+		::PostQuitMessage(0);
 		break;
 	}
 	default:
@@ -350,10 +355,11 @@ void App::RenderImGuiMainDockSpace()
 	windowFlag |= ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_NoNavFocus;
 	windowFlag |= ImGuiDockNodeFlags_PassthruCentralNode;
 
-	ImGuiDockNodeFlags dockSpaceFlag{ ImGuiDockNodeFlags_PassthruCentralNode };
-	ImGui::Begin("MainDockSpace", NULL, windowFlag);
-	ImGui::DockSpace(ImGui::GetID("MainDockSpace"), ImVec2{}, dockSpaceFlag);
+	ImGui::PushID("DESKTOP");
+	ImGui::Begin("DESKTOP", NULL, windowFlag);
+	ImGui::DockSpace(ImGui::GetID("DESKTOP"), {}, ImGuiDockNodeFlags_PassthruCentralNode);
 	ImGui::End();
+	ImGui::PopID();
 }
 
 void App::RenderImGuiConsole()

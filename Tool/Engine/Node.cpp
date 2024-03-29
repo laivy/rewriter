@@ -1,5 +1,6 @@
 ﻿#include "Stdafx.h"
 #include "App.h"
+#include "Global.h"
 #include "Hierarchy.h"
 #include "Inspector.h"
 #include "Node.h"
@@ -32,7 +33,7 @@ void Node::Render()
 		if (name.starts_with('\0'))
 			name = "##";
 		if (ImGui::Selectable(std::format("{}##{}", name, m_id).c_str(), &m_isSelected))
-			; //OnNodeSelect.Notify(this);
+			Global::OnNodeSelect.Notify(this);
 		
 		RenderContextMenu();
 		return;

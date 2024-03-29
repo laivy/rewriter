@@ -50,7 +50,7 @@ private:
 	static inline size_t s_index{ 0 };
 
 protected:
-	static constexpr auto DEFAULT_NODE_NAME{ "NewProperty" };
+	static constexpr auto DEFAULT_NODE_NAME{ "Node" };
 
 	size_t m_id;
 	bool m_isValid;

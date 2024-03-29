@@ -1,6 +1,5 @@
 ﻿#include "Stdafx.h"
 #include "Util.h"
-#include <cuchar>
 
 namespace Util
 {

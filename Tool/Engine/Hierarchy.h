@@ -1,7 +1,6 @@
 ﻿#pragma once
 
 class Node;
-class RootNode;
 
 class Hierarchy : public TSingleton<Hierarchy>
 {
@@ -37,6 +36,9 @@ private:
 	static constexpr auto MENU_FILE_OPEN{ "Open" };
 	static constexpr auto MENU_FILE_SAVE{ "Save" };
 	static constexpr auto MENU_FILE_SAVEAS{ "Save as" };
+	static constexpr auto DEFAULT_FILE_NAME{ "NewFile" };
 
 	std::vector<std::unique_ptr<Node>> m_roots;
+
+	Observer<Node*> m_onNodeSelect;
 };

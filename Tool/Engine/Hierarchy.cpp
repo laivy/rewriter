@@ -1,11 +1,13 @@
 ﻿#include "Stdafx.h"
+#include "Global.h"
 #include "Hierarchy.h"
 #include "Inspector.h"
 #include "Node.h"
 
 Hierarchy::Hierarchy()
 {
-	//OnNodeSelect.Add(std::bind_front(&Hierarchy::OnNodeSelect, this));
+	m_onNodeSelect = { std::bind_front(&Hierarchy::OnNodeSelect, this) };
+	Global::OnNodeSelect.Add(&m_onNodeSelect);
 }
 
 Hierarchy::~Hierarchy()
@@ -83,25 +85,26 @@ void Hierarchy::OnFileDragDrop(std::string_view path)
 
 void Hierarchy::OnMenuFileNew()
 {
-	int index{ 1 };
-	std::string name{ "NewFile" };
+	size_t index{ 1 };
+	std::string name{ DEFAULT_FILE_NAME };
 	while (true)
 	{
-		auto it{ std::ranges::find_if(m_roots,
-			[&name](const auto& p)
+		auto it{ std::ranges::find_if(m_roots, [&name](const auto& p)
 			{
-				return p->GetName() == name;
+				return name == p->GetName();
 			}) };
+
 		if (it == m_roots.cend())
 			break;
-		name = std::format("NewFile{}", index++);
+
+		name = std::format("{}{}", DEFAULT_FILE_NAME, index++);
 	}
 
 	auto root{ std::make_unique<Node>() };
-	root->SetFilePath(name);
 	root->SetProperty(std::make_shared<Resource::Property>());
 	root->SetName(name);
-	m_roots.push_back(std::move(root));
+	root->SetFilePath(name);
+	m_roots.emplace_back(root.release());
 }
 
 void Hierarchy::OnMenuFileOpen()
@@ -125,10 +128,14 @@ void Hierarchy::OnMenuFileOpen()
 	// 역슬래시를 슬래시로 변환
 	std::ranges::replace(filePath, L'\\', L'/');
 
+	// 로드
+	auto prop{ Resource::Load(filePath) };
+
+	// 노드 추가
 	auto root{ std::make_unique<Node>() };
+	root->SetProperty(prop);
 	root->SetFilePath(filePath);
-	root->SetProperty(Resource::Load(filePath));
-	m_roots.push_back(std::move(root));
+	m_roots.emplace_back(root.release());
 }
 
 void Hierarchy::OnMenuFileSave()

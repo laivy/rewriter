@@ -9,6 +9,11 @@ class Observer
 public:
 	friend class Event<Params...>;
 
+	Observer() :
+		m_event{ nullptr }
+	{
+	}
+
 	Observer(const std::function<void(Params...)>& callback) :
 		m_event{ nullptr },
 		m_callback{ callback }
@@ -18,7 +23,10 @@ public:
 	~Observer()
 	{
 		if (m_event)
+		{
 			m_event->Remove(this);
+			m_event = nullptr;
+		}
 	}
 
 	void OnNotify(const Params&... param)
