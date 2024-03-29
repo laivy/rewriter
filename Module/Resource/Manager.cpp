@@ -124,9 +124,60 @@ namespace Resource
 		return root;
 	}
 
+	void Manager::Unload(const std::wstring& path)
+	{
+		// 로드 된 모든 리소스 해제
+		if (path.empty())
+		{
+			for (const auto& [_, p] : m_resources)
+				p->Flush();
+
+			std::erase_if(m_resources,
+				[](const auto& r)
+				{
+					return r.second->m_children.empty();
+				});
+
+			return;
+		}
+
+		// path를 포함한 하위 리소스 해제
+		size_t pos{ path.rfind(Stringtable::DATA_PATH_SEPERATOR) };
+		if (pos == std::wstring::npos && m_resources.contains(path)) // '/'가 없다는건 파일을 Unload 한다는 것
+		{
+			auto p{ m_resources.at(path) };
+			p->Flush();
+			if (p->m_children.empty())
+				m_resources.erase(path);
+		}
+		else
+		{
+			std::wstring parent{ path.substr(0, pos) };
+			std::wstring remain{ path.substr(pos + 1) };
+			auto p{ Get(parent) };
+			if (!p)
+				return;
+
+			auto c{ p->Get(remain) };
+			if (!c)
+				return;
+
+			c->Flush();
+			if (c->m_children.empty())
+				std::erase(p->m_children, c);
+		}
+	}
+
+	std::shared_ptr<Property> Get(const std::wstring& path)
+	{
+		if (auto m{ Manager::GetInstance() })
+			return m->Get(path);
+		return nullptr;
+	}
+
 	std::shared_ptr<Property> Load(const std::filesystem::path& path, const std::wstring& subPath)
 	{
-		// 서버, 클라에서는 상대 경로로 들어옴
+		// 서버, 클라에서는 상대 경로, 툴에서는 절대 경로를 사용함
 		std::filesystem::path p{ path };
 		if (p.is_relative())
 			p = Stringtable::DATA_FOLDER_PATH + p.wstring();
@@ -243,57 +294,6 @@ namespace Resource
 		}
 
 		return root;
-	}
-
-	void Manager::Unload(const std::wstring& path)
-	{
-		// 로드 된 모든 리소스 해제
-		if (path.empty())
-		{
-			for (const auto& [_, p] : m_resources)
-				p->Flush();
-
-			std::erase_if(m_resources,
-				[](const auto& r)
-				{
-					return r.second->m_children.empty();
-				});
-
-			return;
-		}
-
-		// path를 포함한 하위 리소스 해제
-		size_t pos{ path.rfind(Stringtable::DATA_PATH_SEPERATOR) };
-		if (pos == std::wstring::npos && m_resources.contains(path)) // '/'가 없다는건 파일을 Unload 한다는 것
-		{
-			auto p{ m_resources.at(path) };
-			p->Flush();
-			if (p->m_children.empty())
-				m_resources.erase(path);
-		}
-		else
-		{
-			std::wstring parent{ path.substr(0, pos) };
-			std::wstring remain{ path.substr(pos + 1) };
-			auto p{ Get(parent) };
-			if (!p)
-				return;
-
-			auto c{ p->Get(remain) };
-			if (!c)
-				return;
-
-			c->Flush();
-			if (c->m_children.empty())
-				std::erase(p->m_children, c);
-		}
-	}
-
-	std::shared_ptr<Property> Get(const std::wstring& path)
-	{
-		if (auto m{ Manager::GetInstance() })
-			return m->Get(path);
-		return nullptr;
 	}
 
 	void Unload(const std::wstring& path)

@@ -62,7 +62,6 @@ namespace Resource
 	void Property::Save(const std::filesystem::path& path)
 	{
 		std::ofstream file{ path, std::ios::binary };
-		//file.imbue(std::locale{ "" });
 		std::function<void(Property*)> lambda = [&](Property* prop)
 			{
 				// 이름

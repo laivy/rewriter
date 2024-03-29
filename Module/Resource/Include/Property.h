@@ -46,6 +46,7 @@ namespace Resource
 		__declspec(dllexport) Iterator end() const;
 
 		__declspec(dllexport) void Save(const std::filesystem::path& path);
+
 		__declspec(dllexport) void Add(const std::shared_ptr<Property>& child);
 
 		__declspec(dllexport) void SetType(Type type);
