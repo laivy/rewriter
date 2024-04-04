@@ -29,6 +29,7 @@ public:
 		}
 	}
 
+private:
 	void OnNotify(const Params&... param)
 	{
 		if (m_callback)
