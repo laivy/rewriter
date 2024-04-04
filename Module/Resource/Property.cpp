@@ -26,7 +26,7 @@ namespace Resource
 
 	bool Property::Iterator::operator!=(const Iterator& it) const
 	{
-		if (m_property->m_children.empty())
+		if (m_property->children.empty())
 			return false;
 		if (m_property != it.m_property)
 			return true;
@@ -38,14 +38,14 @@ namespace Resource
 	std::pair<std::wstring, std::shared_ptr<Property>> Property::Iterator::operator*() const
 	{
 		return std::make_pair(
-			m_property->m_children[m_index]->m_name,
-			m_property->m_children[m_index]
+			m_property->children[m_index]->name,
+			m_property->children[m_index]
 		);
 	}
 
 	Property::Property() :
 		m_type{ Property::Type::FOLDER },
-		m_name{ L"" }
+		name{ L"" }
 	{
 	}
 
@@ -56,7 +56,7 @@ namespace Resource
 
 	Property::Iterator Property::end() const
 	{
-		return Iterator{ this, m_children.size() };
+		return Iterator{ this, children.size() };
 	}
 
 	void Property::Save(const std::filesystem::path& path)
@@ -65,10 +65,10 @@ namespace Resource
 		std::function<void(Property*)> lambda = [&](Property* prop)
 			{
 				// 이름
-				std::wstring name{ prop->m_name.c_str() };
+				std::wstring name{ prop->name.c_str() };
 				int32_t length{ static_cast<int32_t>(name.size()) };
 				file.write(reinterpret_cast<char*>(&length), sizeof(length));
-				file.write(reinterpret_cast<char*>(prop->m_name.data()), length * sizeof(wchar_t));
+				file.write(reinterpret_cast<char*>(prop->name.data()), length * sizeof(wchar_t));
 
 				// 타입
 				file.write(reinterpret_cast<char*>(&prop->m_type), sizeof(prop->m_type));
@@ -118,23 +118,23 @@ namespace Resource
 					break;
 				}
 
-				int32_t count{ static_cast<int32_t>(prop->m_children.size()) };
+				int32_t count{ static_cast<int32_t>(prop->children.size()) };
 				file.write(reinterpret_cast<char*>(&count), sizeof(count));
 
-				for (const auto& child : prop->m_children)
+				for (const auto& child : prop->children)
 					lambda(child.get());
 			};
 
-		int32_t count{ static_cast<int32_t>(m_children.size()) };
+		int32_t count{ static_cast<int32_t>(children.size()) };
 		file.write(reinterpret_cast<char*>(&count), sizeof(count));
 
-		for (const auto& child : m_children)
+		for (const auto& child : children)
 			lambda(child.get());
 	}
 
 	void Property::Add(const std::shared_ptr<Property>& child)
 	{
-		m_children.push_back(child);
+		children.push_back(child);
 	}
 
 	void Property::SetType(Type type)
@@ -144,7 +144,7 @@ namespace Resource
 
 	void Property::SetName(const std::wstring& name)
 	{
-		m_name = name;
+		this->name = name;
 	}
 
 	void Property::Set(int value)
@@ -179,7 +179,7 @@ namespace Resource
 
 	std::wstring Property::GetName() const
 	{
-		return m_name;
+		return name;
 	}
 
 	int Property::GetInt(const std::wstring& path) const
@@ -304,20 +304,20 @@ namespace Resource
 		{
 			std::wstring childName{ path.substr(0, pos) };
 			std::wstring remain{ path.substr(pos + 1) };
-			auto it{ std::ranges::find_if(m_children, [&](const auto& p) { return p->m_name == childName; }) };
-			if (it == m_children.end())
+			auto it{ std::ranges::find_if(children, [&](const auto& p) { return p->name == childName; }) };
+			if (it == children.end())
 				return nullptr;
 			return (*it)->Get(remain);
 		}
 
-		auto it{ std::ranges::find_if(m_children, [&](const auto& p) { return p->m_name == path; }) };
-		if (it == m_children.end())
+		auto it{ std::ranges::find_if(children, [&](const auto& p) { return p->name == path; }) };
+		if (it == children.end())
 			return nullptr;
 		return *it;
 	}
 
 	void Property::Flush()
 	{
-		std::erase_if(m_children, [](const auto& c) { return c.use_count() <= 1; });
+		std::erase_if(children, [](const auto& c) { return c.use_count() <= 1; });
 	}
 }

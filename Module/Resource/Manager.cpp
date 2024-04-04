@@ -135,7 +135,7 @@ namespace Resource
 			std::erase_if(m_resources,
 				[](const auto& r)
 				{
-					return r.second->m_children.empty();
+					return r.second->children.empty();
 				});
 
 			return;
@@ -147,7 +147,7 @@ namespace Resource
 		{
 			auto p{ m_resources.at(path) };
 			p->Flush();
-			if (p->m_children.empty())
+			if (p->children.empty())
 				m_resources.erase(path);
 		}
 		else
@@ -163,8 +163,8 @@ namespace Resource
 				return;
 
 			c->Flush();
-			if (c->m_children.empty())
-				std::erase(p->m_children, c);
+			if (c->children.empty())
+				std::erase(p->children, c);
 		}
 	}
 

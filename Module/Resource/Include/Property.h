@@ -70,9 +70,12 @@ namespace Resource
 		// Manager에서 사용하는 함수들
 		void Flush();
 
+	public:
+		std::wstring name;
+		std::vector<std::shared_ptr<Property>> children;
+
 	private:
 		Type m_type;
-		std::wstring m_name;
 		std::variant<
 			int32_t,
 			INT2,
@@ -80,6 +83,5 @@ namespace Resource
 			std::wstring,
 			std::shared_ptr<Image>
 		> m_data;
-		std::vector<std::shared_ptr<Property>> m_children;
 	};
 }
