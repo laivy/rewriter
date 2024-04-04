@@ -3,7 +3,7 @@
 
 namespace Global
 {
-	Event<Node*> OnNodeAdd;
-	Event<Node*> OnNodeDelete;
-	Event<Node*> OnNodeSelect;
+	Event<std::shared_ptr<Resource::Property>> OnPropertyAdd;
+	Event<std::shared_ptr<Resource::Property>> OnPropertyDelete;
+	Event<std::shared_ptr<Resource::Property>> OnPropertySelect;
 }

@@ -1,10 +1,8 @@
 ﻿#pragma once
 
-class Node;
-
 namespace Global
 {
-	extern Event<Node*> OnNodeAdd;
-	extern Event<Node*> OnNodeDelete;
-	extern Event<Node*> OnNodeSelect;
+	extern Event<std::shared_ptr<Resource::Property>> OnPropertyAdd;
+	extern Event<std::shared_ptr<Resource::Property>> OnPropertyDelete;
+	extern Event<std::shared_ptr<Resource::Property>> OnPropertySelect;
 }

@@ -1,7 +1,7 @@
 ﻿#pragma once
 #include "Common/Singleton.h"
 
-class Node;
+struct PropInfo;
 
 class Inspector : public TSingleton<Inspector>
 {
@@ -12,11 +12,11 @@ public:
 	void Update(float deltaTime);
 	void Render();
 
-	Node* GetNode() const;
+	std::shared_ptr<Resource::Property> GetNode() const;
 
 private:
-	bool OnNodeDelete(Node* node);
-	bool OnNodeSelect(Node* node);
+	void OnNodeDelete(std::shared_ptr<Resource::Property> prop);
+	void OnNodeSelect(std::shared_ptr<Resource::Property> prop);
 
 	void RenderBasicInfo();
 
@@ -25,8 +25,12 @@ private:
 	static constexpr auto STRING_LENGTH_MAX{ 20ui64 };
 	static constexpr auto PROPERTY_TYPES = std::array{ "FOLDER", "INT", "INT2", "FLOAT", "STRING", "IMAGE" };
 
-	// 하이라키 윈도우에서 선택된 노드
-	Node* m_node;
+	// 옵저버
+	Observer<std::shared_ptr<Resource::Property>> m_onNodeDelete;
+	Observer<std::shared_ptr<Resource::Property>> m_onNodeSelect;
+
+	// 하이라키 윈도우에서 선택된 프로퍼티
+	std::shared_ptr<Resource::Property> m_prop;
 
 	// 입력받을 때 사용할 변수
 	std::string m_name;

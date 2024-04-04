@@ -1,7 +1,9 @@
 ﻿#include "Stdafx.h"
+#include "Global.h"
 #include "Hierarchy.h"
 #include "Inspector.h"
 #include "Node.h"
+#include "Util.h"
 
 Resource::Property::Type StringToType(std::string_view type)
 {
@@ -42,15 +44,19 @@ std::string TypeToString(Resource::Property::Type type)
 }
 
 Inspector::Inspector() :
-	m_node{ nullptr },
+	m_prop{ nullptr },
 	m_int{},
 	m_int2{},
 	m_float{}
 {
 	m_name.resize(STRING_LENGTH_MAX);
 	m_string.resize(STRING_LENGTH_MAX);
-	//Event::OnNodeDelete.Add(std::bind_front(&Inspector::OnNodeDelete, this));
-	//Event::OnNodeSelect.Add(std::bind_front(&Inspector::OnNodeSelect, this));
+
+	m_onNodeSelect = { std::bind_front(&Inspector::OnNodeSelect, this) };
+	Global::OnPropertySelect.Add(&m_onNodeSelect);
+
+	m_onNodeDelete = { std::bind_front(&Inspector::OnNodeDelete, this) };
+	Global::OnPropertyDelete.Add(&m_onNodeDelete);
 }
 
 void Inspector::Update(float deltaTime)
@@ -59,109 +65,104 @@ void Inspector::Update(float deltaTime)
 
 void Inspector::Render()
 {
+	ImGui::PushID(WINDOW_NAME);
 	if (ImGui::Begin(WINDOW_NAME))
 	{
-		ImGui::PushID("Inspector");
 		RenderBasicInfo();
-		ImGui::PopID();
 	}
 	ImGui::End();
+	ImGui::PopID();
 }
 
-Node* Inspector::GetNode() const
+std::shared_ptr<Resource::Property> Inspector::GetNode() const
 {
-	return m_node;
+	return m_prop;
 }
 
-bool Inspector::OnNodeDelete(Node* node)
+void Inspector::OnNodeDelete(std::shared_ptr<Resource::Property> prop)
 {
-	if (m_node == node)
-		m_node = nullptr;
-	return false;
+	if (m_prop == prop)
+		m_prop.reset();
 }
 
-bool Inspector::OnNodeSelect(Node* node)
+void Inspector::OnNodeSelect(std::shared_ptr<Resource::Property> prop)
 {
-	m_node = node;
-	if (!m_node)
-		return false;
+	m_prop = prop;
+	if (!m_prop)
+		return;
 
 	// 이름 설정
-	if (node->IsRoot())
-	{
-		m_name = node->GetFilePath().filename().string();
-	}
-	else
-	{
-		m_name = node->GetName();
-	}
-	m_name.resize(STRING_LENGTH_MAX);
+	m_name = Util::wstou8s(prop->name);
 
 	// 값 설정
-	switch (m_node->GetType())
+	switch (m_prop->GetType())
 	{
 	case Resource::Property::Type::INT:
-		m_int = m_node->GetInt();
+	{
+		m_int = m_prop->GetInt();
 		break;
+	}
 	case Resource::Property::Type::INT2:
 	{
-		m_int2 = m_node->GetInt2();
+		m_int2 = m_prop->GetInt2();
 		break;
 	}
 	case Resource::Property::Type::FLOAT:
-		m_float = m_node->GetFloat();
-		break;
-	case Resource::Property::Type::STRING:
-		m_string = m_node->GetString();
+	{
+		m_float = m_prop->GetFloat();
 		break;
 	}
-
-	return false;
+	case Resource::Property::Type::STRING:
+	{
+		m_string = Util::wstou8s(m_prop->GetString());
+		break;
+	}
+	}
 }
 
 void Inspector::RenderBasicInfo()
 {
-	if (!m_node)
+	if (!m_prop)
 		return;
 
+	ImGui::PushID(WINDOW_NAME);
 	ImGui::SeparatorText("Property Info");
 
 	ImGuiInputTextFlags flag{ ImGuiInputTextFlags_CharsNoBlank };
-	if (m_node->IsRoot())
-		flag |= ImGuiInputTextFlags_ReadOnly;
+	//if (!m_prop->path.empty())
+	//	flag |= ImGuiInputTextFlags_ReadOnly;
 	ImGui::AlignTextToFramePadding();
 
 	ImGui::Text("Name"); ImGui::SameLine(100);
 	if (ImGui::InputText("##Name", m_name.data(), STRING_LENGTH_MAX + 1, flag))
 	{
-		m_node->SetName(m_name);
+		m_prop->SetName(Util::u8stows(m_name));
 	}
 
-	if (m_node->IsRoot())
-	{
-		ImGui::Text("FilePath"); ImGui::SameLine(100);
-
-		auto path{ m_node->GetFilePath() };
-		if (path.is_absolute())
-			ImGui::Text(path.string().c_str());
-		else
-			ImGui::Text("-");
-		return;
-	}
+	//if (!m_prop->path.empty())
+	//{
+	//	ImGui::Text("FilePath"); ImGui::SameLine(100);
+	//	if (m_prop->path.is_absolute())
+	//		ImGui::Text(m_prop->path.string().c_str());
+	//	else
+	//		ImGui::Text("-");
+	//	ImGui::PopID();
+	//	return;
+	//}
 
 	ImGui::AlignTextToFramePadding();
 	ImGui::Text("Type"); ImGui::SameLine(100);
-	if (ImGui::BeginCombo("##Inspector/Type", m_node ? TypeToString(m_node->GetType()).c_str() : "-"))
+	if (ImGui::BeginCombo("##Inspector/Type", m_prop ? TypeToString(m_prop->GetType()).c_str() : "-"))
 	{
 		for (const std::string& s : PROPERTY_TYPES)
 		{
 			if (ImGui::Selectable(s.c_str()))
-				m_node->SetType(StringToType(s));
+				m_prop->SetType(StringToType(s));
 		}
 		ImGui::EndCombo();
 	}
 
-	auto type{ m_node->GetType() };
+	auto type{ m_prop->GetType() };
 	if (type == Resource::Property::Type::FOLDER)
 		return;
 
@@ -173,30 +174,27 @@ void Inspector::RenderBasicInfo()
 	case Resource::Property::Type::INT:
 	{
 		if (ImGui::InputInt("##Inspector/Int", &m_int))
-			m_node->Set(m_int);
+			m_prop->Set(m_int);
 		break;
 	}
 	case Resource::Property::Type::INT2:
 	{
 		if (ImGui::InputInt2("##Inspector/Int2", reinterpret_cast<int*>(&m_int2)))
-			m_node->Set(m_int2);
+			m_prop->Set(m_int2);
 		break;
 	}
 	case Resource::Property::Type::FLOAT:
 	{
 		if (ImGui::InputFloat("##Inspector/Float", &m_float))
-			m_node->Set(m_float);
+			m_prop->Set(m_float);
 		break;
 	}
 	case Resource::Property::Type::STRING:
 	{
 		if (ImGui::InputText("##Inspector/String", m_string.data(), STRING_LENGTH_MAX + 1))
-		{
-			std::wstring wstring{};
-			wstring.assign(m_string.begin(), m_string.end());
-			m_node->Set(wstring);
-		}
+			m_prop->Set(Util::u8stows(m_string));
 		break;
 	}
 	}
+	ImGui::PopID();
 }

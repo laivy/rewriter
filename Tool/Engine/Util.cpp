@@ -17,6 +17,14 @@ namespace Util
 		return str;
 	}
 
+	std::wstring u8stows(const std::string& u8str)
+	{
+		int length{ ::MultiByteToWideChar(CP_UTF8, NULL, u8str.data(), static_cast<int>(u8str.size()), NULL, NULL) };
+		std::wstring wstr(length, '\0');
+		::MultiByteToWideChar(CP_UTF8, NULL, u8str.data(), static_cast<int>(u8str.size()), wstr.data(), length);
+		return wstr;
+	}
+
 	std::string wstou8s(const std::wstring& wstr)
 	{
 		int length{ ::WideCharToMultiByte(CP_UTF8, NULL, wstr.data(), static_cast<int>(wstr.size()), NULL, NULL, NULL, NULL) };
