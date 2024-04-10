@@ -108,7 +108,7 @@
     <ClInclude Include="Global.h" />
     <ClInclude Include="Hierarchy.h" />
     <ClInclude Include="Inspector.h" />
-    <ClInclude Include="Node.h" />
+    <ClInclude Include="PropInfo.h" />
     <ClInclude Include="Explorer.h" />
     <ClInclude Include="Stdafx.h" />
     <ClInclude Include="Util.h" />
@@ -144,7 +144,6 @@
     <ClCompile Include="Hierarchy.cpp" />
     <ClCompile Include="Inspector.cpp" />
     <ClCompile Include="Main.cpp" />
-    <ClCompile Include="Node.cpp" />
     <ClCompile Include="Explorer.cpp" />
     <ClCompile Include="Stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>

@@ -93,7 +93,7 @@
     <ClInclude Include="Inspector.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
-    <ClInclude Include="Node.h">
+    <ClInclude Include="PropInfo.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
     <ClInclude Include="Util.h">
@@ -153,9 +153,6 @@
       <Filter>소스 파일</Filter>
     </ClCompile>
     <ClCompile Include="Inspector.cpp">
-      <Filter>소스 파일</Filter>
-    </ClCompile>
-    <ClCompile Include="Node.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
     <ClCompile Include="Util.cpp">

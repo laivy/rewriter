@@ -2,12 +2,12 @@
 #include "Global.h"
 #include "Hierarchy.h"
 #include "Inspector.h"
-#include "Node.h"
+#include "PropInfo.h"
 #include "Util.h"
 
 Hierarchy::Hierarchy()
 {
-	m_onNodeSelect = { std::bind_front(&Hierarchy::OnNodeSelect, this) };
+	m_onNodeSelect = { std::bind_front(&Hierarchy::OnPropertySelect, this) };
 	Global::OnPropertySelect.Add(&m_onNodeSelect);
 }
 
@@ -17,6 +17,19 @@ Hierarchy::~Hierarchy()
 
 void Hierarchy::Update(float deltaTime)
 {
+	std::function<void(const std::shared_ptr<Resource::Property>&)> lambda = [&](const std::shared_ptr<Resource::Property>& p)
+		{
+			if (!Global::propInfo[p].isValid)
+			{
+				std::erase(Global::properties, p);
+				return;
+			}
+
+			for (const auto& child : p->children)
+				lambda(child);
+		};
+	for (const auto& prop : Global::properties)
+		lambda(prop);
 }
 
 void Hierarchy::Render()
@@ -27,7 +40,6 @@ void Hierarchy::Render()
 		ProcessDragDrop();
 		RenderMenu();
 		RenderNode();
-		DeleteInvalidNodes();
 	}
 	ImGui::End();
 	ImGui::PopID();
@@ -55,83 +67,77 @@ void Hierarchy::RenderMenu()
 
 void Hierarchy::RenderNode()
 {
-	auto menu =
-		[](Resource::Property* prop)
+	auto menu = [](std::shared_ptr<Resource::Property> prop)
 		{
 			if (ImGui::BeginPopupContextItem("POPUP_CONTEXT_ITEM"))
 			{
 				if (ImGui::Selectable("Add"))
 				{
+					size_t index{ 1 };
+					std::wstring name{ DEFAULT_NODE_NAME };
+					while (true)
+					{
+						auto it = std::ranges::find_if(prop->children, [name](const auto& child) { return name == child->name; });
+						if (it == prop->children.end())
+							break;
+						name = std::format(L"{}{}", DEFAULT_NODE_NAME, index);
+						++index;
+					}
+
 					auto child{ std::make_shared<Resource::Property>() };
-					child->SetName(L"New Node");
+					child->SetName(name);
 					prop->Add(child);
-					Global::OnPropertyAdd.Notify(nullptr);
+					Global::propInfo[child].parent = prop;
+					Global::OnPropertyAdd.Notify(child);
 				}
 				ImGui::EndPopup();
 			}
 		};
 
-	std::function<void(Resource::Property*)> render =
-		[&](Resource::Property* prop)
+	std::function<void(const std::shared_ptr<Resource::Property>&)> render = [&](const std::shared_ptr<Resource::Property>& prop)
 		{
-			ImGui::PushID(prop);
-			if (prop->children.empty())
+			ImGui::PushID(prop.get());
+			if (!Global::propInfo[prop].isRoot && prop->children.empty())
 			{
-				if (ImGui::Selectable(Util::wstou8s(prop->GetName()).c_str()))
-					Global::OnPropertySelect.Notify(nullptr);
+				if (ImGui::Selectable(Util::wstou8s(prop->GetName()).c_str(), Global::propInfo[prop].isSelected))
+					Global::OnPropertySelect.Notify(prop);
 				menu(prop);
 			}
 			else
 			{
-				ImGuiTreeNodeFlags flag{ ImGuiTreeNodeFlags_DefaultOpen | ImGuiTreeNodeFlags_OpenOnDoubleClick };
+				ImGuiTreeNodeFlags flag{ 
+					ImGuiTreeNodeFlags_DefaultOpen | ImGuiTreeNodeFlags_OpenOnDoubleClick |
+					ImGuiTreeNodeFlags_SpanAvailWidth | ImGuiTreeNodeFlags_SpanFullWidth
+				};
+				if (Global::propInfo[prop].isRoot)
+				{
+					ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, { 0.0f, 5.0f });
+					flag |= ImGuiTreeNodeFlags_FramePadding;
+				}
+				if (Global::propInfo[prop].isSelected)
+					flag |= ImGuiTreeNodeFlags_Selected;
 				if (ImGui::TreeNodeEx(Util::wstou8s(prop->GetName()).c_str(), flag))
 				{
 					if (ImGui::IsItemClicked())
-						Global::OnPropertySelect.Notify(nullptr);
+						Global::OnPropertySelect.Notify(prop);
 
 					menu(prop);
 
 					for (const auto& [_, child] : *prop)
-						render(child.get());
+						render(child);
 
 					ImGui::TreePop();
 				}
+				if (Global::propInfo[prop].isRoot)
+					ImGui::PopStyleVar();
 			}
 			ImGui::PopID();
 		};
 
-	ImGui::PushID("NODE");
-	for (const auto& node : m_roots)
-	{
-		// 노드는 트리노드로 렌더링		
-		ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, { 0.0f, 5.0f });
-		ImGuiTreeNodeFlags flag{ 
-			ImGuiTreeNodeFlags_DefaultOpen | ImGuiTreeNodeFlags_OpenOnDoubleClick | 
-			ImGuiTreeNodeFlags_FramePadding | ImGuiTreeNodeFlags_SpanAvailWidth | ImGuiTreeNodeFlags_SpanFullWidth
-		};
-		if (ImGui::TreeNodeEx(Util::wstou8s(node->name).c_str(), flag))
-		{
-			if (ImGui::IsItemClicked())
-				Global::OnPropertySelect.Notify(nullptr);
-
-			menu(node.get());
-
-			// 프로퍼티 렌더링
-			for (const auto& child : node->children)
-				render(child.get());
-
-			ImGui::TreePop();
-		}
-		ImGui::PopStyleVar();
-	}
+	ImGui::PushID("PROPERTY");
+	for (const auto& prop : Global::properties)
+		render(prop);
 	ImGui::PopID();
-}
-
-void Hierarchy::DeleteInvalidNodes()
-{
-	//std::erase_if(m_roots, [](const auto& root) { return !root->IsValid(); });
-	//for (const auto& root : m_roots)
-	//	root->DeleteInvalidChildren();
 }
 
 void Hierarchy::ProcessDragDrop()
@@ -158,12 +164,12 @@ void Hierarchy::OnMenuFileNew()
 	std::wstring name{ DEFAULT_FILE_NAME };
 	while (true)
 	{
-		auto it{ std::ranges::find_if(m_roots, [&name](const auto& node)
+		auto it{ std::ranges::find_if(Global::properties, [&name](const auto& node)
 			{
 				return name == node->name;
 			}) };
 
-		if (it == m_roots.cend())
+		if (it == Global::properties.cend())
 			break;
 
 		name = std::format(L"{}{}", DEFAULT_FILE_NAME, index++);
@@ -171,7 +177,8 @@ void Hierarchy::OnMenuFileNew()
 
 	auto prop{ std::make_shared<Resource::Property>() };
 	prop->SetName(name);
-	m_roots.push_back(prop);
+	Global::properties.push_back(prop);
+	Global::propInfo[prop].isRoot = true;
 }
 
 void Hierarchy::OnMenuFileOpen()
@@ -185,7 +192,7 @@ void Hierarchy::OnMenuFileOpen()
 	ofn.nMaxFile = MAX_PATH;
 	ofn.Flags = OFN_EXPLORER | OFN_FILEMUSTEXIST | OFN_HIDEREADONLY;
 	ofn.lpstrDefExt = L"dat";
-	GetOpenFileName(&ofn);
+	::GetOpenFileName(&ofn);
 
 	// 경로가 비어있는지 확인
 	std::erase(filePath, L'\0');
@@ -197,7 +204,9 @@ void Hierarchy::OnMenuFileOpen()
 
 	// 로드
 	auto prop{ Resource::Load(filePath) };
-	m_roots.push_back(prop);
+	Global::properties.push_back(prop);
+	Global::propInfo[prop].path = filePath;
+	Global::propInfo[prop].isRoot = true;
 }
 
 void Hierarchy::OnMenuFileSave()
@@ -217,27 +226,25 @@ void Hierarchy::OnMenuFileSaveAs()
 {
 }
 
-void Hierarchy::OnNodeSelect(std::shared_ptr<Resource::Property> prop)
+void Hierarchy::OnPropertySelect(std::shared_ptr<Resource::Property> prop)
 {
-	//std::function<void(Node*)> lambda = [&](Node* n)
-	//	{
-	//		// Ctrl키를 누르고 있으면 누른 노드 추가 선택
-	//		if (ImGui::GetIO().KeyCtrl)
-	//		{
-	//			//if (n == node)
-	//			//	n->SetSelect(true);
-	//			return;
-	//		}
+	std::function<void(const std::shared_ptr<Resource::Property>&)> lambda = 
+		[&](const std::shared_ptr<Resource::Property>& p)
+		{
+			// 선택한 노드 외에 전부 선택 해제
+			Global::propInfo[p].isSelected = (p == prop);
 
-	//		// 선택한 노드 외에 전부 선택 해제
-	//		//n->SetSelect(n == node ? true : false);
+			// 재귀
+			for (const auto& child : p->children)
+				lambda(child);
+		};
 
-	//		// 재귀
-	//		for (auto& child : *n)
-	//			lambda(child.get());
-	//	};
+	// 노드 선택
+	// Ctrl키를 누르고 있으면 다른 노드들 선택 해제하지 않음
+	Global::propInfo[prop].isSelected = true;
+	if (ImGui::GetIO().KeyCtrl)
+		return;
 
-	//for (auto& root : m_roots)
-	//	for (auto& child : *root)
-	//		lambda(child.get());
+	for (const auto& p : Global::properties)
+		lambda(p);
 }

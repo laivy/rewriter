@@ -2,7 +2,7 @@
 #include "Global.h"
 #include "Hierarchy.h"
 #include "Inspector.h"
-#include "Node.h"
+#include "ProfInfo.h"
 #include "Util.h"
 
 Resource::Property::Type StringToType(std::string_view type)
@@ -125,7 +125,6 @@ void Inspector::RenderBasicInfo()
 	if (!m_prop)
 		return;
 
-	ImGui::PushID(WINDOW_NAME);
 	ImGui::SeparatorText("Property Info");
 
 	ImGuiInputTextFlags flag{ ImGuiInputTextFlags_CharsNoBlank };
@@ -196,5 +195,4 @@ void Inspector::RenderBasicInfo()
 		break;
 	}
 	}
-	ImGui::PopID();
 }
