@@ -95,7 +95,7 @@ void Explorer::RenderFileView()
 	}
 
 	for (const auto& d : std::filesystem::directory_iterator{ m_path }
-					   | std::views::filter([](const auto& d) { return d.is_regular_file(); }))
+					   | std::views::filter([](const auto& d) { return d.is_regular_file() && d.path().extension() == Stringtable::DATA_FILE_EXT; }))
 	{
 		std::string name{ Util::wstou8s(d.path().filename().wstring()) };
 		ImGui::Selectable(name.c_str());
