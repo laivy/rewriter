@@ -1,7 +1,5 @@
 ﻿#pragma once
 
-struct PropInfo;
-
 class Hierarchy : public TSingleton<Hierarchy>
 {
 public:
@@ -14,14 +12,12 @@ public:
 private:
 	void OnPropertySelect(std::shared_ptr<Resource::Property> prop);
 	void OnFileDragDrop(std::string_view path);
-
-	// 각 메뉴 선택 시 호출된다.
 	void OnMenuFileNew();
 	void OnMenuFileOpen();
 	void OnMenuFileSave();
 	void OnMenuFileSaveAs();
 
-	void ProcessDragDrop();
+	void DragDrop();
 	void RenderMenu();
 	void RenderNode();
 

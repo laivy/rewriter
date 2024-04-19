@@ -111,6 +111,9 @@
     <ClInclude Include="Global.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\External\Imgui\imgui_stdlib.h">
+      <Filter>외부 파일\Imgui</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="App.cpp">
@@ -163,6 +166,9 @@
     </ClCompile>
     <ClCompile Include="Global.cpp">
       <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\External\Imgui\imgui_stdlib.cpp">
+      <Filter>외부 파일\Imgui</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

@@ -140,6 +140,24 @@ namespace Resource
 	void Property::SetType(Type type)
 	{
 		m_type = type;
+		switch (m_type)
+		{
+		case Type::INT:
+			m_data = 0;
+			break;
+		case Type::INT2:
+			m_data = INT2{ 0, 0 };
+			break;
+		case Type::FLOAT:
+			m_data = 0.0f;
+			break;
+		case Type::STRING:
+			m_data = L"";
+			break;
+		case Type::IMAGE:
+			m_data = std::shared_ptr<Resource::Image>{};
+			break;
+		}
 	}
 
 	void Property::SetName(const std::wstring& name)
@@ -185,6 +203,7 @@ namespace Resource
 	int Property::GetInt(const std::wstring& path) const
 	{
 		assert(m_type == Type::INT);
+		assert(std::holds_alternative<int32_t>(m_data));
 		
 		if (path.empty())
 			return std::get<int>(m_data);

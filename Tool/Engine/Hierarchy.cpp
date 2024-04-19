@@ -17,19 +17,18 @@ Hierarchy::~Hierarchy()
 
 void Hierarchy::Update(float deltaTime)
 {
-	std::function<void(const std::shared_ptr<Resource::Property>&)> lambda = [&](const std::shared_ptr<Resource::Property>& p)
+	// 유효하지 않은 프로퍼티 삭제
+	std::function<void(const std::shared_ptr<Resource::Property>&)> func =
+		[&](const std::shared_ptr<Resource::Property>& prop)
 		{
-			if (!Global::propInfo[p].isValid)
-			{
-				std::erase(Global::properties, p);
-				return;
-			}
-
-			for (const auto& child : p->children)
-				lambda(child);
+			std::erase_if(prop->children, [](const auto& prop) { return !Global::propInfo[prop].isValid; });
+			for (const auto& child : prop->children)
+				func(child);
 		};
+
+	std::erase_if(Global::properties, [](const auto& prop) { return !Global::propInfo[prop].isValid; });
 	for (const auto& prop : Global::properties)
-		lambda(prop);
+		func(prop);
 }
 
 void Hierarchy::Render()
@@ -37,7 +36,7 @@ void Hierarchy::Render()
 	ImGui::PushID(WINDOW_NAME);
 	if (ImGui::Begin(WINDOW_NAME, NULL, ImGuiWindowFlags_MenuBar))
 	{
-		ProcessDragDrop();
+		DragDrop();
 		RenderMenu();
 		RenderNode();
 	}
@@ -71,6 +70,28 @@ void Hierarchy::RenderNode()
 		{
 			if (ImGui::BeginPopupContextItem("POPUP_CONTEXT_ITEM"))
 			{
+				if (Global::propInfo[prop].isRoot)
+				{
+					if (ImGui::Selectable("Save"))
+					{
+						prop->Save(Global::propInfo[prop].path);
+					}
+					if (ImGui::Selectable("Save As"))
+					{
+						std::wstring path(MAX_PATH, L'\0');
+						OPENFILENAME ofn{};
+						ofn.lStructSize = sizeof(OPENFILENAME);
+						ofn.lpstrFilter = L"Data File(*.dat)\0*.dat\0";
+						ofn.lpstrFile = path.data();
+						ofn.lpstrDefExt = Stringtable::DATA_FILE_EXT;
+						ofn.nMaxFile = MAX_PATH;
+						if (::GetSaveFileName(&ofn))
+						{
+							prop->Save(path);
+							Global::propInfo[prop].path = path;
+						}
+					}
+				}
 				if (ImGui::Selectable("Add"))
 				{
 					size_t index{ 1 };
@@ -90,6 +111,11 @@ void Hierarchy::RenderNode()
 					Global::propInfo[child].parent = prop;
 					Global::OnPropertyAdd.Notify(child);
 				}
+				if (ImGui::Selectable("Del"))
+				{
+					Global::propInfo[prop].isValid = false;
+					Global::OnPropertyDelete.Notify(prop);
+				}
 				ImGui::EndPopup();
 			}
 		};
@@ -102,35 +128,36 @@ void Hierarchy::RenderNode()
 				if (ImGui::Selectable(Util::wstou8s(prop->GetName()).c_str(), Global::propInfo[prop].isSelected))
 					Global::OnPropertySelect.Notify(prop);
 				menu(prop);
+				ImGui::PopID();
+				return;
 			}
-			else
+
+			ImGuiTreeNodeFlags flag{ 
+				ImGuiTreeNodeFlags_DefaultOpen | ImGuiTreeNodeFlags_OpenOnDoubleClick |
+				ImGuiTreeNodeFlags_SpanAvailWidth | ImGuiTreeNodeFlags_SpanFullWidth
+			};
+			if (Global::propInfo[prop].isRoot)
 			{
-				ImGuiTreeNodeFlags flag{ 
-					ImGuiTreeNodeFlags_DefaultOpen | ImGuiTreeNodeFlags_OpenOnDoubleClick |
-					ImGuiTreeNodeFlags_SpanAvailWidth | ImGuiTreeNodeFlags_SpanFullWidth
-				};
-				if (Global::propInfo[prop].isRoot)
-				{
-					ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, { 0.0f, 5.0f });
-					flag |= ImGuiTreeNodeFlags_FramePadding;
-				}
-				if (Global::propInfo[prop].isSelected)
-					flag |= ImGuiTreeNodeFlags_Selected;
-				if (ImGui::TreeNodeEx(Util::wstou8s(prop->GetName()).c_str(), flag))
-				{
-					if (ImGui::IsItemClicked())
-						Global::OnPropertySelect.Notify(prop);
-
-					menu(prop);
-
-					for (const auto& [_, child] : *prop)
-						render(child);
-
-					ImGui::TreePop();
-				}
-				if (Global::propInfo[prop].isRoot)
-					ImGui::PopStyleVar();
+				ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, { 0.0f, 5.0f });
+				flag |= ImGuiTreeNodeFlags_FramePadding;
 			}
+			if (Global::propInfo[prop].isSelected)
+				flag |= ImGuiTreeNodeFlags_Selected;
+			if (ImGui::TreeNodeEx(Util::wstou8s(prop->GetName()).c_str(), flag))
+			{
+				if (ImGui::IsItemClicked())
+					Global::OnPropertySelect.Notify(prop);
+
+				menu(prop);
+
+				for (const auto& [_, child] : *prop)
+					render(child);
+
+				ImGui::TreePop();
+			}
+			if (Global::propInfo[prop].isRoot)
+				ImGui::PopStyleVar();
+
 			ImGui::PopID();
 		};
 
@@ -140,7 +167,7 @@ void Hierarchy::RenderNode()
 	ImGui::PopID();
 }
 
-void Hierarchy::ProcessDragDrop()
+void Hierarchy::DragDrop()
 {
 	auto window{ ImGui::GetCurrentWindow() };
 	if (ImGui::BeginDragDropTargetCustom(window->ContentRegionRect, window->ID))
