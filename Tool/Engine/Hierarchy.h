@@ -21,6 +21,8 @@ private:
 	void RenderMenu();
 	void RenderNode();
 
+	void Load(const std::filesystem::path& path);
+
 private:
 	static constexpr auto WINDOW_NAME{ "Hierarchy" };
 	static constexpr auto MENU_FILE{ "File" };

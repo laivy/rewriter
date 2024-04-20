@@ -5,46 +5,17 @@
 #include "PropInfo.h"
 #include "Util.h"
 
-Resource::Property::Type StringToType(std::string_view type)
+std::map<Resource::Property::Type, std::string> PROPERTY_TYPES
 {
-	if (type == "GROUP")
-		return Resource::Property::Type::FOLDER;
-	if (type == "INT")
-		return Resource::Property::Type::INT;
-	if (type == "INT2")
-		return Resource::Property::Type::INT2;
-	if (type == "FLOAT")
-		return Resource::Property::Type::FLOAT;
-	if (type == "STRING")
-		return Resource::Property::Type::STRING;
-	if (type == "IMAGE")
-		return Resource::Property::Type::IMAGE;
-	return Resource::Property::Type::FOLDER;
-}
+	{ Resource::Property::Type::FOLDER, "GROUP" },
+	{ Resource::Property::Type::INT, "INT" },
+	{ Resource::Property::Type::INT2, "INT2" },
+	{ Resource::Property::Type::FLOAT, "FLOAT" },
+	{ Resource::Property::Type::STRING, "STRING" },
+	{ Resource::Property::Type::IMAGE, "IMAGE" }
+};
 
-std::string TypeToString(Resource::Property::Type type)
-{
-	switch (type)
-	{
-	case Resource::Property::Type::FOLDER:
-		return "GROUP";
-	case Resource::Property::Type::INT:
-		return "INT";
-	case Resource::Property::Type::INT2:
-		return "INT2";
-	case Resource::Property::Type::FLOAT:
-		return "FLOAT";
-	case Resource::Property::Type::STRING:
-		return "STRING";
-	case Resource::Property::Type::IMAGE:
-		return "IMAGE";
-	default:
-		return "";
-	}
-}
-
-Inspector::Inspector() :
-	m_prop{ nullptr }
+Inspector::Inspector()
 {
 	m_onPropertySelect = { std::bind_front(&Inspector::OnPropertySelect, this) };
 	Global::OnPropertySelect.Add(&m_onPropertySelect);
@@ -68,14 +39,14 @@ void Inspector::Render()
 	ImGui::PopID();
 }
 
-std::shared_ptr<Resource::Property> Inspector::GetNode() const
+std::weak_ptr<Resource::Property> Inspector::GetNode() const
 {
 	return m_prop;
 }
 
 void Inspector::OnPropertyDelete(std::shared_ptr<Resource::Property> prop)
 {
-	if (m_prop == prop)
+	if (m_prop.lock() == prop)
 		m_prop.reset();
 }
 
@@ -86,73 +57,87 @@ void Inspector::OnPropertySelect(std::shared_ptr<Resource::Property> prop)
 
 void Inspector::RenderBasicInfo()
 {
-	if (!m_prop)
+	auto prop{ m_prop.lock() };
+	if (!prop)
 		return;
 
 	ImGui::AlignTextToFramePadding();
 	ImGui::SeparatorText("Property Info");
-	if (Global::propInfo[m_prop].isRoot)
+	if (Global::propInfo[prop].isRoot)
 	{
 		ImGui::Text("Path");
 		ImGui::SameLine(100);
-		ImGui::Selectable(Global::propInfo[m_prop].path.string().empty() ? "-" : Global::propInfo[m_prop].path.string().c_str(), true);
+		if (Global::propInfo[prop].path.empty())
+			ImGui::InputText("##PATH", "-", 1, ImGuiInputTextFlags_ReadOnly);
+		else
+			ImGui::InputText("##PATH", &Util::u8stou8s(Global::propInfo[prop].path.u8string()), ImGuiInputTextFlags_ReadOnly);
 	}
 	else
 	{
 		ImGui::Text("Name");
 		ImGui::SameLine(100);
-		auto name{ Util::wstou8s(m_prop->GetName()) };
+		auto name{ Util::wstou8s(prop->GetName()) };
 		if (ImGui::InputText("##NAME", &name, ImGuiInputTextFlags_EnterReturnsTrue))
-			m_prop->SetName(Util::u8stows(name));
-
-		ImGui::Text("Type"); ImGui::SameLine(100);
-		if (ImGui::BeginCombo("##INSPECTOR/TYPE", m_prop ? TypeToString(m_prop->GetType()).c_str() : "-"))
 		{
-			for (const auto& s : PROPERTY_TYPES)
+			do
 			{
-				if (ImGui::Selectable(s))
+				if (auto parent{ Global::propInfo[prop].parent.lock() })
 				{
-					auto type{ StringToType(s) };
-					m_prop->SetType(type);
+					auto it{ std::ranges::find_if(parent->children, [&name](const auto& prop) { return prop->name == Util::u8stows(name); }) };
+					if (it != parent->children.cend())
+						return;
 				}
+				prop->SetName(Util::u8stows(name));
+			} while (false);
+		}
+
+		ImGui::Text("Type");
+		ImGui::SameLine(100);
+		if (ImGui::BeginCombo("##INSPECTOR/TYPE", prop ? PROPERTY_TYPES.at(prop->GetType()).c_str() : "-"))
+		{
+			for (const auto& [e, s] : PROPERTY_TYPES)
+			{
+				if (ImGui::Selectable(s.c_str()))
+					prop->SetType(e);
 			}
 			ImGui::EndCombo();
 		}
 	}
 
-	auto type{ m_prop->GetType() };
+	auto type{ prop->GetType() };
 	if (type == Resource::Property::Type::FOLDER)
 		return;
 
-	ImGui::Text("Value"); ImGui::SameLine(100);
+	ImGui::Text("Value");
+	ImGui::SameLine(100);
 	switch (type)
 	{
 	case Resource::Property::Type::INT:
 	{
-		auto data{ m_prop->GetInt() };
+		auto data{ prop->GetInt() };
 		if (ImGui::InputInt("##INSPECTOR/INT", &data))
-			m_prop->Set(data);
+			prop->Set(data);
 		break;
 	}
 	case Resource::Property::Type::INT2:
 	{
-		auto data{ m_prop->GetInt2() };
+		auto data{ prop->GetInt2() };
 		if (ImGui::InputInt2("##INSPECTOR/INT2", reinterpret_cast<int*>(&data)))
-			m_prop->Set(data);
+			prop->Set(data);
 		break;
 	}
 	case Resource::Property::Type::FLOAT:
 	{
-		auto data{ m_prop->GetFloat() };
+		auto data{ prop->GetFloat() };
 		if (ImGui::InputFloat("##INSPECTOR/FLOAT", &data))
-			m_prop->Set(data);
+			prop->Set(data);
 		break;
 	}
 	case Resource::Property::Type::STRING:
 	{
-		auto data{ Util::wstou8s(m_prop->GetString()) };
+		auto data{ Util::wstou8s(prop->GetString()) };
 		if (ImGui::InputTextMultiline("##INSPECTOR/STRING", &data))
-			m_prop->Set(Util::u8stows(data));
+			prop->Set(Util::u8stows(data));
 		break;
 	}
 	}

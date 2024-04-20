@@ -19,6 +19,12 @@ namespace Util
 		return str;
 	}
 
+	// std::u8string -> std::string
+	std::string u8stou8s(const std::u8string& u8str)
+	{
+		return std::string{ u8str.begin(), u8str.end() };
+	}
+
 	std::string u8stombs(const std::u8string& u8str)
 	{
 		// u8 -> ws

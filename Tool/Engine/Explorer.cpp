@@ -81,9 +81,7 @@ void Explorer::RenderFileView()
 	if (m_path.compare(m_path.root_path()) != 0)
 	{
 		if (ImGui::Button(".."))
-		{
 			SetPath(std::filesystem::canonical(m_path / ".."));
-		}
 	}
 
 	for (const auto& d : std::filesystem::directory_iterator{ m_path }
@@ -97,12 +95,12 @@ void Explorer::RenderFileView()
 	for (const auto& d : std::filesystem::directory_iterator{ m_path }
 					   | std::views::filter([](const auto& d) { return d.is_regular_file() && d.path().extension() == Stringtable::DATA_FILE_EXT; }))
 	{
-		std::string name{ Util::wstou8s(d.path().filename().wstring()) };
+		std::string name{ Util::u8stou8s(d.path().filename().u8string()) };
 		ImGui::Selectable(name.c_str());
 		if (ImGui::BeginDragDropSource())
 		{
 			auto fullPath{ d.path().string() };
-			ImGui::SetDragDropPayload("FILE_TO_HIERARCHY", fullPath.data(), fullPath.size() + 1);
+			ImGui::SetDragDropPayload("DRAGDROP", fullPath.data(), fullPath.size() + 1);
 			ImGui::Text(name.c_str());
 			ImGui::EndDragDropSource();
 		}

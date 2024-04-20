@@ -214,6 +214,7 @@ void App::InitImGui()
 
 	ImGui::CreateContext();
 	ImGuiIO& io{ ImGui::GetIO() };
+	io.IniFilename = "D:/Programming/Rewriter/Data/imgui.ini";
 	io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
 	io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
 	io.Fonts->AddFontFromFileTTF("D:/Programming/Rewriter/Data/NEXON Lv2 Gothic.ttf", 16.0f, nullptr, io.Fonts->GetGlyphRangesKorean());

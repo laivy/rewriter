@@ -46,78 +46,91 @@ void Hierarchy::Render()
 
 void Hierarchy::RenderMenu()
 {
-	if (ImGui::BeginMenuBar())
+	if (!ImGui::BeginMenuBar())
+		return;
+
+	if (ImGui::BeginMenu(MENU_FILE))
 	{
-		if (ImGui::BeginMenu(MENU_FILE))
+		if (ImGui::MenuItem(MENU_FILE_NEW, "ctrl+n") || ImGui::Shortcut(ImGuiMod_Ctrl | ImGuiKey_N))
 		{
-			if (ImGui::MenuItem(MENU_FILE_NEW))
-				OnMenuFileNew();
-			if (ImGui::MenuItem(MENU_FILE_OPEN))
-				OnMenuFileOpen();
-			if (ImGui::MenuItem(MENU_FILE_SAVE))
-				OnMenuFileSave();
-			if (ImGui::MenuItem(MENU_FILE_SAVEAS))
-				OnMenuFileSaveAs();
-			ImGui::EndMenu();
+			ImGui::CloseCurrentPopup();
+			OnMenuFileNew();
 		}
-		ImGui::EndMenuBar();
+		if (ImGui::MenuItem(MENU_FILE_OPEN, "ctrl+o") || ImGui::Shortcut(ImGuiMod_Ctrl | ImGuiKey_O))
+		{
+			ImGui::CloseCurrentPopup();
+			OnMenuFileOpen();
+		}
+		if (ImGui::MenuItem(MENU_FILE_SAVE, "ctrl+s") || ImGui::Shortcut(ImGuiMod_Ctrl | ImGuiKey_S))
+		{
+			ImGui::CloseCurrentPopup();
+			OnMenuFileSave();
+		}
+		if (ImGui::MenuItem(MENU_FILE_SAVEAS, "ctrl+shift+s") || ImGui::Shortcut(ImGuiMod_Ctrl | ImGuiMod_Shift | ImGuiKey_S))
+		{
+			ImGui::CloseCurrentPopup();
+			OnMenuFileSaveAs();
+		}
+		ImGui::EndMenu();
 	}
+	ImGui::EndMenuBar();
 }
 
 void Hierarchy::RenderNode()
 {
 	auto menu = [](std::shared_ptr<Resource::Property> prop)
 		{
-			if (ImGui::BeginPopupContextItem("POPUP_CONTEXT_ITEM"))
-			{
-				if (Global::propInfo[prop].isRoot)
-				{
-					if (ImGui::Selectable("Save"))
-					{
-						prop->Save(Global::propInfo[prop].path);
-					}
-					if (ImGui::Selectable("Save As"))
-					{
-						std::wstring path(MAX_PATH, L'\0');
-						OPENFILENAME ofn{};
-						ofn.lStructSize = sizeof(OPENFILENAME);
-						ofn.lpstrFilter = L"Data File(*.dat)\0*.dat\0";
-						ofn.lpstrFile = path.data();
-						ofn.lpstrDefExt = Stringtable::DATA_FILE_EXT;
-						ofn.nMaxFile = MAX_PATH;
-						if (::GetSaveFileName(&ofn))
-						{
-							prop->Save(path);
-							Global::propInfo[prop].path = path;
-						}
-					}
-				}
-				if (ImGui::Selectable("Add"))
-				{
-					size_t index{ 1 };
-					std::wstring name{ DEFAULT_NODE_NAME };
-					while (true)
-					{
-						auto it = std::ranges::find_if(prop->children, [name](const auto& child) { return name == child->name; });
-						if (it == prop->children.end())
-							break;
-						name = std::format(L"{}{}", DEFAULT_NODE_NAME, index);
-						++index;
-					}
+			if (!ImGui::BeginPopupContextItem("CONTEXT"))
+				return;
 
-					auto child{ std::make_shared<Resource::Property>() };
-					child->SetName(name);
-					prop->Add(child);
-					Global::propInfo[child].parent = prop;
-					Global::OnPropertyAdd.Notify(child);
-				}
-				if (ImGui::Selectable("Del"))
+			if (Global::propInfo[prop].isRoot)
+			{
+				if (ImGui::Selectable("Save"))
 				{
-					Global::propInfo[prop].isValid = false;
-					Global::OnPropertyDelete.Notify(prop);
+					prop->Save(Global::propInfo[prop].path);
 				}
-				ImGui::EndPopup();
+				if (ImGui::Selectable("Save As"))
+				{
+					std::wstring path(MAX_PATH, L'\0');
+					OPENFILENAME ofn{};
+					ofn.lStructSize = sizeof(OPENFILENAME);
+					ofn.lpstrFilter = L"Data File(*.dat)\0*.dat\0";
+					ofn.lpstrFile = path.data();
+					ofn.lpstrDefExt = Stringtable::DATA_FILE_EXT;
+					ofn.nMaxFile = MAX_PATH;
+					if (::GetSaveFileName(&ofn))
+					{
+						prop->Save(path);
+						Global::propInfo[prop].path = path;
+						prop->SetName(Global::propInfo[prop].path.filename());
+					}
+				}
 			}
+			if (ImGui::Selectable("Add"))
+			{
+				size_t index{ 1 };
+				std::wstring name{ DEFAULT_NODE_NAME };
+				while (true)
+				{
+					auto it = std::ranges::find_if(prop->children, [name](const auto& child) { return name == child->name; });
+					if (it == prop->children.end())
+						break;
+					name = std::format(L"{}{}", DEFAULT_NODE_NAME, index);
+					++index;
+				}
+
+				auto child{ std::make_shared<Resource::Property>() };
+				child->SetName(name);
+				prop->Add(child);
+				Global::propInfo[child].parent = prop;
+				Global::OnPropertyAdd.Notify(child);
+			}
+			if (ImGui::Selectable("Del"))
+			{
+				Global::propInfo[prop].isValid = false;
+				Global::OnPropertyDelete.Notify(prop);
+			}
+			ImGui::EndPopup();
 		};
 
 	std::function<void(const std::shared_ptr<Resource::Property>&)> render = [&](const std::shared_ptr<Resource::Property>& prop)
@@ -167,22 +180,33 @@ void Hierarchy::RenderNode()
 	ImGui::PopID();
 }
 
+void Hierarchy::Load(const std::filesystem::path& path)
+{
+	auto prop{ Resource::Load(path) };
+	prop->SetName(std::filesystem::path{ path }.filename());
+	Global::properties.push_back(prop);
+	Global::propInfo[prop].path = path;
+	Global::propInfo[prop].isRoot = true;
+}
+
 void Hierarchy::DragDrop()
 {
 	auto window{ ImGui::GetCurrentWindow() };
-	if (ImGui::BeginDragDropTargetCustom(window->ContentRegionRect, window->ID))
+	if (!ImGui::BeginDragDropTargetCustom(window->ContentRegionRect, window->ID))
+		return;
+
+	if (auto payload{ ImGui::AcceptDragDropPayload("DRAGDROP") })
 	{
-		if (auto payload{ ImGui::AcceptDragDropPayload("FILE_TO_HIERARCHY") })
-		{
-			std::string_view filePath{ static_cast<const char*>(payload->Data) };
-			OnFileDragDrop(filePath.data());
-		}
-		ImGui::EndDragDropTarget();
+		std::string filePath{ static_cast<const char*>(payload->Data) };
+		OnFileDragDrop(filePath);
 	}
+
+	ImGui::EndDragDropTarget();
 }
 
 void Hierarchy::OnFileDragDrop(std::string_view path)
 {
+	Load(path);
 }
 
 void Hierarchy::OnMenuFileNew()
@@ -210,43 +234,63 @@ void Hierarchy::OnMenuFileNew()
 
 void Hierarchy::OnMenuFileOpen()
 {
-	std::wstring filePath(MAX_PATH, L'\0');
+	std::wstring filepath(MAX_PATH, L'\0');
 
 	OPENFILENAME ofn{};
 	ofn.lStructSize = sizeof(ofn);
 	ofn.lpstrFilter = L"Data Files (*.dat)\0*.dat\0";
-	ofn.lpstrFile = filePath.data();
+	ofn.lpstrFile = filepath.data();
 	ofn.nMaxFile = MAX_PATH;
-	ofn.Flags = OFN_EXPLORER | OFN_FILEMUSTEXIST | OFN_HIDEREADONLY;
+	ofn.Flags = OFN_ALLOWMULTISELECT | OFN_FILEMUSTEXIST | OFN_EXPLORER;
 	ofn.lpstrDefExt = L"dat";
-	::GetOpenFileName(&ofn);
-
-	// 경로가 비어있는지 확인
-	std::erase(filePath, L'\0');
-	if (filePath.empty())
+	if (!::GetOpenFileName(&ofn))
 		return;
 
-	// 역슬래시를 슬래시로 변환
-	std::ranges::replace(filePath, L'\\', L'/');
+	// 경로 및 파일 이름들 추출
+	std::filesystem::path path{ ofn.lpstrFile };
+	std::vector<std::wstring> fileNames;
+	auto ptr{ ofn.lpstrFile };
+	ptr[ofn.nFileOffset - 1] = 0;
+	ptr += ofn.nFileOffset;
+	while (*ptr)
+	{
+		fileNames.emplace_back(ptr);
+		ptr += ::lstrlen(ptr) + 1;
+	}
 
 	// 로드
-	auto prop{ Resource::Load(filePath) };
-	Global::properties.push_back(prop);
-	Global::propInfo[prop].path = filePath;
-	Global::propInfo[prop].isRoot = true;
+	for (const auto& file : fileNames)
+		Load(path / file);
 }
 
 void Hierarchy::OnMenuFileSave()
 {
-	//PropInfo* node{ nullptr };
-	//if (auto inspector{ Inspector::GetInstance() })
-	//	node = inspector->GetNode();
-	//if (!node)
-	//	return;
-	//while (node->GetParent())
-	//	node = node->GetParent();
-	//assert(node->IsRoot() && "NODE MUST BE ROOT NODE");
-	//node->Save();
+	auto inspector{ Inspector::GetInstance() };
+	if (!inspector)
+		return;
+
+	auto prop{ inspector->GetNode().lock() };
+	if (!prop)
+		return;
+
+	if (!Global::propInfo[prop].isRoot)
+		return;
+
+	if (Global::propInfo[prop].path.empty())
+	{
+		std::wstring path(MAX_PATH, L'\0');
+		OPENFILENAME ofn{};
+		ofn.lStructSize = sizeof(OPENFILENAME);
+		ofn.lpstrFilter = L"Data File(*.dat)\0*.dat\0";
+		ofn.lpstrFile = path.data();
+		ofn.lpstrDefExt = Stringtable::DATA_FILE_EXT;
+		ofn.nMaxFile = MAX_PATH;
+		if (::GetSaveFileName(&ofn))
+			Global::propInfo[prop].path = path;
+	}
+
+	prop->SetName(Global::propInfo[prop].path.filename());
+	prop->Save(Global::propInfo[prop].path);
 }
 
 void Hierarchy::OnMenuFileSaveAs()
