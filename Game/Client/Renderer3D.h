@@ -1,8 +1,32 @@
 ﻿#pragma once
 
-class Resource::Image;
-
 namespace Renderer3D
 {
+	constexpr auto FRAME_COUNT{ 3 };
+	extern ComPtr<IDXGIFactory4> factory;
+	extern ComPtr<ID3D12Device> d3dDevice;
+	extern ComPtr<IDXGISwapChain3>	swapChain;
+	extern ComPtr<ID3D12CommandQueue> commandQueue;
+	extern ComPtr<ID3D12CommandAllocator> commandAllocators[FRAME_COUNT];
+	extern ComPtr<ID3D12GraphicsCommandList> commandList;
+	extern ComPtr<ID3D12DescriptorHeap> rtvHeap;
+	extern ComPtr<ID3D12Resource> renderTargets[FRAME_COUNT];
+	extern ComPtr<ID3D12DescriptorHeap> dsvHeap;
+	extern ComPtr<ID3D12Resource> depthStencil;
+	extern ComPtr<ID3D12RootSignature> rootSignature;
+	extern ComPtr<ID3D12Fence> fence;
+	extern D3D12_VIEWPORT viewport;
+	extern D3D12_RECT scissorRect;
+	extern UINT frameIndex;
+	extern HANDLE fenceEvent;
+	extern UINT64 fenceValues[FRAME_COUNT];
+	extern UINT rtvDescriptorSize;
+
+	void Init();
+	void RenderStart();
+	void RenderEnd();
+	void Present();
+	void CleanUp();
+
 	void DrawImage(const std::shared_ptr<Resource::Image>& image, const INT2& position = {}, float opacity = 1.0f);
 }

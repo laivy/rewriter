@@ -1,7 +1,7 @@
 ﻿#include "Stdafx.h"
+#include "App.h"
 #include "WndManager.h"
 #include "Wnd.h"
-#include "ClientApp.h"
 #include "EventManager.h"
 
 WndManager::WndManager()
@@ -15,7 +15,7 @@ WndManager::WndManager()
 
 void WndManager::OnMouseMove(int x, int y)
 {
-	INT2 cursor{ ClientApp::GetInstance()->GetCursorPosition() };
+	INT2 cursor{ App::GetInstance()->GetCursorPosition() };
 	for (const auto& w : m_wnds | std::views::filter([](const auto& w) { return w->IsValid(); }))
 	{
 		INT2 pos{ cursor };
@@ -29,7 +29,7 @@ void WndManager::OnLButtonUp(int x, int y)
 	for (const auto& w : m_wnds)
 		w->SetPick(false);
 
-	INT2 cursor{ ClientApp::GetInstance()->GetCursorPosition() };
+	INT2 cursor{ App::GetInstance()->GetCursorPosition() };
 	for (const auto& w : m_wnds | std::views::filter([x, y](const auto& w) { return w->IsValid() && w->IsContain({ x, y }); }))
 	{
 		INT2 pos{ cursor };
@@ -40,7 +40,7 @@ void WndManager::OnLButtonUp(int x, int y)
 
 void WndManager::OnLButtonDown(int x, int y)
 {
-	INT2 cursor{ ClientApp::GetInstance()->GetCursorPosition() };
+	INT2 cursor{ App::GetInstance()->GetCursorPosition() };
 	Wnd* pickWnd{ nullptr };
 	Wnd* focusWnd{ nullptr };
 	for (const auto& w : m_wnds | std::views::reverse)

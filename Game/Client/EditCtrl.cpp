@@ -1,7 +1,8 @@
 ﻿#include "Stdafx.h"
+#include "App.h"
 #include "EditCtrl.h"
 #include "Font.h"
-#include "ClientApp.h"
+#include "Renderer2D.h"
 #include "Wnd.h"
 
 EditCtrl::EditCtrl(const INT2& size) : 
@@ -13,13 +14,6 @@ EditCtrl::EditCtrl(const INT2& size) :
 {
 	SetSize(size);
 	SetPosition({ 0, 0 });
-
-	//if (auto rm{ ResourceManager::GetInstance() })
-	//{
-	//	SetFont(rm->GetFont(Font::Type::MORRIS12));
-	//	SetText("");
-	//	MoveCaret(0);
-	//}
 }
 
 void EditCtrl::OnKeyboardEvent(UINT message, WPARAM wParam, LPARAM lParam)
@@ -54,7 +48,7 @@ void EditCtrl::OnKeyboardEvent(UINT message, WPARAM wParam, LPARAM lParam)
 	{
 		if (lParam & GCS_COMPSTR)
 		{
-			HIMC hImc{ ImmGetContext(ClientApp::GetInstance()->GetHwnd()) };
+			HIMC hImc{ ImmGetContext(App::GetInstance()->GetHwnd()) };
 			int length{ ImmGetCompositionString(hImc, GCS_COMPSTR, NULL, 0) };
 
 			// 조합중이라면 글자 교체
@@ -66,7 +60,7 @@ void EditCtrl::OnKeyboardEvent(UINT message, WPARAM wParam, LPARAM lParam)
 			if (length)
 				InsertText(std::wstring{ static_cast<WCHAR>(wParam) });
 
-			ImmReleaseContext(ClientApp::GetInstance()->GetHwnd(), hImc);
+			ImmReleaseContext(App::GetInstance()->GetHwnd(), hImc);
 		}
 		if (lParam & GCS_RESULTSTR)
 		{
@@ -190,7 +184,7 @@ void EditCtrl::MoveCaret(int distance)
 
 void EditCtrl::CreateTextLayout()
 {
-	auto dwriteFactory{ ClientApp::GetInstance()->GetDwriteFactory() };
+	auto dwriteFactory{ Renderer2D::dwriteFactory };
 	dwriteFactory->CreateTextLayout(m_text.c_str(), static_cast<UINT32>(m_text.length()), m_font->GetTextFormat().Get(), static_cast<float>(m_size.x), static_cast<float>(m_size.y), &m_textLayout);
 	m_textLayout->SetParagraphAlignment(DWRITE_PARAGRAPH_ALIGNMENT_CENTER);
 	m_textLayout->SetWordWrapping(DWRITE_WORD_WRAPPING_NO_WRAP);

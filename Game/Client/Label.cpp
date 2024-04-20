@@ -1,6 +1,6 @@
 ﻿#include "Stdafx.h"
-#include "ClientApp.h"
 #include "Label.h"
+#include "Renderer2D.h"
 #include "Wnd.h"
 
 Label::Label(const INT2& size)
@@ -35,7 +35,7 @@ void Label::SetFont(const std::shared_ptr<Font>& font)
 void Label::SetText(const std::string& text)
 {
 	m_text = TextUtil::str2wstr(text);
-	ClientApp::GetInstance()->GetDwriteFactory()->CreateTextLayout(
+	Renderer2D::dwriteFactory->CreateTextLayout(
 		m_text.c_str(),
 		static_cast<UINT32>(m_text.length()),
 		m_font->GetTextFormat().Get(),

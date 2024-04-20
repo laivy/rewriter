@@ -1,6 +1,6 @@
 ﻿#include "Stdafx.h"
+#include "Renderer3D.h"
 #include "Shader.h"
-#include "ClientApp.h"
 
 Shader::Shader()
 {
@@ -44,7 +44,7 @@ Shader::Shader()
 	// PSO 생성
 	D3D12_GRAPHICS_PIPELINE_STATE_DESC psoDesc{};
 	psoDesc.InputLayout = { m_inputLayout.data(), static_cast<UINT>(m_inputLayout.size()) };
-	psoDesc.pRootSignature = ClientApp::GetInstance()->GetRootSignature().Get();
+	psoDesc.pRootSignature = Renderer3D::rootSignature.Get();
 	psoDesc.VS = CD3DX12_SHADER_BYTECODE{ vertexShader.Get() };
 	psoDesc.GS = CD3DX12_SHADER_BYTECODE{ geometryShader.Get() };
 	psoDesc.PS = CD3DX12_SHADER_BYTECODE{ pixelShader.Get() };
@@ -57,7 +57,7 @@ Shader::Shader()
 	psoDesc.RTVFormats[0] = DXGI_FORMAT_R8G8B8A8_UNORM;
 	psoDesc.DSVFormat = DXGI_FORMAT_D24_UNORM_S8_UINT;
 	psoDesc.SampleDesc.Count = 1;
-	DX::ThrowIfFailed(ClientApp::GetInstance()->GetD3DDevice()->CreateGraphicsPipelineState(&psoDesc, IID_PPV_ARGS(&m_pipelineState)));
+	DX::ThrowIfFailed(Renderer3D::d3dDevice->CreateGraphicsPipelineState(&psoDesc, IID_PPV_ARGS(&m_pipelineState)));
 }
 
 ID3D12PipelineState* Shader::GetPipelineState() const
@@ -107,7 +107,7 @@ LineShader::LineShader()
 	// PSO 생성
 	D3D12_GRAPHICS_PIPELINE_STATE_DESC psoDesc{};
 	psoDesc.InputLayout = { m_inputLayout.data(), static_cast<UINT>(m_inputLayout.size()) };
-	psoDesc.pRootSignature = ClientApp::GetInstance()->GetRootSignature().Get();
+	psoDesc.pRootSignature = Renderer3D::rootSignature.Get();
 	psoDesc.VS = CD3DX12_SHADER_BYTECODE{ vertexShader.Get() };
 	psoDesc.GS = CD3DX12_SHADER_BYTECODE{ geometryShader.Get() };
 	psoDesc.PS = CD3DX12_SHADER_BYTECODE{ pixelShader.Get() };
@@ -120,5 +120,5 @@ LineShader::LineShader()
 	psoDesc.RTVFormats[0] = DXGI_FORMAT_R8G8B8A8_UNORM;
 	psoDesc.DSVFormat = DXGI_FORMAT_D24_UNORM_S8_UINT;
 	psoDesc.SampleDesc.Count = 1;
-	DX::ThrowIfFailed(ClientApp::GetInstance()->GetD3DDevice()->CreateGraphicsPipelineState(&psoDesc, IID_PPV_ARGS(&m_pipelineState)));
+	DX::ThrowIfFailed(Renderer3D::d3dDevice->CreateGraphicsPipelineState(&psoDesc, IID_PPV_ARGS(&m_pipelineState)));
 }

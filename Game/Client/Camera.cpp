@@ -1,6 +1,6 @@
 ﻿#include "Stdafx.h"
 #include "Camera.h"
-#include "ClientApp.h"
+#include "App.h"
 #include "GameObject.h"
 #include "Map.h"
 #include "ObjectManager.h"
@@ -10,7 +10,7 @@ Camera::Camera() :
 	m_at{ 0.0f, 0.0f }, 
 	m_up{ 0.0f, 1.0f }
 {
-	const auto& [width, height] { ClientApp::GetInstance()->GetWindowSize() };
+	const auto& [width, height] { App::GetInstance()->GetWindowSize() };
 
 	m_cbCamera.Init();
 	m_cbCamera->viewMatrix = DirectX::XMMatrixIdentity();
@@ -36,7 +36,7 @@ void Camera::SetScale(const FLOAT2& scale)
 
 	if (m_cbCamera.IsValid())
 	{
-		const auto& [width, height] { ClientApp::GetInstance()->GetWindowSize() };
+		const auto& [width, height] { App::GetInstance()->GetWindowSize() };
 		m_cbCamera->projMatrix = DirectX::XMMatrixTranspose(DirectX::XMMatrixOrthographicLH(static_cast<float>(width / m_scale.x), static_cast<float>(height / m_scale.y), 0.0f, 1.0f));
 	}
 }
@@ -61,7 +61,7 @@ RECTF Camera::GetCameraBoundary() const
 	INT2 mapSize{ map->GetSize() };
 	RECTF mapBoundary{ 0.0f, static_cast<float>(mapSize.y), static_cast<float>(mapSize.x), 0.0f };
 
-	const auto& [width, height] { ClientApp::GetInstance()->GetWindowSize() };
+	const auto& [width, height] { App::GetInstance()->GetWindowSize() };
 	FLOAT2 cameraRange{ width / m_scale.x, height / m_scale.y };
 
 	RECTF boundary{};

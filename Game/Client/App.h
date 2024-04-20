@@ -2,11 +2,11 @@
 
 class Timer;
 
-class ClientApp : public TSingleton<ClientApp>
+class App : public TSingleton<App>
 {
 public:
-	ClientApp();
-	~ClientApp() = default;
+	App();
+	~App() = default;
 
 	bool OnCreate();
 
@@ -15,10 +15,6 @@ public:
 	HWND GetHwnd() const;
 	INT2 GetWindowSize() const;
 	INT2 GetCursorPosition() const;
-	ComPtr<ID3D12Device> GetD3DDevice() const;
-	ComPtr<ID3D12GraphicsCommandList> GetCommandList() const;
-	ComPtr<ID3D12RootSignature> GetRootSignature() const;
-	ComPtr<IDWriteFactory5> GetDwriteFactory() const;
 
 private:
 	static LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);
@@ -33,29 +29,9 @@ private:
 	void OnKeyboardEvent(UINT message, WPARAM wParam, LPARAM lParam);
 
 	HRESULT InitWindow();
-	HRESULT InitDirectX();
-	void CreateFactory();
-	void CreateDevice();
-	void CreateCommandQueue();
-	void CreateD3D11On12Device();
-	void CreateD2DFactory();
-	void CreateD2DDevice();
-	void CreateSwapChain();
-	void CreateRtvDsvDescriptorHeap();
-	void CreateRenderTargetView();
-	void CreateDepthStencilView();
-	void CreateRootSignature();
-	void CreateCommandList();
-	void CreateFence();
 
 	void Update();
 	void Render();
-
-	void ResetCommandList() const;
-	void ExecuteCommandList() const;
-
-	void WaitPrevFrame();
-	void WaitForGPU();
 
 private:
 	// Window
@@ -98,6 +74,5 @@ private:
 	// DirectWrite
 	ComPtr<IDWriteFactory5>	m_dwriteFactory;
 
-	// 게임프레임워크
 	std::unique_ptr<Timer> m_timer;
 };

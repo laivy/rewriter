@@ -1,7 +1,7 @@
 ﻿#include "Stdafx.h"
+#include "App.h"
 #include "Wnd.h"
 #include "WndManager.h"
-#include "ClientApp.h"
 #include "Button.h"
 #include "EditCtrl.h"
 
@@ -90,7 +90,7 @@ void Wnd::Update(float deltaTime)
 	// 선택된 윈도우 마우스로 옮기기
 	if (m_isPick)
 	{
-		INT2 mouse{ ClientApp::GetInstance()->GetCursorPosition() };
+		INT2 mouse{ App::GetInstance()->GetCursorPosition() };
 		SetPosition({ mouse.x + m_pickDelta.x, mouse.y + m_pickDelta.y });
 	}
 	
@@ -124,7 +124,7 @@ void Wnd::SetPick(bool isPick)
 	m_isPick = isPick;
 	if (isPick)
 	{
-		INT2 mouse{ ClientApp::GetInstance()->GetCursorPosition() };
+		INT2 mouse{ App::GetInstance()->GetCursorPosition() };
 		m_pickDelta = m_position - mouse;
 		SetFocus(true); // pick은 focus의 상위호환
 	}

@@ -1,13 +1,14 @@
 ﻿#include "Stdafx.h"
+#include "App.h"
 #include "Mesh.h"
-#include "ClientApp.h"
+#include "Renderer3D.h"
 
 Mesh::Mesh() : 
 	m_primitiveTopology{ D3D_PRIMITIVE_TOPOLOGY_POINTLIST }, 
 	m_nVertices{ 1 }
 {
-	auto d3dDevice{ ClientApp::GetInstance()->GetD3DDevice() };
-	auto commandList{ ClientApp::GetInstance()->GetCommandList() };
+	auto d3dDevice{ Renderer3D::d3dDevice };
+	auto commandList{ Renderer3D::commandList };
 
 	struct Vertex
 	{

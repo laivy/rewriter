@@ -13,6 +13,8 @@ void LoginWnd::Update(float deltaTime)
 
 void LoginWnd::Render() const
 {
+	return;
+
 	auto patch{ Resource::Get(L"UI.dat/Login/9Patch") };
 	auto lt{ patch->GetImage(L"LT") };
 	auto t{ patch->GetImage(L"T") };

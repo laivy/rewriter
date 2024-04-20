@@ -2,7 +2,7 @@
 #include "LoginScene.h"
 #include "LogoScene.h"
 #include "Mesh.h"
-#include "ClientApp.h"
+#include "App.h"
 #include "SceneManager.h"
 
 void LogoScene::OnCreate()
