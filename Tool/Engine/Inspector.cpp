@@ -17,11 +17,8 @@ std::map<Resource::Property::Type, std::string> PROPERTY_TYPES
 
 Inspector::Inspector()
 {
-	m_onPropertySelect = { std::bind_front(&Inspector::OnPropertySelect, this) };
-	Global::OnPropertySelect.Add(&m_onPropertySelect);
-
-	m_onPropertyDelete = { std::bind_front(&Inspector::OnPropertyDelete, this) };
-	Global::OnPropertyDelete.Add(&m_onPropertyDelete);
+	m_onPropertySelect = Global::OnPropertySelect.Add(std::bind_front(&Inspector::OnPropertySelect, this));
+	m_onPropertyDelete = Global::OnPropertyDelete.Add(std::bind_front(&Inspector::OnPropertyDelete, this));
 }
 
 void Inspector::Update(float deltaTime)

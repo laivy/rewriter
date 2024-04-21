@@ -9,13 +9,8 @@ class Observer
 public:
 	friend class Event<Params...>;
 
-	Observer() :
-		m_event{ nullptr }
-	{
-	}
-
-	Observer(const std::function<void(Params...)>& callback) :
-		m_event{ nullptr },
+	Observer(Event<Params...>* event, const std::function<void(Params...)>& callback) :
+		m_event{ event },
 		m_callback{ callback }
 	{
 	}
@@ -54,13 +49,11 @@ public:
 			o->OnNotify(params...);
 	}
 
-	void Add(Observer<Params...>* observer)
+	std::unique_ptr<Observer<Params...>> Add(const std::function<void(Params...)>& callback)
 	{
-		if (observer->m_event)
-			return;
-
-		observer->m_event = this;
-		m_observers.push_back(observer);
+		auto observer{ std::make_unique<Observer<Params...>>(this, callback) };
+		m_observers.push_back(observer.get());
+		return observer;
 	}
 
 	void Remove(Observer<Params...>* observer)

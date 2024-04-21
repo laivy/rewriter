@@ -22,8 +22,8 @@ private:
 	static constexpr auto STRING_LENGTH_MAX{ 30ui64 };
 
 	// 옵저버
-	Observer<std::shared_ptr<Resource::Property>> m_onPropertyDelete;
-	Observer<std::shared_ptr<Resource::Property>> m_onPropertySelect;
+	std::unique_ptr<Observer<std::shared_ptr<Resource::Property>>> m_onPropertyDelete;
+	std::unique_ptr<Observer<std::shared_ptr<Resource::Property>>> m_onPropertySelect;
 
 	// 하이라키 윈도우에서 선택된 프로퍼티
 	std::weak_ptr<Resource::Property> m_prop;

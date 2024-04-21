@@ -7,8 +7,7 @@
 
 Hierarchy::Hierarchy()
 {
-	m_onNodeSelect = { std::bind_front(&Hierarchy::OnPropertySelect, this) };
-	Global::OnPropertySelect.Add(&m_onNodeSelect);
+	m_onProprtySelect = Global::OnPropertySelect.Add(std::bind_front(&Hierarchy::OnPropertySelect, this));
 }
 
 Hierarchy::~Hierarchy()

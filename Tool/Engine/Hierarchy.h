@@ -33,5 +33,5 @@ private:
 	static constexpr auto DEFAULT_FILE_NAME{ L"NewFile" };
 	static constexpr auto DEFAULT_NODE_NAME{ L"NewNode" };
 
-	Observer<std::shared_ptr<Resource::Property>> m_onNodeSelect;
+	std::unique_ptr<Observer<std::shared_ptr<Resource::Property>>> m_onProprtySelect;
 };
