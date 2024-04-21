@@ -12,10 +12,6 @@ namespace Resource
 	{
 	}
 
-	Image::~Image()
-	{
-	}
-
 	void Image::SetBuffer(std::byte* buffer, size_t size)
 	{
 		m_buffer.reset(buffer);
@@ -61,9 +57,10 @@ namespace Resource
 		if (!ctx || m_type == type)
 			return;
 
-		ComPtr<ID2D1Bitmap> bitmap{};
-		m_resource.As(&bitmap);
+		if (m_resource)
+			return;
 
+		ComPtr<ID2D1Bitmap> bitmap;
 		ComPtr<IWICImagingFactory> factory;
 		ComPtr<IWICBitmapDecoder> decoder;
 		ComPtr<IWICFormatConverter> converter;
@@ -71,7 +68,7 @@ namespace Resource
 		ComPtr<IWICStream> stream;
 
 		HRESULT hr{ E_FAIL };
-		hr = CoCreateInstance(CLSID_WICImagingFactory, NULL, CLSCTX_INPROC_SERVER, IID_PPV_ARGS(&factory));
+		hr = ::CoCreateInstance(CLSID_WICImagingFactory, NULL, CLSCTX_INPROC_SERVER, IID_PPV_ARGS(&factory));
 		hr = factory->CreateStream(&stream);
 		hr = stream->InitializeFromMemory(
 			reinterpret_cast<WICInProcPointer>(m_buffer.get()),
@@ -84,6 +81,7 @@ namespace Resource
 		hr = ctx->CreateBitmapFromWicBitmap(converter.Get(), &bitmap);
 		assert(SUCCEEDED(hr));
 
+		m_resource = bitmap.Detach();
 		m_type = type;
 		m_buffer.reset();
 		m_bufferSize = 0;

@@ -1,8 +1,6 @@
 ﻿#pragma once
 
-struct ID2D1Bitmap;
 struct ID2D1DeviceContext2;
-struct ID3D12Resource;
 
 namespace Resource
 {
@@ -15,10 +13,10 @@ namespace Resource
 		};
 
 	public:
-		Image();
-		~Image();
+		__declspec(dllexport) Image();
+		~Image() = default;
 
-		void SetBuffer(std::byte* buffer, size_t size);
+		__declspec(dllexport) void SetBuffer(std::byte* buffer, size_t size);
 
 		std::span<std::byte> GetBuffer() const;
 
