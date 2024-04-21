@@ -36,11 +36,6 @@ void Inspector::Render()
 	ImGui::PopID();
 }
 
-std::weak_ptr<Resource::Property> Inspector::GetNode() const
-{
-	return m_prop;
-}
-
 void Inspector::OnPropertyDelete(std::shared_ptr<Resource::Property> prop)
 {
 	if (m_prop.lock() == prop)
@@ -82,7 +77,7 @@ void Inspector::RenderBasicInfo()
 				{
 					auto it{ std::ranges::find_if(parent->children, [&name](const auto& prop) { return prop->name == Util::u8stows(name); }) };
 					if (it != parent->children.cend())
-						return;
+						break;
 				}
 				prop->SetName(Util::u8stows(name));
 			} while (false);

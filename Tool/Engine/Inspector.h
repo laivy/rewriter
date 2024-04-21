@@ -9,8 +9,6 @@ public:
 	void Update(float deltaTime);
 	void Render();
 
-	std::weak_ptr<Resource::Property> GetNode() const;
-
 private:
 	void OnPropertyDelete(std::shared_ptr<Resource::Property> prop);
 	void OnPropertySelect(std::shared_ptr<Resource::Property> prop);
@@ -25,6 +23,6 @@ private:
 	std::unique_ptr<Observer<std::shared_ptr<Resource::Property>>> m_onPropertyDelete;
 	std::unique_ptr<Observer<std::shared_ptr<Resource::Property>>> m_onPropertySelect;
 
-	// 하이라키 윈도우에서 선택된 프로퍼티
+	// 하이라키 윈도우에서 가장 마지막으로 선택된 프로퍼티
 	std::weak_ptr<Resource::Property> m_prop;
 };

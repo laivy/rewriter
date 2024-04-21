@@ -17,6 +17,7 @@ private:
 	void OnMenuFileSave();
 	void OnMenuFileSaveAs();
 
+	void Shortcut();
 	void DragDrop();
 	void RenderMenu();
 	void RenderNode();
@@ -34,4 +35,5 @@ private:
 	static constexpr auto DEFAULT_NODE_NAME{ L"NewNode" };
 
 	std::unique_ptr<Observer<std::shared_ptr<Resource::Property>>> m_onProprtySelect;
+	std::vector<std::weak_ptr<Resource::Property>> m_selectedPropertise;
 };
