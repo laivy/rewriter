@@ -183,6 +183,14 @@ namespace Resource
 			p = Stringtable::DATA_FOLDER_PATH + p.wstring();
 
 		std::ifstream file{ p, std::ios::binary };
+		if (!file)
+		{
+#ifdef _DEBUG
+			assert(false && "CAN NOT FIND DATA FILE");
+#endif
+			return nullptr;
+		}
+
 		std::function<void(const std::shared_ptr<Property>&, std::wstring&)> lambda = [&](const std::shared_ptr<Property>& prop, std::wstring& path)
 			{
 				// 이름
