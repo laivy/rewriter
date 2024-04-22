@@ -17,6 +17,6 @@ public:
 	virtual void OnKeyboardEvent(UINT message, WPARAM wParam, LPARAM lParam);
 
 	virtual void Update(float deltaTime);
-	virtual void Render3D(const ComPtr<ID3D12GraphicsCommandList>& commandList) const;
 	virtual void Render2D() const;
+	virtual void Render3D() const;
 };

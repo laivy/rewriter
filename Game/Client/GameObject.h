@@ -34,8 +34,8 @@ public:
 	IGameObject();
 	virtual ~IGameObject() = default;
 
-	virtual void Update(FLOAT deltaTime);
-	virtual void Render(const ComPtr<ID3D12GraphicsCommandList>& commandList) const;
+	virtual void Update(FLOAT deltaTime) = 0;
+	virtual void Render(const ComPtr<ID3D12GraphicsCommandList>& commandList) const = 0;
 	virtual void Destroy();
 
 	virtual void Move(const FLOAT2& delta);

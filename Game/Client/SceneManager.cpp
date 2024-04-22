@@ -8,8 +8,11 @@
 
 SceneManager::SceneManager() : m_scene{ nullptr }
 {
-	LoginScene::Instantiate();
-	SetScene(LoginScene::GetInstance());
+	if (auto login{ LoginScene::Instantiate() })
+	{
+		login->OnCreate();
+		SetScene(login);
+	}
 }
 
 SceneManager::~SceneManager()
@@ -24,40 +27,14 @@ void SceneManager::OnResize(int width, int height)
 		m_scene->OnResize(width, height);
 }
 
-void SceneManager::OnMouseMove(int x, int y)
-{
-	if (m_scene)
-		m_scene->OnMouseMove(x, y);
-}
-
-void SceneManager::OnLButtonUp(int x, int y)
-{
-	if (m_scene)
-		m_scene->OnLButtonUp(x, y);
-}
-
-void SceneManager::OnLButtonDown(int x, int y)
-{
-	if (m_scene)
-		m_scene->OnLButtonDown(x, y);
-}
-
-void SceneManager::OnRButtonUp(int x, int y)
-{
-	if (m_scene)
-		m_scene->OnRButtonUp(x, y);
-}
-
-void SceneManager::OnRButtonDown(int x, int y)
-{
-	if (m_scene)
-		m_scene->OnRButtonDown(x, y);
-}
-
 void SceneManager::OnKeyboardEvent(UINT message, WPARAM wParam, LPARAM lParam)
 {
 	if (m_scene)
 		m_scene->OnKeyboardEvent(message, wParam, lParam);
+}
+
+void SceneManager::OnMouseEvent(UINT message, int x, int y)
+{
 }
 
 void SceneManager::Update(float deltaTime)
@@ -67,17 +44,25 @@ void SceneManager::Update(float deltaTime)
 		m_scene->Update(deltaTime);
 }
 
-void SceneManager::Render(const ComPtr<ID3D12GraphicsCommandList>& commandList) const
-{
-	if (m_scene)
-		m_scene->Render3D(commandList);
-}
-
 void SceneManager::Render2D() const
 {
 	if (m_scene)
 		m_scene->Render2D();
 	//RenderFadeEffect();
+}
+
+void SceneManager::Render3D(const ComPtr<ID3D12GraphicsCommandList>& commandList) const
+{
+	if (m_scene)
+		m_scene->Render3D();
+}
+
+void SceneManager::SetScene(IScene* scene)
+{
+	if (m_scene)
+		m_scene->OnDestroy();
+	scene->OnCreate();
+	m_scene = scene;
 }
 
 void SceneManager::SetFadeIn(FLOAT second, const std::function<void()>& callback)

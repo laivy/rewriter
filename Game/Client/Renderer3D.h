@@ -3,6 +3,8 @@
 namespace Renderer3D
 {
 	constexpr auto FRAME_COUNT{ 3 };
+
+	// D3D12
 	extern ComPtr<IDXGIFactory4> factory;
 	extern ComPtr<ID3D12Device> d3dDevice;
 	extern ComPtr<IDXGISwapChain3>	swapChain;
@@ -21,6 +23,11 @@ namespace Renderer3D
 	extern HANDLE fenceEvent;
 	extern UINT64 fenceValues[FRAME_COUNT];
 	extern UINT rtvDescriptorSize;
+
+	// D3D11on12
+	extern ComPtr<ID3D11On12Device> d3d11On12Device;
+	extern ComPtr<ID3D11DeviceContext> d3d11DeviceContext;
+	extern ComPtr<ID3D11Resource> wrappedBackBuffers[FRAME_COUNT];
 
 	void Init();
 	void RenderStart();

@@ -2,7 +2,6 @@
 #include "Common/Stdafx.h"
 
 // Windows
-
 #pragma comment(lib, "imm32.lib")
 #pragma comment(lib, "ws2_32.lib")
 #include <SDKDDKVer.h>
@@ -39,6 +38,7 @@ EXTERN_C IMAGE_DOS_HEADER __ImageBase;
 // Game
 #include "DXUtil.h"
 #include "TextUtil.h"
+#include "Common/Event.h"
 #include "Common/Packet.h"
 
 // 전역 변수

@@ -1,5 +1,6 @@
 ﻿#include "Stdafx.h"
 #include "App.h"
+#include "Renderer2D.h"
 #include "Renderer3D.h"
 
 namespace
@@ -44,6 +45,40 @@ namespace
 		queueDesc.Flags = D3D12_COMMAND_QUEUE_FLAG_NONE;
 		queueDesc.Type = D3D12_COMMAND_LIST_TYPE_DIRECT;
 		DX::ThrowIfFailed(d3dDevice->CreateCommandQueue(&queueDesc, IID_PPV_ARGS(&commandQueue)));
+	}
+
+	void CreateD3D11On12Device()
+	{
+		// Create an 11 device wrapped around the 12 device and share 12's command queue.
+		ComPtr<ID3D11Device> d3d11Device;
+		DX::ThrowIfFailed(D3D11On12CreateDevice(
+			d3dDevice.Get(),
+			D3D11_CREATE_DEVICE_BGRA_SUPPORT,
+			nullptr,
+			0,
+			reinterpret_cast<IUnknown**>(commandQueue.GetAddressOf()),
+			1,
+			0,
+			&d3d11Device,
+			&d3d11DeviceContext,
+			nullptr
+		));
+
+		// Query the 11On12 device from the 11 device.
+		DX::ThrowIfFailed(d3d11Device.As(&d3d11On12Device));
+	}
+
+	void CreateD2DDevice()
+	{
+		// 팩토리 생성
+		DX::ThrowIfFailed(D2D1CreateFactory(D2D1_FACTORY_TYPE_SINGLE_THREADED, Renderer2D::d2dFactory.GetAddressOf()));
+
+		// 디바이스 생성
+		ComPtr<IDXGIDevice> dxgiDevice;
+		DX::ThrowIfFailed(d3d11On12Device.As(&dxgiDevice));
+		DX::ThrowIfFailed(Renderer2D::d2dFactory->CreateDevice(dxgiDevice.Get(), &Renderer2D::d2dDevice));
+		DX::ThrowIfFailed(Renderer2D::d2dDevice->CreateDeviceContext(D2D1_DEVICE_CONTEXT_OPTIONS_NONE, &Renderer2D::ctx));
+		DX::ThrowIfFailed(DWriteCreateFactory(DWRITE_FACTORY_TYPE_SHARED, __uuidof(IDWriteFactory), &Renderer2D::dwriteFactory));
 	}
 
 	void CreateSwapChain()
@@ -98,12 +133,37 @@ namespace
 
 	void CreateRenderTargetView()
 	{
+		UINT dpi{ ::GetDpiForWindow(App::GetInstance()->GetHwnd()) };
+		D2D1_BITMAP_PROPERTIES1 bitmapProperties{ D2D1::BitmapProperties1(
+			D2D1_BITMAP_OPTIONS_TARGET | D2D1_BITMAP_OPTIONS_CANNOT_DRAW,
+			D2D1::PixelFormat(DXGI_FORMAT_UNKNOWN, D2D1_ALPHA_MODE_PREMULTIPLIED),
+			static_cast<float>(dpi),
+			static_cast<float>(dpi)
+		) };
+
 		CD3DX12_CPU_DESCRIPTOR_HANDLE rtvHandle{ rtvHeap->GetCPUDescriptorHandleForHeapStart() };
 		for (UINT i = 0; i < FRAME_COUNT; ++i)
 		{
 			DX::ThrowIfFailed(swapChain->GetBuffer(i, IID_PPV_ARGS(&renderTargets[i])));
 			d3dDevice->CreateRenderTargetView(renderTargets[i].Get(), nullptr, rtvHandle);
 			rtvHandle.Offset(rtvDescriptorSize);
+
+			D3D11_RESOURCE_FLAGS d3d11Flags{ D3D11_BIND_RENDER_TARGET };
+			DX::ThrowIfFailed(d3d11On12Device->CreateWrappedResource(
+				renderTargets[i].Get(),
+				&d3d11Flags,
+				D3D12_RESOURCE_STATE_RENDER_TARGET,
+				D3D12_RESOURCE_STATE_PRESENT,
+				IID_PPV_ARGS(&wrappedBackBuffers[i])
+			));
+
+			ComPtr<IDXGISurface> surface;
+			DX::ThrowIfFailed(wrappedBackBuffers[i].As(&surface));
+			DX::ThrowIfFailed(Renderer2D::ctx->CreateBitmapFromDxgiSurface(
+				surface.Get(),
+				&bitmapProperties,
+				&Renderer2D::d2dRenderTargets[i]
+			));
 
 			DX::ThrowIfFailed(d3dDevice->CreateCommandAllocator(D3D12_COMMAND_LIST_TYPE_DIRECT, IID_PPV_ARGS(&commandAllocators[i])));
 		}
@@ -237,6 +297,7 @@ namespace
 
 namespace Renderer3D
 {
+	// D3D12
 	ComPtr<IDXGIFactory4> factory;
 	ComPtr<ID3D12Device> d3dDevice;
 	ComPtr<IDXGISwapChain3>	swapChain;
@@ -256,15 +317,59 @@ namespace Renderer3D
 	UINT64 fenceValues[FRAME_COUNT];
 	UINT rtvDescriptorSize;
 
+	// D3D11on12
 	ComPtr<ID3D11On12Device> d3d11On12Device;
 	ComPtr<ID3D11DeviceContext> d3d11DeviceContext;
 	ComPtr<ID3D11Resource> wrappedBackBuffers[FRAME_COUNT];
+
+	std::unique_ptr<Observer<int, int>> OnResizeObserver;
+
+	static void OnResize(int width, int height)
+	{
+		viewport = D3D12_VIEWPORT{ 0.0f, 0.0f, static_cast<float>(width), static_cast<float>(height), 0.0f, 1.0f };
+		scissorRect = D3D12_RECT{ 0, 0, static_cast<long>(width), static_cast<long>(height) };
+
+		WaitPrevFrame();
+
+		for (UINT i = 0; i < FRAME_COUNT; ++i)
+		{
+			renderTargets[i].Reset();
+			wrappedBackBuffers[i].Reset();
+			Renderer2D::d2dRenderTargets[i].Reset();
+			fenceValues[i] = fenceValues[frameIndex];
+		}
+
+		Renderer2D::ctx->SetTarget(nullptr);
+		Renderer2D::ctx->Flush();
+
+		d3d11DeviceContext->OMSetRenderTargets(0, nullptr, nullptr);
+		d3d11DeviceContext->Flush();
+
+		DXGI_SWAP_CHAIN_DESC desc{};
+		swapChain->GetDesc(&desc);
+		swapChain->ResizeBuffers(FRAME_COUNT, width, height, desc.BufferDesc.Format, desc.Flags);
+		frameIndex = swapChain->GetCurrentBackBufferIndex();
+
+		// 렌더타겟 생성
+		CD3DX12_CPU_DESCRIPTOR_HANDLE rtvHandle{ rtvHeap->GetCPUDescriptorHandleForHeapStart() };
+		for (UINT i = 0; i < FRAME_COUNT; ++i)
+		{
+			swapChain->GetBuffer(i, IID_PPV_ARGS(&renderTargets[i]));
+			d3dDevice->CreateRenderTargetView(renderTargets[i].Get(), nullptr, rtvHandle);
+			rtvHandle.Offset(rtvDescriptorSize);
+		}
+
+		CreateRenderTargetView();
+		CreateDepthStencilView();
+	}
 
 	void Init()
 	{
 		CreateFactory();
 		CreateDevice();
 		CreateCommandQueue();
+		CreateD3D11On12Device();
+		CreateD2DDevice();
 		CreateSwapChain();
 		CreateRtvDsvDescriptorHeap();
 		CreateRenderTargetView();
@@ -276,6 +381,8 @@ namespace Renderer3D
 		ResetCommandList();
 		ExecuteCommandList();
 		WaitForGPU();
+
+		OnResizeObserver = App::OnResize.Add(OnResize);
 	}
 
 	void RenderStart()

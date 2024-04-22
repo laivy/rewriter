@@ -24,4 +24,7 @@ public:
 	virtual void Update(FLOAT deltaTime) final;
 	virtual void Render3D(const ComPtr<ID3D12GraphicsCommandList>& commandList) const final;
 	virtual void Render2D() const final;
+
+private:
+	std::unique_ptr<Observer<UINT, WPARAM, LPARAM>> m_onKeyboardEvent;
 };

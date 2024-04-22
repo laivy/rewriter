@@ -3,16 +3,12 @@
 namespace Renderer2D
 {
 	constexpr auto FRAME_COUNT{ 3 };
-	extern ComPtr<ID3D11On12Device> d3d11On12Device;
-	extern ComPtr<ID3D11DeviceContext> d3d11DeviceContext;
-	extern ComPtr<ID3D11Resource> wrappedBackBuffers[FRAME_COUNT];
 	extern ComPtr<ID2D1DeviceContext2> ctx;
 	extern ComPtr<ID2D1Factory3> d2dFactory;
 	extern ComPtr<ID2D1Device2> d2dDevice;
 	extern ComPtr<ID2D1Bitmap1> d2dRenderTargets[FRAME_COUNT];
 	extern ComPtr<IDWriteFactory5> dwriteFactory;
 
-	void Init();
 	void RenderStart();
 	void RenderEnd();
 

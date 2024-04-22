@@ -16,7 +16,7 @@ public:
 	ConstantBuffer(const ConstantBuffer& rhs) :
 		m_buffer{ rhs.m_buffer },
 		m_data{ rhs.m_data }
-	{		
+	{
 	}
 
 	~ConstantBuffer()

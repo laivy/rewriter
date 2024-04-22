@@ -1,8 +1,9 @@
 ﻿#pragma once
+#include "Object.h"
 
 class Wnd;
 
-class IUserInterface abstract
+class IUserInterface abstract : public IObject
 {
 public:
 	IUserInterface();
@@ -15,8 +16,9 @@ public:
 	virtual void OnRButtonDown(int x, int y);
 	virtual void OnKeyboardEvent(UINT message, WPARAM wParam, LPARAM lParam);
 
-	virtual void Update(float deltaTime);
-	virtual void Render() const;
+	virtual void Update(float deltaTime) override;
+	virtual void Render() const override;
+
 	virtual void Destroy();
 
 	virtual void SetParent(Wnd* const wnd);

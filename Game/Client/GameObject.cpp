@@ -18,13 +18,9 @@ IGameObject::IGameObject() :
 {
 }
 
-void IGameObject::Update(FLOAT deltaTime) { }
-
-void IGameObject::Render(const ComPtr<ID3D12GraphicsCommandList>& commandList) const { }
-
 void IGameObject::Destroy()
 {
-	m_isValid = FALSE;
+	m_isValid = false;
 }
 
 void IGameObject::Move(const FLOAT2& delta)
