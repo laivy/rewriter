@@ -95,7 +95,7 @@ RECTI& RECTI::Offset(int x, int y)
 	return *this;
 }
 
-bool RECTI::IsContain(const INT2& point)
+bool RECTI::IsContain(const INT2& point) const
 {
 	if (left <= point.x && point.x <= right &&
 		top <= point.y && point.y <= bottom)
@@ -129,7 +129,7 @@ RECTF& RECTF::Offset(FLOAT x, FLOAT y)
 	return *this;
 }
 
-bool RECTF::IsContain(FLOAT2 point)
+bool RECTF::IsContain(FLOAT2 point) const
 {
 	if (left <= point.x && point.x <= right &&
 		top <= point.y && point.y <= bottom)

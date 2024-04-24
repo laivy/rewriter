@@ -30,6 +30,12 @@
     <Filter Include="모듈 파일\Resource">
       <UniqueIdentifier>{ceba596a-ee30-443a-ae81-d205b7cc9472}</UniqueIdentifier>
     </Filter>
+    <Filter Include="소스 파일\Renderer">
+      <UniqueIdentifier>{4dde1501-574a-4469-8aaf-d036a20d253f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="헤더 파일\Renderer">
+      <UniqueIdentifier>{152eed6e-f976-4540-be42-37f92739d1e5}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Main.cpp">
@@ -140,12 +146,6 @@
     <ClCompile Include="..\..\External\Imgui\imgui_widgets.cpp">
       <Filter>외부 파일\Imgui</Filter>
     </ClCompile>
-    <ClCompile Include="Renderer2D.cpp">
-      <Filter>소스 파일</Filter>
-    </ClCompile>
-    <ClCompile Include="Renderer3D.cpp">
-      <Filter>소스 파일</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\Common\Packet.cpp">
       <Filter>소스 파일\Common</Filter>
     </ClCompile>
@@ -163,6 +163,15 @@
     </ClCompile>
     <ClCompile Include="..\..\External\Imgui\imgui_stdlib.cpp">
       <Filter>외부 파일\Imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="Renderer.cpp">
+      <Filter>소스 파일\Renderer</Filter>
+    </ClCompile>
+    <ClCompile Include="Renderer2D.cpp">
+      <Filter>소스 파일\Renderer</Filter>
+    </ClCompile>
+    <ClCompile Include="Renderer3D.cpp">
+      <Filter>소스 파일\Renderer</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -289,12 +298,6 @@
     <ClInclude Include="..\..\Module\Resource\Include\ResourceManager.h">
       <Filter>모듈 파일\Resource</Filter>
     </ClInclude>
-    <ClInclude Include="Renderer2D.h">
-      <Filter>헤더 파일</Filter>
-    </ClInclude>
-    <ClInclude Include="Renderer3D.h">
-      <Filter>헤더 파일</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\Module\Resource\Include\Image.h">
       <Filter>모듈 파일\Resource</Filter>
     </ClInclude>
@@ -324,6 +327,15 @@
     </ClInclude>
     <ClInclude Include="..\..\Common\Event.h">
       <Filter>헤더 파일\Common</Filter>
+    </ClInclude>
+    <ClInclude Include="Renderer.h">
+      <Filter>헤더 파일\Renderer</Filter>
+    </ClInclude>
+    <ClInclude Include="Renderer2D.h">
+      <Filter>헤더 파일\Renderer</Filter>
+    </ClInclude>
+    <ClInclude Include="Renderer3D.h">
+      <Filter>헤더 파일\Renderer</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

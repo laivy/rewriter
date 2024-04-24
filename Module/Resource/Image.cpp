@@ -52,9 +52,9 @@ namespace Resource
 		return INT2{};
 	}
 
-	void Image::UseAs(const ComPtr<ID2D1DeviceContext2>& ctx, Type type)
+	void Image::Use(const ComPtr<ID2D1DeviceContext2>& ctx)
 	{
-		if (!ctx || m_type == type)
+		if (!ctx)
 			return;
 
 		if (m_resource)
@@ -81,9 +81,9 @@ namespace Resource
 		hr = ctx->CreateBitmapFromWicBitmap(converter.Get(), &bitmap);
 		assert(SUCCEEDED(hr));
 
-		m_resource = bitmap.Detach();
-		m_type = type;
+		m_type = Type::D2D;
 		m_buffer.reset();
 		m_bufferSize = 0;
+		m_resource = bitmap.Detach();
 	}
 }

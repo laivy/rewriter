@@ -132,5 +132,37 @@ void Inspector::RenderBasicInfo()
 			prop->Set(Util::u8stows(data));
 		break;
 	}
+	case Resource::Property::Type::IMAGE:
+	{
+		if (!ImGui::Button("..."))
+			break;
+
+		std::wstring path(MAX_PATH, L'\0');
+		OPENFILENAME ofn{};
+		ofn.lStructSize = sizeof(ofn);
+		ofn.lpstrFilter = L"PNG Files (*.png)\0*.png\0";
+		ofn.lpstrFile = path.data();
+		ofn.nMaxFile = MAX_PATH;
+		ofn.Flags = OFN_FILEMUSTEXIST | OFN_EXPLORER;
+		ofn.lpstrDefExt = L"dat";
+		if (!::GetOpenFileName(&ofn))
+			break;
+
+		std::ifstream file{ path, std::ios::binary };
+		if (!file)
+			break;
+
+		file.seekg(0, std::ios::end);
+		auto size{ static_cast<size_t>(file.tellg()) };
+		file.seekg(0, std::ios::beg);
+
+		std::unique_ptr<std::byte[]> buffer{ new std::byte[size]{} };
+		file.read(reinterpret_cast<char*>(buffer.get()), size);
+
+		auto image{ std::make_shared<Resource::Image>() };
+		image->SetBuffer(buffer.release(), size);
+		prop->Set(image);
+		break;
+	}
 	}
 }

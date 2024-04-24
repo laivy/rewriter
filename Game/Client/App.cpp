@@ -3,6 +3,7 @@
 #include "EventManager.h"
 #include "LoginServer.h"
 #include "ObjectManager.h"
+#include "Renderer.h"
 #include "Renderer2D.h"
 #include "Renderer3D.h"
 #include "SceneManager.h"
@@ -22,7 +23,7 @@ App::App() :
 void App::OnCreate()
 {
 	InitWindow();
-	Renderer3D::Init();
+	Renderer::Init();
 
 	EventManager::Instantiate();
 	ObjectManager::Instantiate();
@@ -112,7 +113,7 @@ LRESULT CALLBACK App::WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPa
 
 void App::OnDestroy()
 {
-	Renderer3D::CleanUp();
+	Renderer::CleanUp();
 
 	ObjectManager::Destroy();
 	WndManager::Destroy();
@@ -171,19 +172,17 @@ void App::Update()
 
 void App::Render()
 {
-	Renderer3D::RenderStart();
+	Renderer3D::Begin();
 	{
 		//if (SceneManager::IsInstanced())
 		//	SceneManager::GetInstance()->Render(m_commandList);
 	}
-	Renderer3D::RenderEnd();
-
-	Renderer2D::RenderStart();
+	Renderer3D::End();
+	Renderer2D::Begin();
 	{
 		if (auto sm{ SceneManager::GetInstance() })
 			sm->Render2D();
 	}
-	Renderer2D::RenderEnd();
-
-	Renderer3D::Present();
+	Renderer2D::End();
+	Renderer::Present();
 }

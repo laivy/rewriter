@@ -22,7 +22,7 @@ namespace Resource
 
 		__declspec(dllexport) IUnknown* Get() const;
 		__declspec(dllexport) INT2 GetSize() const;
-		__declspec(dllexport) void UseAs(const ComPtr<ID2D1DeviceContext2>& ctx, Type type);
+		__declspec(dllexport) void Use(const ComPtr<ID2D1DeviceContext2>& ctx);
 
 	private:
 		Type m_type;

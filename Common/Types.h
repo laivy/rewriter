@@ -39,7 +39,7 @@ public:
 	RECTI(int left, int top, int right, int bottom);
 
 	RECTI& Offset(int x, int y);
-	bool IsContain(const INT2& point);
+	bool IsContain(const INT2& point) const;
 
 public:
 	int left;
@@ -55,7 +55,7 @@ public:
 	RECTF(FLOAT left, FLOAT top, FLOAT right, FLOAT bottom);
 
 	RECTF& Offset(FLOAT x, FLOAT y);
-	bool IsContain(FLOAT2 point);
+	bool IsContain(FLOAT2 point) const;
 };
 
 using MATRIX = D2D1::Matrix3x2F;

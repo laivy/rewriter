@@ -2,7 +2,7 @@
 #include "App.h"
 #include "EditCtrl.h"
 #include "Font.h"
-#include "Renderer2D.h"
+#include "Renderer.h"
 #include "Wnd.h"
 
 EditCtrl::EditCtrl(const INT2& size) : 
@@ -184,7 +184,7 @@ void EditCtrl::MoveCaret(int distance)
 
 void EditCtrl::CreateTextLayout()
 {
-	auto dwriteFactory{ Renderer2D::dwriteFactory };
+	auto dwriteFactory{ Renderer::dwriteFactory };
 	dwriteFactory->CreateTextLayout(m_text.c_str(), static_cast<UINT32>(m_text.length()), m_font->GetTextFormat().Get(), static_cast<float>(m_size.x), static_cast<float>(m_size.y), &m_textLayout);
 	m_textLayout->SetParagraphAlignment(DWRITE_PARAGRAPH_ALIGNMENT_CENTER);
 	m_textLayout->SetWordWrapping(DWRITE_WORD_WRAPPING_NO_WRAP);

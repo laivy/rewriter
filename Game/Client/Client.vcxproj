@@ -170,12 +170,9 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Use</PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="Object.cpp" />
-    <ClCompile Include="Renderer2D.cpp">
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Use</PrecompiledHeader>
-    </ClCompile>
-    <ClCompile Include="Renderer3D.cpp">
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Use</PrecompiledHeader>
-    </ClCompile>
+    <ClCompile Include="Renderer.cpp" />
+    <ClCompile Include="Renderer2D.cpp" />
+    <ClCompile Include="Renderer3D.cpp" />
     <ClCompile Include="Server.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Use</PrecompiledHeader>
     </ClCompile>
@@ -290,6 +287,7 @@
     <ClInclude Include="Font.h" />
     <ClInclude Include="GameScene.h" />
     <ClInclude Include="Object.h" />
+    <ClInclude Include="Renderer.h" />
     <ClInclude Include="Renderer2D.h" />
     <ClInclude Include="Renderer3D.h" />
     <ClInclude Include="Server.h" />

@@ -23,14 +23,14 @@ SceneManager::~SceneManager()
 
 void SceneManager::OnResize(int width, int height)
 {
-	if (m_scene)
-		m_scene->OnResize(width, height);
+	//if (m_scene)
+	//	m_scene->OnResize(width, height);
 }
 
 void SceneManager::OnKeyboardEvent(UINT message, WPARAM wParam, LPARAM lParam)
 {
-	if (m_scene)
-		m_scene->OnKeyboardEvent(message, wParam, lParam);
+	//if (m_scene)
+	//	m_scene->OnKeyboardEvent(message, wParam, lParam);
 }
 
 void SceneManager::OnMouseEvent(UINT message, int x, int y)

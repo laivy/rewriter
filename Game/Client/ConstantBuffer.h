@@ -1,5 +1,5 @@
 ﻿#pragma once
-#include "Renderer3D.h"
+#include "Renderer.h"
 
 template <class T>
 class ConstantBuffer
@@ -27,7 +27,7 @@ public:
 
 	void Init()
 	{
-		auto device{ Renderer3D::d3dDevice };
+		auto device{ Renderer::d3dDevice };
 		DX::ThrowIfFailed(device->CreateCommittedResource(
 			&CD3DX12_HEAP_PROPERTIES{ D3D12_HEAP_TYPE_UPLOAD },
 			D3D12_HEAP_FLAG_NONE,

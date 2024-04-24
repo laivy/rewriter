@@ -1,10 +1,10 @@
 ﻿#include "Stdafx.h"
 #include "Font.h"
-#include "Renderer2D.h"
+#include "Renderer.h"
 
 Font::Font(const std::string& fontPath, float size, DWRITE_FONT_WEIGHT weight, DWRITE_FONT_STYLE style, DWRITE_FONT_STRETCH stretch)
 {
-	auto dwriteFactory{ Renderer2D::dwriteFactory };
+	auto dwriteFactory{ Renderer::dwriteFactory };
 
 	ComPtr<IDWriteFontFile> fontFile;
 	dwriteFactory->CreateFontFileReference(TextUtil::str2wstr(fontPath).c_str(), nullptr, &fontFile);
