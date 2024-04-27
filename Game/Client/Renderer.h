@@ -23,6 +23,7 @@ namespace Renderer
 	extern HANDLE fenceEvent;
 	extern UINT64 fenceValues[FRAME_COUNT];
 	extern UINT rtvDescriptorSize;
+	extern UINT cbvSrvUavDescriptorIncrementSize;
 
 	// D3D11on12
 	extern ComPtr<ID3D11On12Device> d3d11On12Device;

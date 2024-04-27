@@ -12,7 +12,4 @@ public:
 	virtual void Update(float deltaTime);
 	virtual void Render2D() const;
 	virtual void Render3D() const;
-
-private:
-
 };

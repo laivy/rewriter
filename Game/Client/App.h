@@ -6,35 +6,27 @@ class App : public TSingleton<App>
 {
 public:
 	App();
-	~App() = default;
-
-	void OnCreate();
+	~App();
 
 	void Run();
-
-	HWND GetHwnd() const;
-	INT2 GetWindowSize() const;
-	INT2 GetCursorPosition() const;
 
 private:
 	static LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);
 
-	void OnDestroy();
-
-	HRESULT InitWindow();
+	void InitWindow();
 
 	void Update();
 	void Render();
-
-private:
-	bool m_isActive;
-	HINSTANCE m_hInstance;
-	HWND m_hWnd;
-	INT2 m_size;
-	std::unique_ptr<Timer> m_timer;
 
 public:
 	static inline Event<UINT, WPARAM, LPARAM> OnKeyboardEvent;
 	static inline Event<UINT, int, int> OnMouseEvent;
 	static inline Event<int, int> OnResize;
+	static inline HINSTANCE hInstance;
+	static inline HWND hWnd;
+	static inline INT2 size{ 1920, 1080 };
+
+private:
+	bool m_isActive;
+	std::unique_ptr<Timer> m_timer;
 };

@@ -1,39 +1,29 @@
 ﻿#include "Stdafx.h"
 #include "App.h"
-#include "EventManager.h"
-#include "LoginServer.h"
-#include "ObjectManager.h"
 #include "Renderer.h"
 #include "Renderer2D.h"
 #include "Renderer3D.h"
 #include "SceneManager.h"
-#include "Wnd.h"
-#include "WndManager.h"
+#include "Window.h"
+#include "WindowManager.h"
 #include "Common/Timer.h"
 
 App::App() :
 	m_isActive{ true },
-	m_hInstance{ NULL },
-	m_hWnd{ NULL },
-	m_size{ 1920, 1080 },
 	m_timer{ new Timer }
-{
-}
-
-void App::OnCreate()
 {
 	InitWindow();
 	Renderer::Init();
-
-	EventManager::Instantiate();
-	ObjectManager::Instantiate();
-	WndManager::Instantiate();
 	SceneManager::Instantiate();
-
-	if (auto loginServer{ LoginServer::Instantiate() })
-		loginServer->Connect();
-
+	WindowManager::Instantiate();
 	m_timer->Tick();
+}
+
+App::~App()
+{
+	Renderer::CleanUp();
+	SceneManager::Destroy();
+	WindowManager::Destroy();
 }
 
 void App::Run()
@@ -54,24 +44,6 @@ void App::Run()
 			Render();
 		}
 	}
-}
-
-HWND App::GetHwnd() const
-{
-	return m_hWnd;
-}
-
-INT2 App::GetWindowSize() const
-{
-	return m_size;
-}
-
-INT2 App::GetCursorPosition() const
-{
-	POINT mouse;
-	::GetCursorPos(&mouse);
-	::ScreenToClient(m_hWnd, &mouse);
-	return { mouse.x, mouse.y };
 }
 
 LRESULT CALLBACK App::WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
@@ -102,7 +74,6 @@ LRESULT CALLBACK App::WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPa
 		App::OnResize.Notify(GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam));
 		break;
 	case WM_DESTROY:
-		app->OnDestroy();
 		::PostQuitMessage(0);
 		break;
 	default:
@@ -111,17 +82,7 @@ LRESULT CALLBACK App::WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPa
 	return 0;
 }
 
-void App::OnDestroy()
-{
-	Renderer::CleanUp();
-
-	ObjectManager::Destroy();
-	WndManager::Destroy();
-	EventManager::Destroy();
-	SceneManager::Destroy();
-}
-
-HRESULT App::InitWindow()
+void App::InitWindow()
 {
 	WNDCLASSEX wcex{};
 	wcex.cbSize = sizeof(WNDCLASSEX);
@@ -136,10 +97,10 @@ HRESULT App::InitWindow()
 	wcex.lpszClassName = L"CLIENT";
 	::RegisterClassEx(&wcex);
 	
-	RECT rect{ 0, 0, m_size.x, m_size.y };
+	RECT rect{ 0, 0, size.x, size.y };
 	::AdjustWindowRect(&rect, WS_OVERLAPPEDWINDOW, FALSE);
 
-	m_hWnd = ::CreateWindow(
+	hWnd = ::CreateWindow(
 		L"CLIENT",
 		L"CLIENT",
 		WS_OVERLAPPEDWINDOW, /*WS_OVERLAPPED | WS_SYSMENU | WS_BORDER,*/
@@ -152,20 +113,16 @@ HRESULT App::InitWindow()
 		HINST_THISCOMPONENT,
 		this
 	);
-	::SetWindowText(m_hWnd, TEXT("Rewriter"));
-
-	HRESULT hr{ m_hWnd ? S_OK : E_FAIL };
-	if (SUCCEEDED(hr))
-	{
-		::ShowWindow(m_hWnd, SW_SHOWNORMAL);
-		::UpdateWindow(m_hWnd);
-	}
-	return hr;
+	::SetWindowText(hWnd, TEXT("Rewriter"));
+	::ShowWindow(hWnd, SW_SHOWNORMAL);
+	::UpdateWindow(hWnd);
 }
 
 void App::Update()
 {
 	float deltaTime{ m_timer->Tick() };
+	if (auto wm{ WindowManager::GetInstance() })
+		wm->Update(deltaTime);
 	if (auto sm{ SceneManager::GetInstance() })
 		sm->Update(deltaTime);
 }
@@ -174,8 +131,8 @@ void App::Render()
 {
 	Renderer3D::Begin();
 	{
-		//if (SceneManager::IsInstanced())
-		//	SceneManager::GetInstance()->Render(m_commandList);
+		if (auto sm{ SceneManager::GetInstance() })
+			sm->Render3D();
 	}
 	Renderer3D::End();
 	Renderer2D::Begin();

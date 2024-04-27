@@ -7,9 +7,6 @@ int WINAPI WinMain(_In_		HINSTANCE hInstance,
 				   _In_		int nCmdShow)
 {
 	if (auto app{ App::Instantiate() })
-	{
-		app->OnCreate();
 		app->Run();
-	}
 	App::Destroy();
 }

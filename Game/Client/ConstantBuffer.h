@@ -25,17 +25,20 @@ public:
 			m_buffer->Unmap(0, nullptr);
 	}
 
-	void Init()
+	void Alloc()
 	{
-		auto device{ Renderer::d3dDevice };
-		DX::ThrowIfFailed(device->CreateCommittedResource(
+		if (!m_buffer)
+			return;
+
+		DX::ThrowIfFailed(Renderer::d3dDevice->CreateCommittedResource(
 			&CD3DX12_HEAP_PROPERTIES{ D3D12_HEAP_TYPE_UPLOAD },
 			D3D12_HEAP_FLAG_NONE,
 			&CD3DX12_RESOURCE_DESC::Buffer(BUFFER_SIZE),
 			D3D12_RESOURCE_STATE_GENERIC_READ,
 			NULL,
-			IID_PPV_ARGS(&m_buffer)));
-		m_buffer->SetName(TEXT("CONSTANT BUFFER"));
+			IID_PPV_ARGS(&m_buffer))
+		);
+		m_buffer->SetName(L"CONSTANT BUFFER");
 		DX::ThrowIfFailed(m_buffer->Map(0, nullptr, reinterpret_cast<void**>(&m_data)));
 
 		// 기본 생성자 호출
@@ -47,12 +50,12 @@ public:
 		return m_data ? true : false;
 	}
 
-	void SetShaderVariable(const ComPtr<ID3D12GraphicsCommandList>& commandList, RootParamIndex rootParameterIndex) const
+	void SetShaderVariable() const
 	{
-		commandList->SetGraphicsRootConstantBufferView(static_cast<UINT>(rootParameterIndex), m_buffer->GetGPUVirtualAddress());
+		Renderer::commandList->SetGraphicsRootConstantBufferView(T::INDEX, m_buffer->GetGPUVirtualAddress());
 	}
 
-	T* operator->()
+	T* operator->() const
 	{
 		return m_data;
 	}

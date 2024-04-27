@@ -37,46 +37,5 @@ EXTERN_C IMAGE_DOS_HEADER __ImageBase;
 
 // Game
 #include "DXUtil.h"
-#include "TextUtil.h"
 #include "Common/Event.h"
 #include "Common/Packet.h"
-
-// 전역 변수
-extern UINT g_cbvSrvUavDescriptorIncrementSize;
-
-enum class RootParamIndex : unsigned int
-{
-	// 상수버퍼
-	GAMEOBJECT,
-	CAMERA,
-	TEXTURE,
-#ifdef _DEBUG
-	LINE,
-#endif
-
-	// 서술자
-	TEXTURE0,
-
-	// 루트파라미터 개수
-	COUNT
-};
-
-enum class Layer
-{
-	// 먼저 선언되있을 수록 위에 그려짐
-	LOCALPLAYER,
-	REMOTEPLAYER,
-	MONSTER,
-	TERRAIN,
-	BACKGROUND1,
-	BACKGROUND2,
-	BACKGROUND3,
-	COUNT
-};
-
-enum class Pivot
-{
-	LEFTTOP, CENTERTOP, RIGHTTOP,
-	LEFTCENTER, CENTER, RIGHTCENTER,
-	LEFTBOT, CENTERBOT, RIGHTBOT
-};

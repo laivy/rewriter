@@ -33,7 +33,7 @@ namespace
 			Renderer::factory->EnumWarpAdapter(IID_PPV_ARGS(&hardwareAdapter));
 			DX::ThrowIfFailed(D3D12CreateDevice(hardwareAdapter.Get(), D3D_FEATURE_LEVEL_11_0, IID_PPV_ARGS(&Renderer::d3dDevice)));
 		}
-		g_cbvSrvUavDescriptorIncrementSize = Renderer::d3dDevice->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
+		Renderer::cbvSrvUavDescriptorIncrementSize = Renderer::d3dDevice->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
 	}
 
 	void CreateCommandQueue()
@@ -80,7 +80,7 @@ namespace
 
 	void CreateSwapChain()
 	{
-		HWND hWnd{ App::GetInstance()->GetHwnd() };
+		HWND hWnd{ App::hWnd };
 		RECT rect{};
 		::GetClientRect(hWnd, &rect);
 
@@ -130,7 +130,7 @@ namespace
 
 	void CreateRenderTargetView()
 	{
-		UINT dpi{ ::GetDpiForWindow(App::GetInstance()->GetHwnd()) };
+		UINT dpi{ ::GetDpiForWindow(App::hWnd) };
 		D2D1_BITMAP_PROPERTIES1 bitmapProperties{ D2D1::BitmapProperties1(
 			D2D1_BITMAP_OPTIONS_TARGET | D2D1_BITMAP_OPTIONS_CANNOT_DRAW,
 			D2D1::PixelFormat(DXGI_FORMAT_UNKNOWN, D2D1_ALPHA_MODE_PREMULTIPLIED),
@@ -168,12 +168,10 @@ namespace
 
 	void CreateDepthStencilView()
 	{
-		auto size{ App::GetInstance()->GetWindowSize() };
-
 		D3D12_RESOURCE_DESC desc{};
 		desc.Dimension = D3D12_RESOURCE_DIMENSION_TEXTURE2D;
-		desc.Width = size.x;
-		desc.Height = size.y;
+		desc.Width = App::size.x;
+		desc.Height = App::size.y;
 		desc.DepthOrArraySize = 1;
 		desc.MipLevels = 1;
 		desc.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
@@ -205,17 +203,24 @@ namespace
 
 	void CreateRootSignature()
 	{
+		/*
+		* Common.hlsli 파일에 선언된 것과 동일해야 함
+		* 0 : cbuffer cbGameObject : register(b0)
+		* 1 : cbuffer cbCamera : register(b1)
+		* 2 : cbuffer cbTexture : register(b2)
+		* 3 : cbuffer cbLine : register(b3)
+		* 4 : Texture2D g_texture : register(t0)
+		*/
+
 		std::array<CD3DX12_DESCRIPTOR_RANGE, 1> ranges{};
 		ranges[0].Init(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 1, 0, 0, D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND);
 
-		std::array<CD3DX12_ROOT_PARAMETER, static_cast<UINT>(RootParamIndex::COUNT)> rootParameter{};
-		rootParameter[static_cast<UINT>(RootParamIndex::GAMEOBJECT)].InitAsConstantBufferView(static_cast<UINT>(RootParamIndex::GAMEOBJECT));
-		rootParameter[static_cast<UINT>(RootParamIndex::CAMERA)].InitAsConstantBufferView(static_cast<UINT>(RootParamIndex::CAMERA));
-		rootParameter[static_cast<UINT>(RootParamIndex::TEXTURE)].InitAsConstantBufferView(static_cast<UINT>(RootParamIndex::TEXTURE));
-#ifdef _DEBUG
-		rootParameter[static_cast<UINT>(RootParamIndex::LINE)].InitAsConstantBufferView(static_cast<UINT>(RootParamIndex::LINE));
-#endif
-		rootParameter[static_cast<UINT>(RootParamIndex::TEXTURE0)].InitAsDescriptorTable(1, &ranges[0], D3D12_SHADER_VISIBILITY_PIXEL);
+		std::array<CD3DX12_ROOT_PARAMETER, 5> rootParameter{};
+		rootParameter[0].InitAsConstantBufferView(0);
+		rootParameter[1].InitAsConstantBufferView(1);
+		rootParameter[2].InitAsConstantBufferView(2);
+		rootParameter[3].InitAsConstantBufferView(3);
+		rootParameter[4].InitAsDescriptorTable(1, &ranges[0], D3D12_SHADER_VISIBILITY_PIXEL);
 
 		std::array<CD3DX12_STATIC_SAMPLER_DESC, 1> samplerDesc{};
 		samplerDesc[0].Init(
@@ -313,6 +318,7 @@ namespace Renderer
 	HANDLE fenceEvent;
 	UINT64 fenceValues[FRAME_COUNT];
 	UINT rtvDescriptorSize;
+	UINT cbvSrvUavDescriptorIncrementSize;
 
 	// D3D11on12
 	ComPtr<ID3D11On12Device> d3d11On12Device;
@@ -325,8 +331,6 @@ namespace Renderer
 	ComPtr<ID2D1Device2> d2dDevice;
 	ComPtr<ID2D1Bitmap1> d2dRenderTargets[FRAME_COUNT];
 	ComPtr<IDWriteFactory5> dwriteFactory;
-
-	std::unique_ptr<Observer<int, int>> OnResizeObserver;
 
 	void OnResize(int width, int height)
 	{
@@ -387,7 +391,7 @@ namespace Renderer
 		ExecuteCommandList();
 		WaitForGPU();
 
-		OnResizeObserver = App::OnResize.Add(OnResize);
+		App::OnResize.Register(&OnResize);
 	}
 
 	void Present()
@@ -403,7 +407,7 @@ namespace Renderer
 
 #ifdef _DEBUG
 		ComPtr<IDXGIDebug1> dxgiDebug;
-		if (SUCCEEDED(DXGIGetDebugInterface1(0, IID_PPV_ARGS(&dxgiDebug))))
+		if (SUCCEEDED(DXGIGetDebugInterface1(NULL, IID_PPV_ARGS(&dxgiDebug))))
 		{
 			dxgiDebug->ReportLiveObjects(DXGI_DEBUG_ALL, DXGI_DEBUG_RLO_FLAGS::DXGI_DEBUG_RLO_ALL);
 		}

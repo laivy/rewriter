@@ -1,9 +1,8 @@
 ﻿#include "Stdafx.h"
 #include "UI.h"
-#include "Wnd.h"
+#include "Window.h"
 
 IUserInterface::IUserInterface() :
-	m_parent{ nullptr },
 	m_isValid{ true },
 	m_isFocus{ false },
 	m_size{ 0, 0 },
@@ -11,11 +10,7 @@ IUserInterface::IUserInterface() :
 {
 }
 
-void IUserInterface::OnMouseMove(int x, int y) { }
-void IUserInterface::OnLButtonUp(int x, int y) { }
-void IUserInterface::OnLButtonDown(int x, int y) { }
-void IUserInterface::OnRButtonUp(int x, int y) { }
-void IUserInterface::OnRButtonDown(int x, int y) { }
+void IUserInterface::OnMouseEvent(UINT message, int x, int y) { }
 void IUserInterface::OnKeyboardEvent(UINT message, WPARAM wParam, LPARAM lParam) { }
 void IUserInterface::Update(float deltaTime) { }
 void IUserInterface::Render() const { }
@@ -25,19 +20,9 @@ void IUserInterface::Destroy()
 	m_isValid = false;
 }
 
-void IUserInterface::SetParent(Wnd* const wnd)
-{
-	m_parent = wnd;
-}
-
 void IUserInterface::SetFocus(bool focus)
 {
 	m_isFocus = focus;
-}
-
-void IUserInterface::SetSize(const INT2& size)
-{
-	m_size = size;
 }
 
 void IUserInterface::SetPosition(const INT2& position, Pivot pivot)
@@ -80,6 +65,11 @@ void IUserInterface::SetPosition(const INT2& position, Pivot pivot)
 	}
 }
 
+void IUserInterface::SetSize(const INT2& size)
+{
+	m_size = size;
+}
+
 bool IUserInterface::IsValid() const
 {
 	return m_isValid;
@@ -96,16 +86,6 @@ bool IUserInterface::IsContain(const INT2& point) const
 	RECTI rect{ 0, 0, m_size.x, m_size.y };
 	rect.Offset(m_position.x, m_position.y);
 	return rect.IsContain(point);
-}
-
-Wnd* const IUserInterface::GetParent() const
-{
-	return m_parent;
-}
-
-INT2 IUserInterface::GetSize() const
-{
-	return m_size;
 }
 
 INT2 IUserInterface::GetPosition(Pivot pivot) const
@@ -145,4 +125,9 @@ INT2 IUserInterface::GetPosition(Pivot pivot) const
 		break;
 	}
 	return position;
+}
+
+INT2 IUserInterface::GetSize() const
+{
+	return m_size;
 }

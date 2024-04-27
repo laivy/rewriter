@@ -1,66 +1,74 @@
 ﻿#pragma once
+#include <any>
 
-template <class... Params>
-class Event;
+class IObserver;
 
-template <class... Params>
-class Observer
+class IEvent abstract
 {
 public:
-	friend class Event<Params...>;
+	virtual void Unregister(IObserver* observer) = 0;
+};
 
-	Observer(Event<Params...>* event, const std::function<void(Params...)>& callback) :
-		m_event{ event },
-		m_callback{ callback }
+class IObserver
+{
+protected:
+	IObserver() : m_event{ nullptr }
 	{
 	}
 
-	~Observer()
+public:
+	~IObserver()
 	{
 		if (m_event)
+			m_event->Unregister(this);
+	}
+
+public:
+	IEvent* m_event;
+};
+
+template <class... Params>
+class Event : public IEvent
+{
+private:
+	using Callback = std::function<void(Params...)>;
+
+public:
+	Event() = default;
+	~Event()
+	{
+		for (const auto& [o, _] : m_observers)
 		{
-			m_event->Remove(this);
-			m_event = nullptr;
+			if (o)
+				o->m_event = nullptr;
+		}
+	}
+
+	void Register(const Callback& callback)
+	{
+		m_observers[nullptr].push_back(callback);
+	}
+
+	void Register(IObserver* observer, const Callback& callback)
+	{
+		observer->m_event = this;
+		m_observers[observer].push_back(callback);
+	}
+
+	virtual void Unregister(IObserver* observer) override final
+	{
+		m_observers.erase(observer);
+	}
+
+	void Notify(const Params&... params)
+	{
+		for (const auto& [_, callbacks] : m_observers)
+		{
+			for (const auto& callback : callbacks)
+				callback(params...);
 		}
 	}
 
 private:
-	void OnNotify(const Params&... param)
-	{
-		if (m_callback)
-			m_callback(param...);
-	}
-
-private:
-	Event<Params...>* m_event;
-	std::function<void(Params...)> m_callback;
-};
-
-template <class... Params>
-class Event
-{
-public:
-	Event() = default;
-	~Event() = default;
-
-	void Notify(const Params&... params)
-	{
-		for (const auto& o : m_observers)
-			o->OnNotify(params...);
-	}
-
-	std::unique_ptr<Observer<Params...>> Add(const std::function<void(Params...)>& callback)
-	{
-		auto observer{ std::make_unique<Observer<Params...>>(this, callback) };
-		m_observers.push_back(observer.get());
-		return observer;
-	}
-
-	void Remove(Observer<Params...>* observer)
-	{
-		std::erase(m_observers, observer);
-	}
-
-private:
-	std::vector<Observer<Params...>*> m_observers;
+	std::map<IObserver*, std::vector<Callback>> m_observers;
 };

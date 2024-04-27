@@ -1,5 +1,12 @@
 ﻿#pragma once
 
+enum class Pivot
+{
+	LEFTTOP, CENTERTOP, RIGHTTOP,
+	LEFTCENTER, CENTER, RIGHTCENTER,
+	LEFTBOT, CENTERBOT, RIGHTBOT
+};
+
 class IObject abstract
 {
 public:
@@ -14,7 +21,7 @@ public:
 	virtual void Render() const override = 0;
 
 protected:
-	int m_layer; // 클 수록 위에 그려짐
+	UINT m_layer; // 클 수록 위에 그려짐
 };
 
 class IObject3D abstract : public IObject
@@ -24,5 +31,5 @@ public:
 	virtual void Render() const override = 0;
 
 protected:
-	int m_layer; // 클 수록 위에 그려짐
+	UINT m_layer; // 작을 수록 위에 그려짐
 };

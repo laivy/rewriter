@@ -15,6 +15,7 @@ using Microsoft::WRL::ComPtr;
 #include <cassert>
 #include <chrono>
 #include <codecvt>
+#include <deque>
 #include <filesystem>
 #include <fstream>
 #include <functional>
@@ -22,6 +23,7 @@ using Microsoft::WRL::ComPtr;
 #include <map>
 #include <memory>
 #include <mutex>
+#include <queue>
 #include <ranges>
 #include <span>
 #include <string>
