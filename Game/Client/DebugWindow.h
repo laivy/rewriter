@@ -4,8 +4,11 @@
 class DebugWindow : public IWindow
 {
 public:
-	DebugWindow() = default;
+	DebugWindow();
 	~DebugWindow() = default;
+
+	virtual void OnMouseEvent(UINT message, int x, int y) override final;
+	virtual void OnKeyboardEvent(UINT message, WPARAM wParam, LPARAM lParam) override final;
 
 	virtual void Update(float deltaTime) override final;
 	virtual void Render() const override final;

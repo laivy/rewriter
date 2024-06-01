@@ -140,6 +140,12 @@
     <ClCompile Include="Modal.cpp">
       <Filter>소스 파일\UI</Filter>
     </ClCompile>
+    <ClCompile Include="TextBox.cpp">
+      <Filter>소스 파일\UI</Filter>
+    </ClCompile>
+    <ClCompile Include="Control.cpp">
+      <Filter>소스 파일\UI</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Stdafx.h">
@@ -260,6 +266,12 @@
       <Filter>헤더 파일\UI</Filter>
     </ClInclude>
     <ClInclude Include="Modal.h">
+      <Filter>헤더 파일\UI</Filter>
+    </ClInclude>
+    <ClInclude Include="TextBox.h">
+      <Filter>헤더 파일\UI</Filter>
+    </ClInclude>
+    <ClInclude Include="Control.h">
       <Filter>헤더 파일\UI</Filter>
     </ClInclude>
   </ItemGroup>

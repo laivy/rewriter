@@ -272,10 +272,11 @@ namespace Resource
 
 	std::wstring Property::GetString(const std::wstring& path) const
 	{
-		assert(m_type == Type::STRING);
-
 		if (path.empty())
+		{
+			assert(m_type == Type::STRING);
 			return std::get<std::wstring>(m_data);
+		}
 
 		std::wstring name{ path };
 		std::wstring remain{};
@@ -295,10 +296,11 @@ namespace Resource
 
 	std::shared_ptr<Image> Property::GetImage(const std::wstring& path) const
 	{
-		assert(m_type == Type::IMAGE);
-
 		if (path.empty())
+		{
+			assert(m_type == Type::IMAGE);
 			return std::get<std::shared_ptr<Image>>(m_data);
+		}
 
 		std::wstring name{ path };
 		std::wstring remain{};
@@ -313,6 +315,7 @@ namespace Resource
 		if (const auto & child{ Get(name) })
 			return child->GetImage(remain);
 
+		assert(m_type == Type::IMAGE);
 		return nullptr;
 	}
 

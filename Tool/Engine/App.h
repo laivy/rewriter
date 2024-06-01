@@ -32,9 +32,9 @@ public:
 	// Window
 	static constexpr auto TITLE_NAME{ L"RW Engine 1.0v" };
 	HINSTANCE m_hInstance;
-	HWND m_hWnd;
+	HWND hWnd;
 	bool m_isActive;
-	std::pair<int, int> m_size;
+	std::pair<int, int> size;
 
 	// DirectX
 	static constexpr auto FRAME_COUNT{ 3 };

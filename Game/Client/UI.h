@@ -18,8 +18,9 @@ public:
 	virtual void SetPosition(const INT2& position, Pivot pivot = Pivot::LEFTTOP);
 	virtual void SetSize(const INT2& size);
 
-	bool IsValid() const;
-	bool IsFocus() const;
+	virtual bool IsValid() const;
+	virtual bool IsFocus() const;
+
 	bool IsContain(const INT2& point) const;
 	INT2 GetPosition(Pivot pivot = Pivot::LEFTTOP) const;
 	INT2 GetSize() const;

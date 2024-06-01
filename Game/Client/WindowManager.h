@@ -22,6 +22,7 @@ private:
 	void OnMouseEvent(UINT message, int x, int y);
 
 private:
-	std::deque<std::unique_ptr<IModal>> m_modals;
-	std::deque<std::unique_ptr<IWindow>> m_windows;
+	std::vector<std::unique_ptr<IModal>> m_modals;
+	std::vector<std::unique_ptr<IWindow>> m_windows;
+	IWindow* m_focusWindow;
 };

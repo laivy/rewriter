@@ -84,7 +84,7 @@ bool IUserInterface::IsContain(const INT2& point) const
 {
 	// point는 부모 좌표계 기준의 좌표
 	RECTI rect{ 0, 0, m_size.x, m_size.y };
-	rect.Offset(m_position.x, m_position.y);
+	rect.Offset(m_position);
 	return rect.IsContain(point);
 }
 

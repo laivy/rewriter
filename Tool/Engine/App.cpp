@@ -7,9 +7,9 @@
 
 App::App(HINSTANCE hInstance) :
 	m_hInstance{ hInstance },
-	m_hWnd{ NULL },
+	hWnd{ NULL },
 	m_isActive{ false },
-	m_size{ 1920, 1080 },
+	size{ 1920, 1080 },
 	m_timer{ new Timer }
 {
 	InitWindow();
@@ -98,10 +98,10 @@ void App::InitWindow()
 	::RegisterClassEx(&wcex);
 
 	// 화면 최대 크기로 윈도우 생성
-	RECT rect{ 0, 0, m_size.first, m_size.second };
+	RECT rect{ 0, 0, size.first, size.second };
 	::AdjustWindowRect(&rect, WS_OVERLAPPEDWINDOW, FALSE);
 
-	m_hWnd = ::CreateWindow(
+	hWnd = ::CreateWindow(
 		wcex.lpszClassName,
 		TITLE_NAME,
 		WS_OVERLAPPEDWINDOW,
@@ -114,10 +114,10 @@ void App::InitWindow()
 		wcex.hInstance,
 		this
 	);
-	::SetWindowText(m_hWnd, TITLE_NAME);
+	::SetWindowText(hWnd, TITLE_NAME);
 
-	::ShowWindow(m_hWnd, SW_SHOWMAXIMIZED);
-	::UpdateWindow(m_hWnd);
+	::ShowWindow(hWnd, SW_SHOWMAXIMIZED);
+	::UpdateWindow(hWnd);
 }
 
 void App::InitDirectX()
@@ -153,7 +153,7 @@ void App::InitDirectX()
 
 	// 스왑체인 생성
 	RECT rect{};
-	GetClientRect(m_hWnd, &rect);
+	GetClientRect(hWnd, &rect);
 
 	DXGI_SWAP_CHAIN_DESC1 swapChainDesc{};
 	swapChainDesc.BufferCount = FRAME_COUNT;
@@ -167,7 +167,7 @@ void App::InitDirectX()
 	ComPtr<IDXGISwapChain1> swapChain;
 	m_factory->CreateSwapChainForHwnd(
 		m_commandQueue.Get(),
-		m_hWnd,
+		hWnd,
 		&swapChainDesc,
 		nullptr,
 		nullptr,
@@ -175,7 +175,7 @@ void App::InitDirectX()
 	);
 	swapChain.As(&m_swapChain);
 	m_frameIndex = m_swapChain->GetCurrentBackBufferIndex();
-	m_factory->MakeWindowAssociation(m_hWnd, DXGI_MWA_NO_ALT_ENTER);
+	m_factory->MakeWindowAssociation(hWnd, DXGI_MWA_NO_ALT_ENTER);
 
 	// 서술자 힙 생성
 	D3D12_DESCRIPTOR_HEAP_DESC rtvHeapDesc{};
@@ -223,7 +223,7 @@ void App::InitImGui()
 	ImGui::GetStyle().DockingSeparatorSize = 1.0f;
 	ImGui::StyleColorsDark();
 
-	ImGui_ImplWin32_Init(m_hWnd);
+	ImGui_ImplWin32_Init(hWnd);
 	ImGui_ImplDX12_Init(
 		m_d3dDevice.Get(),
 		FRAME_COUNT,

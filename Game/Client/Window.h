@@ -1,10 +1,12 @@
 ﻿#pragma once
 #include "UI.h"
 
+class IControl;
+
 class IWindow abstract : public IUserInterface
 {
 public:
-	IWindow() = default;
+	IWindow();
 	virtual ~IWindow() = default;
 
 	virtual void OnMouseEvent(UINT message, int x, int y);
@@ -13,6 +15,10 @@ public:
 	virtual void Update(float deltaTime);
 	virtual void Render() const;
 
-private:
-	std::vector<std::unique_ptr<IUserInterface>> m_userInterfaces;
+protected:
+	bool m_isPicked;
+	INT2 m_pickPos;
+	RECTI m_pickRect;
+	std::vector<std::unique_ptr<IControl>> m_controls;
+	IControl* m_focusControl;
 };

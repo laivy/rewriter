@@ -1,4 +1,5 @@
 ﻿#include "Stdafx.h"
+#include "Control.h"
 #include "Modal.h"
 
 IModal::IModal(const Callback& callback) : 
