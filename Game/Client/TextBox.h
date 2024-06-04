@@ -16,6 +16,10 @@ public:
 	virtual void SetFocus(bool focus) override final;
 	virtual bool IsFocus() const override final;
 
+	void SetMultiLine(bool isMultiLine);
+	void SetVerticalScroll(bool hasVerticalScroll);
+	void SetHorizontalScroll(bool hasHorizontalScroll);
+
 private:
 	void UpdateOffset();
 
@@ -28,7 +32,7 @@ private:
 	void InsertCharacter(wchar_t character);
 	void EraseCharacter();
 
-	int GetTextWidth(int position) const;
+	DWRITE_HIT_TEST_METRICS GetTextMetrics(int position) const;
 
 private:
 	static constexpr auto MARGIN_LEFT = 5;
@@ -46,7 +50,7 @@ private:
 	bool m_drawCaret;
 
 	INT2 m_offset;
-	bool m_multiLine;
-	bool m_verticalScroll;
-	bool m_horizontalScroll;
+	bool m_isMultiLine;
+	bool m_hasVerticalScroll;
+	bool m_hasHorizontalScroll;
 };

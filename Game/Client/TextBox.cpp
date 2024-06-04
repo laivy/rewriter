@@ -12,9 +12,9 @@ TextBox::TextBox(IWindow* owner) :
 	m_caretTimer{ 0.0f },
 	m_drawCaret{ true },
 	m_offset{},
-	m_multiLine{ false },
-	m_verticalScroll{ false },
-	m_horizontalScroll{ false }
+	m_isMultiLine{ false },
+	m_hasVerticalScroll{ false },
+	m_hasHorizontalScroll{ false }
 {
 	m_textFormat = Renderer2D::CreateTextFormat(L"", 16);
 }
@@ -35,6 +35,12 @@ void TextBox::OnKeyboardEvent(UINT message, WPARAM wParam, LPARAM lParam)
 			MoveCaret(-1);
 			EraseCharacter();
 			break;
+		case VK_END:
+			MoveCaret(static_cast<int>(m_text.size()));
+			break;
+		case VK_HOME:
+			MoveCaret(-static_cast<int>(m_text.size()));
+			break;
 		case VK_LEFT:
 			MoveCaret(-1);
 			break;
@@ -51,6 +57,9 @@ void TextBox::OnKeyboardEvent(UINT message, WPARAM wParam, LPARAM lParam)
 	{
 		if (wParam == VK_BACK)
 			break;
+		if (wParam == VK_RETURN && !m_isMultiLine)
+			break;
+
 		InsertCharacter(static_cast<wchar_t>(wParam));
 		MoveCaret(1);
 		break;
@@ -134,10 +143,27 @@ bool TextBox::IsFocus() const
 	return m_owner->IsFocus() && m_isFocus;
 }
 
+void TextBox::SetMultiLine(bool isMultiLine)
+{
+	m_isMultiLine = isMultiLine;
+}
+
+void TextBox::SetVerticalScroll(bool hasVerticalScroll)
+{
+	m_hasVerticalScroll = hasVerticalScroll;
+}
+
+void TextBox::SetHorizontalScroll(bool hasHorizontalScroll)
+{
+	m_hasHorizontalScroll = hasHorizontalScroll;
+}
+
 void TextBox::UpdateOffset()
 {
-	int textWidth{ GetTextWidth(m_caret) };
+	auto metrics{ GetTextMetrics(m_caret) };
+	int textWidth{ static_cast<int>(metrics.left) };
 	int textBoxWidth{ m_size.x - (MARGIN_LEFT + MARGIN_RIGHT) };
+	int textBoxHeight{ m_size.y - (MARGIN_TOP + MARGIN_BOTTOM) };
 
 	// 우측 스크롤
 	if (textWidth + m_offset.x >= textBoxWidth)
@@ -146,6 +172,14 @@ void TextBox::UpdateOffset()
 	// 좌측 스크롤
 	else if (textWidth + m_offset.x < 0)
 		m_offset.x = -textWidth;
+
+	// 하단 스크롤
+	if (metrics.top + metrics.height + m_offset.y > textBoxHeight)
+		m_offset.y = textBoxHeight - (metrics.top + metrics.height);
+
+	// 상단 스크롤
+	else if (metrics.top + m_offset.y < 0)
+		m_offset.y = -metrics.top + MARGIN_TOP;
 }
 
 void TextBox::RenderBackground() const
@@ -192,8 +226,11 @@ void TextBox::RenderCaret() const
 	caret.Offset(m_position);
 	caret.Offset({ MARGIN_LEFT, 5 });
 	if (m_textLayout)
-		caret.Offset({ GetTextWidth(m_caret), 0 });
-	caret.Offset({ m_offset.x, 0 });
+	{
+		auto metrics{ GetTextMetrics(m_caret) };
+		caret.Offset({ static_cast<int>(metrics.left), static_cast<int>(metrics.top) });
+	}
+	caret.Offset({ m_offset.x, m_offset.y });
 	Renderer2D::DrawRect(caret);
 }
 
@@ -201,7 +238,7 @@ void TextBox::SetText(const std::wstring& text)
 {
 	m_text = text;
 	m_textLayout = Renderer2D::CreateTextLayout(m_text, m_textFormat, m_size.x - MARGIN_LEFT, m_size.y);
-	if (!m_multiLine)
+	if (!m_isMultiLine)
 		m_textLayout->SetWordWrapping(DWRITE_WORD_WRAPPING_NO_WRAP);
 	m_caretTimer = 0.0f;
 	m_drawCaret = true;
@@ -230,13 +267,13 @@ void TextBox::EraseCharacter()
 	SetText(m_text);
 }
 
-int TextBox::GetTextWidth(int position) const
+DWRITE_HIT_TEST_METRICS TextBox::GetTextMetrics(int position) const
 {
 	if (!m_textLayout || position < 0)
-		return 0;
+		return {};
 
 	FLOAT2 pos{};
 	DWRITE_HIT_TEST_METRICS metrics{};
 	m_textLayout->HitTestTextPosition(position, TRUE, &pos.x, &pos.y, &metrics);
-	return static_cast<int>(metrics.left);
+	return metrics;
 }
