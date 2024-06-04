@@ -175,6 +175,7 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Use</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Use</PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="TextBlock.cpp" />
     <ClCompile Include="TextBox.cpp" />
     <ClCompile Include="UI.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Use</PrecompiledHeader>
@@ -236,6 +237,7 @@
     <ClInclude Include="SceneManager.h" />
     <ClInclude Include="Shader.h" />
     <ClInclude Include="Stdafx.h" />
+    <ClInclude Include="TextBlock.h" />
     <ClInclude Include="TextBox.h" />
     <ClInclude Include="UI.h" />
     <ClInclude Include="Window.h" />
