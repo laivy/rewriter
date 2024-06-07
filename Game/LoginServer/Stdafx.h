@@ -1,13 +1,10 @@
 ﻿#pragma once
+#include "Common/Stdafx.h"
 
 // Windows
-#define WIN32_LEAN_AND_MEAN 
-#include <Windows.h>
 #include <WS2tcpip.h>
 #include <MSWSock.h>
 #include <WinSock2.h>
-#include <wrl.h>
-using Microsoft::WRL::ComPtr;
 
 #ifndef HINST_THISCOMPONENT
 EXTERN_C IMAGE_DOS_HEADER __ImageBase;
@@ -16,21 +13,16 @@ EXTERN_C IMAGE_DOS_HEADER __ImageBase;
 
 // C/C++
 #include <atlstr.h>
-#include <array>
 #include <format>
-#include <memory>
-#include <mutex>
-#include <string>
-#include <thread>
-#include <unordered_map>
+#include <semaphore>
 
 // DirectX
-#include <dxgi1_6.h>
 #include <d3d12.h>
-#include "External/DirectX/d3dx12.h"
+#include <dxgi1_6.h>
 #ifdef _DEBUG
 #include <dxgidebug.h>
 #endif
+#include "External/DirectX/d3dx12.h"
 
 // Imgui
 #include "External/Imgui/imgui.h"
@@ -47,7 +39,7 @@ extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg
 #include "Module/Database/Include/Connection.h"
 #include "Module/Database/Include/Login.h"
 
-// Game
+// Project
 #include "Common/Network.h"
 #include "Common/Packet.h"
 #include "Common/Request.h"

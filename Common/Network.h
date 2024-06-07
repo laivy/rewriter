@@ -15,12 +15,12 @@ struct OVERLAPPEDEX : public OVERLAPPED
 		socket{ INVALID_SOCKET },
 		buffer{}
 	{
-		m_wsaBuf.len = BUFFER_SIZE;
-		m_wsaBuf.buf = new char[BUFFER_SIZE] {};
+		wsaBuf.len = BUFFER_SIZE;
+		wsaBuf.buf = new char[BUFFER_SIZE] {};
 	}
 
 	IOOperation op;
 	SOCKET socket;
 	char buffer[BUFFER_SIZE];
-	WSABUF m_wsaBuf;
+	WSABUF wsaBuf;
 };

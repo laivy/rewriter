@@ -7,7 +7,7 @@
 #include <SDKDDKVer.h>
 #include <wincodec.h>
 #include <windowsx.h>
-#include <winsock2.h>
+#include <WinSock2.h>
 #include <WS2tcpip.h>
 
 #ifndef HINST_THISCOMPONENT

@@ -17,5 +17,5 @@ namespace Database
 		SQLHDBC m_hDbc;
 	};
 
-	__declspec(dllexport) DBRESULT Connect(const std::wstring& server, const std::wstring& database, const std::wstring& username, const std::wstring& password);
+	__declspec(dllexport) DBRESULT Connect(std::wstring_view server, std::wstring_view database, std::wstring_view username, std::wstring_view password);
 }

@@ -14,7 +14,7 @@ WindowManager::WindowManager() :
 	App::OnMouseEvent.Register(this, std::bind_front(&WindowManager::OnMouseEvent, this));
 
 #ifdef _DEBUG
-	for (size_t i = 0; i < 2; ++i)
+	for (size_t i = 0; i < 1; ++i)
 	{
 		auto window{ std::make_unique<DebugWindow>() };
 		if (i == 0)

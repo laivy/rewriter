@@ -103,7 +103,7 @@ namespace Renderer2D
 		Renderer::ctx->CreateSolidColorBrush(color, &brush);
 
 		auto size{ Renderer::ctx->GetSize() };
-		auto textFormat{ CreateTextFormat(fontName, static_cast<float>(fontSize), textAlignment, paragraphAlignment) };
+		auto textFormat{ CreateTextFormat(fontName, fontSize, textAlignment, paragraphAlignment) };
 		Renderer::ctx->DrawText(
 			text.data(),
 			static_cast<UINT32>(text.size()),

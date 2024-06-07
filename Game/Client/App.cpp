@@ -4,6 +4,7 @@
 #include "Renderer2D.h"
 #include "Renderer3D.h"
 #include "SceneManager.h"
+#include "Server.h"
 #include "Window.h"
 #include "WindowManager.h"
 #include "Common/Timer.h"
@@ -14,8 +15,7 @@ App::App() :
 {
 	InitWindow();
 	Renderer::Init();
-	SceneManager::Instantiate();
-	WindowManager::Instantiate();
+	InitApp();
 	m_timer->Tick();
 }
 
@@ -116,6 +116,14 @@ void App::InitWindow()
 	::SetWindowText(hWnd, TEXT("Rewriter"));
 	::ShowWindow(hWnd, SW_SHOWNORMAL);
 	::UpdateWindow(hWnd);
+}
+
+void App::InitApp()
+{
+	SceneManager::Instantiate();
+	WindowManager::Instantiate();
+
+	Connect<LoginServer>();
 }
 
 void App::Update()

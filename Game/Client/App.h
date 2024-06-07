@@ -14,6 +14,7 @@ private:
 	static LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);
 
 	void InitWindow();
+	void InitApp();
 
 	void Update();
 	void Render();
@@ -22,8 +23,8 @@ public:
 	static inline Event<UINT, WPARAM, LPARAM> OnKeyboardEvent;
 	static inline Event<UINT, int, int> OnMouseEvent;
 	static inline Event<int, int> OnResize;
-	static inline HINSTANCE hInstance;
-	static inline HWND hWnd;
+	static inline HINSTANCE hInstance{ NULL };
+	static inline HWND hWnd{ NULL };
 	static inline INT2 size{ 1920, 1080 };
 
 private:

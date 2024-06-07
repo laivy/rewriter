@@ -1,15 +1,8 @@
 ﻿#pragma once
 
-class ClientSocket
+struct ClientSocket
 {
-public:
-	friend class IOCPThread;
-
-	ClientSocket(int socketID, SOCKET socket);
-	~ClientSocket();
-
-private:
-	int m_socketID;
-	SOCKET m_socket;
-	OVERLAPPEDEX m_overlappedEx;
+	size_t socketID{ 0 };
+	SOCKET socket{ INVALID_SOCKET };
+	OVERLAPPEDEX overlappedEx{};
 };

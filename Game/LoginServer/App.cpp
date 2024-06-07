@@ -1,9 +1,9 @@
 ﻿#include "Stdafx.h"
-#include "DBThread.h"
-#include "IOCPThread.h"
-#include "LoginApp.h"
+#include "App.h"
+#include "DBManager.h"
+#include "ClientAcceptor.h"
 
-LoginApp::LoginApp() :
+App::App() :
 	m_hWnd{ NULL },
 	m_wndSize{ 600, 400 },
 	m_cbvSrvUavDescriptorIncrementSize{ 0 },
@@ -13,19 +13,23 @@ LoginApp::LoginApp() :
 	m_rtvDescriptorSize{ 0 },
 	m_isDxInit{ false }
 {
-}
-
-void LoginApp::OnCreate()
-{
-	InitWnd();
+	InitWindow();
 	InitDirectX();
 	InitImgui();
-
-	DBThread::Instantiate();
-	IOCPThread::Instantiate();
+	InitApp();
 }
 
-void LoginApp::Run()
+App::~App()
+{
+	ClientAcceptor::Destroy();
+	DBManager::Destroy();
+
+	ImGui_ImplDX12_Shutdown();
+	ImGui_ImplWin32_Shutdown();
+	ImGui::DestroyContext();
+}
+
+void App::Run()
 {
 	MSG msg{};
 	while (true)
@@ -45,34 +49,33 @@ void LoginApp::Run()
 	}
 }
 
-LRESULT LoginApp::WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
+LRESULT App::WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
 	if (ImGui_ImplWin32_WndProcHandler(hWnd, message, wParam, lParam))
 		return true;
 
-	LoginApp* app{ reinterpret_cast<LoginApp*>(GetWindowLongPtr(hWnd, GWLP_USERDATA)) };
+	App* app{ reinterpret_cast<App*>(::GetWindowLongPtr(hWnd, GWLP_USERDATA)) };
 	switch (message)
 	{
 	case WM_NCCREATE:
 	{
 		LPCREATESTRUCT pcs{ reinterpret_cast<LPCREATESTRUCT>(lParam) };
-		SetWindowLongPtr(hWnd, GWLP_USERDATA, reinterpret_cast<LONG_PTR>(pcs->lpCreateParams));
+		::SetWindowLongPtr(hWnd, GWLP_USERDATA, reinterpret_cast<LONG_PTR>(pcs->lpCreateParams));
 		return 1;
 	}
 	case WM_SIZE:
 		app->OnResize({ static_cast<int>(LOWORD(lParam)), static_cast<int>(HIWORD(lParam)) });
 		break;
 	case WM_DESTROY:
-		app->OnDestroy();
-		PostQuitMessage(0);
+		::PostQuitMessage(0);
 		break;
 	default:
-		return DefWindowProc(hWnd, message, wParam, lParam);
+		return ::DefWindowProc(hWnd, message, wParam, lParam);
 	}
 	return 0;
 }
 
-void LoginApp::InitWnd()
+void App::InitWindow()
 {
 	WNDCLASSEX wcex{};
 	wcex.cbSize = sizeof(WNDCLASSEX);
@@ -93,8 +96,8 @@ void LoginApp::InitWnd()
 	m_hWnd = CreateWindow(
 		wcex.lpszClassName,
 		TEXT("Login Server"),
-		WS_OVERLAPPED | WS_SYSMENU | WS_BORDER | WS_THICKFRAME,
-		//WS_OVERLAPPEDWINDOW,
+		//WS_OVERLAPPED | WS_SYSMENU | WS_BORDER | WS_THICKFRAME,
+		WS_OVERLAPPEDWINDOW,
 		CW_USEDEFAULT,
 		CW_USEDEFAULT,
 		rect.right - rect.left,
@@ -109,7 +112,7 @@ void LoginApp::InitWnd()
 	UpdateWindow(m_hWnd);
 }
 
-void LoginApp::InitDirectX()
+void App::InitDirectX()
 {
 	CreateFactory();
 	CreateDevice();
@@ -123,7 +126,7 @@ void LoginApp::InitDirectX()
 	m_isDxInit = true;
 }
 
-void LoginApp::InitImgui()
+void App::InitImgui()
 {
 	IMGUI_CHECKVERSION();
 	ImGui::CreateContext();
@@ -131,7 +134,7 @@ void LoginApp::InitImgui()
 	
 	io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
 	io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
-	io.Fonts->AddFontFromFileTTF("C:/Dev/ReWriter/Client/Data/morris9.ttf", 12.0f, nullptr, io.Fonts->GetGlyphRangesKorean());
+	//io.Fonts->AddFontFromFileTTF("C:/Dev/ReWriter/Client/Data/morris9.ttf", 12.0f, nullptr, io.Fonts->GetGlyphRangesKorean());
 	ImGui::GetStyle().WindowMenuButtonPosition = ImGuiDir_None;
 	ImGui::StyleColorsDark();
 
@@ -142,10 +145,17 @@ void LoginApp::InitImgui()
 		DXGI_FORMAT_R8G8B8A8_UNORM,
 		m_srvDescHeap.Get(),
 		m_srvDescHeap->GetCPUDescriptorHandleForHeapStart(),
-		m_srvDescHeap->GetGPUDescriptorHandleForHeapStart());
+		m_srvDescHeap->GetGPUDescriptorHandleForHeapStart()
+	);
 }
 
-void LoginApp::CreateFactory()
+void App::InitApp()
+{
+	DBManager::Instantiate();
+	ClientAcceptor::Instantiate();
+}
+
+void App::CreateFactory()
 {
 	UINT dxgiFactoryFlags{ 0 };
 #ifdef _DEBUG
@@ -159,7 +169,7 @@ void LoginApp::CreateFactory()
 	CreateDXGIFactory2(dxgiFactoryFlags, IID_PPV_ARGS(&m_factory));
 }
 
-void LoginApp::CreateDevice()
+void App::CreateDevice()
 {
 	ComPtr<IDXGIAdapter1> hardwareAdapter;
 	for (UINT i = 0; DXGI_ERROR_NOT_FOUND != m_factory->EnumAdapters1(i, &hardwareAdapter); ++i)
@@ -177,7 +187,7 @@ void LoginApp::CreateDevice()
 	m_cbvSrvUavDescriptorIncrementSize = m_d3dDevice->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
 }
 
-void LoginApp::CreateCommandQueue()
+void App::CreateCommandQueue()
 {
 	D3D12_COMMAND_QUEUE_DESC queueDesc{};
 	queueDesc.Flags = D3D12_COMMAND_QUEUE_FLAG_NONE;
@@ -185,7 +195,7 @@ void LoginApp::CreateCommandQueue()
 	m_d3dDevice->CreateCommandQueue(&queueDesc, IID_PPV_ARGS(&m_commandQueue));
 }
 
-void LoginApp::CreateSwapChain()
+void App::CreateSwapChain()
 {
 	RECT rect{};
 	GetClientRect(m_hWnd, &rect);
@@ -216,7 +226,7 @@ void LoginApp::CreateSwapChain()
 	m_factory->MakeWindowAssociation(m_hWnd, DXGI_MWA_NO_ALT_ENTER);
 }
 
-void LoginApp::CreateRtvDescriptorHeap()
+void App::CreateRtvDescriptorHeap()
 {
 	D3D12_DESCRIPTOR_HEAP_DESC rtvHeapDesc{};
 	rtvHeapDesc.NumDescriptors = FRAME_COUNT;
@@ -227,7 +237,7 @@ void LoginApp::CreateRtvDescriptorHeap()
 	m_rtvDescriptorSize = m_d3dDevice->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_RTV);
 }
 
-void LoginApp::CreateSrvDescriptorHeap()
+void App::CreateSrvDescriptorHeap()
 {
 	D3D12_DESCRIPTOR_HEAP_DESC srvHeapDesc{};
 	srvHeapDesc.NumDescriptors = 1;
@@ -237,7 +247,7 @@ void LoginApp::CreateSrvDescriptorHeap()
 	m_d3dDevice->CreateDescriptorHeap(&srvHeapDesc, IID_PPV_ARGS(&m_srvDescHeap));
 }
 
-void LoginApp::CreateRenderTargetView()
+void App::CreateRenderTargetView()
 {
 	CD3DX12_CPU_DESCRIPTOR_HANDLE rtvHandle{ m_rtvHeap->GetCPUDescriptorHandleForHeapStart() };
 	for (UINT i = 0; i < FRAME_COUNT; ++i)
@@ -250,20 +260,20 @@ void LoginApp::CreateRenderTargetView()
 	}
 }
 
-void LoginApp::CreateCommandList()
+void App::CreateCommandList()
 {
 	m_d3dDevice->CreateCommandList(0, D3D12_COMMAND_LIST_TYPE_DIRECT, m_commandAllocators[m_frameIndex].Get(), nullptr, IID_PPV_ARGS(&m_commandList));
 	m_commandList->Close();
 }
 
-void LoginApp::CreateFence()
+void App::CreateFence()
 {
 	m_d3dDevice->CreateFence(0, D3D12_FENCE_FLAG_NONE, IID_PPV_ARGS(&m_fence));
 	m_fenceEvent = CreateEvent(NULL, FALSE, FALSE, NULL);
 	++m_fenceValues[m_frameIndex];
 }
 
-void LoginApp::WaitPrevFrame()
+void App::WaitPrevFrame()
 {
 	const UINT64 currentFenceValue{ m_fenceValues[m_frameIndex] };
 	m_commandQueue->Signal(m_fence.Get(), currentFenceValue);
@@ -278,7 +288,7 @@ void LoginApp::WaitPrevFrame()
 	m_fenceValues[m_frameIndex] = currentFenceValue + 1;
 }
 
-void LoginApp::OnResize(const INT2& size)
+void App::OnResize(const INT2& size)
 {
 	if (!m_isDxInit)
 		return;
@@ -299,22 +309,12 @@ void LoginApp::OnResize(const INT2& size)
 	CreateRenderTargetView();
 }
 
-void LoginApp::OnDestroy()
-{
-	DBThread::Destroy();
-	IOCPThread::Destroy();
-
-	ImGui_ImplDX12_Shutdown();
-	ImGui_ImplWin32_Shutdown();
-	ImGui::DestroyContext();
-}
-
-void LoginApp::Update()
+void App::Update()
 {
 
 }
 
-void LoginApp::Render()
+void App::Render()
 {
 	m_commandAllocators[m_frameIndex]->Reset();
 	m_commandList->Reset(m_commandAllocators[m_frameIndex].Get(), nullptr);
@@ -333,9 +333,9 @@ void LoginApp::Render()
 	ImGui::NewFrame();
 
 	RenderBackgroundWindow();
-	if (auto dbThread{ DBThread::GetInstance() })
+	if (auto dbThread{ DBManager::GetInstance() })
 		dbThread->Render();
-	if (auto userThread{ IOCPThread::GetInstance() })
+	if (auto userThread{ ClientAcceptor::GetInstance() })
 		userThread->Render();
 
 	ImGui::EndFrame();
@@ -356,7 +356,7 @@ void LoginApp::Render()
 	WaitPrevFrame();
 }
 
-void LoginApp::RenderBackgroundWindow()
+void App::RenderBackgroundWindow()
 {
 	RECT rect{};
 	GetClientRect(m_hWnd, std::addressof(rect));

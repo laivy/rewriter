@@ -4,9 +4,9 @@
 #include "Window.h"
 
 IWindow::IWindow() :
-	m_isPicked{ false },
+	m_titleBarRect{},
 	m_pickPos{},
-	m_pickRect{ 0, 0, 200, 200 },
+	m_isPicked{ false },
 	m_focusControl{ nullptr }
 {
 }
@@ -18,7 +18,7 @@ void IWindow::OnMouseEvent(UINT message, int x, int y)
 	case WM_LBUTTONDOWN:
 	{
 		// 피킹 됐는지 확인
-		if (m_pickRect.IsContain({ x, y }))
+		if (m_titleBarRect.IsContain({ x, y }))
 		{
 			m_isPicked = true;
 			m_pickPos = { x, y };

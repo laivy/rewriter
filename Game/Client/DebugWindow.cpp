@@ -2,14 +2,21 @@
 #include "Control.h"
 #include "DebugWindow.h"
 #include "Renderer2D.h"
+#include "TextBlock.h"
 #include "TextBox.h"
 
 DebugWindow::DebugWindow()
 {
-	m_size = { 800, 600 };
+	m_size = { 600, 400 };
 	
+	auto textBlock{ std::make_unique<TextBlock>(this) };
+	textBlock->SetSize({ 200, 30 });
+	textBlock->SetPosition({ m_size.x / 2, m_size.y / 2 - 25 }, Pivot::CENTER);
+	textBlock->SetText(L"Hello, TextBlock!");
+	m_controls.push_back(std::move(textBlock));
+
 	auto textBox{ std::make_unique<TextBox>(this) };
-	textBox->SetSize({ 150, 25 });
+	textBox->SetSize({ 200, 30 });
 	textBox->SetPosition({ m_size.x / 2, m_size.y / 2 }, Pivot::CENTER);
 	m_controls.push_back(std::move(textBox));
 }

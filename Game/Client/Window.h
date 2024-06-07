@@ -16,9 +16,10 @@ public:
 	virtual void Render() const;
 
 protected:
-	bool m_isPicked;
+	RECTI m_titleBarRect;
 	INT2 m_pickPos;
-	RECTI m_pickRect;
+	bool m_isPicked;
+
 	std::vector<std::unique_ptr<IControl>> m_controls;
 	IControl* m_focusControl;
 };

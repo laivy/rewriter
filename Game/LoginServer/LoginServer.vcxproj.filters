@@ -24,6 +24,12 @@
     <Filter Include="외부 파일\Imgui">
       <UniqueIdentifier>{e395ed58-b3ca-4a19-882c-d51b882a8818}</UniqueIdentifier>
     </Filter>
+    <Filter Include="모듈 파일">
+      <UniqueIdentifier>{2b41385f-6cd9-4ef1-ae72-472cfb6201f4}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="모듈 파일\Resource">
+      <UniqueIdentifier>{858d5109-090a-4d87-bcc9-8e508bc340b9}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Main.cpp">
@@ -32,13 +38,13 @@
     <ClCompile Include="Stdafx.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
-    <ClCompile Include="LoginApp.cpp">
+    <ClCompile Include="App.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
-    <ClCompile Include="DBThread.cpp">
+    <ClCompile Include="DBManager.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
-    <ClCompile Include="IOCPThread.cpp">
+    <ClCompile Include="ClientAcceptor.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
     <ClCompile Include="User.cpp">
@@ -82,13 +88,13 @@
     <ClInclude Include="Stdafx.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
-    <ClInclude Include="LoginApp.h">
+    <ClInclude Include="App.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
-    <ClInclude Include="DBThread.h">
+    <ClInclude Include="DBManager.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
-    <ClInclude Include="IOCPThread.h">
+    <ClInclude Include="ClientAcceptor.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
     <ClInclude Include="User.h">
@@ -141,6 +147,15 @@
     </ClInclude>
     <ClInclude Include="..\..\Common\Types.h">
       <Filter>헤더 파일\Common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Module\Resource\Include\Image.h">
+      <Filter>모듈 파일\Resource</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Module\Resource\Include\Manager.h">
+      <Filter>모듈 파일\Resource</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Module\Resource\Include\Property.h">
+      <Filter>모듈 파일\Resource</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

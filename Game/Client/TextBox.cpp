@@ -2,6 +2,7 @@
 #include "App.h"
 #include "Renderer.h"
 #include "Renderer2D.h"
+#include "Server.h"
 #include "TextBox.h"
 #include "Window.h"
 
@@ -58,7 +59,15 @@ void TextBox::OnKeyboardEvent(UINT message, WPARAM wParam, LPARAM lParam)
 		if (wParam == VK_BACK)
 			break;
 		if (wParam == VK_RETURN && !m_isMultiLine)
+		{
+			Packet packet{ Packet::Type::CLIENT_TryLogin };
+			packet.Encode(m_text);
+			packet.End();
+			Send<LoginServer>(packet);
+
+			SetText(L"");
 			break;
+		}
 
 		InsertCharacter(static_cast<wchar_t>(wParam));
 		MoveCaret(1);

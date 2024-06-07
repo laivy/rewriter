@@ -1,20 +1,20 @@
 ﻿#pragma once
 
-class LoginApp : public TSingleton<LoginApp>
+class App : public TSingleton<App>
 {
 public:
-	LoginApp();
-	~LoginApp() = default;
+	App();
+	~App();
 
-	void OnCreate();
 	void Run();
 
 private:
 	static LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);
 
-	void InitWnd();
+	void InitWindow();
 	void InitDirectX();
 	void InitImgui();
+	void InitApp();
 
 	void CreateFactory();
 	void CreateDevice();
@@ -28,7 +28,6 @@ private:
 	void WaitPrevFrame();
 
 	void OnResize(const INT2& size);
-	void OnDestroy();
 
 	void Update();
 	void Render();

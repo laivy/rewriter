@@ -1,12 +1,12 @@
 ﻿#pragma once
-#include <WinSock2.h>
 #include <memory>
 #include <string>
 
+// 크기(4바이트) + 타입(4바이트) + 데이터
 class Packet
 {
 public:
-	enum class Type
+	enum class Type : unsigned int
 	{
 		CLIENT_TryLogin,
 		LOGIN_TryLogin,
@@ -14,99 +14,112 @@ public:
 
 public:
 	Packet(Type type);
-	Packet(const char* buffer, int size);
+	Packet(const char* buffer);
 	~Packet() = default;
 
 	template<class T, class... Args>
 	void Encode(const T& arg, const Args&... args)
 	{
-		Encode(arg);
-		Encode(args...);
-	}
-
-	template<class T>
-	void Encode(const T& arg)
-	{
-		// 현재 위치에 쓰려는데 버퍼가 모자랄 경우 재할당
-		if (m_bufferSize < m_offset + sizeof(arg))
-			ReAlloc();
-
-		std::memcpy(m_buffer.get() + m_offset, reinterpret_cast<const void*>(&arg), sizeof(arg));
-		m_encodedSize = std::max(m_encodedSize, m_offset + static_cast<int>(sizeof(arg)));
-		m_offset += sizeof(arg);
-	}
-
-	template<>
-	void Encode(const std::string& arg)
-	{
-		Encode(static_cast<int>(arg.size()));
-		EncodeBuffer(arg.data(), static_cast<int>(arg.size()));
-	}
-
-	void EncodeBuffer(const char* buffer, int size);
-
-	// 버퍼의 지정한 오프셋 위치에 쓴다.
-	// 쓰기 후엔 오프셋을 버퍼 끝으로 옮긴다.
-	template<class T>
-	void EncodeAt(int offset, const T& arg)
-	{
-		int oldOffset{ m_offset };
-		m_offset = offset;
-		Encode(arg);
-		m_offset = m_encodedSize;
+		_Encode(arg);
+		if constexpr (sizeof...(Args) > 0)
+			Encode(args...);
 	}
 
 	template<class... Args>
 	std::tuple<Args...> Decode()
 	{
-		std::tuple<Args...> value{};
-		_Decode<0>(value);
-		return value;
+		std::tuple<Args...> data{};
+		_Decode<0>(data);
+		return data;
 	}
 
 	void End();
 
 	Type GetType() const;
 	const char* GetBuffer() const;
-	int GetSize() const;
+	size_t GetSize() const;
 
 private:
+	void EncodeBuffer(const char* buffer, size_t size);
+
+	// 버퍼에 sizeof(T) 만큼 씀
+	template<class T>
+	void _Encode(const T& data)
+	{
+		if (m_encodedSize + sizeof(T) > m_bufferSize)
+			ReAlloc(sizeof(T));
+
+		std::memcpy(m_buffer.get() + m_offset, &data, sizeof(T));
+		m_offset += sizeof(T);
+		m_encodedSize = std::max<unsigned int>(m_encodedSize, m_offset + sizeof(T));
+	}
+
+	// 배열은 원소 개수 + 데이터를 씀
+	template<class T>
+	requires std::is_array_v<T>
+	void _Encode(const T& data)
+	{
+		_Encode(data.size());
+		EncodeBuffer(data.data(), sizeof(T));
+	}
+
+	// 문자열은 글자 개수 + 데이터를 씀
+	template<class T>
+	requires std::is_same_v<T, std::string> || std::is_same_v<T, std::wstring>
+	void _Encode(const T& data)
+	{
+		_Encode(static_cast<unsigned int>(data.size()));
+		EncodeBuffer(reinterpret_cast<const char*>(data.data()), data.size() * sizeof(T::value_type));
+	}
+
+	// 버퍼에서 sizeof(T) 만큼 읽어서 T로 반환
+	template<class T>
+	T _Decode()
+	{
+		T data{};
+		std::memmove(&data, m_buffer.get() + m_offset, sizeof(T));
+		m_offset += sizeof(T);
+		return data;
+	}
+
+	// 튜플의 N번째 데이터를 디코드하고 N+1번째 데이터 디코드
 	template<int N, class... Args>
-	void _Decode(std::tuple<Args...>& value)
+	void _Decode(std::tuple<Args...>& data)
 	{
 		if constexpr (N < sizeof...(Args))
 		{
-			std::get<N>(value) = _Decode<std::remove_reference_t<decltype(std::get<N>(value))>>();
-			_Decode<N + 1>(value);
+			std::get<N>(data) = _Decode<std::remove_reference_t<decltype(std::get<N>(data))>>();
+			_Decode<N + 1>(data);
 		}
 	}
 
 	template<class T>
+	requires std::is_same_v<T, std::string> || std::is_same_v<T, std::wstring>
 	T _Decode()
 	{
-		T value{};
-		std::memmove(reinterpret_cast<void*>(&value), m_buffer.get() + m_offset, sizeof(T));
-		m_offset += sizeof(T);
+		auto length{ _Decode<unsigned int>() };
+		std::wstring value{ reinterpret_cast<T::value_type*>(m_buffer.get() + m_offset), static_cast<size_t>(length) };
+		m_offset += length * sizeof(T::value_type);
 		return value;
 	}
 
-	template<>
-	std::string _Decode()
+	template<class T>
+	void EncodeAt(const T& data, unsigned int offset)
 	{
-		int length{ _Decode<int>() };
-		std::string value{ m_buffer.get() + m_offset, static_cast<size_t>(length) };
-		m_offset += length;
-		return value;
+		auto temp{ m_offset };
+		m_offset = offset;
+		_Encode(data);
+		m_offset = temp;
 	}
 
-	void ReAlloc();
+	void ReAlloc(size_t requireSize);
 
 private:
-	static constexpr auto DEFAULT_BUFFER_SIZE = 128;
+	static constexpr auto DEFAULT_BUFFER_SIZE{ 128 };
 
-	Type m_type; // 패킷 타입
+	Type m_type;
 	std::unique_ptr<char[]> m_buffer;
-	int m_bufferSize; // 버퍼 크기
-	int m_encodedSize; // 버퍼에 쓰여진 크기
-	int m_offset; // 버퍼에서 가르키고 있는 위치
+	unsigned int m_bufferSize;
+	unsigned int m_encodedSize;
+	unsigned int m_offset;
 };
