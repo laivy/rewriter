@@ -1,7 +1,9 @@
 ﻿#pragma once
 #include "Window.h"
 
-class DebugWindow : public IWindow
+class DebugWindow : 
+	public IWindow,
+	public IObserver
 {
 public:
 	DebugWindow();

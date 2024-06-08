@@ -7,6 +7,8 @@ public:
 	IUserInterface();
 	virtual ~IUserInterface() = default;
 	
+	virtual void OnMouseEnter(int x, int y);
+	virtual void OnMouseLeave(int x, int y);
 	virtual void OnMouseEvent(UINT message, int x, int y);
 	virtual void OnKeyboardEvent(UINT message, WPARAM wParam, LPARAM lParam);
 

@@ -7,20 +7,15 @@
 
 #include "DebugWindow.h"
 
-WindowManager::WindowManager() :
-	m_focusWindow{ nullptr }
+WindowManager::WindowManager()
 {
 	App::OnKeyboardEvent.Register(this, std::bind_front(&WindowManager::OnKeyboardEvent, this));
 	App::OnMouseEvent.Register(this, std::bind_front(&WindowManager::OnMouseEvent, this));
 
 #ifdef _DEBUG
-	for (size_t i = 0; i < 1; ++i)
-	{
-		auto window{ std::make_unique<DebugWindow>() };
-		if (i == 0)
-			window->SetPosition({ App::size.x / 2, App::size.y / 2 }, Pivot::CENTER);
-		Register(std::move(window));
-	}
+	auto window{ std::make_unique<DebugWindow>() };
+	window->SetPosition({ App::size.x / 2, App::size.y / 2 }, Pivot::CENTER);
+	Register(std::move(window));
 #endif // _DEBUG
 }
 
@@ -29,11 +24,11 @@ void WindowManager::Update(float deltaTime)
 	std::erase_if(m_modals, [this](const auto& modal) { return !modal->IsValid(); });
 	std::erase_if(m_windows, [this](const auto& window) { return !window->IsValid(); });
 	if (!m_modals.empty())
-		m_focusWindow = m_modals.back().get();
+		m_focusWindow = m_modals.back();
 	else if (!m_windows.empty())
-		m_focusWindow = m_windows.back().get();
+		m_focusWindow = m_windows.back();
 	else
-		m_focusWindow = nullptr;
+		m_focusWindow.reset();
 
 	for (const auto& modal : m_modals)
 		modal->Update(deltaTime);
@@ -60,57 +55,53 @@ void WindowManager::Render() const
 	Renderer::ctx->SetTransform(D2D1::Matrix3x2F::Identity());
 }
 
-void WindowManager::Register(std::unique_ptr<IModal> modal)
+void WindowManager::Register(const std::shared_ptr<IModal>& modal)
 {
-	m_focusWindow = modal.get();
-	m_modals.push_back(std::move(modal));
+	m_focusWindow = modal;
+	m_modals.push_back(modal);
 }
 
-void WindowManager::Register(std::unique_ptr<IWindow> window)
+void WindowManager::Register(const std::shared_ptr<IWindow>& window)
 {
 	if (m_modals.empty())
-		m_focusWindow = window.get();
-	m_windows.push_back(std::move(window));
+		m_focusWindow = window;
+	m_windows.push_back(window);
 }
 
 void WindowManager::OnKeyboardEvent(UINT message, WPARAM wParam, LPARAM lParam)
 {
-	if (m_focusWindow)
-		m_focusWindow->OnKeyboardEvent(message, wParam, lParam);
+	if (auto focusWindow{ m_focusWindow.lock() })
+		focusWindow->OnKeyboardEvent(message, wParam, lParam);
 }
 
 void WindowManager::OnMouseEvent(UINT message, int x, int y)
 {
+	// 모달이 있으면 해당 모달에게만 이벤트 전달
 	if (!m_modals.empty())
 	{
-		auto pos{ m_modals.back()->GetPosition() };
-		m_modals.back()->OnMouseEvent(message, x - pos.x, y - pos.y);
+		auto& modal{ m_modals.back() };
+		auto pos{ modal->GetPosition() };
+		modal->OnMouseEvent(message, x - pos.x, y - pos.y);
 		return;
 	}
 
-	if (m_windows.empty())
-		return;
-
-	// 최상위 윈도우 갱신
-	do
+	switch (message)
 	{
-		if (message != WM_LBUTTONDOWN)
-			break;
+	case WM_MOUSEMOVE:
+	{
+		UpdateMouseOverWindow(x, y);
+		break;
+	}
+	case WM_LBUTTONDOWN:
+	{
+		UpdateFocusWindow(x, y);
+		break;
+	}
+	default:
+		break;
+	}
 
-		auto rit = std::ranges::find_if(std::views::reverse(m_windows), [x, y](const auto& window) { return window->IsContain({ x, y }); });
-		if (rit == m_windows.rend())
-		{
-			m_focusWindow = nullptr;
-			break;
-		}
-
-		auto it{ --rit.base() };
-		std::rotate(it, it + 1, m_windows.end());
-
-		m_focusWindow = m_windows.back().get();
-		m_focusWindow->SetFocus(true);
-	} while (false);
-
+	// 이벤트 전달
 	for (const auto& window : m_windows)
 	{
 		if (!window->IsContain({ x, y }))
@@ -119,4 +110,39 @@ void WindowManager::OnMouseEvent(UINT message, int x, int y)
 		auto pos{ window->GetPosition() };
 		window->OnMouseEvent(message, x - pos.x, y - pos.y);
 	}
+}
+
+void WindowManager::UpdateMouseOverWindow(int x, int y)
+{
+	auto rit{ std::ranges::find_if(std::views::reverse(m_windows), [x, y](const auto& window) { return window->IsContain({ x, y }); }) };
+	if (rit == m_windows.rend())
+	{
+		if (auto window{ m_mouseOverWindow.lock() })
+			window->OnMouseLeave(x, y);
+		m_mouseOverWindow.reset();
+		return;
+	}
+
+	if (auto window{ m_mouseOverWindow.lock() }; window != *rit)
+	{
+		if (window)
+			window->OnMouseLeave(x, y);
+		m_mouseOverWindow = *rit;
+		(*rit)->OnMouseEnter(x, y);
+	}
+}
+
+void WindowManager::UpdateFocusWindow(int x, int y)
+{
+	auto rit{ std::ranges::find_if(std::views::reverse(m_windows), [x, y](const auto& window) { return window->IsContain({ x, y }); }) };
+	if (rit == m_windows.rend())
+	{
+		m_focusWindow.reset();
+		return;
+	}
+
+	auto it{ --rit.base() };
+	std::rotate(it, it + 1, m_windows.end());
+	m_windows.back()->SetFocus(true);
+	m_focusWindow = m_windows.back();
 }

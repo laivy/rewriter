@@ -184,11 +184,11 @@ void TextBox::UpdateOffset()
 
 	// 하단 스크롤
 	if (metrics.top + metrics.height + m_offset.y > textBoxHeight)
-		m_offset.y = textBoxHeight - (metrics.top + metrics.height);
+		m_offset.y = textBoxHeight - static_cast<int>(metrics.top + metrics.height);
 
 	// 상단 스크롤
 	else if (metrics.top + m_offset.y < 0)
-		m_offset.y = -metrics.top + MARGIN_TOP;
+		m_offset.y = static_cast<int>(-metrics.top) + MARGIN_TOP;
 }
 
 void TextBox::RenderBackground() const

@@ -15,11 +15,16 @@ public:
 	virtual void Update(float deltaTime);
 	virtual void Render() const;
 
+private:
+	void UpdateMouseOverControl(int x, int y);
+	void UpdateFocusControl(int x, int y);
+
 protected:
 	RECTI m_titleBarRect;
 	INT2 m_pickPos;
 	bool m_isPicked;
 
-	std::vector<std::unique_ptr<IControl>> m_controls;
-	IControl* m_focusControl;
+	std::vector<std::shared_ptr<IControl>> m_controls;
+	std::weak_ptr<IControl> m_mouseOverControl;
+	std::weak_ptr<IControl> m_focusControl;
 };

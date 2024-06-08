@@ -10,10 +10,29 @@ IUserInterface::IUserInterface() :
 {
 }
 
-void IUserInterface::OnMouseEvent(UINT message, int x, int y) { }
-void IUserInterface::OnKeyboardEvent(UINT message, WPARAM wParam, LPARAM lParam) { }
-void IUserInterface::Update(float deltaTime) { }
-void IUserInterface::Render() const { }
+void IUserInterface::OnMouseEnter(int x, int y)
+{
+}
+
+void IUserInterface::OnMouseLeave(int x, int y)
+{
+}
+
+void IUserInterface::OnMouseEvent(UINT message, int x, int y)
+{
+}
+
+void IUserInterface::OnKeyboardEvent(UINT message, WPARAM wParam, LPARAM lParam)
+{
+}
+
+void IUserInterface::Update(float deltaTime)
+{
+}
+
+void IUserInterface::Render() const
+{
+}
 
 void IUserInterface::Destroy()
 {

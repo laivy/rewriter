@@ -1,4 +1,5 @@
 ﻿#include "Stdafx.h"
+#include "Button.h"
 #include "Control.h"
 #include "DebugWindow.h"
 #include "Renderer2D.h"
@@ -9,16 +10,23 @@ DebugWindow::DebugWindow()
 {
 	m_size = { 600, 400 };
 	
-	auto textBlock{ std::make_unique<TextBlock>(this) };
+	auto textBlock{ std::make_shared<TextBlock>(this) };
 	textBlock->SetSize({ 200, 30 });
 	textBlock->SetPosition({ m_size.x / 2, m_size.y / 2 - 25 }, Pivot::CENTER);
 	textBlock->SetText(L"Hello, TextBlock!");
-	m_controls.push_back(std::move(textBlock));
+	m_controls.push_back(textBlock);
 
-	auto textBox{ std::make_unique<TextBox>(this) };
+	auto textBox{ std::make_shared<TextBox>(this) };
 	textBox->SetSize({ 200, 30 });
 	textBox->SetPosition({ m_size.x / 2, m_size.y / 2 }, Pivot::CENTER);
-	m_controls.push_back(std::move(textBox));
+	m_controls.push_back(textBox);
+
+	auto button{ std::make_shared<Button>(this) };
+	button->SetSize({ 200, 30 });
+	button->SetPosition({ m_size.x / 2, m_size.y / 2 + 25 }, Pivot::CENTER);
+	button->SetText(L"Button");
+	button->OnButtonClick.Register(this, []() { ::OutputDebugString(L"OnButtonClick!\n"); });
+	m_controls.push_back(button);
 }
 
 void DebugWindow::OnMouseEvent(UINT message, int x, int y)

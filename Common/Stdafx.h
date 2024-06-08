@@ -8,6 +8,9 @@
 #include <Windows.h>
 #include <wrl.h>
 using Microsoft::WRL::ComPtr;
+#ifdef DrawText
+#undef DrawText
+#endif
 
 // C/C++
 #include <algorithm>
