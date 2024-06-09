@@ -5,7 +5,7 @@
 
 App::App() :
 	m_hWnd{ NULL },
-	m_wndSize{ 600, 400 },
+	m_size{ 600, 400 },
 	m_cbvSrvUavDescriptorIncrementSize{ 0 },
 	m_frameIndex{ 0 },
 	m_fenceEvent{ 0 },
@@ -23,6 +23,8 @@ App::~App()
 {
 	ClientAcceptor::Destroy();
 	DBManager::Destroy();
+
+	::WSACleanup();
 
 	ImGui_ImplDX12_Shutdown();
 	ImGui_ImplWin32_Shutdown();
@@ -84,16 +86,16 @@ void App::InitWindow()
 	wcex.cbClsExtra = 0;
 	wcex.cbWndExtra = 0;
 	wcex.hInstance = HINST_THISCOMPONENT;
-	wcex.hCursor = LoadCursor(NULL, IDC_ARROW);
+	wcex.hCursor = ::LoadCursor(NULL, IDC_ARROW);
 	wcex.hbrBackground = NULL;
 	wcex.lpszMenuName = NULL;
 	wcex.lpszClassName = TEXT("Login Server");
-	RegisterClassEx(&wcex);
+	::RegisterClassEx(&wcex);
 
-	RECT rect{ 0, 0, m_wndSize.x, m_wndSize.y };
-	AdjustWindowRect(&rect, WS_OVERLAPPEDWINDOW, FALSE);
+	RECT rect{ 0, 0, m_size.x, m_size.y };
+	::AdjustWindowRect(&rect, WS_OVERLAPPEDWINDOW, FALSE);
 
-	m_hWnd = CreateWindow(
+	m_hWnd = ::CreateWindow(
 		wcex.lpszClassName,
 		TEXT("Login Server"),
 		//WS_OVERLAPPED | WS_SYSMENU | WS_BORDER | WS_THICKFRAME,
@@ -108,8 +110,8 @@ void App::InitWindow()
 		this
 	);
 
-	ShowWindow(m_hWnd, SW_SHOWNORMAL);
-	UpdateWindow(m_hWnd);
+	::ShowWindow(m_hWnd, SW_SHOWNORMAL);
+	::UpdateWindow(m_hWnd);
 }
 
 void App::InitDirectX()
@@ -151,6 +153,10 @@ void App::InitImgui()
 
 void App::InitApp()
 {
+	WSADATA wsaData{};
+	if (::WSAStartup(MAKEWORD(2, 2), &wsaData))
+		assert(false && "FAIL WSAStartup");
+
 	DBManager::Instantiate();
 	ClientAcceptor::Instantiate();
 }

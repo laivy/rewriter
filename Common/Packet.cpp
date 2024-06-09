@@ -11,27 +11,42 @@ Packet::Packet(Packet::Type type) :
 	Encode(type);
 }
 
-Packet::Packet(const char* buffer) :
+Packet::Packet(const char* buffer, unsigned int size) :
 	m_buffer{ nullptr },
 	m_bufferSize{ 0 },
 	m_encodedSize{ 0 },
 	m_offset{ 0 }
 {
-	std::memmove(&m_bufferSize, buffer, sizeof(int));
+	// 패킷 사이즈만큼 버퍼를 생성
+	std::memcpy(&m_bufferSize, buffer, sizeof(m_bufferSize));
 	m_buffer.reset(new char[m_bufferSize]{});
 
-	std::memmove(&m_type, buffer + sizeof(m_bufferSize), sizeof(m_type));
-	std::memmove(
-		m_buffer.get(),
-		buffer + sizeof(m_bufferSize) + sizeof(m_type),
-		m_bufferSize - sizeof(m_bufferSize) - sizeof(m_type)
-	);
+	// 타입
+	std::memcpy(&m_type, buffer + sizeof(m_bufferSize), sizeof(m_type));
+
+	// 데이터 복사
+	EncodeBuffer(buffer + sizeof(m_bufferSize) + sizeof(m_type), size - sizeof(m_bufferSize) - sizeof(m_type));
+}
+
+void Packet::EncodeBuffer(const char* buffer, unsigned int size)
+{
+	if (m_encodedSize + size > m_bufferSize)
+		ReAlloc(size);
+
+	std::memcpy(m_buffer.get() + m_offset, buffer, size);
+	m_offset += size;
+	m_encodedSize = std::max<unsigned int>(m_encodedSize, m_offset + size);
 }
 
 void Packet::End()
 {
 	// 패킷 크기를 0 위치에 씀
 	EncodeAt(GetSize(), 0);
+}
+
+void Packet::SetOffset(unsigned int offset)
+{
+	m_offset = offset;
 }
 
 Packet::Type Packet::GetType() const
@@ -44,24 +59,14 @@ const char* Packet::GetBuffer() const
 	return m_buffer.get();
 }
 
-size_t Packet::GetSize() const
+unsigned int Packet::GetSize() const
 {
 	return m_encodedSize;
 }
 
-void Packet::EncodeBuffer(const char* buffer, size_t size)
+void Packet::ReAlloc(unsigned int requireSize)
 {
-	if (m_encodedSize + size > m_bufferSize)
-		ReAlloc(size);
-
-	std::memcpy(m_buffer.get() + m_offset, buffer, size);
-	m_offset += size;
-	m_encodedSize = std::max<unsigned int>(m_encodedSize, m_offset + size);
-}
-
-void Packet::ReAlloc(size_t requireSize)
-{
-	size_t bufferSize{ m_bufferSize };
+	unsigned int bufferSize{ m_bufferSize };
 	do
 	{
 		bufferSize *= 2;

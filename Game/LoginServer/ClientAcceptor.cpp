@@ -4,10 +4,8 @@
 
 ClientAcceptor::ClientAcceptor() :
 	m_isActive{ false },
-	m_acceptSocket{ INVALID_SOCKET },
-	m_hIOCP{ INVALID_HANDLE_VALUE },
-	m_overlappedEx{},
-	m_clientSocketID{}
+	m_acceptContext{},
+	m_sessionId{}
 {
 	Init();
 }
@@ -70,15 +68,8 @@ void ClientAcceptor::Render()
 
 void ClientAcceptor::Init()
 {
-	WSADATA wsaData{};
-	if (::WSAStartup(MAKEWORD(2, 2), &wsaData))
-	{
-		assert(false && "FAIL WSAStartup");
-		return;
-	}
-
-	m_acceptSocket = ::WSASocket(AF_INET, SOCK_STREAM, IPPROTO_TCP, NULL, NULL, WSA_FLAG_OVERLAPPED);
-	if (m_acceptSocket == INVALID_SOCKET)
+	m_acceptContext.listenSocket = ::WSASocket(AF_INET, SOCK_STREAM, IPPROTO_TCP, NULL, NULL, WSA_FLAG_OVERLAPPED);
+	if (m_acceptContext.listenSocket == INVALID_SOCKET)
 	{
 		assert(false && "FAIL WSASocket - listenSocket");
 		return;
@@ -88,33 +79,33 @@ void ClientAcceptor::Init()
 	serverAddr.sin_family = AF_INET;
 	serverAddr.sin_port = ::htons(9000);
 	serverAddr.sin_addr.s_addr = ::htonl(INADDR_ANY);
-	if (::bind(m_acceptSocket, reinterpret_cast<sockaddr*>(&serverAddr), sizeof(serverAddr)) == SOCKET_ERROR)
+	if (::bind(m_acceptContext.listenSocket, reinterpret_cast<sockaddr*>(&serverAddr), sizeof(serverAddr)) == SOCKET_ERROR)
 	{
 		assert(false && "FAIL bind");
 		return;
 	}
 
 	BOOL on{ TRUE };
-	if (::setsockopt(m_acceptSocket, SOL_SOCKET, SO_CONDITIONAL_ACCEPT, reinterpret_cast<char*>(std::addressof(on)), sizeof(on)) == SOCKET_ERROR)
+	if (::setsockopt(m_acceptContext.listenSocket, SOL_SOCKET, SO_CONDITIONAL_ACCEPT, reinterpret_cast<char*>(&on), sizeof(on)) == SOCKET_ERROR)
 	{
 		assert(false && "FAIL setsockopt");
 		return;
 	}
 
-	if (::listen(m_acceptSocket, SOMAXCONN) == SOCKET_ERROR)
+	if (::listen(m_acceptContext.listenSocket, SOMAXCONN) == SOCKET_ERROR)
 	{
 		assert(false && "FAIL listen");
 		return;
 	}
 
-	m_hIOCP = ::CreateIoCompletionPort(INVALID_HANDLE_VALUE, NULL, NULL, 0);
-	if (m_hIOCP == INVALID_HANDLE_VALUE)
+	m_acceptContext.hIOCP = ::CreateIoCompletionPort(INVALID_HANDLE_VALUE, NULL, NULL, 0);
+	if (m_acceptContext.hIOCP == INVALID_HANDLE_VALUE)
 	{
 		assert(false && "FAIL CreateIoCompletionPort()");
 		return;
 	}
 
-	if (!::CreateIoCompletionPort(reinterpret_cast<HANDLE>(m_acceptSocket), m_hIOCP, 0, 0))
+	if (!::CreateIoCompletionPort(reinterpret_cast<HANDLE>(m_acceptContext.listenSocket), m_acceptContext.hIOCP, 0, 0))
 	{
 		assert(false && "FAIL CreateIoCompletionPort()");
 		return;
@@ -127,10 +118,17 @@ void ClientAcceptor::Init()
 		return;
 	}
 
-	m_overlappedEx = {};
-	m_overlappedEx.op = IOOperation::ACCEPT;
-	m_overlappedEx.socket = clientSocket;
-	if (!::AcceptEx(m_acceptSocket, m_overlappedEx.socket, m_overlappedEx.buffer, 0, sizeof(SOCKADDR_IN) + 16, sizeof(SOCKADDR_IN) + 16, nullptr, &m_overlappedEx))
+	m_acceptContext.clientSocket = clientSocket;
+	if (!::AcceptEx(
+		m_acceptContext.listenSocket,
+		m_acceptContext.clientSocket,
+		m_acceptContext.overlappedEx.acceptBuffer.data(),
+		0,
+		sizeof(SOCKADDR_IN) + 16,
+		sizeof(SOCKADDR_IN) + 16,
+		nullptr,
+		&m_acceptContext.overlappedEx
+	))
 	{
 		if (::WSAGetLastError() != ERROR_IO_PENDING)
 		{
@@ -146,13 +144,13 @@ void ClientAcceptor::Init()
 
 void ClientAcceptor::Run()
 {
-	DWORD ioSize{};
+	unsigned long ioSize{};
 	size_t socketID{};
 	OVERLAPPEDEX* overlappedEx{};
 
 	while (m_isActive)
 	{
-		if (!::GetQueuedCompletionStatus(m_hIOCP, &ioSize, reinterpret_cast<PULONG_PTR>(&socketID), reinterpret_cast<OVERLAPPED**>(&overlappedEx), SOCKET_TIMEOUT_MILLISEC))
+		if (!::GetQueuedCompletionStatus(m_acceptContext.hIOCP, &ioSize, reinterpret_cast<PULONG_PTR>(&socketID), reinterpret_cast<OVERLAPPED**>(&overlappedEx), SOCKET_TIMEOUT_MILLISEC))
 		{
 			int error{ ::WSAGetLastError() };
 			switch (error)
@@ -178,7 +176,7 @@ void ClientAcceptor::Run()
 		case IOOperation::RECV:
 		{
 			if (ioSize > 0)
-				OnReceive(socketID);
+				OnReceive(socketID, ioSize);
 			else
 				OnDisconnect(socketID);
 			break;
@@ -199,7 +197,7 @@ void ClientAcceptor::OnAccept(OVERLAPPEDEX* overlappedEx)
 	int remoteAddrSize{};
 
 	::GetAcceptExSockaddrs(
-		overlappedEx->buffer,
+		&overlappedEx->acceptBuffer,
 		0,
 		sizeof(SOCKADDR_IN) + 16,
 		sizeof(SOCKADDR_IN) + 16,
@@ -209,80 +207,112 @@ void ClientAcceptor::OnAccept(OVERLAPPEDEX* overlappedEx)
 		&remoteAddrSize
 	);
 
-	std::array<std::string, 2> buffer;
-	buffer[0].resize(16);
-	buffer[1].resize(16);
-	::inet_ntop(AF_INET, &localAddr->sin_addr, buffer[0].data(), sizeof(buffer[0]));
-	::inet_ntop(AF_INET, &remoteAddr->sin_addr, buffer[1].data(), sizeof(buffer[1]));
+	std::string buffer(16, '\0');
+	::inet_ntop(AF_INET, &remoteAddr->sin_addr, buffer.data(), buffer.size());
 
-	std::string log{ std::format("[hh:mm:ss] {} Connected", buffer[1].c_str()) };
+	std::string log{ std::format("[hh:mm:ss] {} Connected", buffer.c_str()) };
 	if (std::unique_lock lock{ m_logMutex })
 		m_logs.push_back(log);
 
-	if (::setsockopt(overlappedEx->socket, SOL_SOCKET, SO_UPDATE_ACCEPT_CONTEXT, reinterpret_cast<char*>(&m_acceptSocket), sizeof(m_acceptSocket)))
+	if (::setsockopt(m_acceptContext.clientSocket, SOL_SOCKET, SO_UPDATE_ACCEPT_CONTEXT, reinterpret_cast<char*>(&m_acceptContext.listenSocket), sizeof(m_acceptContext.listenSocket)))
 	{
 		assert(false && "ACCEPT FAIL - setsockopt");
 		return;
 	}
 
 	// 해당 소켓을 IOCP에 등록
-	::CreateIoCompletionPort(reinterpret_cast<HANDLE>(m_overlappedEx.socket), m_hIOCP, m_clientSocketID, 0);
+	::CreateIoCompletionPort(reinterpret_cast<HANDLE>(m_acceptContext.clientSocket), m_acceptContext.hIOCP, m_sessionId, 0);
 
 	// ClientSocket 추가
-	ClientSocket clientSocket{ m_clientSocketID, m_overlappedEx.socket };
-	++m_clientSocketID;
-
 	// 해당 소켓을 수신 상태로 변경
-	DWORD flag{};
-	if (::WSARecv(clientSocket.socket, &clientSocket.overlappedEx.wsaBuf, 1, 0, &flag, &clientSocket.overlappedEx, NULL))
+	if (std::unique_lock lock{ m_socketMutex })
 	{
-		if (::WSAGetLastError() != ERROR_IO_PENDING)
+		auto& session{ m_sessions[m_sessionId] };
+		session.id = m_sessionId;
+		session.socket = m_acceptContext.clientSocket;
+		session.recvOverlappedEx.op = IOOperation::RECV;
+		++m_sessionId;
+
+		WSABUF wsaBuf{ OVERLAPPEDEX::BUFFER_SIZE, session.recvOverlappedEx.recvBuffer.get() };
+		DWORD flag{};
+		if (::WSARecv(session.socket, &wsaBuf, 1, 0, &flag, &session.recvOverlappedEx, NULL))
 		{
-			assert(false && "ACCEPT FAIL - WSARecv");
-			return;
+			if (::WSAGetLastError() != ERROR_IO_PENDING)
+			{
+				assert(false && "ACCEPT FAIL - WSARecv");
+				return;
+			}
 		}
 	}
-	clientSocket.overlappedEx.op = IOOperation::RECV;
-
-	if (std::unique_lock lock{ m_socketMutex })
-		m_clientSockets.emplace(clientSocket.socketID, std::move(clientSocket));
 
 	// 새로운 Accept 소켓 생성
-	overlappedEx->socket = ::WSASocket(AF_INET, SOCK_STREAM, IPPROTO_TCP, 0, 0, WSA_FLAG_OVERLAPPED);
+	m_acceptContext.overlappedEx = {};
+	m_acceptContext.clientSocket = ::WSASocket(AF_INET, SOCK_STREAM, IPPROTO_TCP, 0, 0, WSA_FLAG_OVERLAPPED);
 	::AcceptEx(
-		m_acceptSocket,
-		m_overlappedEx.socket,
-		m_overlappedEx.buffer,
+		m_acceptContext.listenSocket,
+		m_acceptContext.clientSocket,
+		m_acceptContext.overlappedEx.acceptBuffer.data(),
 		0,
 		sizeof(SOCKADDR_IN) + 16,
 		sizeof(SOCKADDR_IN) + 16,
 		nullptr,
-		&m_overlappedEx
+		&m_acceptContext.overlappedEx
 	);
 }
 
-void ClientAcceptor::OnReceive(size_t socketID)
+void ClientAcceptor::OnReceive(size_t socketID, unsigned long ioSize)
 {
 	std::lock_guard lock{ m_socketMutex };
-	if (!m_clientSockets.contains(socketID))
+	if (!m_sessions.contains(socketID))
 		return;
 
-	const auto& socket{ m_clientSockets.at(socketID) };
-	Packet packet{ socket.overlappedEx.wsaBuf.buf };
-	auto [s]{ packet.Decode<std::wstring>() };
+	auto& session{ m_sessions.at(socketID) };
+	do
+	{
+		// 조립 중인 패킷이 있으면 패킷 뒤에 데이터 추가
+		if (session.remainSize > 0)
+		{
+			session.packet->EncodeBuffer(session.recvOverlappedEx.recvBuffer.get(), ioSize);
+			session.remainSize -= ioSize;
+			break;
+		}
 
-	int i = 0;
+		// 패킷 크기가 수신한 크기 보다 크면 아직 받을 데이터가 남은 것
+		unsigned int size{ 0 };
+		std::memcpy(&size, session.recvOverlappedEx.recvBuffer.get(), sizeof(size));
+		if (size > ioSize)
+			session.remainSize = size - ioSize;
+
+		// 조립 시작
+		session.packet = std::make_unique<Packet>(session.recvOverlappedEx.recvBuffer.get(), ioSize);
+	} while (false);
+
+	// 완성
+	if (session.remainSize == 0)
+	{
+		session.packet->SetOffset(0);
+		
+		std::wstring wstr{ std::format(L"{} : ", socketID) };
+		for (int i = 0; i < 1000; ++i)
+			wstr += std::to_wstring(i) + L",";
+		wstr += L"\n";
+		::OutputDebugString(wstr.c_str());
+	}
+
+	WSABUF wsaBuf{ OVERLAPPEDEX::BUFFER_SIZE, session.recvOverlappedEx.recvBuffer.get() };
+	DWORD flag{};
+	::WSARecv(session.socket, &wsaBuf, 1, 0, &flag, &session.recvOverlappedEx, NULL);
 }
 
 void ClientAcceptor::OnDisconnect(size_t socketID)
 {
 	std::lock_guard lock{ m_socketMutex };
-	if (!m_clientSockets.contains(socketID))
+	if (!m_sessions.contains(socketID))
 		return;
 
-	auto& clientSocket{ m_clientSockets.at(socketID) };
+	auto& clientSocket{ m_sessions.at(socketID) };
 	::closesocket(clientSocket.socket);
-	m_clientSockets.erase(socketID);
+	m_sessions.erase(socketID);
 
 	if (std::unique_lock lock{ m_logMutex })
 		m_logs.push_back("[hh:mm:ss] Disconnect");

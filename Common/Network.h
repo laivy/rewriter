@@ -2,7 +2,7 @@
 
 enum class IOOperation
 {
-	NONE, ACCEPT, RECV
+	ACCEPT, RECV
 };
 
 struct OVERLAPPEDEX : public OVERLAPPED
@@ -11,16 +11,13 @@ struct OVERLAPPEDEX : public OVERLAPPED
 
 	OVERLAPPEDEX() :
 		OVERLAPPED{},
-		op{ IOOperation::NONE },
-		socket{ INVALID_SOCKET },
-		buffer{}
+		op{ IOOperation::ACCEPT },
+		acceptBuffer{},
+		recvBuffer{ new char[BUFFER_SIZE] {} }
 	{
-		wsaBuf.len = BUFFER_SIZE;
-		wsaBuf.buf = new char[BUFFER_SIZE] {};
 	}
 
 	IOOperation op;
-	SOCKET socket;
-	char buffer[BUFFER_SIZE];
-	WSABUF wsaBuf;
+	std::array<char, 64> acceptBuffer;
+	std::shared_ptr<char[]> recvBuffer;
 };

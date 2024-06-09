@@ -3,6 +3,15 @@
 
 class ClientAcceptor : public TSingleton<ClientAcceptor>
 {
+private:
+	struct AcceptContext
+	{
+		HANDLE hIOCP{ INVALID_HANDLE_VALUE };
+		SOCKET listenSocket{ INVALID_SOCKET };
+		SOCKET clientSocket{ INVALID_SOCKET };
+		OVERLAPPEDEX overlappedEx{};
+	};
+
 public:
 	ClientAcceptor();
 	~ClientAcceptor();
@@ -14,7 +23,7 @@ private:
 	void Run();
 
 	void OnAccept(OVERLAPPEDEX* overlappedEx);
-	void OnReceive(size_t socketID);
+	void OnReceive(size_t socketID, unsigned long ioSize);
 	void OnDisconnect(size_t socketID);
 
 private:
@@ -23,14 +32,12 @@ private:
 
 	bool m_isActive;
 
-	SOCKET m_acceptSocket;
-	HANDLE m_hIOCP;
-	OVERLAPPEDEX m_overlappedEx;
+	AcceptContext m_acceptContext;
 
 	// 클라이언트 소켓
 	std::mutex m_socketMutex;
-	std::unordered_map<size_t, ClientSocket> m_clientSockets;
-	std::atomic<size_t> m_clientSocketID;
+	std::atomic<size_t> m_sessionId;
+	std::unordered_map<size_t, Session> m_sessions;
 
 	// 워커 쓰레드
 	std::array<std::jthread, ACCEPT_THREAD_COUNT> m_threads;

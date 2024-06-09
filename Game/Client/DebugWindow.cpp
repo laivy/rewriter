@@ -3,6 +3,7 @@
 #include "Control.h"
 #include "DebugWindow.h"
 #include "Renderer2D.h"
+#include "Server.h"
 #include "TextBlock.h"
 #include "TextBox.h"
 
@@ -25,7 +26,17 @@ DebugWindow::DebugWindow()
 	button->SetSize({ 200, 30 });
 	button->SetPosition({ m_size.x / 2, m_size.y / 2 + 25 }, Pivot::CENTER);
 	button->SetText(L"Button");
-	button->OnButtonClick.Register(this, []() { ::OutputDebugString(L"OnButtonClick!\n"); });
+	button->OnButtonClick.Register(this,
+		[]()
+		{
+			::OutputDebugString(L"OnButtonClick!\n");
+
+			Packet packet{ Packet::Type::CLIENT_TryLogin };
+			for (int i = 0; i < 1000; ++i)
+				packet.Encode(i);
+			packet.End();
+			Send<LoginServer>(packet);
+		});
 	m_controls.push_back(button);
 }
 

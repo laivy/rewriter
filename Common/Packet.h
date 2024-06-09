@@ -14,7 +14,7 @@ public:
 
 public:
 	Packet(Type type);
-	Packet(const char* buffer);
+	Packet(const char* buffer, unsigned int size);
 	~Packet() = default;
 
 	template<class T, class... Args>
@@ -33,14 +33,24 @@ public:
 		return data;
 	}
 
+	void EncodeBuffer(const char* buffer, unsigned int size);
 	void End();
+
+	void SetOffset(unsigned int offset);
 
 	Type GetType() const;
 	const char* GetBuffer() const;
-	size_t GetSize() const;
+	unsigned int GetSize() const;
 
 private:
-	void EncodeBuffer(const char* buffer, size_t size);
+	template<class T>
+	void EncodeAt(const T& data, unsigned int offset)
+	{
+		auto temp{ m_offset };
+		SetOffset(offset);
+		_Encode(data);
+		SetOffset(temp);
+	}
 
 	// 버퍼에 sizeof(T) 만큼 씀
 	template<class T>
@@ -103,16 +113,7 @@ private:
 		return value;
 	}
 
-	template<class T>
-	void EncodeAt(const T& data, unsigned int offset)
-	{
-		auto temp{ m_offset };
-		m_offset = offset;
-		_Encode(data);
-		m_offset = temp;
-	}
-
-	void ReAlloc(size_t requireSize);
+	void ReAlloc(unsigned int requireSize);
 
 private:
 	static constexpr auto DEFAULT_BUFFER_SIZE{ 128 };

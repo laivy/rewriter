@@ -38,7 +38,7 @@ private:
 private:
 	// Window
 	HWND m_hWnd;
-	INT2 m_wndSize;
+	INT2 m_size;
 
 	// DirectX12
 	static constexpr UINT FRAME_COUNT = 3;

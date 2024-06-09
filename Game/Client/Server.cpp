@@ -29,11 +29,13 @@ void IServer::Connect(std::string_view ip, int port)
 
 	SOCKET socket = ::socket(AF_INET, SOCK_STREAM, 0);
 
+	BOOL option{ TRUE };
+	::setsockopt(socket, SOL_SOCKET, TCP_NODELAY, reinterpret_cast<char*>(&option), sizeof(option));
+
 	SOCKADDR_IN sockAddr{};
 	sockAddr.sin_family = AF_INET;
 	sockAddr.sin_port = ::htons(port);
 	::inet_pton(AF_INET, ip.data(), &(sockAddr.sin_addr.s_addr));
-
 	if (::connect(socket, reinterpret_cast<SOCKADDR*>(&sockAddr), sizeof(sockAddr)))
 	{
 		assert(false && "FAIL connect");

@@ -1,8 +1,11 @@
 ﻿#pragma once
 
-struct ClientSocket
+struct Session
 {
-	size_t socketID{ 0 };
+	size_t id{ 0 };
 	SOCKET socket{ INVALID_SOCKET };
-	OVERLAPPEDEX overlappedEx{};
+	OVERLAPPEDEX recvOverlappedEx{};
+
+	unsigned int remainSize{ 0 };
+	std::unique_ptr<Packet> packet;
 };
