@@ -391,7 +391,7 @@ namespace Renderer
 		ExecuteCommandList();
 		WaitForGPU();
 
-		App::OnResize.Register(&OnResize);
+		App::OnResize->Register(&OnResize);
 	}
 
 	void Present()

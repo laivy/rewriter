@@ -6,6 +6,7 @@
 
 Button::Button(IWindow* owner) :
 	IControl{ owner },
+	OnButtonClick{ std::make_shared<Event<>>() },
 	m_state{ false }
 {
 	m_textFormat = Renderer2D::CreateTextFormat(L"", 16);
@@ -32,7 +33,7 @@ void Button::OnMouseEvent(UINT message, int x, int y)
 	}
 	case WM_LBUTTONUP:
 	{
-		OnButtonClick.Notify();
+		OnButtonClick->Notify();
 		m_state = State::MOUSEOVER;
 		break;
 	}

@@ -2,31 +2,62 @@
 #include "Button.h"
 #include "Control.h"
 #include "DebugWindow.h"
+#include "Modal.h"
 #include "Renderer2D.h"
 #include "Server.h"
 #include "TextBlock.h"
 #include "TextBox.h"
+#include "WindowManager.h"
 
 DebugWindow::DebugWindow()
 {
 	m_size = { 600, 400 };
 	
-	auto textBlock{ std::make_shared<TextBlock>(this) };
-	textBlock->SetSize({ 200, 30 });
-	textBlock->SetPosition({ m_size.x / 2, m_size.y / 2 - 25 }, Pivot::CENTER);
-	textBlock->SetText(L"Hello, TextBlock!");
-	m_controls.push_back(textBlock);
+	auto idTextBlock{ std::make_shared<TextBlock>(this) };
+	idTextBlock->SetSize({ 20, 30 });
+	idTextBlock->SetPosition({ m_size.x / 2 - 90, m_size.y / 2 - 22 }, Pivot::CENTER);
+	idTextBlock->SetText(L"ID");
+	m_controls.push_back(idTextBlock);
 
-	auto textBox{ std::make_shared<TextBox>(this) };
-	textBox->SetSize({ 200, 30 });
-	textBox->SetPosition({ m_size.x / 2, m_size.y / 2 }, Pivot::CENTER);
-	m_controls.push_back(textBox);
+	auto idTextBox{ std::make_shared<TextBox>(this) };
+	idTextBox->SetSize({ 180, 30 });
+	idTextBox->SetPosition({ m_size.x / 2 - 80, m_size.y / 2 - 25 }, Pivot::LEFTCENTER);
+	m_controls.push_back(idTextBox);
 
-	auto button{ std::make_shared<Button>(this) };
-	button->SetSize({ 200, 30 });
-	button->SetPosition({ m_size.x / 2, m_size.y / 2 + 25 }, Pivot::CENTER);
-	button->SetText(L"Button");
-	button->OnButtonClick.Register(this,
+	auto pwTextBlock{ std::make_shared<TextBlock>(this) };
+	pwTextBlock->SetSize({ 25, 30 });
+	pwTextBlock->SetPosition({ m_size.x / 2 - 96, m_size.y / 2 + 17 }, Pivot::CENTER);
+	pwTextBlock->SetText(L"PW");
+	m_controls.push_back(pwTextBlock);
+
+	auto pwTextBox{ std::make_shared<TextBox>(this) };
+	pwTextBox->SetSize({ 180, 30 });
+	pwTextBox->SetPosition({ m_size.x / 2 - 80, m_size.y / 2 + 15 }, Pivot::LEFTCENTER);
+	m_controls.push_back(pwTextBox);
+
+	auto registerButton{ std::make_shared<Button>(this) };
+	registerButton->SetSize({ 97, 30 });
+	registerButton->SetPosition({ m_size.x / 2 - 100, m_size.y / 2 + 55 }, Pivot::LEFTCENTER);
+	registerButton->SetText(L"Register");
+	registerButton->OnButtonClick->Register(this,
+		[button = registerButton]()
+		{
+			button->m_state = Button::State::DEFAULT;
+			auto callback = [](IModal::Return retval)
+				{
+
+				};
+			auto modal{ std::make_shared<IModal>(callback) };
+			if (auto wm{ WindowManager::GetInstance() })
+				wm->Register(modal);
+		});
+	m_controls.push_back(registerButton);
+
+	auto loginButton{ std::make_shared<Button>(this) };
+	loginButton->SetSize({ 97, 30 });
+	loginButton->SetPosition({ m_size.x / 2 + 100, m_size.y / 2 + 55 }, Pivot::RIGHTCENTER);
+	loginButton->SetText(L"Login");
+	loginButton->OnButtonClick->Register(this,
 		[]()
 		{
 			::OutputDebugString(L"OnButtonClick!\n");
@@ -37,7 +68,7 @@ DebugWindow::DebugWindow()
 			packet.End();
 			Send<LoginServer>(packet);
 		});
-	m_controls.push_back(button);
+	m_controls.push_back(loginButton);
 }
 
 void DebugWindow::OnMouseEvent(UINT message, int x, int y)

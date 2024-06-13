@@ -20,9 +20,9 @@ private:
 	void Render();
 
 public:
-	static inline Event<UINT, WPARAM, LPARAM> OnKeyboardEvent;
-	static inline Event<UINT, int, int> OnMouseEvent;
-	static inline Event<int, int> OnResize;
+	static inline auto OnKeyboardEvent{ std::make_shared<Event<UINT, WPARAM, LPARAM>>() };
+	static inline auto OnMouseEvent{ std::make_shared<Event<UINT, int, int>>() };
+	static inline auto OnResize{ std::make_shared<Event<int, int>>() };
 	static inline HINSTANCE hInstance{ NULL };
 	static inline HWND hWnd{ NULL };
 	static inline INT2 size{ 1920, 1080 };

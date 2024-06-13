@@ -22,9 +22,9 @@ public:
 	void SetText(std::wstring_view text);
 
 public:
-	Event<> OnButtonClick;
+	std::shared_ptr<Event<>> OnButtonClick;
 
-private:
+public:
 	State m_state;
 	ComPtr<IDWriteTextFormat> m_textFormat;
 	ComPtr<IDWriteTextLayout> m_textLayout;
