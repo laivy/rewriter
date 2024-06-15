@@ -23,6 +23,7 @@ void WindowManager::Update(float deltaTime)
 {
 	std::erase_if(m_modals, [this](const auto& modal) { return !modal->IsValid(); });
 	std::erase_if(m_windows, [this](const auto& window) { return !window->IsValid(); });
+
 	if (!m_modals.empty())
 		m_focusWindow = m_modals.back();
 	else if (!m_windows.empty())
@@ -76,6 +77,9 @@ void WindowManager::OnKeyboardEvent(UINT message, WPARAM wParam, LPARAM lParam)
 
 void WindowManager::OnMouseEvent(UINT message, int x, int y)
 {
+	if (message == WM_MOUSEMOVE)
+		UpdateMouseOverWindow(x, y);
+
 	// 모달이 있으면 해당 모달에게만 이벤트 전달
 	if (!m_modals.empty())
 	{
@@ -85,21 +89,8 @@ void WindowManager::OnMouseEvent(UINT message, int x, int y)
 		return;
 	}
 
-	switch (message)
-	{
-	case WM_MOUSEMOVE:
-	{
-		UpdateMouseOverWindow(x, y);
-		break;
-	}
-	case WM_LBUTTONDOWN:
-	{
+	if (message == WM_LBUTTONDOWN)
 		UpdateFocusWindow(x, y);
-		break;
-	}
-	default:
-		break;
-	}
 
 	// 이벤트 전달
 	for (const auto& window : m_windows)
@@ -114,6 +105,27 @@ void WindowManager::OnMouseEvent(UINT message, int x, int y)
 
 void WindowManager::UpdateMouseOverWindow(int x, int y)
 {
+	if (!m_modals.empty())
+	{
+		auto rit{ std::ranges::find_if(std::views::reverse(m_modals), [x, y](const auto& modal) { return modal->IsContain({ x, y }); }) };
+		if (rit == m_modals.rend())
+		{
+			if (auto window{ m_mouseOverWindow.lock() })
+				window->OnMouseLeave(x, y);
+			m_mouseOverWindow.reset();
+			return;
+		}
+
+		if (auto window{ m_mouseOverWindow.lock() }; window != *rit)
+		{
+			if (window)
+				window->OnMouseLeave(x, y);
+			m_mouseOverWindow = *rit;
+			(*rit)->OnMouseEnter(x, y);
+		}
+		return;
+	}
+
 	auto rit{ std::ranges::find_if(std::views::reverse(m_windows), [x, y](const auto& window) { return window->IsContain({ x, y }); }) };
 	if (rit == m_windows.rend())
 	{

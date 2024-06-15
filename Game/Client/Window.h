@@ -9,8 +9,9 @@ public:
 	IWindow();
 	virtual ~IWindow() = default;
 
-	virtual void OnMouseEvent(UINT message, int x, int y);
-	virtual void OnKeyboardEvent(UINT message, WPARAM wParam, LPARAM lParam);
+	virtual void OnMouseLeave(int x, int y) override;
+	virtual void OnMouseEvent(UINT message, int x, int y) override;
+	virtual void OnKeyboardEvent(UINT message, WPARAM wParam, LPARAM lParam) override;
 
 	virtual void Update(float deltaTime);
 	virtual void Render() const;

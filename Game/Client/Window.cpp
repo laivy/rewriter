@@ -10,6 +10,13 @@ IWindow::IWindow() :
 {
 }
 
+void IWindow::OnMouseLeave(int x, int y)
+{
+	if (auto control{ m_mouseOverControl.lock() })
+		control->OnMouseLeave(x, y);
+	m_mouseOverControl.reset();
+}
+
 void IWindow::OnMouseEvent(UINT message, int x, int y)
 {
 	switch (message)
