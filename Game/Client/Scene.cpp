@@ -1,8 +1,25 @@
 ﻿#include "Stdafx.h"
 #include "Scene.h"
+#include "WindowManager.h"
 
-void IScene::OnCreate() { }
-void IScene::OnDestroy() { }
-void IScene::Update(float deltaTime) { }
-void IScene::Render3D() const { }
-void IScene::Render2D() const { }
+IScene::IScene()
+{
+	WindowManager::Destroy();
+	WindowManager::Instantiate();
+}
+
+void IScene::Update(float deltaTime)
+{
+	if (auto wm{ WindowManager::GetInstance() })
+		wm->Update(deltaTime);
+}
+
+void IScene::Render2D() const
+{
+	if (auto wm{ WindowManager::GetInstance() })
+		wm->Render();
+}
+
+void IScene::Render3D() const
+{
+}

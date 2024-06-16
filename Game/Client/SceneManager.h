@@ -1,11 +1,12 @@
 ﻿#pragma once
-#include "Scene.h"
+
+class IScene;
 
 class SceneManager : public TSingleton<SceneManager>
 {
 public:
-	SceneManager() = default;
-	~SceneManager() = default;
+	SceneManager();
+	~SceneManager();
 
 	void Update(float deltaTime);
 	void Render2D() const;

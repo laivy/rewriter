@@ -3,11 +3,8 @@
 class IScene abstract
 {
 public:
-	IScene() = default;
+	IScene();
 	virtual ~IScene() = default;
-
-	virtual void OnCreate();
-	virtual void OnDestroy();
 
 	virtual void Update(float deltaTime);
 	virtual void Render2D() const;

@@ -21,7 +21,6 @@ App::App() :
 App::~App()
 {
 	Renderer::CleanUp();
-	WindowManager::Destroy();
 	SceneManager::Destroy();
 	ServerThread::Destroy();
 }
@@ -131,7 +130,6 @@ void App::InitApp()
 	Renderer::Init();
 	ServerThread::Instantiate();
 	SceneManager::Instantiate();
-	WindowManager::Instantiate();
 }
 
 void App::Update()
