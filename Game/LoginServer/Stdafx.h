@@ -6,11 +6,6 @@
 #include <MSWSock.h>
 #include <WinSock2.h>
 
-#ifndef HINST_THISCOMPONENT
-EXTERN_C IMAGE_DOS_HEADER __ImageBase;
-#define HINST_THISCOMPONENT ((HINSTANCE)&__ImageBase)
-#endif
-
 // C/C++
 #include <atlstr.h>
 #include <format>

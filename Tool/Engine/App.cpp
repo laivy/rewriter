@@ -3,33 +3,25 @@
 #include "Explorer.h"
 #include "Hierarchy.h"
 #include "Inspector.h"
+#include "Common/ImguiEx.h"
 #include "Common/Timer.h"
 
-App::App(HINSTANCE hInstance) :
-	m_hInstance{ hInstance },
-	hWnd{ NULL },
-	m_isActive{ false },
-	size{ 1920, 1080 },
+App::App() :
+	m_isActive{ true },
 	m_timer{ new Timer }
 {
 	InitWindow();
-	InitDirectX();
 	InitImGui();
 	InitApp();
 	m_timer->Tick();
-	m_isActive = true;
 }
 
 App::~App()
 {
-	// 싱글톤 삭제
 	Explorer::Destroy();
 	Hierarchy::Destroy();
 	Inspector::Destroy();
-
-	ImGui_ImplDX12_Shutdown();
-	ImGui_ImplWin32_Shutdown();
-	ImGui::DestroyContext();
+	ImGui::CleanUp();	
 }
 
 void App::Run()
@@ -68,7 +60,7 @@ LRESULT App::WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 	}
 	case WM_SIZE:
 	{
-		app->OnResize(GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam));
+		OnResize->Notify(GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam));
 		break;
 	}
 	case WM_DESTROY:
@@ -90,20 +82,20 @@ void App::InitWindow()
 	wcex.lpfnWndProc = WndProc;
 	wcex.cbClsExtra = 0;
 	wcex.cbWndExtra = 0;
-	wcex.hInstance = m_hInstance;
+	wcex.hInstance = HINST_THISCOMPONENT;
 	wcex.hCursor = LoadCursor(NULL, IDC_ARROW);
 	wcex.hbrBackground = NULL;
 	wcex.lpszMenuName = NULL;
-	wcex.lpszClassName = TITLE_NAME;
+	wcex.lpszClassName = WINDOW_TITLE_NAME;
 	::RegisterClassEx(&wcex);
 
 	// 화면 최대 크기로 윈도우 생성
-	RECT rect{ 0, 0, size.first, size.second };
+	RECT rect{ 0, 0, size.x, size.y };
 	::AdjustWindowRect(&rect, WS_OVERLAPPEDWINDOW, FALSE);
 
 	hWnd = ::CreateWindow(
 		wcex.lpszClassName,
-		TITLE_NAME,
+		WINDOW_TITLE_NAME,
 		WS_OVERLAPPEDWINDOW,
 		CW_USEDEFAULT,
 		CW_USEDEFAULT,
@@ -114,160 +106,32 @@ void App::InitWindow()
 		wcex.hInstance,
 		this
 	);
-	::SetWindowText(hWnd, TITLE_NAME);
-
+	::SetWindowText(hWnd, WINDOW_TITLE_NAME);
 	::ShowWindow(hWnd, SW_SHOWMAXIMIZED);
 	::UpdateWindow(hWnd);
 }
 
-void App::InitDirectX()
-{
-	// 팩토리, 디바이스 생성
-	CreateDXGIFactory2(NULL, IID_PPV_ARGS(&m_factory));
-	ComPtr<IDXGIAdapter1> hardwareAdapter;
-	for (UINT i = 0; DXGI_ERROR_NOT_FOUND != m_factory->EnumAdapters1(i, &hardwareAdapter); ++i)
-	{
-		DXGI_ADAPTER_DESC1 adapterDesc{};
-		hardwareAdapter->GetDesc1(&adapterDesc);
-		if (adapterDesc.Flags & DXGI_ADAPTER_FLAG_SOFTWARE) continue;
-		if (SUCCEEDED(D3D12CreateDevice(hardwareAdapter.Get(), D3D_FEATURE_LEVEL_11_0, IID_PPV_ARGS(&m_d3dDevice)))) break;
-	}
-	if (!m_d3dDevice)
-	{
-		m_factory->EnumWarpAdapter(IID_PPV_ARGS(&hardwareAdapter));
-		D3D12CreateDevice(hardwareAdapter.Get(), D3D_FEATURE_LEVEL_11_0, IID_PPV_ARGS(&m_d3dDevice));
-	}
-	m_cbvSrvUavDescriptorIncrementSize = m_d3dDevice->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
-
-	// 커맨드 큐, 할당자, 리스트 생성
-	D3D12_COMMAND_QUEUE_DESC queueDesc{};
-	queueDesc.Flags = D3D12_COMMAND_QUEUE_FLAG_NONE;
-	queueDesc.Type = D3D12_COMMAND_LIST_TYPE_DIRECT;
-	m_d3dDevice->CreateCommandQueue(&queueDesc, IID_PPV_ARGS(&m_commandQueue));
-
-	for (int i{ 0 }; i < FRAME_COUNT; ++i)
-		m_d3dDevice->CreateCommandAllocator(D3D12_COMMAND_LIST_TYPE_DIRECT, IID_PPV_ARGS(&m_commandAllocators[i]));
-
-	m_d3dDevice->CreateCommandList(0, D3D12_COMMAND_LIST_TYPE_DIRECT, m_commandAllocators[m_frameIndex].Get(), nullptr, IID_PPV_ARGS(&m_commandList));
-	m_commandList->Close();
-
-	// 스왑체인 생성
-	RECT rect{};
-	GetClientRect(hWnd, &rect);
-
-	DXGI_SWAP_CHAIN_DESC1 swapChainDesc{};
-	swapChainDesc.BufferCount = FRAME_COUNT;
-	swapChainDesc.Width = rect.right - rect.left;
-	swapChainDesc.Height = rect.bottom - rect.top;
-	swapChainDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
-	swapChainDesc.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
-	swapChainDesc.SwapEffect = DXGI_SWAP_EFFECT_FLIP_DISCARD;
-	swapChainDesc.SampleDesc.Count = 1;
-
-	ComPtr<IDXGISwapChain1> swapChain;
-	m_factory->CreateSwapChainForHwnd(
-		m_commandQueue.Get(),
-		hWnd,
-		&swapChainDesc,
-		nullptr,
-		nullptr,
-		&swapChain
-	);
-	swapChain.As(&m_swapChain);
-	m_frameIndex = m_swapChain->GetCurrentBackBufferIndex();
-	m_factory->MakeWindowAssociation(hWnd, DXGI_MWA_NO_ALT_ENTER);
-
-	// 서술자 힙 생성
-	D3D12_DESCRIPTOR_HEAP_DESC rtvHeapDesc{};
-	rtvHeapDesc.NumDescriptors = FRAME_COUNT;
-	rtvHeapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_RTV;
-	rtvHeapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_NONE;
-	rtvHeapDesc.NodeMask = NULL;
-	m_d3dDevice->CreateDescriptorHeap(&rtvHeapDesc, IID_PPV_ARGS(&m_rtvHeap));
-	m_rtvDescriptorSize = m_d3dDevice->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_RTV);
-
-	D3D12_DESCRIPTOR_HEAP_DESC srvHeapDesc{};
-	srvHeapDesc.NumDescriptors = 1;
-	srvHeapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
-	srvHeapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;
-	srvHeapDesc.NodeMask = NULL;
-	m_d3dDevice->CreateDescriptorHeap(&srvHeapDesc, IID_PPV_ARGS(&m_srvDescHeap));
-
-	// 렌더타겟 생성
-	CD3DX12_CPU_DESCRIPTOR_HANDLE rtvHandle{ m_rtvHeap->GetCPUDescriptorHandleForHeapStart() };
-	for (UINT i = 0; i < FRAME_COUNT; ++i)
-	{
-		m_swapChain->GetBuffer(i, IID_PPV_ARGS(&m_renderTargets[i]));
-		m_d3dDevice->CreateRenderTargetView(m_renderTargets[i].Get(), nullptr, rtvHandle);
-		rtvHandle.Offset(m_rtvDescriptorSize);
-	}
-
-	// 펜스 생성
-	m_d3dDevice->CreateFence(0, D3D12_FENCE_FLAG_NONE, IID_PPV_ARGS(&m_fence));
-	m_fenceEvent = CreateEvent(NULL, FALSE, FALSE, NULL);
-	++m_fenceValues[m_frameIndex];
-}
-
 void App::InitImGui()
 {
-	IMGUI_CHECKVERSION();
+	ImGui::Init(hWnd);
+	OnResize->Register(&ImGui::OnResize);
 
-	ImGui::CreateContext();
 	ImGuiIO& io{ ImGui::GetIO() };
-	io.IniFilename = "D:/Programming/Rewriter/Data/imgui.ini";
+	io.IniFilename = "Data/imgui.ini";
 	io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
 	io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
-	io.Fonts->AddFontFromFileTTF("D:/Programming/Rewriter/Data/NEXON Lv2 Gothic.ttf", 16.0f, nullptr, io.Fonts->GetGlyphRangesKorean());
+	io.Fonts->AddFontFromFileTTF("Data/NEXON Lv2 Gothic.ttf", 16.0f, nullptr, io.Fonts->GetGlyphRangesKorean());
 	
 	ImGui::GetStyle().WindowMenuButtonPosition = ImGuiDir_None;
 	ImGui::GetStyle().DockingSeparatorSize = 1.0f;
 	ImGui::StyleColorsDark();
-
-	ImGui_ImplWin32_Init(hWnd);
-	ImGui_ImplDX12_Init(
-		m_d3dDevice.Get(),
-		FRAME_COUNT,
-		DXGI_FORMAT_R8G8B8A8_UNORM,
-		m_srvDescHeap.Get(),
-		m_srvDescHeap->GetCPUDescriptorHandleForHeapStart(),
-		m_srvDescHeap->GetGPUDescriptorHandleForHeapStart()
-	);
 }
 
 void App::InitApp()
 {
-	// 싱글턴 생성
 	Explorer::Instantiate();
 	Hierarchy::Instantiate();
 	Inspector::Instantiate();
-}
-
-void App::OnResize(int width, int height)
-{
-	if (!m_isActive)
-		return;
-
-	WaitPrevFrame();
-
-	for (int i = 0; i < FRAME_COUNT; ++i)
-	{
-		m_renderTargets[i].Reset();
-		m_fenceValues[i] = m_fenceValues[m_frameIndex];
-	}
-
-	DXGI_SWAP_CHAIN_DESC desc{};
-	m_swapChain->GetDesc(&desc);
-	m_swapChain->ResizeBuffers(FRAME_COUNT, width, height, desc.BufferDesc.Format, desc.Flags);
-	m_frameIndex = m_swapChain->GetCurrentBackBufferIndex();
-	
-	// 렌더타겟 생성
-	CD3DX12_CPU_DESCRIPTOR_HANDLE rtvHandle{ m_rtvHeap->GetCPUDescriptorHandleForHeapStart() };
-	for (UINT i = 0; i < FRAME_COUNT; ++i)
-	{
-		m_swapChain->GetBuffer(i, IID_PPV_ARGS(&m_renderTargets[i]));
-		m_d3dDevice->CreateRenderTargetView(m_renderTargets[i].Get(), nullptr, rtvHandle);
-		rtvHandle.Offset(m_rtvDescriptorSize);
-	}
 }
 
 void App::Update()
@@ -283,65 +147,18 @@ void App::Update()
 
 void App::Render()
 {
-	m_commandAllocators[m_frameIndex]->Reset();
-	m_commandList->Reset(m_commandAllocators[m_frameIndex].Get(), nullptr);
-
-	m_commandList->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(m_renderTargets[m_frameIndex].Get(), D3D12_RESOURCE_STATE_PRESENT, D3D12_RESOURCE_STATE_RENDER_TARGET));
-
-	CD3DX12_CPU_DESCRIPTOR_HANDLE rtvHandle{ m_rtvHeap->GetCPUDescriptorHandleForHeapStart(), static_cast<int>(m_frameIndex), m_rtvDescriptorSize };
-	m_commandList->OMSetRenderTargets(1, &rtvHandle, FALSE, nullptr);
-
-	constexpr float clearColor[]{ 0.15625f, 0.171875f, 0.203125f, 1.0f };
-	m_commandList->ClearRenderTargetView(rtvHandle, clearColor, 0, NULL);
-	m_commandList->SetDescriptorHeaps(1, m_srvDescHeap.GetAddressOf());
-
-	RenderImGui();
-
-	m_commandList->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(m_renderTargets[m_frameIndex].Get(), D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PRESENT));
-	m_commandList->Close();
-	ID3D12CommandList* ppCommandList[]{ m_commandList.Get() };
-	m_commandQueue->ExecuteCommandLists(_countof(ppCommandList), ppCommandList);
-
-	m_swapChain->Present(1, 0);
-	WaitPrevFrame();
-}
-
-void App::WaitPrevFrame()
-{
-	const UINT64 currentFenceValue{ m_fenceValues[m_frameIndex] };
-	m_commandQueue->Signal(m_fence.Get(), currentFenceValue);
-
-	if (m_fence->GetCompletedValue() < m_fenceValues[m_frameIndex])
+	ImGui::RenderBegin();
 	{
-		m_fence->SetEventOnCompletion(m_fenceValues[m_frameIndex], m_fenceEvent);
-		WaitForSingleObjectEx(m_fenceEvent, INFINITE, FALSE);
+		RenderImGuiMainDockSpace();
+		if (auto explorer{ Explorer::GetInstance() })
+			explorer->Render();
+		if (auto hierarchy{ Hierarchy::GetInstance() })
+			hierarchy->Render();
+		if (auto inspector{ Inspector::GetInstance() })
+			inspector->Render();
+		ImGui::ShowDemoWindow();
 	}
-
-	m_frameIndex = m_swapChain->GetCurrentBackBufferIndex();
-	m_fenceValues[m_frameIndex] = currentFenceValue + 1;
-}
-
-void App::RenderImGui()
-{
-	ImGui_ImplDX12_NewFrame();
-	ImGui_ImplWin32_NewFrame();
-	ImGui::NewFrame();
-
-	RenderImGuiMainDockSpace();
-	Explorer::GetInstance()->Render();
-	RenderImGuiConsole();
-	Hierarchy::GetInstance()->Render();
-	Inspector::GetInstance()->Render();
-	ImGui::ShowDemoWindow();
-
-	ImGui::EndFrame();
-	ImGui::Render();
-	ImGui_ImplDX12_RenderDrawData(ImGui::GetDrawData(), m_commandList.Get());
-	if (ImGui::GetIO().ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
-	{
-		ImGui::UpdatePlatformWindows();
-		ImGui::RenderPlatformWindowsDefault();
-	}
+	ImGui::RenderEnd();
 }
 
 void App::RenderImGuiMainDockSpace()
@@ -361,10 +178,4 @@ void App::RenderImGuiMainDockSpace()
 	ImGui::DockSpace(ImGui::GetID("DESKTOP"), {}, ImGuiDockNodeFlags_PassthruCentralNode);
 	ImGui::End();
 	ImGui::PopID();
-}
-
-void App::RenderImGuiConsole()
-{
-	ImGui::Begin("Console");
-	ImGui::End();
 }

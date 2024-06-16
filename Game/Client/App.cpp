@@ -14,7 +14,6 @@ App::App() :
 	m_timer{ new Timer }
 {
 	InitWindow();
-	Renderer::Init();
 	InitApp();
 	m_timer->Tick();
 }
@@ -62,21 +61,29 @@ LRESULT CALLBACK App::WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPa
 	case WM_KEYDOWN:
 	case WM_CHAR:
 	case WM_IME_COMPOSITION:
+	{
 		App::OnKeyboardEvent->Notify(message, wParam, lParam);
 		break;
+	}
 	case WM_MOUSEMOVE:
 	case WM_LBUTTONUP:
 	case WM_LBUTTONDOWN:
 	case WM_RBUTTONUP:
 	case WM_RBUTTONDOWN:
+	{
 		App::OnMouseEvent->Notify(message, GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam));
 		break;
+	}
 	case WM_SIZE:
+	{
 		App::OnResize->Notify(GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam));
 		break;
+	}
 	case WM_DESTROY:
+	{
 		::PostQuitMessage(0);
 		break;
+	}
 	default:
 		return ::DefWindowProc(hWnd, message, wParam, lParam);
 	}
@@ -95,16 +102,16 @@ void App::InitWindow()
 	wcex.hCursor = ::LoadCursor(NULL, IDC_ARROW);
 	wcex.hbrBackground = NULL;
 	wcex.lpszMenuName = NULL;
-	wcex.lpszClassName = L"CLIENT";
+	wcex.lpszClassName = WINDOW_TITLE_NAME;
 	::RegisterClassEx(&wcex);
 	
 	RECT rect{ 0, 0, size.x, size.y };
 	::AdjustWindowRect(&rect, WS_OVERLAPPEDWINDOW, FALSE);
 
 	hWnd = ::CreateWindow(
-		L"CLIENT",
-		L"CLIENT",
-		WS_OVERLAPPEDWINDOW, /*WS_OVERLAPPED | WS_SYSMENU | WS_BORDER,*/
+		wcex.lpszClassName,
+		WINDOW_TITLE_NAME,
+		WS_OVERLAPPEDWINDOW,
 		CW_USEDEFAULT,
 		CW_USEDEFAULT,
 		rect.right - rect.left,
@@ -114,13 +121,14 @@ void App::InitWindow()
 		HINST_THISCOMPONENT,
 		this
 	);
-	::SetWindowText(hWnd, TEXT("Rewriter"));
+	::SetWindowText(hWnd, WINDOW_TITLE_NAME);
 	::ShowWindow(hWnd, SW_SHOWNORMAL);
 	::UpdateWindow(hWnd);
 }
 
 void App::InitApp()
 {
+	Renderer::Init();
 	ServerThread::Instantiate();
 	SceneManager::Instantiate();
 	WindowManager::Instantiate();

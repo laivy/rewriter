@@ -1,6 +1,8 @@
 ﻿#pragma once
 
-class Hierarchy : public TSingleton<Hierarchy>
+class Hierarchy :
+	public IObserver,
+	public TSingleton<Hierarchy>
 {
 public:
 	Hierarchy();
@@ -34,6 +36,5 @@ private:
 	static constexpr auto DEFAULT_FILE_NAME{ L"NewFile" };
 	static constexpr auto DEFAULT_NODE_NAME{ L"NewNode" };
 
-	std::unique_ptr<Observer<std::shared_ptr<Resource::Property>>> m_onProprtySelect;
 	std::vector<std::weak_ptr<Resource::Property>> m_selectedPropertise;
 };

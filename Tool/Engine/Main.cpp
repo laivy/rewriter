@@ -6,8 +6,7 @@ int WINAPI WinMain(_In_		HINSTANCE hInstance,
 				   _In_		LPSTR lpCmdLine,
 				   _In_		int nCmdShow)
 {
-	App::Instantiate(hInstance);
-	if (auto app{ App::GetInstance() })
+	if (auto app{ App::Instantiate() })
 		app->Run();
 	App::Destroy();
 }

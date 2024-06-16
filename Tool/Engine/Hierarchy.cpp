@@ -7,7 +7,7 @@
 
 Hierarchy::Hierarchy()
 {
-	m_onProprtySelect = Global::OnPropertySelect.Add(std::bind_front(&Hierarchy::OnPropertySelect, this));
+	Global::OnPropertySelect->Register(this, std::bind_front(&Hierarchy::OnPropertySelect, this));
 }
 
 Hierarchy::~Hierarchy()
@@ -69,7 +69,7 @@ void Hierarchy::Shortcut()
 				continue;
 
 			Global::propInfo[prop].isValid = false;
-			Global::OnPropertyDelete.Notify(prop);
+			Global::OnPropertyDelete->Notify(prop);
 		}
 	}
 }
@@ -147,13 +147,13 @@ void Hierarchy::RenderNode()
 				child->SetName(name);
 				prop->Add(child);
 				Global::propInfo[child].parent = prop;
-				Global::OnPropertyAdd.Notify(child);
+				Global::OnPropertyAdd->Notify(child);
 			}
 			if (ImGui::Selectable("Del(D)") || ImGui::IsKeyPressed(ImGuiKey_D))
 			{
 				ImGui::CloseCurrentPopup();
 				Global::propInfo[prop].isValid = false;
-				Global::OnPropertyDelete.Notify(prop);
+				Global::OnPropertyDelete->Notify(prop);
 			}
 			ImGui::EndPopup();
 		};
@@ -164,7 +164,7 @@ void Hierarchy::RenderNode()
 			if (!Global::propInfo[prop].isRoot && prop->children.empty())
 			{
 				if (ImGui::Selectable(Util::wstou8s(prop->GetName()).c_str(), Global::propInfo[prop].isSelected))
-					Global::OnPropertySelect.Notify(prop);
+					Global::OnPropertySelect->Notify(prop);
 				menu(prop);
 				ImGui::PopID();
 				return;
@@ -187,7 +187,7 @@ void Hierarchy::RenderNode()
 			if (ImGui::TreeNodeEx(Util::wstou8s(prop->GetName()).c_str(), flag))
 			{
 				if (ImGui::IsItemClicked())
-					Global::OnPropertySelect.Notify(prop);
+					Global::OnPropertySelect->Notify(prop);
 
 				menu(prop);
 

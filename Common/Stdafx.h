@@ -6,8 +6,15 @@
 // Windows
 #define WIN32_LEAN_AND_MEAN
 #include <Windows.h>
+#include <windowsx.h>
 #include <wrl.h>
 using Microsoft::WRL::ComPtr;
+
+#ifndef HINST_THISCOMPONENT
+EXTERN_C IMAGE_DOS_HEADER __ImageBase;
+#define HINST_THISCOMPONENT ((HINSTANCE)&__ImageBase)
+#endif
+
 #ifdef DrawText
 #undef DrawText
 #endif

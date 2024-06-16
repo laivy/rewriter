@@ -86,7 +86,7 @@ private:
 	void _Encode(const T& data)
 	{
 		_Encode(static_cast<unsigned int>(data.size()));
-		EncodeBuffer(reinterpret_cast<const char*>(data.data()), data.size() * sizeof(T::value_type));
+		EncodeBuffer(reinterpret_cast<const char*>(data.data()), static_cast<Packet::size_type>(data.size() * sizeof(T::value_type)));
 	}
 
 	// 버퍼에서 sizeof(T) 만큼 읽어서 T로 반환
@@ -116,7 +116,7 @@ private:
 	{
 		auto length{ _Decode<unsigned int>() };
 		T value{ reinterpret_cast<T::value_type*>(m_buffer.get() + m_offset), static_cast<size_t>(length) };
-		m_offset += length * sizeof(T::value_type);
+		m_offset += static_cast<Packet::size_type>(length * sizeof(T::value_type));
 		return value;
 	}
 
