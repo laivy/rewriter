@@ -2,11 +2,11 @@
 
 class IRequest;
 
-class DBManager : public TSingleton<DBManager>
+class DBAccessor : public TSingleton<DBAccessor>
 {
 public:
-	DBManager();
-	~DBManager();
+	DBAccessor();
+	~DBAccessor();
 
 	void Render();
 

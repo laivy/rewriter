@@ -14,4 +14,7 @@ public:
 
 	virtual void Update(float deltaTime) override final;
 	virtual void Render() const override final;
+
+private:
+	void OnPacket(const std::shared_ptr<Packet>& packet);
 };

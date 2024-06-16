@@ -2,11 +2,11 @@
 #include <memory>
 #include <string>
 
-// 크기(4바이트) + 타입(4바이트) + 데이터
 class Packet
 {
 public:
-	enum class Type : unsigned int
+	using size_type = unsigned short; // 패킷 크기
+	enum class Type : unsigned short // 패킷 타입
 	{
 		CLIENT_TryLogin,
 		LOGIN_TryLogin,
@@ -14,7 +14,7 @@ public:
 
 public:
 	Packet(Type type);
-	Packet(const char* buffer, unsigned int size);
+	Packet(const char* buffer, size_type size);
 	~Packet() = default;
 
 	template<class T, class... Args>
@@ -25,7 +25,14 @@ public:
 			Encode(args...);
 	}
 
+	template<class Arg>
+	Arg Decode()
+	{
+		return _Decode<Arg>();
+	}
+
 	template<class... Args>
+	requires (sizeof...(Args) > 1)
 	std::tuple<Args...> Decode()
 	{
 		std::tuple<Args...> data{};
@@ -33,14 +40,14 @@ public:
 		return data;
 	}
 
-	void EncodeBuffer(const char* buffer, unsigned int size);
+	void EncodeBuffer(const char* buffer, size_type size);
 	void End();
 
-	void SetOffset(unsigned int offset);
+	void SetOffset(size_type offset);
 
 	Type GetType() const;
 	const char* GetBuffer() const;
-	unsigned int GetSize() const;
+	size_type GetSize() const;
 
 private:
 	template<class T>
@@ -61,7 +68,7 @@ private:
 
 		std::memcpy(m_buffer.get() + m_offset, &data, sizeof(T));
 		m_offset += sizeof(T);
-		m_encodedSize = std::max<unsigned int>(m_encodedSize, m_offset + sizeof(T));
+		m_encodedSize = std::max<unsigned int>(m_encodedSize, m_offset);
 	}
 
 	// 배열은 원소 개수 + 데이터를 씀
@@ -87,7 +94,7 @@ private:
 	T _Decode()
 	{
 		T data{};
-		std::memmove(&data, m_buffer.get() + m_offset, sizeof(T));
+		std::memcpy(&data, m_buffer.get() + m_offset, sizeof(T));
 		m_offset += sizeof(T);
 		return data;
 	}
@@ -108,19 +115,19 @@ private:
 	T _Decode()
 	{
 		auto length{ _Decode<unsigned int>() };
-		std::wstring value{ reinterpret_cast<T::value_type*>(m_buffer.get() + m_offset), static_cast<size_t>(length) };
+		T value{ reinterpret_cast<T::value_type*>(m_buffer.get() + m_offset), static_cast<size_t>(length) };
 		m_offset += length * sizeof(T::value_type);
 		return value;
 	}
 
-	void ReAlloc(unsigned int requireSize);
+	void ReAlloc(size_type requireSize);
 
 private:
 	static constexpr auto DEFAULT_BUFFER_SIZE{ 128 };
 
 	Type m_type;
 	std::unique_ptr<char[]> m_buffer;
-	unsigned int m_bufferSize;
-	unsigned int m_encodedSize;
-	unsigned int m_offset;
+	size_type m_bufferSize;
+	size_type m_encodedSize;
+	size_type m_offset;
 };

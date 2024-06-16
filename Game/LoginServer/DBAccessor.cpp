@@ -1,7 +1,7 @@
 ﻿#include "Stdafx.h"
-#include "DBManager.h"
+#include "DBAccessor.h"
 
-DBManager::DBManager() :
+DBAccessor::DBAccessor() :
 	m_semaphores{ 0 },
 	m_isActive{ false },
 	m_ipport{ TEXT("localhost,1433") },
@@ -12,12 +12,12 @@ DBManager::DBManager() :
 	Init();
 }
 
-DBManager::~DBManager()
+DBAccessor::~DBAccessor()
 {
 	m_isActive = false;
 }
 
-void DBManager::Render()
+void DBAccessor::Render()
 {
 	ImGui::Begin("DBManager");
 	if (ImGui::BeginTabBar("Tab"))
@@ -74,14 +74,14 @@ void DBManager::Render()
 	ImGui::End();
 }
 
-void DBManager::PostRequest(std::unique_ptr<IRequest> request)
+void DBAccessor::PostRequest(std::unique_ptr<IRequest> request)
 {
 	std::lock_guard lock{ m_requestMutex };
 	m_requests.push(std::move(request));
 	m_semaphores.release();
 }
 
-void DBManager::Init()
+void DBAccessor::Init()
 {
 	// DB 연결
 	auto rc{ Database::Connect(m_ipport, m_dbname, m_username, m_password) };
@@ -97,14 +97,14 @@ void DBManager::Init()
 
 	// 쓰레드 생성
 	for (auto& thread : m_threads)
-		thread = std::jthread{ &DBManager::Run, this };
+		thread = std::jthread{ &DBAccessor::Run, this };
 }
 
-void DBManager::Run()
+void DBAccessor::Run()
 {
 	while (m_isActive)
 	{
-		if (!m_semaphores.try_acquire_for(1s))
+		if (m_requests.empty() && !m_semaphores.try_acquire_for(1s))
 			continue;
 
 		std::unique_lock lock{ m_requestMutex };

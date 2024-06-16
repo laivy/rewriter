@@ -1,10 +1,11 @@
 ﻿#include "Stdafx.h"
+#include "App.h"
 #include "Button.h"
 #include "Control.h"
 #include "DebugWindow.h"
 #include "Modal.h"
 #include "Renderer2D.h"
-#include "Server.h"
+#include "ServerThread.h"
 #include "TextBlock.h"
 #include "TextBox.h"
 #include "WindowManager.h"
@@ -66,9 +67,11 @@ DebugWindow::DebugWindow()
 			for (int i = 0; i < 1000; ++i)
 				packet.Encode(i);
 			packet.End();
-			Send<LoginServer>(packet);
+			ServerThread::GetInstance()->SendPacket(ServerType::LOGIN, packet);
 		});
 	m_controls.push_back(loginButton);
+
+	App::OnPacket->Register(this, std::bind_front(&DebugWindow::OnPacket, this));
 }
 
 void DebugWindow::OnMouseEvent(UINT message, int x, int y)
@@ -99,4 +102,16 @@ void DebugWindow::Render() const
 
 	for (const auto& control : m_controls)
 		control->Render();
+}
+
+void DebugWindow::OnPacket(const std::shared_ptr<Packet>& packet)
+{
+	switch (packet->GetType())
+	{
+	case Packet::Type::LOGIN_TryLogin:
+	{
+		auto str{ packet->Decode<std::string>() };
+		break;
+	}
+	}
 }

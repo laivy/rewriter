@@ -28,6 +28,7 @@ using Microsoft::WRL::ComPtr;
 #include <mutex>
 #include <queue>
 #include <ranges>
+#include <set>
 #include <span>
 #include <string>
 #include <thread>

@@ -131,8 +131,8 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
     </ClCompile>
-    <ClCompile Include="ClientSocket.cpp" />
-    <ClCompile Include="DBManager.cpp" />
+    <ClCompile Include="Session.cpp" />
+    <ClCompile Include="DBAccessor.cpp" />
     <ClCompile Include="App.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Use</PrecompiledHeader>
     </ClCompile>
@@ -144,7 +144,8 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="User.cpp" />
-    <ClCompile Include="ClientAcceptor.cpp" />
+    <ClCompile Include="AcceptThread.cpp" />
+    <ClCompile Include="UserManager.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\Common\Network.h" />
@@ -165,12 +166,13 @@
     <ClInclude Include="..\..\Module\Resource\Include\Image.h" />
     <ClInclude Include="..\..\Module\Resource\Include\Manager.h" />
     <ClInclude Include="..\..\Module\Resource\Include\Property.h" />
-    <ClInclude Include="ClientSocket.h" />
-    <ClInclude Include="DBManager.h" />
+    <ClInclude Include="Session.h" />
+    <ClInclude Include="DBAccessor.h" />
     <ClInclude Include="App.h" />
     <ClInclude Include="Stdafx.h" />
     <ClInclude Include="User.h" />
-    <ClInclude Include="ClientAcceptor.h" />
+    <ClInclude Include="AcceptThread.h" />
+    <ClInclude Include="UserManager.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

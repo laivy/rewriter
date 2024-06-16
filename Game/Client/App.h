@@ -23,6 +23,7 @@ public:
 	static inline auto OnKeyboardEvent{ std::make_shared<Event<UINT, WPARAM, LPARAM>>() };
 	static inline auto OnMouseEvent{ std::make_shared<Event<UINT, int, int>>() };
 	static inline auto OnResize{ std::make_shared<Event<int, int>>() };
+	static inline auto OnPacket{ std::make_shared<Event<const std::shared_ptr<Packet>&>>() };
 	static inline HINSTANCE hInstance{ NULL };
 	static inline HWND hWnd{ NULL };
 	static inline INT2 size{ 1920, 1080 };

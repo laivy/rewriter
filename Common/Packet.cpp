@@ -7,11 +7,11 @@ Packet::Packet(Packet::Type type) :
 	m_encodedSize{ 0 },
 	m_offset{ 0 }
 {
-	Encode(-1);
-	Encode(type);
+	Encode<size_type>(-1);
+	Encode<Type>(type);
 }
 
-Packet::Packet(const char* buffer, unsigned int size) :
+Packet::Packet(const char* buffer, size_type size) :
 	m_buffer{ nullptr },
 	m_bufferSize{ 0 },
 	m_encodedSize{ 0 },
@@ -28,14 +28,14 @@ Packet::Packet(const char* buffer, unsigned int size) :
 	EncodeBuffer(buffer + sizeof(m_bufferSize) + sizeof(m_type), size - sizeof(m_bufferSize) - sizeof(m_type));
 }
 
-void Packet::EncodeBuffer(const char* buffer, unsigned int size)
+void Packet::EncodeBuffer(const char* buffer, size_type size)
 {
 	if (m_encodedSize + size > m_bufferSize)
 		ReAlloc(size);
 
 	std::memcpy(m_buffer.get() + m_offset, buffer, size);
 	m_offset += size;
-	m_encodedSize = std::max<unsigned int>(m_encodedSize, m_offset + size);
+	m_encodedSize = std::max<size_type>(m_encodedSize, m_offset);
 }
 
 void Packet::End()
@@ -44,7 +44,7 @@ void Packet::End()
 	EncodeAt(GetSize(), 0);
 }
 
-void Packet::SetOffset(unsigned int offset)
+void Packet::SetOffset(size_type offset)
 {
 	m_offset = offset;
 }
@@ -59,14 +59,14 @@ const char* Packet::GetBuffer() const
 	return m_buffer.get();
 }
 
-unsigned int Packet::GetSize() const
+Packet::size_type Packet::GetSize() const
 {
 	return m_encodedSize;
 }
 
-void Packet::ReAlloc(unsigned int requireSize)
+void Packet::ReAlloc(size_type requireSize)
 {
-	unsigned int bufferSize{ m_bufferSize };
+	size_type bufferSize{ m_bufferSize };
 	do
 	{
 		bufferSize *= 2;

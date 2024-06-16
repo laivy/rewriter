@@ -32,8 +32,10 @@ private:
 	void Update();
 	void Render();
 
-private:
 	void RenderBackgroundWindow();
+
+public:
+	static inline auto OnPacket{ std::make_shared<Event<size_t, std::shared_ptr<Packet>>>() };
 
 private:
 	// Window

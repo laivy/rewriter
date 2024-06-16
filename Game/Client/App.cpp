@@ -4,7 +4,7 @@
 #include "Renderer2D.h"
 #include "Renderer3D.h"
 #include "SceneManager.h"
-#include "Server.h"
+#include "ServerThread.h"
 #include "Window.h"
 #include "WindowManager.h"
 #include "Common/Timer.h"
@@ -22,8 +22,9 @@ App::App() :
 App::~App()
 {
 	Renderer::CleanUp();
-	SceneManager::Destroy();
 	WindowManager::Destroy();
+	SceneManager::Destroy();
+	ServerThread::Destroy();
 }
 
 void App::Run()
@@ -120,15 +121,25 @@ void App::InitWindow()
 
 void App::InitApp()
 {
+	ServerThread::Instantiate();
 	SceneManager::Instantiate();
 	WindowManager::Instantiate();
-
-	Connect<LoginServer>();
 }
 
 void App::Update()
 {
 	float deltaTime{ m_timer->Tick() };
+
+	if (auto st{ ServerThread::GetInstance() })
+	{
+		auto packet{ st->PopPacket() };
+		while (packet)
+		{
+			OnPacket->Notify(packet);
+			packet = st->PopPacket();
+		}
+	}
+
 	if (auto wm{ WindowManager::GetInstance() })
 		wm->Update(deltaTime);
 	if (auto sm{ SceneManager::GetInstance() })

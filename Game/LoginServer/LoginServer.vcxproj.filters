@@ -41,10 +41,10 @@
     <ClCompile Include="App.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
-    <ClCompile Include="DBManager.cpp">
+    <ClCompile Include="DBAccessor.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
-    <ClCompile Include="ClientAcceptor.cpp">
+    <ClCompile Include="AcceptThread.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
     <ClCompile Include="User.cpp">
@@ -80,7 +80,10 @@
     <ClCompile Include="..\..\Common\Types.cpp">
       <Filter>소스 파일\Common</Filter>
     </ClCompile>
-    <ClCompile Include="ClientSocket.cpp">
+    <ClCompile Include="Session.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="UserManager.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
   </ItemGroup>
@@ -91,16 +94,16 @@
     <ClInclude Include="App.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
-    <ClInclude Include="DBManager.h">
+    <ClInclude Include="DBAccessor.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
-    <ClInclude Include="ClientAcceptor.h">
+    <ClInclude Include="AcceptThread.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
     <ClInclude Include="User.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
-    <ClInclude Include="ClientSocket.h">
+    <ClInclude Include="Session.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
     <ClInclude Include="..\..\External\DirectX\d3dx12.h">
@@ -156,6 +159,9 @@
     </ClInclude>
     <ClInclude Include="..\..\Module\Resource\Include\Property.h">
       <Filter>모듈 파일\Resource</Filter>
+    </ClInclude>
+    <ClInclude Include="UserManager.h">
+      <Filter>헤더 파일</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

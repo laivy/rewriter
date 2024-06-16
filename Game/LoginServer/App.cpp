@@ -1,7 +1,8 @@
 ﻿#include "Stdafx.h"
 #include "App.h"
-#include "DBManager.h"
-#include "ClientAcceptor.h"
+#include "AcceptThread.h"
+#include "DBAccessor.h"
+#include "UserManager.h"
 
 App::App() :
 	m_hWnd{ NULL },
@@ -21,8 +22,9 @@ App::App() :
 
 App::~App()
 {
-	ClientAcceptor::Destroy();
-	DBManager::Destroy();
+	AcceptThread::Destroy(); // 1. 유저 접속 차단
+	UserManager::Destroy(); // 2. 접속 중인 유저 정보 저장
+	DBAccessor::Destroy(); // 3. DB 연결 해제
 
 	::WSACleanup();
 
@@ -36,12 +38,12 @@ void App::Run()
 	MSG msg{};
 	while (true)
 	{
-		if (PeekMessage(&msg, NULL, 0, 0, PM_REMOVE))
+		if (::PeekMessage(&msg, NULL, 0, 0, PM_REMOVE))
 		{
 			if (msg.message == WM_QUIT)
 				break;
-			TranslateMessage(&msg);
-			DispatchMessage(&msg);
+			::TranslateMessage(&msg);
+			::DispatchMessage(&msg);
 		}
 		else
 		{
@@ -157,8 +159,9 @@ void App::InitApp()
 	if (::WSAStartup(MAKEWORD(2, 2), &wsaData))
 		assert(false && "FAIL WSAStartup");
 
-	DBManager::Instantiate();
-	ClientAcceptor::Instantiate();
+	DBAccessor::Instantiate(); // 1. DB 연결
+	UserManager::Instantiate(); // 2. 유저 매니저 생성
+	AcceptThread::Instantiate(); // 2. 유저 접속 허용
 }
 
 void App::CreateFactory()
@@ -317,7 +320,8 @@ void App::OnResize(const INT2& size)
 
 void App::Update()
 {
-
+	if (auto um{ UserManager::GetInstance() })
+		um->Update();
 }
 
 void App::Render()
@@ -339,9 +343,9 @@ void App::Render()
 	ImGui::NewFrame();
 
 	RenderBackgroundWindow();
-	if (auto dbThread{ DBManager::GetInstance() })
+	if (auto dbThread{ DBAccessor::GetInstance() })
 		dbThread->Render();
-	if (auto userThread{ ClientAcceptor::GetInstance() })
+	if (auto userThread{ AcceptThread::GetInstance() })
 		userThread->Render();
 
 	ImGui::EndFrame();
