@@ -1,5 +1,6 @@
 ﻿#pragma once
-#include "User.h"
+
+class User;
 
 class UserManager : public TSingleton<UserManager>
 {
@@ -11,10 +12,11 @@ public:
 	void Render();
 
 	void Register(const std::shared_ptr<User>& user);
-	void Unregister(const std::shared_ptr<User>& user);
+	void Unregister(User* user);
 
-	std::weak_ptr<User> GetUser(AccountID id);
+	std::shared_ptr<User> GetUser(std::uint32_t accountID) const;
 
 private:
+	mutable std::mutex m_mutex;
 	std::vector<std::shared_ptr<User>> m_users;
 };

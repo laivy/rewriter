@@ -1,7 +1,8 @@
 ﻿#include "Stdafx.h"
+#include "Acceptor.h"
 #include "App.h"
-#include "AcceptThread.h"
 #include "DBAccessor.h"
+#include "SocketManager.h"
 #include "UserManager.h"
 #include "Common/ImguiEx.h"
 
@@ -14,7 +15,7 @@ App::App()
 
 App::~App()
 {
-	AcceptThread::Destroy(); // 1. 유저 접속 차단
+	Acceptor::Destroy(); // 1. 유저 접속 차단
 	UserManager::Destroy(); // 2. 접속 중인 유저 정보 저장
 	DBAccessor::Destroy(); // 3. DB 연결 해제
 	ImGui::CleanUp();
@@ -125,9 +126,10 @@ void App::InitApp()
 	if (::WSAStartup(MAKEWORD(2, 2), &wsaData))
 		assert(false && "FAIL WSAStartup");
 
-	DBAccessor::Instantiate(); // 1. DB 연결
-	UserManager::Instantiate(); // 2. 유저 매니저 생성
-	AcceptThread::Instantiate(); // 2. 유저 접속 허용
+	DBAccessor::Instantiate(); // DB 연결
+	UserManager::Instantiate();
+	SocketManager::Instantiate(); 
+	Acceptor::Instantiate(); // 유저 접속 허용
 }
 
 void App::Update()
@@ -143,8 +145,8 @@ void App::Render()
 		RenderBackgroundWindow();
 		if (auto dbThread{ DBAccessor::GetInstance() })
 			dbThread->Render();
-		if (auto userThread{ AcceptThread::GetInstance() })
-			userThread->Render();
+		if (auto acceptThread{ Acceptor::GetInstance() })
+			acceptThread->Render();
 	}
 	ImGui::RenderEnd();
 }

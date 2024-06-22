@@ -4,6 +4,12 @@
 
 void UserManager::Update()
 {
+	std::lock_guard lock{ m_mutex };
+	std::for_each(std::execution::par, m_users.begin(), m_users.end(),
+		[](auto& user)
+		{
+			user;
+		});
 }
 
 void UserManager::Render()
@@ -12,27 +18,21 @@ void UserManager::Render()
 
 void UserManager::Register(const std::shared_ptr<User>& user)
 {
-	// accountid 기준 오름차순 삽입 정렬
-	auto it = std::ranges::lower_bound(m_users, user, 
-		[](const auto& user1, const auto& user2)
-		{
-			return user1->GetAccountID() < user2->GetAccountID();
-		});
-	m_users.insert(it, user);
+	std::lock_guard lock{ m_mutex };
+	m_users.push_back(user);
 }
 
-void UserManager::Unregister(const std::shared_ptr<User>& user)
+void UserManager::Unregister(User* user)
 {
+	std::lock_guard lock{ m_mutex };
+	std::erase_if(m_users, [user](const auto& u) { return u.get() == user; });
 }
 
-std::weak_ptr<User> UserManager::GetUser(AccountID id)
+std::shared_ptr<User> UserManager::GetUser(std::uint32_t accountID) const
 {
-	auto it = std::ranges::lower_bound(m_users, id,
-		[](const auto& user, auto id) -> bool
-		{
-			return user->GetAccountID() < id;
-		});
+	std::lock_guard lock{ m_mutex };
+	auto it = std::ranges::find_if(m_users, [accountID](const auto& user) { return user->GetAccountID() == accountID; });
 	if (it == m_users.end())
-		return {};
+		return nullptr;
 	return *it;
 }

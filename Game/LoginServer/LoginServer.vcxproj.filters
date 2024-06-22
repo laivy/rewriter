@@ -44,7 +44,7 @@
     <ClCompile Include="DBAccessor.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
-    <ClCompile Include="AcceptThread.cpp">
+    <ClCompile Include="Acceptor.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
     <ClCompile Include="User.cpp">
@@ -80,14 +80,14 @@
     <ClCompile Include="..\..\Common\Types.cpp">
       <Filter>소스 파일\Common</Filter>
     </ClCompile>
-    <ClCompile Include="Session.cpp">
-      <Filter>소스 파일</Filter>
-    </ClCompile>
     <ClCompile Include="UserManager.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
     <ClCompile Include="..\..\Common\ImguiEx.cpp">
       <Filter>소스 파일\Common</Filter>
+    </ClCompile>
+    <ClCompile Include="SocketManager.cpp">
+      <Filter>소스 파일</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -100,13 +100,10 @@
     <ClInclude Include="DBAccessor.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
-    <ClInclude Include="AcceptThread.h">
+    <ClInclude Include="Acceptor.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
     <ClInclude Include="User.h">
-      <Filter>헤더 파일</Filter>
-    </ClInclude>
-    <ClInclude Include="Session.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
     <ClInclude Include="..\..\External\DirectX\d3dx12.h">
@@ -135,9 +132,6 @@
     </ClInclude>
     <ClInclude Include="..\..\External\Imgui\imstb_truetype.h">
       <Filter>외부 파일\Imgui</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Common\Network.h">
-      <Filter>헤더 파일\Common</Filter>
     </ClInclude>
     <ClInclude Include="..\..\Common\Packet.h">
       <Filter>헤더 파일\Common</Filter>
@@ -168,6 +162,12 @@
     </ClInclude>
     <ClInclude Include="..\..\Common\ImguiEx.h">
       <Filter>헤더 파일\Common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Common\Socket.h">
+      <Filter>헤더 파일\Common</Filter>
+    </ClInclude>
+    <ClInclude Include="SocketManager.h">
+      <Filter>헤더 파일</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

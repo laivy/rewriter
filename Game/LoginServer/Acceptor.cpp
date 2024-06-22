@@ -1,23 +1,27 @@
 ﻿#include "Stdafx.h"
-#include "AcceptThread.h"
+#include "Acceptor.h"
 #include "App.h"
+#include "SocketManager.h"
 #include "User.h"
+#include "UserManager.h"
 
-AcceptThread::AcceptThread() :
+Acceptor::Acceptor() :
 	m_isActive{ false },
-	m_context{},
-	m_sessionID{},
-	std::jthread{ &AcceptThread::Run, this }
+	m_hIOCP{ INVALID_HANDLE_VALUE },
+	m_listenSocket{ INVALID_SOCKET },
+	m_clientSocket{ INVALID_SOCKET },
+	m_buffer{},
+	m_overlapped{},
+	std::jthread{ &Acceptor::Run, this }
 {
-	App::OnPacket->Register(std::bind_front(&AcceptThread::OnPacket, this));
 }
 
-AcceptThread::~AcceptThread()
+Acceptor::~Acceptor()
 {
 	m_isActive = false;
 }
 
-void AcceptThread::Render()
+void Acceptor::Render()
 {
 	ImGui::Begin("AcceptThread");
 	if (ImGui::BeginTabBar("Tab"))
@@ -68,10 +72,10 @@ void AcceptThread::Render()
 	ImGui::End();
 }
 
-void AcceptThread::Run()
+void Acceptor::Run()
 {
-	m_context.listenSocket = ::WSASocket(AF_INET, SOCK_STREAM, IPPROTO_TCP, NULL, NULL, WSA_FLAG_OVERLAPPED);
-	if (m_context.listenSocket == INVALID_SOCKET)
+	m_listenSocket = ::WSASocket(AF_INET, SOCK_STREAM, IPPROTO_TCP, NULL, NULL, WSA_FLAG_OVERLAPPED);
+	if (m_listenSocket == INVALID_SOCKET)
 	{
 		assert(false && "CREATE LISTEN SOCKET FAIL");
 		return;
@@ -81,55 +85,46 @@ void AcceptThread::Run()
 	addr.sin_family = AF_INET;
 	addr.sin_port = ::htons(9000);
 	addr.sin_addr.s_addr = ::htonl(INADDR_ANY);
-	if (::bind(m_context.listenSocket, reinterpret_cast<sockaddr*>(&addr), sizeof(addr)) == SOCKET_ERROR)
+	if (::bind(m_listenSocket, reinterpret_cast<sockaddr*>(&addr), sizeof(addr)) == SOCKET_ERROR)
 	{
 		assert(false && "LISTEN SOCKET BIND FAIL");
 		return;
 	}
 
 	BOOL option{ TRUE };
-	if (::setsockopt(m_context.listenSocket, SOL_SOCKET, SO_CONDITIONAL_ACCEPT, reinterpret_cast<char*>(&option), sizeof(option)) == SOCKET_ERROR)
+	if (::setsockopt(m_listenSocket, SOL_SOCKET, SO_CONDITIONAL_ACCEPT, reinterpret_cast<char*>(&option), sizeof(option)) == SOCKET_ERROR)
 	{
 		assert(false && "LISTEN SOCKET SETSOCKOPT FAIL");
 		return;
 	}
 
-	if (::listen(m_context.listenSocket, SOMAXCONN) == SOCKET_ERROR)
+	if (::listen(m_listenSocket, SOMAXCONN) == SOCKET_ERROR)
 	{
 		assert(false && "LISTEN SOCKET LISTEN FAIL");
 		return;
 	}
 
-	m_context.hIOCP = ::CreateIoCompletionPort(INVALID_HANDLE_VALUE, NULL, NULL, 0);
-	if (m_context.hIOCP == INVALID_HANDLE_VALUE)
+	m_hIOCP = ::CreateIoCompletionPort(INVALID_HANDLE_VALUE, NULL, NULL, 0);
+	if (m_hIOCP == INVALID_HANDLE_VALUE)
 	{
 		assert(false && "CREATE IOCP FAIL");
 		return;
 	}
 
-	if (!::CreateIoCompletionPort(reinterpret_cast<HANDLE>(m_context.listenSocket), m_context.hIOCP, 0, 0))
+	if (!::CreateIoCompletionPort(reinterpret_cast<HANDLE>(m_listenSocket), m_hIOCP, 0, 0))
 	{
 		assert(false && "REGISTER IOCP FAIL");
 		return;
 	}
 
-	m_context.clientSocket = ::WSASocket(AF_INET, SOCK_STREAM, IPPROTO_TCP, 0, 0, WSA_FLAG_OVERLAPPED);
-	if (m_context.clientSocket == INVALID_SOCKET)
+	m_clientSocket = ::WSASocket(AF_INET, SOCK_STREAM, IPPROTO_TCP, 0, 0, WSA_FLAG_OVERLAPPED);
+	if (m_clientSocket == INVALID_SOCKET)
 	{
 		assert(false && "CREATE CLIENT SOCKET FAIL");
 		return;
 	}
 
-	if (!::AcceptEx(
-		m_context.listenSocket,
-		m_context.clientSocket,
-		m_context.overlappedEx.acceptBuffer.data(),
-		0,
-		sizeof(SOCKADDR_IN) + 16,
-		sizeof(SOCKADDR_IN) + 16,
-		nullptr,
-		&m_context.overlappedEx
-	))
+	if (!::AcceptEx(m_listenSocket, m_clientSocket, m_buffer.data(), 0, sizeof(SOCKADDR_IN) + 16, sizeof(SOCKADDR_IN) + 16, nullptr, &m_overlapped))
 	{
 		if (::WSAGetLastError() != ERROR_IO_PENDING)
 		{
@@ -140,58 +135,55 @@ void AcceptThread::Run()
 	m_isActive = true;
 
 	unsigned long ioSize{};
-	size_t sessionID{};
-	OVERLAPPEDEX* overlappedEx{};
+	std::uint64_t completionKey{};
+	OVERLAPPED* overlapped{};
 	while (m_isActive)
 	{
-		if (!::GetQueuedCompletionStatus(m_context.hIOCP, &ioSize, reinterpret_cast<PULONG_PTR>(&sessionID), reinterpret_cast<OVERLAPPED**>(&overlappedEx), SOCKET_TIMEOUT_MILLISEC))
-		{
-			int error{ ::WSAGetLastError() };
-			switch (error)
-			{
-			case ERROR_NETNAME_DELETED: // 클라이언트에서 강제로 연결 끊음
-				OnDisconnect(sessionID);
-				continue;
-			case WAIT_TIMEOUT:
-				continue;
-			default:
-				assert(false && "FAIL GetQueuedCompletionStatus()");
-				continue;
-			}
-		}
-
-		switch (overlappedEx->op)
-		{
-		case IOOperation::ACCEPT:
-		{
-			OnAccept(overlappedEx);
-			break;
-		}
-		case IOOperation::RECV:
-		{
-			if (ioSize > 0)
-				OnReceive(sessionID, static_cast<Packet::size_type>(ioSize));
-			else
-				OnDisconnect(sessionID);
-			break;
-		}
-		default:
-			assert(false && "INVALID IO OPERATION");
-			break;
-		}
+		if (::GetQueuedCompletionStatus(m_hIOCP, &ioSize, &completionKey, &overlapped, SOCKET_TIMEOUT_MILLISEC))
+			OnAccept();
 	}
 }
 
-void AcceptThread::OnAccept(OVERLAPPEDEX* overlappedEx)
+void Acceptor::OnAccept()
 {
-	// 연결된 클라이언트 정보를 로그로 출력
+	if (::setsockopt(m_clientSocket, SOL_SOCKET, SO_UPDATE_ACCEPT_CONTEXT, reinterpret_cast<char*>(&m_listenSocket), sizeof(m_listenSocket)))
+	{
+		assert(false && "UPDATE ACCEPT CONTEXT FAIL");
+		return;
+	}
+
+	// 소켓, 유저 등록
+	auto socket{ std::make_shared<Socket>() };
+	socket->socket = m_clientSocket;
+	auto user{ std::make_shared<User>(socket) };
+	if (auto um{ UserManager::GetInstance() })
+		um->Register(user);
+	if (auto sm{ SocketManager::GetInstance() })
+		sm->Register(user, socket);
+
+	// 새로운 Accept 소켓 생성
+	m_overlapped = {};
+	m_buffer.fill(0);
+	m_clientSocket = ::WSASocket(AF_INET, SOCK_STREAM, IPPROTO_TCP, 0, 0, WSA_FLAG_OVERLAPPED);
+	::AcceptEx(
+		m_listenSocket,
+		m_clientSocket,
+		m_buffer.data(),
+		0,
+		sizeof(SOCKADDR_IN) + 16,
+		sizeof(SOCKADDR_IN) + 16,
+		nullptr,
+		&m_overlapped
+	);
+
+	// 연결된 클라이언트 정보 출력
 	SOCKADDR_IN* localAddr{};
 	SOCKADDR_IN* remoteAddr{};
 	int localAddrSize{};
 	int remoteAddrSize{};
 
 	::GetAcceptExSockaddrs(
-		&overlappedEx->acceptBuffer,
+		m_buffer.data(),
 		0,
 		sizeof(SOCKADDR_IN) + 16,
 		sizeof(SOCKADDR_IN) + 16,
@@ -208,19 +200,14 @@ void AcceptThread::OnAccept(OVERLAPPEDEX* overlappedEx)
 	if (std::unique_lock lock{ m_logMutex })
 		m_logs.push_back(log);
 
-	if (::setsockopt(m_context.clientSocket, SOL_SOCKET, SO_UPDATE_ACCEPT_CONTEXT, reinterpret_cast<char*>(&m_context.listenSocket), sizeof(m_context.listenSocket)))
-	{
-		assert(false && "ACCEPT FAIL - setsockopt");
-		return;
-	}
-
+	/*
 	// 해당 소켓을 IOCP에 등록
-	::CreateIoCompletionPort(reinterpret_cast<HANDLE>(m_context.clientSocket), m_context.hIOCP, m_sessionID, 0);
+	::CreateIoCompletionPort(reinterpret_cast<HANDLE>(m_clientSocket), m_hIOCP, m_sessionID, 0);
 
 	// 클라이언트 세션 추가
 	auto& session{ m_sessions[m_sessionID] };
 	session.id = m_sessionID;
-	session.socket = m_context.clientSocket;
+	session.socket = m_clientSocket;
 	session.overlappedEx.op = IOOperation::RECV;
 	++m_sessionID;
 
@@ -234,23 +221,11 @@ void AcceptThread::OnAccept(OVERLAPPEDEX* overlappedEx)
 			return;
 		}
 	}
-
-	// 새로운 Accept 소켓 생성
-	m_context.overlappedEx = {};
-	m_context.clientSocket = ::WSASocket(AF_INET, SOCK_STREAM, IPPROTO_TCP, 0, 0, WSA_FLAG_OVERLAPPED);
-	::AcceptEx(
-		m_context.listenSocket,
-		m_context.clientSocket,
-		m_context.overlappedEx.acceptBuffer.data(),
-		0,
-		sizeof(SOCKADDR_IN) + 16,
-		sizeof(SOCKADDR_IN) + 16,
-		nullptr,
-		&m_context.overlappedEx
-	);
+	*/
 }
 
-void AcceptThread::OnReceive(size_t sessionID, Packet::size_type ioSize)
+/*
+void Acceptor::OnReceive(size_t sessionID, Packet::size_type ioSize)
 {
 	if (!m_sessions.contains(sessionID))
 		return;
@@ -288,7 +263,7 @@ void AcceptThread::OnReceive(size_t sessionID, Packet::size_type ioSize)
 	::WSARecv(session.socket, &wsaBuf, 1, 0, &flag, &session.overlappedEx, NULL);
 }
 
-void AcceptThread::OnDisconnect(size_t sessionID)
+void Acceptor::OnDisconnect(size_t sessionID)
 {
 	if (!m_sessions.contains(sessionID))
 		return;
@@ -301,7 +276,7 @@ void AcceptThread::OnDisconnect(size_t sessionID)
 		m_logs.push_back("[hh:mm:ss] Disconnect");
 }
 
-void AcceptThread::OnPacket(size_t sessionID, const std::shared_ptr<Packet>& packet)
+void Acceptor::OnPacket(size_t sessionID, const std::shared_ptr<Packet>& packet)
 {
 	switch (packet->GetType())
 	{
@@ -321,3 +296,4 @@ void AcceptThread::OnPacket(size_t sessionID, const std::shared_ptr<Packet>& pac
 		break;
 	}
 }
+*/

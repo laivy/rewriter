@@ -8,6 +8,7 @@
 
 // C/C++
 #include <atlstr.h>
+#include <execution>
 #include <format>
 #include <semaphore>
 
