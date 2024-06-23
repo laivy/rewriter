@@ -44,9 +44,6 @@
     <ClCompile Include="DBAccessor.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
-    <ClCompile Include="Acceptor.cpp">
-      <Filter>소스 파일</Filter>
-    </ClCompile>
     <ClCompile Include="User.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
@@ -98,9 +95,6 @@
       <Filter>헤더 파일</Filter>
     </ClInclude>
     <ClInclude Include="DBAccessor.h">
-      <Filter>헤더 파일</Filter>
-    </ClInclude>
-    <ClInclude Include="Acceptor.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
     <ClInclude Include="User.h">

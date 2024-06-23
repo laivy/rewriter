@@ -1,5 +1,4 @@
 ﻿#include "Stdafx.h"
-#include "Acceptor.h"
 #include "App.h"
 #include "DBAccessor.h"
 #include "SocketManager.h"
@@ -15,11 +14,10 @@ App::App()
 
 App::~App()
 {
-	Acceptor::Destroy(); // 1. 유저 접속 차단
-	UserManager::Destroy(); // 2. 접속 중인 유저 정보 저장
-	DBAccessor::Destroy(); // 3. DB 연결 해제
+	SocketManager::Destroy(); // 유저 접속 차단
+	UserManager::Destroy(); // 접속 중인 유저 정보 저장
+	DBAccessor::Destroy(); // DB 연결 해제
 	ImGui::CleanUp();
-	::WSACleanup();
 }
 
 void App::Run()
@@ -122,14 +120,9 @@ void App::InitImgui()
 
 void App::InitApp()
 {
-	WSADATA wsaData{};
-	if (::WSAStartup(MAKEWORD(2, 2), &wsaData))
-		assert(false && "FAIL WSAStartup");
-
 	DBAccessor::Instantiate(); // DB 연결
 	UserManager::Instantiate();
-	SocketManager::Instantiate(); 
-	Acceptor::Instantiate(); // 유저 접속 허용
+	SocketManager::Instantiate(); // 유저 접속 허용
 }
 
 void App::Update()
@@ -142,25 +135,10 @@ void App::Render()
 {
 	ImGui::RenderBegin();
 	{
-		RenderBackgroundWindow();
-		if (auto dbThread{ DBAccessor::GetInstance() })
-			dbThread->Render();
-		if (auto acceptThread{ Acceptor::GetInstance() })
-			acceptThread->Render();
+		if (auto db{ DBAccessor::GetInstance() })
+			db->Render();
+		if (auto sm{ SocketManager::GetInstance() })
+			sm->Render();
 	}
 	ImGui::RenderEnd();
-}
-
-void App::RenderBackgroundWindow()
-{
-	RECT rect{};
-	::GetClientRect(hWnd, &rect);
-
-	ImGui::Begin("Background", NULL,
-		ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoSavedSettings |
-		ImGuiWindowFlags_NoFocusOnAppearing | ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_NoDocking);
-	ImGui::SetWindowSize({ static_cast<float>(rect.right), static_cast<float>(rect.bottom) });
-	ImGui::SetWindowPos({ 0.0f, 0.0f });
-	ImGui::DockSpace(ImGui::GetID("Background"), {}, ImGuiDockNodeFlags_PassthruCentralNode);
-	ImGui::End();
 }

@@ -18,8 +18,6 @@ private:
 	void Update();
 	void Render();
 
-	void RenderBackgroundWindow();
-
 public:
 	static constexpr auto WINDOW_TITLE_NAME{ L"LOGIN SERVER" };
 	static inline auto OnResize{ std::make_shared<Event<int, int >>() };
