@@ -113,17 +113,16 @@ void App::InitWindow()
 
 void App::InitImGui()
 {
-	ImGui::Init(hWnd);
+	ImGui::Init(hWnd, ImGuiConfigFlags_NavEnableKeyboard | ImGuiConfigFlags_DockingEnable);
 	OnResize->Register(&ImGui::OnResize);
 
-	ImGuiIO& io{ ImGui::GetIO() };
+	auto& io{ ImGui::GetIO() };
 	io.IniFilename = "Data/imgui.ini";
-	io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
-	io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
 	io.Fonts->AddFontFromFileTTF("Data/NEXON Lv2 Gothic.ttf", 16.0f, nullptr, io.Fonts->GetGlyphRangesKorean());
 	
-	ImGui::GetStyle().WindowMenuButtonPosition = ImGuiDir_None;
-	ImGui::GetStyle().DockingSeparatorSize = 1.0f;
+	auto& style{ ImGui::GetStyle() };
+	style.WindowMenuButtonPosition = ImGuiDir_None;
+	style.DockingSeparatorSize = 1.0f;
 	ImGui::StyleColorsDark();
 }
 
@@ -147,9 +146,8 @@ void App::Update()
 
 void App::Render()
 {
-	ImGui::RenderBegin();
+	ImGui::BeginRender();
 	{
-		RenderImGuiMainDockSpace();
 		if (auto explorer{ Explorer::GetInstance() })
 			explorer->Render();
 		if (auto hierarchy{ Hierarchy::GetInstance() })
@@ -158,7 +156,7 @@ void App::Render()
 			inspector->Render();
 		ImGui::ShowDemoWindow();
 	}
-	ImGui::RenderEnd();
+	ImGui::EndRender();
 }
 
 void App::RenderImGuiMainDockSpace()

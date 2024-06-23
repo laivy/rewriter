@@ -4,10 +4,21 @@
 
 class Packet;
 
+enum class IOOP
+{
+	ACCEPT,
+	RECEIVE,
+};
+
+struct OVERLAPPEDEX : OVERLAPPED
+{
+	IOOP op{ IOOP::ACCEPT };
+};
+
 struct Socket
 {
 	SOCKET socket{ INVALID_SOCKET };
-	OVERLAPPED overlapped{};
+	OVERLAPPEDEX overlappedEx{};
 	std::array<char, 512> buffer{};
 	std::uint32_t remainSize{};
 	std::unique_ptr<Packet> packet;

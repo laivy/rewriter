@@ -15,6 +15,7 @@ namespace Renderer
 	extern ComPtr<ID3D12Resource> renderTargets[FRAME_COUNT];
 	extern ComPtr<ID3D12DescriptorHeap> dsvHeap;
 	extern ComPtr<ID3D12Resource> depthStencil;
+	extern ComPtr<ID3D12DescriptorHeap> srvHeap;
 	extern ComPtr<ID3D12RootSignature> rootSignature;
 	extern ComPtr<ID3D12Fence> fence;
 	extern D3D12_VIEWPORT viewport;

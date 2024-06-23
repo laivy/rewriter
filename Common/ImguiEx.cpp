@@ -8,10 +8,13 @@
 #include <wrl.h>
 #include "External/DirectX/d3dx12.h"
 using Microsoft::WRL::ComPtr;
+#endif
 
 namespace
 {
+#ifdef _IMGUI_STANDALONE
 	constexpr auto FRAME_COUNT{ 3u };
+	HWND hWnd;
 	ComPtr<IDXGIFactory4> factory;
 	ComPtr<ID3D12Device> d3dDevice;
 	ComPtr<IDXGISwapChain3>	swapChain;
@@ -62,7 +65,7 @@ namespace
 		d3dDevice->CreateCommandQueue(&queueDesc, IID_PPV_ARGS(&commandQueue));
 	}
 
-	void CreateSwapChain(HWND hWnd)
+	void CreateSwapChain()
 	{
 		RECT rect{};
 		::GetClientRect(hWnd, &rect);
@@ -89,7 +92,6 @@ namespace
 		swapChain1.As(&swapChain);
 		frameIndex = swapChain->GetCurrentBackBufferIndex();
 
-		// ALT + ENTER 금지
 		factory->MakeWindowAssociation(hWnd, DXGI_MWA_NO_ALT_ENTER);
 	}
 
@@ -175,18 +177,47 @@ namespace
 		::WaitForSingleObjectEx(fenceEvent, INFINITE, FALSE);
 		++fenceValues[frameIndex];
 	}
-}
+
+	void RenderDockSpace()
+	{
+		const ImGuiViewport* viewport = ImGui::GetMainViewport();
+		ImGui::SetNextWindowPos(viewport->WorkPos);
+		ImGui::SetNextWindowSize(viewport->WorkSize);
+		ImGui::SetNextWindowViewport(viewport->ID);
+
+		ImGui::Begin("DOCKSPACE", NULL,
+			ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoSavedSettings |
+			ImGuiWindowFlags_NoFocusOnAppearing | ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_NoDocking);
+		ImGui::DockSpace(ImGui::GetID("DOCKSPACE"), {}, ImGuiDockNodeFlags_PassthruCentralNode);
+		ImGui::End();
+	}
+#else
+	HWND hWnd;
+	ID3D12DescriptorHeap* srvDescHeap;
+	ID3D12GraphicsCommandList* commandList;
+
+	void CreateSrvDescriptorHeap(ID3D12Device* device)
+	{
+		D3D12_DESCRIPTOR_HEAP_DESC srvHeapDesc{};
+		srvHeapDesc.NumDescriptors = 1;
+		srvHeapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
+		srvHeapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;
+		srvHeapDesc.NodeMask = NULL;
+		device->CreateDescriptorHeap(&srvHeapDesc, IID_PPV_ARGS(&srvDescHeap));
+	}
 #endif
+}
 
 namespace ImGui
 {
 #ifdef _IMGUI_STANDALONE
-	void Init(HWND hWnd)
+	void Init(HWND _hWnd, ImGuiConfigFlags configFlags)
 	{
+		hWnd = _hWnd;
 		CreateFactory();
 		CreateDevice();
 		CreateCommandQueue();
-		CreateSwapChain(hWnd);
+		CreateSwapChain();
 		CreateRtvDescriptorHeap();
 		CreateSrvDescriptorHeap();
 		CreateRenderTargetView();
@@ -199,6 +230,8 @@ namespace ImGui
 
 		IMGUI_CHECKVERSION();
 		ImGui::CreateContext();
+		ImGui::GetIO().ConfigFlags |= configFlags;
+
 		ImGui_ImplWin32_Init(hWnd);
 		ImGui_ImplDX12_Init(
 			d3dDevice.Get(),
@@ -236,15 +269,32 @@ namespace ImGui
 		CreateRenderTargetView();
 	}
 #else
-	void Init(HWND hWnd, ID3D12Device* device, int num_frames_in_flight, DXGI_FORMAT rtv_format,
-		ID3D12DescriptorHeap* cbv_srv_heap, D3D12_CPU_DESCRIPTOR_HANDLE font_srv_cpu_desc_handle, D3D12_GPU_DESCRIPTOR_HANDLE font_srv_gpu_desc_handle)
+	void Init(HWND _hWnd, ID3D12Device* device, ID3D12GraphicsCommandList* _commandList, int num_frames_in_flight, DXGI_FORMAT rtv_format, ImGuiConfigFlags configFlags)
 	{
+		hWnd = _hWnd;
+		commandList = _commandList;
 
+		CreateSrvDescriptorHeap(device);
+
+		IMGUI_CHECKVERSION();
+		ImGui::CreateContext();
+		ImGui::GetIO().ConfigFlags |= configFlags;
+
+		ImGui_ImplWin32_Init(hWnd);
+		ImGui_ImplDX12_Init(
+			device,
+			num_frames_in_flight,
+			rtv_format,
+			srvDescHeap,
+			srvDescHeap->GetCPUDescriptorHandleForHeapStart(),
+			srvDescHeap->GetGPUDescriptorHandleForHeapStart()
+		);
 	}
 #endif
 
-	void RenderBegin()
+	void BeginRender()
 	{
+#ifdef _IMGUI_STANDALONE
 		ResetCommandList();
 		commandList->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(renderTargets[frameIndex].Get(), D3D12_RESOURCE_STATE_PRESENT, D3D12_RESOURCE_STATE_RENDER_TARGET));
 
@@ -254,23 +304,31 @@ namespace ImGui
 		constexpr float clearColor[]{ 0.15625f, 0.171875f, 0.203125f, 1.0f };
 		commandList->ClearRenderTargetView(rtvHandle, clearColor, 0, NULL);
 		commandList->SetDescriptorHeaps(1, srvDescHeap.GetAddressOf());
-
+#else
+		commandList->SetDescriptorHeaps(1, &srvDescHeap);
+#endif
 		ImGui_ImplDX12_NewFrame();
 		ImGui_ImplWin32_NewFrame();
 		ImGui::NewFrame();
+#ifdef _IMGUI_STANDALONE
+		RenderDockSpace();
+#endif
 	}
 
-	void RenderEnd()
+	void EndRender()
 	{
-		ImGui::EndFrame();
 		ImGui::Render();
+#ifdef _IMGUI_STANDALONE
 		ImGui_ImplDX12_RenderDrawData(ImGui::GetDrawData(), commandList.Get());
+#else
+		ImGui_ImplDX12_RenderDrawData(ImGui::GetDrawData(), commandList);
+#endif
 		if (ImGui::GetIO().ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
 		{
 			ImGui::UpdatePlatformWindows();
 			ImGui::RenderPlatformWindowsDefault();
 		}
-
+#ifdef _IMGUI_STANDALONE
 		commandList->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(renderTargets[frameIndex].Get(), D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PRESENT));
 		commandList->Close();
 		ID3D12CommandList* ppCommandList[]{ commandList.Get() };
@@ -278,6 +336,7 @@ namespace ImGui
 
 		swapChain->Present(1, 0);
 		WaitPrevFrame();
+#endif
 	}
 
 	void CleanUp()

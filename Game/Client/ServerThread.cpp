@@ -2,16 +2,15 @@
 #include "ServerThread.h"
 
 ServerThread::ServerThread() :
-	m_isActive{ true },
 	m_hIOCP{ INVALID_HANDLE_VALUE },
 	m_servers{},
-	std::jthread{ &ServerThread::Run, this }
+	std::jthread{ std::bind_front(&ServerThread::Run, this) }
 {
 }
 
 ServerThread::~ServerThread()
 {
-	m_isActive = false;
+	std::jthread::request_stop();
 	std::jthread::join();
 	for (auto& server : m_servers)
 	{
@@ -41,7 +40,7 @@ std::shared_ptr<Packet> ServerThread::PopPacket()
 	return packet;
 }
 
-void ServerThread::Run()
+void ServerThread::Run(std::stop_token stoken)
 {
 	WSADATA wsaData{};
 	if (::WSAStartup(MAKEWORD(2, 2), &wsaData))
@@ -63,7 +62,7 @@ void ServerThread::Run()
 	unsigned long ioSize{};
 	size_t serverType{};
 	OVERLAPPEDEX* overlappedEx{};
-	while (m_isActive)
+	while (!stoken.stop_requested())
 	{
 		if (!::GetQueuedCompletionStatus(m_hIOCP, &ioSize, reinterpret_cast<PULONG_PTR>(&serverType), reinterpret_cast<OVERLAPPED**>(&overlappedEx), 1000))
 		{
@@ -142,6 +141,7 @@ void ServerThread::OnDisconnect(ServerType type)
 	server.port = 0;
 	if (server.socket != INVALID_SOCKET)
 	{
+		::shutdown(server.socket, SD_BOTH);
 		::closesocket(server.socket);
 		server.socket = INVALID_SOCKET;
 	}

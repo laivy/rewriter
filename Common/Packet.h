@@ -6,7 +6,7 @@ class Packet
 {
 public:
 	using size_type = unsigned short; // 패킷 크기
-	enum class Type : unsigned short // 패킷 타입
+	enum class Type : unsigned int // 패킷 타입
 	{
 		CLIENT_TryLogin,
 		LOGIN_TryLogin,
@@ -123,7 +123,7 @@ private:
 	void ReAlloc(size_type requireSize);
 
 private:
-	static constexpr auto DEFAULT_BUFFER_SIZE{ 128 };
+	static constexpr size_type DEFAULT_BUFFER_SIZE{ 128 };
 
 	Type m_type;
 	std::unique_ptr<char[]> m_buffer;

@@ -43,7 +43,7 @@ void App::Run()
 LRESULT App::WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
 	if (ImGui_ImplWin32_WndProcHandler(hWnd, message, wParam, lParam))
-		return true;
+		return 1;
 
 	App* app{ reinterpret_cast<App*>(::GetWindowLongPtr(hWnd, GWLP_USERDATA)) };
 	switch (message)
@@ -55,11 +55,15 @@ LRESULT App::WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 		return 1;
 	}
 	case WM_SIZE:
+	{
 		App::OnResize->Notify(GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam));
 		break;
+	}
 	case WM_DESTROY:
+	{
 		::PostQuitMessage(0);
 		break;
+	}
 	default:
 		return ::DefWindowProc(hWnd, message, wParam, lParam);
 	}
@@ -104,17 +108,16 @@ void App::InitWindow()
 
 void App::InitImgui()
 {
-	ImGui::Init(hWnd);
+	ImGui::Init(hWnd, ImGuiConfigFlags_NavEnableKeyboard | ImGuiConfigFlags_DockingEnable);
 	OnResize->Register(&ImGui::OnResize);
 
-	ImGuiIO& io{ ImGui::GetIO() };
+	auto& io{ ImGui::GetIO() };
 	io.IniFilename = "Data/imgui.ini";
-	io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
-	io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
 	io.Fonts->AddFontFromFileTTF("Data/NEXON Lv2 Gothic.ttf", 16.0f, nullptr, io.Fonts->GetGlyphRangesKorean());
 
-	ImGui::GetStyle().WindowMenuButtonPosition = ImGuiDir_None;
-	ImGui::GetStyle().DockingSeparatorSize = 1.0f;
+	auto& style{ ImGui::GetStyle() };
+	style.WindowMenuButtonPosition = ImGuiDir_None;
+	style.DockingSeparatorSize = 1.0f;
 	ImGui::StyleColorsDark();
 }
 
@@ -133,12 +136,12 @@ void App::Update()
 
 void App::Render()
 {
-	ImGui::RenderBegin();
+	ImGui::BeginRender();
 	{
 		if (auto db{ DBAccessor::GetInstance() })
 			db->Render();
 		if (auto sm{ SocketManager::GetInstance() })
 			sm->Render();
 	}
-	ImGui::RenderEnd();
+	ImGui::EndRender();
 }

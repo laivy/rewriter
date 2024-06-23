@@ -166,6 +166,16 @@ namespace
 		}
 	}
 
+	void CreateSrvDescriptorHeap()
+	{
+		D3D12_DESCRIPTOR_HEAP_DESC srvHeapDesc{};
+		srvHeapDesc.NumDescriptors = 1;
+		srvHeapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
+		srvHeapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;
+		srvHeapDesc.NodeMask = NULL;
+		Renderer::d3dDevice->CreateDescriptorHeap(&srvHeapDesc, IID_PPV_ARGS(&Renderer::srvHeap));
+	}
+
 	void CreateDepthStencilView()
 	{
 		D3D12_RESOURCE_DESC desc{};
@@ -310,6 +320,7 @@ namespace Renderer
 	ComPtr<ID3D12Resource> renderTargets[FRAME_COUNT];
 	ComPtr<ID3D12DescriptorHeap> dsvHeap;
 	ComPtr<ID3D12Resource> depthStencil;
+	ComPtr<ID3D12DescriptorHeap> srvHeap;
 	ComPtr<ID3D12RootSignature> rootSignature;
 	ComPtr<ID3D12Fence> fence;
 	D3D12_VIEWPORT viewport;
@@ -383,6 +394,7 @@ namespace Renderer
 		CreateRtvDsvDescriptorHeap();
 		CreateRenderTargetView();
 		CreateDepthStencilView();
+		CreateSrvDescriptorHeap();
 		CreateRootSignature();
 		CreateCommandList();
 		CreateFence();

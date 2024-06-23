@@ -7,6 +7,7 @@
 #include "ServerThread.h"
 #include "Window.h"
 #include "WindowManager.h"
+#include "Common/ImguiEx.h"
 #include "Common/Timer.h"
 
 App::App() :
@@ -20,6 +21,9 @@ App::App() :
 
 App::~App()
 {
+#ifdef _DEBUG
+	ImGui::CleanUp();
+#endif
 	Renderer::CleanUp();
 	SceneManager::Destroy();
 	ServerThread::Destroy();
@@ -47,6 +51,9 @@ void App::Run()
 
 LRESULT CALLBACK App::WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
+#ifdef _DEBUG
+	ImGui_ImplWin32_WndProcHandler(hWnd, message, wParam, lParam);
+#endif
 	App* app{ reinterpret_cast<App*>(::GetWindowLongPtr(hWnd, GWLP_USERDATA)) };
 	switch (message)
 	{
@@ -128,6 +135,16 @@ void App::InitWindow()
 void App::InitApp()
 {
 	Renderer::Init();
+#ifdef _DEBUG
+	ImGui::Init(
+		App::hWnd,
+		Renderer::d3dDevice.Get(),
+		Renderer::commandList.Get(),
+		Renderer::FRAME_COUNT,
+		DXGI_FORMAT_R8G8B8A8_UNORM,
+		ImGuiConfigFlags_NavEnableKeyboard | ImGuiConfigFlags_DockingEnable | ImGuiConfigFlags_ViewportsEnable
+	);
+#endif
 	ServerThread::Instantiate();
 	SceneManager::Instantiate();
 }
@@ -158,6 +175,13 @@ void App::Render()
 	{
 		if (auto sm{ SceneManager::GetInstance() })
 			sm->Render3D();
+#ifdef _DEBUG
+		ImGui::BeginRender();
+		{
+			ImGui::ShowDemoWindow();
+		}
+		ImGui::EndRender();
+#endif
 	}
 	Renderer3D::End();
 	Renderer2D::Begin();

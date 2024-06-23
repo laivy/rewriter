@@ -46,7 +46,7 @@ public:
 	std::shared_ptr<Packet> PopPacket();
 
 private:
-	void Run();
+	void Run(std::stop_token stoken);
 
 	void OnReceive(ServerType type, Packet::size_type ioSize);
 	void OnDisconnect(ServerType type);
@@ -54,7 +54,6 @@ private:
 	void Connect(ServerType type, std::string_view ip, unsigned short port);
 
 private:
-	bool m_isActive;
 	HANDLE m_hIOCP;
 	std::array<Server, static_cast<size_t>(ServerType::COUNT)> m_servers;
 
