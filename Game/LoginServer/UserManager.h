@@ -8,7 +8,7 @@ public:
 	UserManager() = default;
 	~UserManager() = default;
 
-	void Update();
+	void Update(float deltaTime);
 	void Render();
 
 	void Register(const std::shared_ptr<User>& user);

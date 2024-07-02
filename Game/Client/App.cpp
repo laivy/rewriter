@@ -4,7 +4,7 @@
 #include "Renderer2D.h"
 #include "Renderer3D.h"
 #include "SceneManager.h"
-#include "ServerThread.h"
+#include "ServerManager.h"
 #include "Window.h"
 #include "WindowManager.h"
 #include "Common/ImguiEx.h"
@@ -26,7 +26,7 @@ App::~App()
 #endif
 	Renderer::CleanUp();
 	SceneManager::Destroy();
-	ServerThread::Destroy();
+	ServerManager::Destroy();
 }
 
 void App::Run()
@@ -128,7 +128,6 @@ void App::InitWindow()
 		this
 	);
 	::SetWindowText(hWnd, WINDOW_TITLE_NAME);
-	::ShowWindow(hWnd, SW_SHOWNORMAL);
 	::UpdateWindow(hWnd);
 }
 
@@ -145,24 +144,21 @@ void App::InitApp()
 		ImGuiConfigFlags_NavEnableKeyboard | ImGuiConfigFlags_DockingEnable | ImGuiConfigFlags_ViewportsEnable
 	);
 #endif
-	ServerThread::Instantiate();
+	// 서버매니저 생성자에서 로그인 서버와 연결 시도
+	// 연결 실패 시 클라이언트 종료
+	if (auto sm{ ServerManager::Instantiate() })
+	{
+		if (sm->IsConnected(Server::Type::LOGIN))
+			::ShowWindow(hWnd, SW_SHOWNORMAL);
+		else
+			::PostQuitMessage(0);
+	}
 	SceneManager::Instantiate();
 }
 
 void App::Update()
 {
 	float deltaTime{ m_timer->Tick() };
-
-	if (auto st{ ServerThread::GetInstance() })
-	{
-		auto packet{ st->PopPacket() };
-		while (packet)
-		{
-			OnPacket->Notify(packet);
-			packet = st->PopPacket();
-		}
-	}
-
 	if (auto wm{ WindowManager::GetInstance() })
 		wm->Update(deltaTime);
 	if (auto sm{ SceneManager::GetInstance() })

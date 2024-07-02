@@ -57,7 +57,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_DEBUG;_IMGUI_STANDALONE;_LOGINSERVER;_SERVER;_WINDOWS;NOMINMAX;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>false</ConformanceMode>
-      <PrecompiledHeaderFile>stdafx.h</PrecompiledHeaderFile>
+      <PrecompiledHeaderFile>Stdafx.h</PrecompiledHeaderFile>
       <LanguageStandard>stdcpp20</LanguageStandard>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <AdditionalIncludeDirectories>$(SolutionDir);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
@@ -80,6 +80,7 @@
       <LanguageStandard>stdcpp20</LanguageStandard>
       <AdditionalIncludeDirectories>$(SolutionDir);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PrecompiledHeader>Use</PrecompiledHeader>
+      <PrecompiledHeaderFile>Stdafx.h</PrecompiledHeaderFile>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -103,6 +104,7 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="..\..\Common\Timer.cpp" />
     <ClCompile Include="..\..\Common\Types.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
@@ -135,7 +137,6 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
     </ClCompile>
-    <ClCompile Include="DBAccessor.cpp" />
     <ClCompile Include="App.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Use</PrecompiledHeader>
     </ClCompile>
@@ -157,6 +158,7 @@
     <ClInclude Include="..\..\Common\Singleton.h" />
     <ClInclude Include="..\..\Common\Socket.h" />
     <ClInclude Include="..\..\Common\Stringtable.h" />
+    <ClInclude Include="..\..\Common\Timer.h" />
     <ClInclude Include="..\..\Common\Types.h" />
     <ClInclude Include="..\..\External\DirectX\d3dx12.h" />
     <ClInclude Include="..\..\External\Imgui\imconfig.h" />
@@ -170,7 +172,6 @@
     <ClInclude Include="..\..\Module\Resource\Include\Image.h" />
     <ClInclude Include="..\..\Module\Resource\Include\Manager.h" />
     <ClInclude Include="..\..\Module\Resource\Include\Property.h" />
-    <ClInclude Include="DBAccessor.h" />
     <ClInclude Include="App.h" />
     <ClInclude Include="SocketManager.h" />
     <ClInclude Include="Stdafx.h" />

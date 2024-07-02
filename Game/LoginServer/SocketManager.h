@@ -14,7 +14,7 @@ public:
 private:
 	void Run(std::stop_token stoken);
 	void OnAccept();
-	void OnReceive(User* user, unsigned long ioSize);
+	void OnReceive(User* user, Packet::size_type ioSize);
 	void OnDisconnect(User* user);
 
 private:

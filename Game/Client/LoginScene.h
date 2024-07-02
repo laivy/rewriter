@@ -14,5 +14,5 @@ public:
 	virtual void Render3D() const override final;
 
 private:
-	void OnPacket(const std::shared_ptr<Packet>& packet);
+	void OnPacket(Packet& packet);
 };

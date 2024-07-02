@@ -84,6 +84,7 @@ SocketManager::~SocketManager()
 {
 	for (auto& thread : m_threads)
 		thread.request_stop();
+	::CloseHandle(m_hIOCP);
 	::WSACleanup();
 }
 
@@ -91,7 +92,6 @@ void SocketManager::Render()
 {
 	if (ImGui::Begin("SOCKET MANAGER"))
 	{
-
 	}
 	ImGui::End();
 }
@@ -103,16 +103,16 @@ void SocketManager::Run(std::stop_token stoken)
 	OVERLAPPEDEX* overlappedEx{};
 	while (!stoken.stop_requested())
 	{
-		if (::GetQueuedCompletionStatus(m_hIOCP, &ioSize, reinterpret_cast<unsigned long long*>(&user), reinterpret_cast<OVERLAPPED**>(&overlappedEx), 1000))
+		if (::GetQueuedCompletionStatus(m_hIOCP, &ioSize, reinterpret_cast<unsigned long long*>(&user), reinterpret_cast<OVERLAPPED**>(&overlappedEx), INFINITE))
 		{
 			switch (overlappedEx->op)
 			{
-			case IOOP::ACCEPT:
+			case OVERLAPPEDEX::IOOP::ACCEPT:
 				OnAccept();
 				break;
-			case IOOP::RECEIVE:
+			case OVERLAPPEDEX::IOOP::RECEIVE:
 				if (ioSize > 0)
-					OnReceive(user, ioSize);
+					OnReceive(user, static_cast<Packet::size_type>(ioSize));
 				else
 					OnDisconnect(user);
 				break;
@@ -126,7 +126,7 @@ void SocketManager::Run(std::stop_token stoken)
 		case ERROR_NETNAME_DELETED: // 클라이언트에서 강제로 연결 끊음
 			OnDisconnect(user);
 			continue;
-		case WAIT_TIMEOUT:
+		case ERROR_ABANDONED_WAIT_0: // IOCP 핸들 닫힘
 			continue;
 		default:
 			assert(false && "IOCP ERROR");
@@ -147,7 +147,7 @@ void SocketManager::OnAccept()
 	// 유저 객체 생성
 	auto socket{ std::make_shared<Socket>() };
 	socket->socket = m_clientSocket;
-	socket->overlappedEx.op = IOOP::RECEIVE;
+	socket->overlappedEx.op = OVERLAPPEDEX::IOOP::RECEIVE;
 	auto user{ std::make_shared<User>(socket) };
 	if (auto um{ UserManager::GetInstance() })
 		um->Register(user);
@@ -164,7 +164,7 @@ void SocketManager::OnAccept()
 	::AcceptEx(m_listenSocket, m_clientSocket, m_acceptBuffer.data(), 0, sizeof(SOCKADDR_IN) + 16, sizeof(SOCKADDR_IN) + 16, nullptr, &m_overlappedEx);
 }
 
-void SocketManager::OnReceive(User* user, unsigned long ioSize)
+void SocketManager::OnReceive(User* user, Packet::size_type ioSize)
 {
 	const auto& socket{ user->GetSocket() };
 	if (socket->packet && socket->remainSize > 0)

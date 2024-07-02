@@ -5,7 +5,7 @@
 #include "DebugWindow.h"
 #include "Modal.h"
 #include "Renderer2D.h"
-#include "ServerThread.h"
+#include "ServerManager.h"
 #include "TextBlock.h"
 #include "TextBox.h"
 #include "WindowManager.h"
@@ -67,7 +67,7 @@ DebugWindow::DebugWindow()
 			for (int i = 0; i < 1000; ++i)
 				packet.Encode(i);
 			packet.End();
-			ServerThread::GetInstance()->SendPacket(ServerType::LOGIN, packet);
+			ServerManager::GetInstance()->SendPacket(Server::Type::LOGIN, packet);
 		});
 	m_controls.push_back(loginButton);
 
@@ -104,13 +104,13 @@ void DebugWindow::Render() const
 		control->Render();
 }
 
-void DebugWindow::OnPacket(const std::shared_ptr<Packet>& packet)
+void DebugWindow::OnPacket(Packet& packet)
 {
-	switch (packet->GetType())
+	switch (packet.GetType())
 	{
 	case Packet::Type::LOGIN_TryLogin:
 	{
-		auto str{ packet->Decode<std::string>() };
+		auto str{ packet.Decode<std::string>() };
 		break;
 	}
 	}

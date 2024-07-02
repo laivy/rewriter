@@ -1,6 +1,5 @@
 ﻿#include "Stdafx.h"
 #include "App.h"
-#include "DBAccessor.h"
 #include "SocketManager.h"
 #include "UserManager.h"
 #include "Common/ImguiEx.h"
@@ -10,13 +9,13 @@ App::App()
 	InitWindow();
 	InitImgui();
 	InitApp();
+	m_timer.Tick();
 }
 
 App::~App()
 {
 	SocketManager::Destroy(); // 유저 접속 차단
 	UserManager::Destroy(); // 접속 중인 유저 정보 저장
-	DBAccessor::Destroy(); // DB 연결 해제
 	ImGui::CleanUp();
 }
 
@@ -123,23 +122,21 @@ void App::InitImgui()
 
 void App::InitApp()
 {
-	DBAccessor::Instantiate(); // DB 연결
 	UserManager::Instantiate();
 	SocketManager::Instantiate(); // 유저 접속 허용
 }
 
 void App::Update()
 {
+	auto deltaTime{ m_timer.Tick() };
 	if (auto um{ UserManager::GetInstance() })
-		um->Update();
+		um->Update(deltaTime);
 }
 
 void App::Render()
 {
 	ImGui::BeginRender();
 	{
-		if (auto db{ DBAccessor::GetInstance() })
-			db->Render();
 		if (auto sm{ SocketManager::GetInstance() })
 			sm->Render();
 	}

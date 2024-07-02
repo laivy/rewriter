@@ -16,6 +16,8 @@ public:
 
 	void OnPacket(Packet& packet);
 
+	void Update(float deltaTime);
+
 	const std::shared_ptr<Socket>& GetSocket() const;
 	std::uint32_t GetAccountID() const;
 

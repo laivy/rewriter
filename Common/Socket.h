@@ -1,17 +1,17 @@
-﻿#include <array>
+﻿#include <WinSock2.h>
+#include <array>
 #include <memory>
-#include "WinSock2.h"
 
 class Packet;
 
-enum class IOOP
-{
-	ACCEPT,
-	RECEIVE,
-};
-
 struct OVERLAPPEDEX : OVERLAPPED
 {
+	enum class IOOP
+	{
+		ACCEPT,
+		RECEIVE,
+	};
+
 	IOOP op{ IOOP::ACCEPT };
 };
 

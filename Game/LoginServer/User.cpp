@@ -25,6 +25,10 @@ void User::OnPacket(Packet& packet)
 	}
 }
 
+void User::Update(float deltaTime)
+{
+}
+
 const std::shared_ptr<Socket>& User::GetSocket() const
 {
 	return m_socket;

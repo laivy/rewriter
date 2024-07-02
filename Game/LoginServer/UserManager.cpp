@@ -2,13 +2,13 @@
 #include "User.h"
 #include "UserManager.h"
 
-void UserManager::Update()
+void UserManager::Update(float deltaTime)
 {
 	std::lock_guard lock{ m_mutex };
 	std::for_each(std::execution::par, m_users.begin(), m_users.end(),
-		[](auto& user)
+		[deltaTime](auto& user)
 		{
-			user;
+			user->Update(deltaTime);
 		});
 }
 

@@ -1,4 +1,5 @@
 ﻿#pragma once
+#include "Common/Timer.h"
 
 class App : public TSingleton<App>
 {
@@ -24,4 +25,7 @@ public:
 	static inline auto OnPacket{ std::make_shared<Event<size_t, std::shared_ptr<Packet>>>() };
 	static inline HWND hWnd{ NULL };
 	static inline INT2 size{ 600, 400 };
+
+private:
+	Timer m_timer;
 };

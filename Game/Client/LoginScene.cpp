@@ -21,6 +21,6 @@ void LoginScene::Render3D() const
 {
 }
 
-void LoginScene::OnPacket(const std::shared_ptr<Packet>& packet)
+void LoginScene::OnPacket(Packet& packet)
 {
 }

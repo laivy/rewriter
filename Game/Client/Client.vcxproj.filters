@@ -155,7 +155,7 @@
     <ClCompile Include="Shader.cpp">
       <Filter>소스 파일\Renderer</Filter>
     </ClCompile>
-    <ClCompile Include="ServerThread.cpp">
+    <ClCompile Include="ServerManager.cpp">
       <Filter>소스 파일\Server</Filter>
     </ClCompile>
     <ClCompile Include="Context.cpp">
@@ -298,7 +298,7 @@
     <ClInclude Include="Shader.h">
       <Filter>헤더 파일\Renderer</Filter>
     </ClInclude>
-    <ClInclude Include="ServerThread.h">
+    <ClInclude Include="ServerManager.h">
       <Filter>헤더 파일\Server</Filter>
     </ClInclude>
     <ClInclude Include="Context.h">
