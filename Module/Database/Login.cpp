@@ -1,6 +1,6 @@
 ﻿#include "Stdafx.h"
-#include "Include/Connection.h"
-#include "Include/Login.h"
+#include "Connection.h"
+#include "Login.h"
 
 namespace Database
 {

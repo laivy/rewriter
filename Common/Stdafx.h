@@ -24,28 +24,21 @@ EXTERN_C IMAGE_DOS_HEADER __ImageBase;
 #include <array>
 #include <cassert>
 #include <chrono>
-#include <codecvt>
-#include <deque>
 #include <filesystem>
 #include <fstream>
 #include <functional>
-#include <list>
 #include <map>
 #include <memory>
 #include <mutex>
-#include <queue>
 #include <ranges>
-#include <set>
-#include <span>
 #include <string>
 #include <thread>
 #include <unordered_map>
-#include <variant>
 #include <vector>
 using namespace std::chrono_literals;
 
 // Project
-#include "Common/Event.h"
-#include "Common/Singleton.h"
-#include "Common/StringTable.h"
-#include "Common/Types.h"
+#include "Event.h"
+#include "Singleton.h"
+#include "StringTable.h"
+#include "Types.h"

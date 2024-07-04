@@ -1,8 +1,6 @@
 ﻿#include "Stdafx.h"
 #include "App.h"
-#include "UserAcceptor.h"
-#include "UserManager.h"
-#include "Common/CenterServer.h"
+#include "ServerAcceptor.h"
 #include "Common/ImguiEx.h"
 
 App::App()
@@ -15,9 +13,6 @@ App::App()
 
 App::~App()
 {
-	UserAcceptor::Destroy(); // 유저 접속 차단
-	UserManager::Destroy(); // 접속 중인 유저 정보 저장
-	ImGui::CleanUp();
 	::WSACleanup();
 }
 
@@ -131,24 +126,20 @@ void App::InitApp()
 		return;
 	}
 
-	CenterServer::Instantiate(L"Login.dat"); // 센터 서버 연결
-	UserManager::Instantiate();
-	UserAcceptor::Instantiate(); // 유저 접속 허용
+	ServerAcceptor::Instantiate();
 }
 
 void App::Update()
 {
-	auto deltaTime{ m_timer.Tick() };
-	if (auto um{ UserManager::GetInstance() })
-		um->Update(deltaTime);
 }
 
 void App::Render()
 {
 	ImGui::BeginRender();
 	{
-		if (auto sm{ UserAcceptor::GetInstance() })
+		if (auto sm{ ServerAcceptor::GetInstance() })
 			sm->Render();
+		ImGui::ShowDemoWindow();
 	}
 	ImGui::EndRender();
 }

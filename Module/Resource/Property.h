@@ -1,4 +1,5 @@
 ﻿#pragma once
+#include <variant>
 
 template<class T>
 concept is_property_data_type_v = 

@@ -3,11 +3,11 @@
 
 class User;
 
-class SocketManager : public TSingleton<SocketManager>
+class UserAcceptor : public TSingleton<UserAcceptor>
 {
 public:
-	SocketManager();
-	~SocketManager();
+	UserAcceptor();
+	~UserAcceptor();
 
 	void Render();
 

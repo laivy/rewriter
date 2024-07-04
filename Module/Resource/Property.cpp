@@ -1,7 +1,7 @@
 ﻿#include "Stdafx.h"
-#include "Include/Image.h"
-#include "Include/Property.h"
-#include "Include/Manager.h"
+#include "Image.h"
+#include "Manager.h"
+#include "Property.h"
 #include "External/DirectX/WICTextureLoader12.h"
 
 namespace Resource
@@ -202,11 +202,11 @@ namespace Resource
 
 	int Property::GetInt(const std::wstring& path) const
 	{
-		assert(m_type == Type::INT);
-		assert(std::holds_alternative<int32_t>(m_data));
-		
 		if (path.empty())
+		{
+			assert(m_type == Type::INT);
 			return std::get<int>(m_data);
+		}
 
 		std::wstring name{ path };
 		std::wstring remain{};
@@ -226,10 +226,11 @@ namespace Resource
 
 	INT2 Property::GetInt2(const std::wstring& path) const
 	{
-		assert(m_type == Type::INT2);
-
 		if (path.empty())
+		{
+			assert(m_type == Type::INT2);
 			return std::get<INT2>(m_data);
+		}
 
 		std::wstring name{ path };
 		std::wstring remain{};
@@ -249,10 +250,11 @@ namespace Resource
 
 	float Property::GetFloat(const std::wstring& path) const
 	{
-		assert(m_type == Type::FLOAT);
-
 		if (path.empty())
+		{
+			assert(m_type == Type::FLOAT);
 			return std::get<float>(m_data);
+		}
 
 		std::wstring name{ path };
 		std::wstring remain{};

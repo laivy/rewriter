@@ -2,12 +2,11 @@
 #include "Common/Stdafx.h"
 
 // Windows
-#include <WS2tcpip.h>
+#include <WinSock2.h> // MSWSock.h 보다 위에 있어야함
 #include <MSWSock.h>
-#include <WinSock2.h>
+#include <WS2tcpip.h>
 
 // C/C++
-#include <atlstr.h>
 #include <execution>
 #include <format>
 #include <semaphore>
@@ -27,16 +26,9 @@
 #include "External/Imgui/imgui_impl_dx12.h"
 extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
 
-// Database
-#include <sql.h>
-#include <sqlext.h>
-#include <sqltypes.h>
-#include "Module/Database/Include/Types.h"
-#include "Module/Database/Include/Connection.h"
-#include "Module/Database/Include/Login.h"
+// Module
+#include "Module/Resource/Include/Lib.h"
 
 // Project
 #include "Common/Packet.h"
 #include "Common/Request.h"
-#include "Common/Singleton.h"
-#include "Common/Types.h"

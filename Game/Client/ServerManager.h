@@ -32,6 +32,8 @@ private:
 	void OnDisconnect(Server::Type type);
 
 private:
+	std::jthread m_thread;
+
 	HANDLE m_hIOCP;
 	std::map<Server::Type, Server> m_servers;
 };

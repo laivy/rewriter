@@ -1,8 +1,5 @@
 ﻿#pragma once
-
-// Windows
-#define WIN32_LEAN_AND_MEAN
-#include <Windows.h>
+#include "Common/Stdafx.h"
 
 // C/C++
 #include <format>
@@ -14,7 +11,6 @@
 #include <sqlext.h>
 #include <sqltypes.h>
 
-// Game
-#include "Common/Singleton.h"
-#include "Include/Types.h"
-#include "Include/Connection.h"
+// Project
+#include "Types.h"
+#include "Connection.h"

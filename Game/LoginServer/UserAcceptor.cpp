@@ -1,22 +1,15 @@
 ﻿#include "Stdafx.h"
-#include "SocketManager.h"
+#include "UserAcceptor.h"
 #include "User.h"
 #include "UserManager.h"
 
-SocketManager::SocketManager() :
+UserAcceptor::UserAcceptor() :
 	m_hIOCP{ INVALID_HANDLE_VALUE },
 	m_listenSocket{ INVALID_SOCKET },
 	m_clientSocket{ INVALID_SOCKET },
 	m_acceptBuffer{},
 	m_overlappedEx{}
 {
-	WSADATA wsaData{};
-	if (::WSAStartup(MAKEWORD(2, 2), &wsaData))
-	{
-		assert(false && "FAIL WSAStartup");
-		return;
-	}
-
 	m_listenSocket = ::WSASocket(AF_INET, SOCK_STREAM, IPPROTO_TCP, NULL, NULL, WSA_FLAG_OVERLAPPED);
 	if (m_listenSocket == INVALID_SOCKET)
 	{
@@ -77,18 +70,17 @@ SocketManager::SocketManager() :
 	}
 
 	for (auto& thread : m_threads)
-		thread = std::jthread{ std::bind_front(&SocketManager::Run, this) };
+		thread = std::jthread{ std::bind_front(&UserAcceptor::Run, this) };
 }
 
-SocketManager::~SocketManager()
+UserAcceptor::~UserAcceptor()
 {
 	for (auto& thread : m_threads)
 		thread.request_stop();
 	::CloseHandle(m_hIOCP);
-	::WSACleanup();
 }
 
-void SocketManager::Render()
+void UserAcceptor::Render()
 {
 	if (ImGui::Begin("SOCKET MANAGER"))
 	{
@@ -96,7 +88,7 @@ void SocketManager::Render()
 	ImGui::End();
 }
 
-void SocketManager::Run(std::stop_token stoken)
+void UserAcceptor::Run(std::stop_token stoken)
 {
 	unsigned long ioSize{};
 	User* user{ nullptr };
@@ -135,7 +127,7 @@ void SocketManager::Run(std::stop_token stoken)
 	}
 }
 
-void SocketManager::OnAccept()
+void UserAcceptor::OnAccept()
 {
 	// 클라이언트 소켓 특성을 리슨 소켓과 동일하게 설정
 	if (::setsockopt(m_clientSocket, SOL_SOCKET, SO_UPDATE_ACCEPT_CONTEXT, reinterpret_cast<char*>(&m_listenSocket), sizeof(m_listenSocket)))
@@ -148,6 +140,7 @@ void SocketManager::OnAccept()
 	auto socket{ std::make_shared<Socket>() };
 	socket->socket = m_clientSocket;
 	socket->overlappedEx.op = OVERLAPPEDEX::IOOP::RECEIVE;
+
 	auto user{ std::make_shared<User>(socket) };
 	if (auto um{ UserManager::GetInstance() })
 		um->Register(user);
@@ -164,7 +157,7 @@ void SocketManager::OnAccept()
 	::AcceptEx(m_listenSocket, m_clientSocket, m_acceptBuffer.data(), 0, sizeof(SOCKADDR_IN) + 16, sizeof(SOCKADDR_IN) + 16, nullptr, &m_overlappedEx);
 }
 
-void SocketManager::OnReceive(User* user, Packet::size_type ioSize)
+void UserAcceptor::OnReceive(User* user, Packet::size_type ioSize)
 {
 	const auto& socket{ user->GetSocket() };
 	if (socket->packet && socket->remainSize > 0)
@@ -194,7 +187,7 @@ void SocketManager::OnReceive(User* user, Packet::size_type ioSize)
 	::WSARecv(socket->socket, &wsaBuf, 1, 0, &flag, &socket->overlappedEx, nullptr);
 }
 
-void SocketManager::OnDisconnect(User* user)
+void UserAcceptor::OnDisconnect(User* user)
 {
 	const auto& socket{ user->GetSocket() };
 	::shutdown(socket->socket, SD_BOTH);

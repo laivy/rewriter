@@ -14,28 +14,49 @@
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
     <Filter Include="헤더 파일\Common">
-      <UniqueIdentifier>{a5643d21-8cf7-4896-97ab-377ce81da1f2}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="외부 파일">
-      <UniqueIdentifier>{d204f306-1c39-4303-bc86-20001baade5c}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="외부 파일\DirectX">
-      <UniqueIdentifier>{d3667ac8-58d9-45d6-a16a-70909c5fa11e}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="외부 파일\Imgui">
-      <UniqueIdentifier>{98257789-8391-4d29-b7c6-a8c047b61320}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="모듈 파일">
-      <UniqueIdentifier>{c96b76fc-1b6b-4525-96fb-93a3a895cd79}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="모듈 파일\Resource">
-      <UniqueIdentifier>{c6909b65-4e1d-4cc2-875c-4c6033644656}</UniqueIdentifier>
+      <UniqueIdentifier>{e3fef7e2-babd-4f03-b826-e574f97bf324}</UniqueIdentifier>
     </Filter>
     <Filter Include="소스 파일\Common">
-      <UniqueIdentifier>{2c2f03d0-2441-4526-be4f-ddb6031b5bdd}</UniqueIdentifier>
+      <UniqueIdentifier>{c1fd24f3-df49-4b5e-becd-e2082d40d2b8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="외부 파일">
+      <UniqueIdentifier>{9ce7382e-ea17-4de5-bb0a-232033e6795f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="외부 파일\Imgui">
+      <UniqueIdentifier>{313ea8f7-b530-4093-a8eb-933827866ac0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="외부 파일\DirectX">
+      <UniqueIdentifier>{6a745c7b-b237-4ec5-a691-d2efcffd0841}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="소스 파일\Server">
+      <UniqueIdentifier>{11111cd8-10ad-4a20-91d4-05659f76e0eb}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="헤더 파일\Server">
+      <UniqueIdentifier>{08c2f6f4-988a-482a-b3d6-a78915725ff7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="모듈 파일">
+      <UniqueIdentifier>{ead56e20-41c3-47e0-b316-9a8121ded57d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="모듈 파일\Resource">
+      <UniqueIdentifier>{4687aec8-53d7-49f1-abb3-878514d0e14f}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\..\Common\Singleton.h">
+      <Filter>헤더 파일\Common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Common\Stdafx.h">
+      <Filter>헤더 파일\Common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Common\Timer.h">
+      <Filter>헤더 파일\Common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Common\Event.h">
+      <Filter>헤더 파일\Common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Common\Packet.h">
+      <Filter>헤더 파일\Common</Filter>
+    </ClInclude>
     <ClInclude Include="App.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
@@ -60,6 +81,9 @@
     <ClInclude Include="..\..\External\Imgui\imgui_internal.h">
       <Filter>외부 파일\Imgui</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\External\Imgui\imgui_stdlib.h">
+      <Filter>외부 파일\Imgui</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\External\Imgui\imstb_rectpack.h">
       <Filter>외부 파일\Imgui</Filter>
     </ClInclude>
@@ -69,63 +93,42 @@
     <ClInclude Include="..\..\External\Imgui\imstb_truetype.h">
       <Filter>외부 파일\Imgui</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\Module\Resource\Include\Image.h">
-      <Filter>모듈 파일\Resource</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Module\Resource\Include\Property.h">
-      <Filter>모듈 파일\Resource</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Module\Resource\Include\ResourceManager.h">
-      <Filter>모듈 파일\Resource</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Common\Singleton.h">
+    <ClInclude Include="..\..\Common\ImguiEx.h">
       <Filter>헤더 파일\Common</Filter>
     </ClInclude>
     <ClInclude Include="..\..\Common\Types.h">
       <Filter>헤더 파일\Common</Filter>
     </ClInclude>
-    <ClInclude Include="Explorer.h">
-      <Filter>헤더 파일</Filter>
+    <ClInclude Include="ServerAcceptor.h">
+      <Filter>헤더 파일\Server</Filter>
     </ClInclude>
-    <ClInclude Include="Hierarchy.h">
-      <Filter>헤더 파일</Filter>
+    <ClInclude Include="Server.h">
+      <Filter>헤더 파일\Server</Filter>
     </ClInclude>
-    <ClInclude Include="Inspector.h">
-      <Filter>헤더 파일</Filter>
+    <ClInclude Include="..\..\Module\Resource\Include\Manager.h">
+      <Filter>모듈 파일\Resource</Filter>
     </ClInclude>
-    <ClInclude Include="PropInfo.h">
-      <Filter>헤더 파일</Filter>
+    <ClInclude Include="..\..\Module\Resource\Include\Property.h">
+      <Filter>모듈 파일\Resource</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\Common\Timer.h">
-      <Filter>헤더 파일\Common</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Common\Stdafx.h">
-      <Filter>헤더 파일\Common</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Common\Event.h">
-      <Filter>헤더 파일\Common</Filter>
-    </ClInclude>
-    <ClInclude Include="Global.h">
-      <Filter>헤더 파일</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\External\Imgui\imgui_stdlib.h">
-      <Filter>외부 파일\Imgui</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Common\ImguiEx.h">
-      <Filter>헤더 파일\Common</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Common\Util.h">
-      <Filter>헤더 파일\Common</Filter>
+    <ClInclude Include="LoginServer.h">
+      <Filter>헤더 파일\Server</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="..\..\Common\Packet.cpp">
+      <Filter>소스 파일\Common</Filter>
+    </ClCompile>
     <ClCompile Include="App.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
-    <ClCompile Include="Main.cpp">
+    <ClCompile Include="Stdafx.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
-    <ClCompile Include="Stdafx.cpp">
+    <ClCompile Include="..\..\Common\Timer.cpp">
+      <Filter>소스 파일\Common</Filter>
+    </ClCompile>
+    <ClCompile Include="Main.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
     <ClCompile Include="..\..\External\Imgui\imgui.cpp">
@@ -143,38 +146,29 @@
     <ClCompile Include="..\..\External\Imgui\imgui_impl_win32.cpp">
       <Filter>외부 파일\Imgui</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\External\Imgui\imgui_stdlib.cpp">
+      <Filter>외부 파일\Imgui</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\External\Imgui\imgui_tables.cpp">
       <Filter>외부 파일\Imgui</Filter>
     </ClCompile>
     <ClCompile Include="..\..\External\Imgui\imgui_widgets.cpp">
       <Filter>외부 파일\Imgui</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\Common\Types.cpp">
-      <Filter>소스 파일\Common</Filter>
-    </ClCompile>
-    <ClCompile Include="Explorer.cpp">
-      <Filter>소스 파일</Filter>
-    </ClCompile>
-    <ClCompile Include="Hierarchy.cpp">
-      <Filter>소스 파일</Filter>
-    </ClCompile>
-    <ClCompile Include="Inspector.cpp">
-      <Filter>소스 파일</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\Common\Timer.cpp">
-      <Filter>소스 파일\Common</Filter>
-    </ClCompile>
-    <ClCompile Include="Global.cpp">
-      <Filter>소스 파일</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\External\Imgui\imgui_stdlib.cpp">
-      <Filter>외부 파일\Imgui</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\Common\ImguiEx.cpp">
       <Filter>소스 파일\Common</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\Common\Util.cpp">
+    <ClCompile Include="..\..\Common\Types.cpp">
       <Filter>소스 파일\Common</Filter>
+    </ClCompile>
+    <ClCompile Include="ServerAcceptor.cpp">
+      <Filter>소스 파일\Server</Filter>
+    </ClCompile>
+    <ClCompile Include="Server.cpp">
+      <Filter>소스 파일\Server</Filter>
+    </ClCompile>
+    <ClCompile Include="LoginServer.cpp">
+      <Filter>소스 파일\Server</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

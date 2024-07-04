@@ -1,4 +1,5 @@
-﻿#include <WinSock2.h>
+﻿#pragma once
+#include <WinSock2.h>
 #include <array>
 #include <memory>
 
@@ -20,6 +21,7 @@ struct Socket
 	SOCKET socket{ INVALID_SOCKET };
 	OVERLAPPEDEX overlappedEx{};
 	std::array<char, 512> buffer{};
-	std::uint32_t remainSize{};
+
 	std::unique_ptr<Packet> packet;
+	Packet::size_type remainSize{};
 };

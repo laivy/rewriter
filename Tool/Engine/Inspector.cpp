@@ -3,7 +3,7 @@
 #include "Hierarchy.h"
 #include "Inspector.h"
 #include "PropInfo.h"
-#include "Util.h"
+#include "Common/Util.h"
 
 std::map<Resource::Property::Type, std::string> PROPERTY_TYPES
 {

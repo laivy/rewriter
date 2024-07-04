@@ -1,15 +1,16 @@
 ﻿#include "Stdafx.h"
-#include "Include/Image.h"
-#include "Include/Property.h"
-#include "Include/Manager.h"
+#include "Image.h"
+#include "Manager.h"
+#include "Property.h"
 
 namespace Resource
 {
-	bool IsSkip(std::istream& file, std::wstring& name)
+	bool IsSkip(std::ifstream& file, std::wstring& name)
 	{
 		if (name.empty())
 			return false;
 
+		auto streamPos{ file.tellg() }; // 현재 파일 포인터 위치 저장
 		bool isSkip{ false };
 
 		int32_t length{};
@@ -34,19 +35,18 @@ namespace Resource
 				name = name.substr(pos + 1);
 		}
 
-		// 이 뒤에서 스트림으로부터 이름을 읽을 수 있도록 커서를 string만큼 뒤로 옮김
-		file.seekg(-length - sizeof(length), std::ios::cur);
-
+		// 읽기 전 위치로 옮김
+		file.seekg(streamPos);
 		return isSkip;
 	}
 
-	void Skip(std::istream& file)
+	void Skip(std::ifstream& file)
 	{
-		char length{};
+		int32_t length{};
 		file.read(reinterpret_cast<char*>(&length), sizeof(length));
 		file.ignore(length * sizeof(wchar_t));
 
-		auto type{ Property::Type::FOLDER };
+		Property::Type type{};
 		file.read(reinterpret_cast<char*>(&type), sizeof(type));
 
 		switch (type)
@@ -87,7 +87,7 @@ namespace Resource
 			Skip(file);
 	}
 
-	std::shared_ptr<Property> Manager::Get(const std::wstring& path)
+	std::shared_ptr<Property> Manager::Get(std::wstring_view path)
 	{
 		std::wstring filePath{ path };
 		std::wstring subPath{};
@@ -121,7 +121,10 @@ namespace Resource
 
 		auto root{ Resource::Load(filePath, subPath) };
 		m_resources.emplace(filePath, root);
-		return root;
+
+		if (subPath.empty())
+			return root;
+		return root->Get(subPath);
 	}
 
 	void Manager::Unload(const std::wstring& path)
@@ -168,7 +171,7 @@ namespace Resource
 		}
 	}
 
-	std::shared_ptr<Property> Get(const std::wstring& path)
+	std::shared_ptr<Property> Get(std::wstring_view path)
 	{
 		if (auto m{ Manager::GetInstance() })
 			return m->Get(path);

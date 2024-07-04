@@ -1,8 +1,8 @@
 ﻿#include "Stdafx.h"
-#include "Include/Image.h"
 #include <d2d1_3.h>
 #include <d3d12.h>
 #include <wincodec.h>
+#include "Image.h"
 
 namespace Resource
 {

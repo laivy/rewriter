@@ -89,10 +89,11 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="include\Connection.h" />
-    <ClInclude Include="Include\Types.h" />
-    <ClInclude Include="include\Login.h" />
+    <ClInclude Include="Connection.h" />
+    <ClInclude Include="Include\Lib.h" />
+    <ClInclude Include="Login.h" />
     <ClInclude Include="Stdafx.h" />
+    <ClInclude Include="Types.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Connection.cpp" />

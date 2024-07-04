@@ -4,6 +4,7 @@ class Timer
 {
 public:
 	Timer();
+	~Timer() = default;
 
 	float Tick();
 

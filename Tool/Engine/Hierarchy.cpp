@@ -3,7 +3,7 @@
 #include "Hierarchy.h"
 #include "Inspector.h"
 #include "PropInfo.h"
-#include "Util.h"
+#include "Common/Util.h"
 
 Hierarchy::Hierarchy()
 {
@@ -298,8 +298,15 @@ void Hierarchy::OnMenuFileOpen()
 	}
 
 	// 로드
-	for (const auto& file : fileNames)
-		Load(path / file);
+	if (fileNames.size() == 1)
+	{
+		Load(path);
+	}
+	else
+	{
+		for (const auto& file : fileNames)
+			Load(path / file);
+	}
 }
 
 void Hierarchy::OnMenuFileSave()

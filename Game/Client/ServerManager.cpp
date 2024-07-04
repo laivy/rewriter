@@ -5,26 +5,19 @@
 ServerManager::ServerManager() :
 	m_hIOCP{ INVALID_HANDLE_VALUE }
 {
-	WSADATA wsaData{};
-	if (::WSAStartup(MAKEWORD(2, 2), &wsaData))
-	{
-		assert(false && "WSA INIT FAIL");
-		return;
-	}
-
 	m_hIOCP = ::CreateIoCompletionPort(INVALID_HANDLE_VALUE, NULL, NULL, 0);
 	if (m_hIOCP == INVALID_HANDLE_VALUE)
 	{
 		assert(false && "CREATE IOCP HANDLE FAIL");
 		return;
 	}
-
 	Connect(Server::Type::LOGIN, "127.0.0.1", 9000);
+
+	m_thread = std::jthread{ std::bind_front(&ServerManager::Run, this) };
 }
 
 ServerManager::~ServerManager()
 {
-	::WSACleanup();
 }
 
 bool ServerManager::Connect(Server::Type type, std::string_view ip, unsigned short port)

@@ -21,13 +21,16 @@
     <ClInclude Include="Stdafx.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
-    <ClInclude Include="include\Connection.h">
-      <Filter>헤더 파일\Include</Filter>
+    <ClInclude Include="Connection.h">
+      <Filter>헤더 파일</Filter>
     </ClInclude>
-    <ClInclude Include="include\Login.h">
-      <Filter>헤더 파일\Include</Filter>
+    <ClInclude Include="Login.h">
+      <Filter>헤더 파일</Filter>
     </ClInclude>
-    <ClInclude Include="Include\Types.h">
+    <ClInclude Include="Types.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="Include\Lib.h">
       <Filter>헤더 파일\Include</Filter>
     </ClInclude>
   </ItemGroup>

@@ -38,12 +38,9 @@ EXTERN_C IMAGE_DOS_HEADER __ImageBase;
 extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
 #endif
 
-// Resource
-#include "Module/Resource/Include/Image.h"
-#include "Module/Resource/Include/Manager.h"
-#include "Module/Resource/Include/Property.h"
+// Module
+#include "Module/Resource/Include/Lib.h"
 
-// Game
+// Project
 #include "DXUtil.h"
-#include "Common/Event.h"
 #include "Common/Packet.h"

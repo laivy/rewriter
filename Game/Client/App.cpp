@@ -27,6 +27,7 @@ App::~App()
 	Renderer::CleanUp();
 	SceneManager::Destroy();
 	ServerManager::Destroy();
+	::WSACleanup();
 }
 
 void App::Run()
@@ -144,6 +145,13 @@ void App::InitApp()
 		ImGuiConfigFlags_NavEnableKeyboard | ImGuiConfigFlags_DockingEnable | ImGuiConfigFlags_ViewportsEnable
 	);
 #endif
+	WSADATA wsaData{};
+	if (::WSAStartup(MAKEWORD(2, 2), &wsaData))
+	{
+		assert(false && "WSA INIT FAIL");
+		return;
+	}
+
 	// 서버매니저 생성자에서 로그인 서버와 연결 시도
 	// 연결 실패 시 클라이언트 종료
 	if (auto sm{ ServerManager::Instantiate() })
