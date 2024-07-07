@@ -156,7 +156,7 @@ void App::InitApp()
 	// 연결 실패 시 클라이언트 종료
 	if (auto sm{ ServerManager::Instantiate() })
 	{
-		if (sm->IsConnected(Server::Type::LOGIN))
+		if (sm->IsConnected(IServer::Type::Login))
 			::ShowWindow(hWnd, SW_SHOWNORMAL);
 		else
 			::PostQuitMessage(0);

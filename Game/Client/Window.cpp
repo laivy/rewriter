@@ -92,6 +92,8 @@ void IWindow::Update(float deltaTime)
 
 void IWindow::Render() const
 {
+	for (const auto& control : m_controls)
+		control->Render();
 }
 
 void IWindow::UpdateMouseOverControl(int x, int y)

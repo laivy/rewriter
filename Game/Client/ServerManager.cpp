@@ -1,120 +1,91 @@
 ﻿#include "Stdafx.h"
 #include "App.h"
+#include "LoginServer.h"
 #include "ServerManager.h"
 
 ServerManager::ServerManager() :
-	m_hIOCP{ INVALID_HANDLE_VALUE }
+	m_iocp{ INVALID_HANDLE_VALUE }
 {
-	m_hIOCP = ::CreateIoCompletionPort(INVALID_HANDLE_VALUE, NULL, NULL, 0);
-	if (m_hIOCP == INVALID_HANDLE_VALUE)
+	m_iocp = ::CreateIoCompletionPort(INVALID_HANDLE_VALUE, NULL, NULL, 0);
+	if (m_iocp == INVALID_HANDLE_VALUE)
 	{
 		assert(false && "CREATE IOCP HANDLE FAIL");
 		return;
 	}
-	Connect(Server::Type::LOGIN, "127.0.0.1", 9000);
+	Connect(IServer::Type::Login, L"127.0.0.1", 9000);
 
 	m_thread = std::jthread{ std::bind_front(&ServerManager::Run, this) };
 }
 
 ServerManager::~ServerManager()
 {
+	m_thread.request_stop();
+	::CloseHandle(m_iocp);
 }
 
-bool ServerManager::Connect(Server::Type type, std::string_view ip, unsigned short port)
+bool ServerManager::Connect(IServer::Type type, std::wstring_view ip, unsigned short port)
 {
-	auto& server{ m_servers[type] };
-	server.ip = ip;
-	server.port = port;
-
-	SOCKET s{ ::WSASocket(AF_INET, SOCK_STREAM, IPPROTO_TCP, NULL, NULL, WSA_FLAG_OVERLAPPED) };
-	if (s == INVALID_SOCKET)
+	std::unique_ptr<IServer> server;
+	switch (type)
 	{
-		assert(false && "CREATE SOCKET FAIL");
+	case IServer::Type::Login:
+		server = std::make_unique<LoginServer>();
+		break;
+	case IServer::Type::Game:
+		break;
+	case IServer::Type::Chat:
+		break;
+	default:
 		return false;
 	}
-
-	SOCKADDR_IN addr{};
-	addr.sin_family = AF_INET;
-	addr.sin_port = ::htons(port);
-	::inet_pton(AF_INET, ip.data(), &(addr.sin_addr.s_addr));
-	if (::WSAConnect(s, reinterpret_cast<sockaddr*>(&addr), sizeof(addr), nullptr, nullptr, nullptr, nullptr))
+	if (!server->Connect(ip, port, m_iocp))
 	{
-		assert(false && "CONNECT FAIL");
+		assert(false && "CONNECT TO SERVER FAIL");
 		return false;
 	}
-
-	if (!::CreateIoCompletionPort(reinterpret_cast<HANDLE>(s), m_hIOCP, reinterpret_cast<unsigned long long>(&server), 0))
-	{
-		assert(false && "REGISTER IOCP FAIL");
-		return false;
-	}
-
-	auto& socket{ server.socket };
-	socket.socket = s;
-	socket.overlappedEx.op = OVERLAPPEDEX::IOOP::RECEIVE;
-
-	WSABUF wsaBuf{ static_cast<unsigned long>(socket.buffer.size()), socket.buffer.data() };
-	DWORD flag{};
-	::WSARecv(socket.socket, &wsaBuf, 1, 0, &flag, &socket.overlappedEx, nullptr);
+	m_servers.push_back(std::move(server));
 	return true;
 }
 
-void ServerManager::Disconnect(Server::Type type)
+void ServerManager::Disconnect(IServer::Type type)
 {
-	if (!m_servers.contains(type))
-		return;
-	::shutdown(m_servers[type].socket.socket, SD_BOTH);
-	::closesocket(m_servers[type].socket.socket);
-	m_servers.erase(type);
+	std::erase_if(m_servers, [type](auto& server) { return server->GetType() == type; });
 }
 
-bool ServerManager::IsConnected(Server::Type type)
+bool ServerManager::IsConnected(IServer::Type type)
 {
-	if (!m_servers.contains(type))
-		return false;
-	if (m_servers[type].socket.socket == INVALID_SOCKET)
-		return false;
-	return true;
+	return std::ranges::find_if(m_servers, [type](auto& server) { return server->GetType() == type; }) != m_servers.end();
 }
 
-void ServerManager::SendPacket(Server::Type type, const Packet& packet)
+void ServerManager::SendPacket(IServer::Type type, const Packet& packet)
 {
-	if (IsConnected(type))
-		::send(m_servers[type].socket.socket, packet.GetBuffer(), packet.GetSize(), 0);
+	auto it{ std::ranges::find_if(m_servers, [type](auto& server) { return server->GetType() == type; }) };
+	if (it != m_servers.end())
+		(*it)->SendPacket(packet);
 }
 
 void ServerManager::Run(std::stop_token stoken)
 {
 	unsigned long ioSize{};
-	size_t serverType{};
+	IServer* server{};
 	OVERLAPPEDEX* overlappedEx{};
 	while (!stoken.stop_requested())
 	{
-		if (::GetQueuedCompletionStatus(m_hIOCP, &ioSize, reinterpret_cast<PULONG_PTR>(&serverType), reinterpret_cast<OVERLAPPED**>(&overlappedEx), INFINITE))
+		if (::GetQueuedCompletionStatus(m_iocp, &ioSize, reinterpret_cast<PULONG_PTR>(&server), reinterpret_cast<OVERLAPPED**>(&overlappedEx), INFINITE))
 		{
-			switch (overlappedEx->op)
-			{
-			case OVERLAPPEDEX::IOOP::RECEIVE:
-			{
-				if (ioSize > 0)
-					OnReceive(static_cast<Server::Type>(serverType), static_cast<Packet::size_type>(ioSize));
-				else
-					OnDisconnect(static_cast<Server::Type>(serverType));
-				break;
-			}
-			default:
-				assert(false);
-				break;
-			}
+			if (ioSize > 0)
+				OnReceive(server, static_cast<Packet::Size>(ioSize));
+			else
+				OnDisconnect(server);
+			break;
 		}
 
 		int error{ ::WSAGetLastError() };
 		switch (error)
 		{
 		case ERROR_NETNAME_DELETED: // 서버에서 강제로 연결 끊음
-			OnDisconnect(static_cast<Server::Type>(serverType));
-			continue;
 		case ERROR_ABANDONED_WAIT_0: // IOCP 핸들 닫힘
+			OnDisconnect(server);
 			continue;
 		default:
 			assert(false && "IOCP ERROR");
@@ -123,9 +94,9 @@ void ServerManager::Run(std::stop_token stoken)
 	}
 }
 
-void ServerManager::OnReceive(Server::Type type, Packet::size_type ioSize)
+void ServerManager::OnReceive(IServer* server, Packet::Size ioSize)
 {
-	auto& socket{ m_servers.at(type).socket };
+	auto& socket{ server->GetSocket() };
 	if (socket.packet && socket.remainSize > 0)
 	{
 		socket.packet->EncodeBuffer(socket.buffer.data(), ioSize);
@@ -135,7 +106,7 @@ void ServerManager::OnReceive(Server::Type type, Packet::size_type ioSize)
 	{
 		socket.packet = std::make_unique<Packet>(socket.buffer.data(), ioSize);
 
-		Packet::size_type size{ 0 };
+		Packet::Size size{ 0 };
 		std::memcpy(&size, socket.buffer.data(), sizeof(size));
 		if (size > ioSize)
 			socket.remainSize = size - ioSize;
@@ -153,13 +124,7 @@ void ServerManager::OnReceive(Server::Type type, Packet::size_type ioSize)
 	::WSARecv(socket.socket, &wsaBuf, 1, 0, &flag, &socket.overlappedEx, nullptr);
 }
 
-void ServerManager::OnDisconnect(Server::Type type)
+void ServerManager::OnDisconnect(IServer* server)
 {
-	auto& server{ m_servers.at(type) };
-	if (server.socket.socket != INVALID_SOCKET)
-	{
-		::shutdown(server.socket.socket, SD_BOTH);
-		::closesocket(server.socket.socket);
-	}
-	m_servers.erase(type);
+	Disconnect(server->GetType());
 }

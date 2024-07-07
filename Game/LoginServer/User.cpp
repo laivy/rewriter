@@ -9,20 +9,6 @@ User::User(const std::shared_ptr<Socket>& socket) :
 
 void User::OnPacket(Packet& packet)
 {
-	switch (packet.GetType())
-	{
-	case Packet::Type::CLIENT_TryLogin:
-	{
-		std::wstring wstr;
-		for (size_t i = 0; i < 1000; ++i)
-			wstr += std::format(L"{} ", packet.Decode<int>());
-		wstr += L"\n";
-		::OutputDebugString(wstr.c_str());
-		break;
-	}
-	default:
-		break;
-	}
 }
 
 void User::Update(float deltaTime)

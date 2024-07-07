@@ -7,6 +7,7 @@ class Packet;
 
 struct OVERLAPPEDEX : OVERLAPPED
 {
+#ifndef _CLIENT
 	enum class IOOP
 	{
 		ACCEPT,
@@ -14,6 +15,7 @@ struct OVERLAPPEDEX : OVERLAPPED
 	};
 
 	IOOP op{ IOOP::ACCEPT };
+#endif
 };
 
 struct Socket
@@ -23,5 +25,5 @@ struct Socket
 	std::array<char, 512> buffer{};
 
 	std::unique_ptr<Packet> packet;
-	Packet::size_type remainSize{};
+	Packet::Size remainSize{};
 };

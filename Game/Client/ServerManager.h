@@ -1,19 +1,5 @@
 ﻿#pragma once
-#include "Common/Socket.h"
-
-struct Server
-{
-	enum class Type
-	{
-		LOGIN,
-		GAME,
-		CHAT
-	};
-
-	std::string ip;
-	unsigned short port{ 0 };
-	Socket socket{};
-};
+#include "Server.h"
 
 class ServerManager : public TSingleton<ServerManager>
 {
@@ -21,19 +7,19 @@ public:
 	ServerManager();
 	~ServerManager();
 
-	bool Connect(Server::Type type, std::string_view ip, unsigned short port);
-	void Disconnect(Server::Type type);
-	bool IsConnected(Server::Type type);
-	void SendPacket(Server::Type type, const Packet& packet);
+	bool Connect(IServer::Type type, std::wstring_view ip, unsigned short port);
+	void Disconnect(IServer::Type type);
+	bool IsConnected(IServer::Type type);
+	void SendPacket(IServer::Type type, const Packet& packet);
 
 private:
 	void Run(std::stop_token stoken);
-	void OnReceive(Server::Type type, Packet::size_type ioSize);
-	void OnDisconnect(Server::Type type);
+	void OnReceive(IServer* server, Packet::Size ioSize);
+	void OnDisconnect(IServer* server);
 
 private:
 	std::jthread m_thread;
 
-	HANDLE m_hIOCP;
-	std::map<Server::Type, Server> m_servers;
+	HANDLE m_iocp;
+	std::vector<std::unique_ptr<IServer>> m_servers;
 };

@@ -14,6 +14,13 @@ CenterServer::CenterServer(std::wstring_view config) :
 	m_thread = std::jthread{ std::bind_front(&CenterServer::Run, this) };
 }
 
+CenterServer::~CenterServer()
+{
+	m_thread.request_stop();
+	::shutdown(m_socket, SD_BOTH);
+	::closesocket(m_socket);
+}
+
 bool CenterServer::IsConnected() const
 {
 	return m_socket != INVALID_SOCKET;
@@ -34,13 +41,8 @@ void CenterServer::Run(std::stop_token stoken)
 	::InetPtonW(AF_INET, m_ip.c_str(), &(addr.sin_addr.s_addr));
 
 	// 연결될 때까지 1초마다 연결 시도
-	while (::connect(m_socket, reinterpret_cast<sockaddr*>(&addr), sizeof(addr)))
+	while (!stoken.stop_requested() && ::connect(m_socket, reinterpret_cast<sockaddr*>(&addr), sizeof(addr)))
 		std::this_thread::sleep_for(1s);
-
-	Packet packet{ Packet::Type::CLIENT_TryLogin };
-	packet.Encode(1);
-	packet.End();
-	::send(m_socket, packet.GetBuffer(), packet.GetSize(), 0);
 
 	while (!stoken.stop_requested())
 	{
@@ -59,14 +61,14 @@ void CenterServer::OnReceive(int received)
 {
 	if (m_packet && m_remainSize > 0)
 	{
-		m_packet->EncodeBuffer(m_buffer.data(), static_cast<Packet::size_type>(received));
+		m_packet->EncodeBuffer(m_buffer.data(), static_cast<Packet::Size>(received));
 		m_remainSize -= received;
 	}
 	else
 	{
-		m_packet = std::make_unique<Packet>(m_buffer.data(), static_cast<Packet::size_type>(received));
+		m_packet = std::make_unique<Packet>(m_buffer.data(), static_cast<Packet::Size>(received));
 
-		Packet::size_type size{ 0 };
+		Packet::Size size{ 0 };
 		std::memcpy(&size, m_buffer.data(), sizeof(size));
 		if (size > received)
 			m_remainSize = size - received;
@@ -75,14 +77,7 @@ void CenterServer::OnReceive(int received)
 	if (m_packet && m_remainSize == 0)
 	{
 		m_packet->SetOffset(0);
-
-		auto recv{ m_packet->Decode<int>() };
-
-		Packet packet{ Packet::Type::LOGIN_TryLogin };
-		packet.Encode(recv + 1);
-		packet.End();
-		::send(m_socket, packet.GetBuffer(), packet.GetSize(), 0);
-		//OnPacket(*m_packet);
+		OnPacket(*m_packet);
 		m_packet.reset();
 	}
 }
@@ -94,4 +89,8 @@ void CenterServer::OnDisconnect()
 	::shutdown(m_socket, SD_BOTH);
 	::closesocket(m_socket);
 	m_socket = INVALID_SOCKET;
+}
+
+void CenterServer::OnPacket(Packet& packet)
+{
 }

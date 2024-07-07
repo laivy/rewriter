@@ -1,20 +1,17 @@
 ﻿#pragma once
-#include <memory>
-#include <string>
 
 class Packet
 {
 public:
-	using size_type = unsigned short; // 패킷 크기
-	enum class Type : unsigned int // 패킷 타입
+	using Size = unsigned short; // 패킷 크기
+	enum class Type : unsigned short // 패킷 타입
 	{
-		CLIENT_TryLogin,
-		LOGIN_TryLogin,
+		RequestRegisterNewAccount,
 	};
 
 public:
 	Packet(Type type);
-	Packet(const char* buffer, size_type size);
+	Packet(const char* buffer, Size size);
 	~Packet() = default;
 
 	template<class T, class... Args>
@@ -40,14 +37,14 @@ public:
 		return data;
 	}
 
-	void EncodeBuffer(const char* buffer, size_type size);
+	void EncodeBuffer(const char* buffer, Size size);
 	void End();
 
-	void SetOffset(size_type offset);
+	void SetOffset(Size offset);
 
 	Type GetType() const;
 	const char* GetBuffer() const;
-	size_type GetSize() const;
+	Size GetSize() const;
 
 private:
 	template<class T>
@@ -86,7 +83,7 @@ private:
 	void _Encode(const T& data)
 	{
 		_Encode(static_cast<unsigned int>(data.size()));
-		EncodeBuffer(reinterpret_cast<const char*>(data.data()), static_cast<Packet::size_type>(data.size() * sizeof(T::value_type)));
+		EncodeBuffer(reinterpret_cast<const char*>(data.data()), static_cast<Packet::Size>(data.size() * sizeof(T::value_type)));
 	}
 
 	// 버퍼에서 sizeof(T) 만큼 읽어서 T로 반환
@@ -116,18 +113,18 @@ private:
 	{
 		auto length{ _Decode<unsigned int>() };
 		T value{ reinterpret_cast<T::value_type*>(m_buffer.get() + m_offset), static_cast<size_t>(length) };
-		m_offset += static_cast<Packet::size_type>(length * sizeof(T::value_type));
+		m_offset += static_cast<Packet::Size>(length * sizeof(T::value_type));
 		return value;
 	}
 
-	void ReAlloc(size_type requireSize);
+	void ReAlloc(Size requireSize);
 
 private:
-	static constexpr size_type DEFAULT_BUFFER_SIZE{ 128 };
+	static constexpr Size DEFAULT_BUFFER_SIZE{ 128 };
 
 	Type m_type;
 	std::unique_ptr<char[]> m_buffer;
-	size_type m_bufferSize;
-	size_type m_encodedSize;
-	size_type m_offset;
+	Size m_bufferSize;
+	Size m_encodedSize;
+	Size m_offset;
 };

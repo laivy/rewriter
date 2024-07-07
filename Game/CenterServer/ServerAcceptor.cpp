@@ -4,7 +4,7 @@
 
 ServerAcceptor::ServerAcceptor() :
 	m_port{ 0 },
-	m_hIOCP{ INVALID_HANDLE_VALUE },
+	m_iocp{ INVALID_HANDLE_VALUE },
 	m_listenSocket{ INVALID_SOCKET },
 	m_clientSocket{ INVALID_SOCKET },
 	m_acceptBuffer{},
@@ -42,14 +42,14 @@ ServerAcceptor::ServerAcceptor() :
 		return;
 	}
 
-	m_hIOCP = ::CreateIoCompletionPort(INVALID_HANDLE_VALUE, NULL, NULL, 0);
-	if (m_hIOCP == INVALID_HANDLE_VALUE)
+	m_iocp = ::CreateIoCompletionPort(INVALID_HANDLE_VALUE, NULL, NULL, 0);
+	if (m_iocp == INVALID_HANDLE_VALUE)
 	{
 		assert(false && "SOCKET MANAGER CREATE IOCP FAIL");
 		return;
 	}
 
-	if (!::CreateIoCompletionPort(reinterpret_cast<HANDLE>(m_listenSocket), m_hIOCP, 0, 0))
+	if (!::CreateIoCompletionPort(reinterpret_cast<HANDLE>(m_listenSocket), m_iocp, 0, 0))
 	{
 		assert(false && "REGISTER IOCP FAIL");
 		return;
@@ -77,8 +77,7 @@ ServerAcceptor::ServerAcceptor() :
 ServerAcceptor::~ServerAcceptor()
 {
 	m_thread.request_stop();
-	::CloseHandle(m_hIOCP);
-	::WSACleanup();
+	::CloseHandle(m_iocp);
 }
 
 void ServerAcceptor::Render()
@@ -116,7 +115,7 @@ void ServerAcceptor::Run(std::stop_token stoken)
 	OVERLAPPEDEX* overlappedEx{};
 	while (!stoken.stop_requested())
 	{
-		if (::GetQueuedCompletionStatus(m_hIOCP, &ioSize, reinterpret_cast<unsigned long long*>(&server), reinterpret_cast<OVERLAPPED**>(&overlappedEx), INFINITE))
+		if (::GetQueuedCompletionStatus(m_iocp, &ioSize, reinterpret_cast<unsigned long long*>(&server), reinterpret_cast<OVERLAPPED**>(&overlappedEx), INFINITE))
 		{
 			switch (overlappedEx->op)
 			{
@@ -125,7 +124,7 @@ void ServerAcceptor::Run(std::stop_token stoken)
 				break;
 			case OVERLAPPEDEX::IOOP::RECEIVE:
 				if (ioSize > 0)
-					OnReceive(server, static_cast<Packet::size_type>(ioSize));
+					OnReceive(server, static_cast<Packet::Size>(ioSize));
 				else
 					OnDisconnect(server);
 				break;
@@ -181,7 +180,7 @@ void ServerAcceptor::OnAccept()
 	socket.socket = m_clientSocket;
 	socket.overlappedEx.op = OVERLAPPEDEX::IOOP::RECEIVE;
 
-	::CreateIoCompletionPort(reinterpret_cast<HANDLE>(socket.socket), m_hIOCP, reinterpret_cast<unsigned long long>(server.get()), 0);
+	::CreateIoCompletionPort(reinterpret_cast<HANDLE>(socket.socket), m_iocp, reinterpret_cast<unsigned long long>(server.get()), 0);
 	WSABUF wsaBuf{ static_cast<unsigned long>(socket.buffer.size()), socket.buffer.data() };
 	DWORD flag{};
 	::WSARecv(socket.socket, &wsaBuf, 1, 0, &flag, &socket.overlappedEx, nullptr);
@@ -195,19 +194,19 @@ void ServerAcceptor::OnAccept()
 	m_servers.push_back(std::move(server));
 }
 
-void ServerAcceptor::OnReceive(IServer* server, Packet::size_type ioSize)
+void ServerAcceptor::OnReceive(IServer* server, Packet::Size ioSize)
 {
 	auto& socket{ server->GetSocket() };
 	if (socket.packet && socket.remainSize > 0)
 	{
-		socket.packet->EncodeBuffer(socket.buffer.data(), static_cast<Packet::size_type>(ioSize));
+		socket.packet->EncodeBuffer(socket.buffer.data(), static_cast<Packet::Size>(ioSize));
 		socket.remainSize -= ioSize;
 	}
 	else
 	{
-		socket.packet = std::make_unique<Packet>(socket.buffer.data(), static_cast<Packet::size_type>(ioSize));
+		socket.packet = std::make_unique<Packet>(socket.buffer.data(), static_cast<Packet::Size>(ioSize));
 
-		Packet::size_type size{ 0 };
+		Packet::Size size{ 0 };
 		std::memcpy(&size, socket.buffer.data(), sizeof(size));
 		if (size > ioSize)
 			socket.remainSize = size - ioSize;
@@ -216,13 +215,6 @@ void ServerAcceptor::OnReceive(IServer* server, Packet::size_type ioSize)
 	if (socket.packet && socket.remainSize == 0)
 	{
 		socket.packet->SetOffset(0);
-
-		auto recv{ socket.packet->Decode<int>() };
-
-		Packet packet{ Packet::Type::LOGIN_TryLogin };
-		packet.Encode(recv + 1);
-		packet.End();
-		::send(socket.socket, packet.GetBuffer(), packet.GetSize(), 0);
 		//server->OnPacket(*socket.packet);
 		socket.packet.reset();
 	}

@@ -155,6 +155,7 @@
     <ClCompile Include="Control.cpp" />
     <ClCompile Include="DebugWindow.cpp" />
     <ClCompile Include="LoginScene.cpp" />
+    <ClCompile Include="LoginServer.cpp" />
     <ClCompile Include="Modal.cpp" />
     <ClCompile Include="Object.cpp" />
     <ClCompile Include="Renderer.cpp" />
@@ -176,6 +177,7 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Use</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Use</PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="Server.cpp" />
     <ClCompile Include="ServerManager.cpp" />
     <ClCompile Include="Shader.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Use</PrecompiledHeader>
@@ -234,6 +236,7 @@
     <ClInclude Include="DebugWindow.h" />
     <ClInclude Include="DXUtil.h" />
     <ClInclude Include="LoginScene.h" />
+    <ClInclude Include="LoginServer.h" />
     <ClInclude Include="Modal.h" />
     <ClInclude Include="Object.h" />
     <ClInclude Include="Renderer.h" />
@@ -243,6 +246,7 @@
     <ClInclude Include="App.h" />
     <ClInclude Include="Scene.h" />
     <ClInclude Include="SceneManager.h" />
+    <ClInclude Include="Server.h" />
     <ClInclude Include="ServerManager.h" />
     <ClInclude Include="Shader.h" />
     <ClInclude Include="Stdafx.h" />

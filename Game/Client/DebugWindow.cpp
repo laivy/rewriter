@@ -10,6 +10,53 @@
 #include "TextBox.h"
 #include "WindowManager.h"
 
+class RegisterAccountModal :
+	public IModal,
+	public IObserver
+{
+private:
+	enum class ButtonID
+	{
+		OK, CANCLE
+	};
+
+public:
+	RegisterAccountModal(const Callback& callback) :
+		IModal{ callback }
+	{
+		m_size = { 500, 300 };
+		SetPosition({ App::size.x / 2, App::size.y / 2 }, Pivot::CENTER);
+
+		auto okButton{ std::make_shared<Button>(this) };
+		okButton->OnButtonClick->Register(this, std::bind(&RegisterAccountModal::OnButtonClicked, this, ButtonID::OK));
+		okButton->SetSize({ 80, 20 });
+		okButton->SetPosition({ m_size.x / 2 - 50, m_size.y / 2 + 120 }, Pivot::CENTER);
+		okButton->SetText(L"OK");
+		m_controls.push_back(okButton);
+
+		auto cancleButton{ std::make_shared<Button>(this) };
+		cancleButton->OnButtonClick->Register(this, std::bind(&RegisterAccountModal::OnButtonClicked, this, ButtonID::CANCLE));
+		cancleButton->SetSize({ 80, 20 });
+		cancleButton->SetPosition({ m_size.x / 2 + 50, m_size.y / 2 + 120 }, Pivot::CENTER);
+		cancleButton->SetText(L"CANCLE");
+		m_controls.push_back(cancleButton);
+	}
+
+	virtual void Render() const override final
+	{
+		RECTI rect{ 0, 0, m_size.x, m_size.y };
+		Renderer2D::DrawRect(rect);
+		IWindow::Render();
+	}
+
+private:
+	void OnButtonClicked(ButtonID id)
+	{
+		if (id == ButtonID::CANCLE)
+			Destroy();
+	}
+};
+
 DebugWindow::DebugWindow()
 {
 	m_size = { 600, 400 };
@@ -44,11 +91,8 @@ DebugWindow::DebugWindow()
 		[button = registerButton]()
 		{
 			button->m_state = Button::State::DEFAULT;
-			auto callback = [](IModal::Return retval)
-				{
-
-				};
-			auto modal{ std::make_shared<IModal>(callback) };
+			auto callback = [](IModal::Return retval) { };
+			std::shared_ptr<IModal> modal{ std::make_shared<RegisterAccountModal>(callback) };
 			if (auto wm{ WindowManager::GetInstance() })
 				wm->Register(modal);
 		});
@@ -61,13 +105,7 @@ DebugWindow::DebugWindow()
 	loginButton->OnButtonClick->Register(this,
 		[]()
 		{
-			::OutputDebugString(L"OnButtonClick!\n");
 
-			Packet packet{ Packet::Type::CLIENT_TryLogin };
-			for (int i = 0; i < 1000; ++i)
-				packet.Encode(i);
-			packet.End();
-			ServerManager::GetInstance()->SendPacket(Server::Type::LOGIN, packet);
 		});
 	m_controls.push_back(loginButton);
 
@@ -100,18 +138,9 @@ void DebugWindow::Render() const
 	Renderer2D::DrawRect(outline, D2D1::ColorF::Black);
 	Renderer2D::DrawRect(rect, D2D1::ColorF::White);
 
-	for (const auto& control : m_controls)
-		control->Render();
+	IWindow::Render();
 }
 
 void DebugWindow::OnPacket(Packet& packet)
 {
-	switch (packet.GetType())
-	{
-	case Packet::Type::LOGIN_TryLogin:
-	{
-		auto str{ packet.Decode<std::string>() };
-		break;
-	}
-	}
 }

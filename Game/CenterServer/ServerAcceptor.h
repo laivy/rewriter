@@ -15,7 +15,7 @@ private:
 
 	void Run(std::stop_token stoken);
 	void OnAccept();
-	void OnReceive(IServer* server, Packet::size_type ioSize);
+	void OnReceive(IServer* server, Packet::Size ioSize);
 	void OnDisconnect(IServer* server);
 
 private:
@@ -24,7 +24,7 @@ private:
 	unsigned short m_port;
 	std::vector<std::tuple<IServer::Type, std::wstring, int>> m_serverLists;
 
-	HANDLE m_hIOCP;
+	HANDLE m_iocp;
 
 	// Accept 관련
 	SOCKET m_listenSocket;
