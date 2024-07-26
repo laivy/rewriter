@@ -1,6 +1,5 @@
 ﻿#include "Stdafx.h"
-#include "Image.h"
-#include "Manager.h"
+#include "PNG.h"
 #include "Property.h"
 #include "External/DirectX/WICTextureLoader12.h"
 
@@ -24,13 +23,18 @@ namespace Resource
 		return *this;
 	}
 
-	bool Property::Iterator::operator!=(const Iterator& it) const
+	bool Property::Iterator::operator==(const Iterator& iter) const
 	{
-		if (m_property->children.empty())
+		return m_property == iter.m_property && m_index == iter.m_index;
+	}
+
+	bool Property::Iterator::operator!=(const Iterator& iter) const
+	{
+		if (m_property->m_children.empty())
 			return false;
-		if (m_property != it.m_property)
+		if (m_property != iter.m_property)
 			return true;
-		if (m_index != it.m_index)
+		if (m_index != iter.m_index)
 			return true;
 		return false;
 	}
@@ -38,14 +42,14 @@ namespace Resource
 	std::pair<std::wstring, std::shared_ptr<Property>> Property::Iterator::operator*() const
 	{
 		return std::make_pair(
-			m_property->children[m_index]->name,
-			m_property->children[m_index]
+			m_property->m_children[m_index]->m_name,
+			m_property->m_children[m_index]
 		);
 	}
 
 	Property::Property() :
 		m_type{ Property::Type::FOLDER },
-		name{ L"" }
+		m_name{ L"" }
 	{
 	}
 
@@ -56,19 +60,20 @@ namespace Resource
 
 	Property::Iterator Property::end() const
 	{
-		return Iterator{ this, children.size() };
+		return Iterator{ this, m_children.size() };
 	}
 
+#ifdef _TOOL
 	void Property::Save(const std::filesystem::path& path)
 	{
 		std::ofstream file{ path, std::ios::binary };
 		std::function<void(Property*)> lambda = [&](Property* prop)
 			{
 				// 이름
-				std::wstring name{ prop->name.c_str() };
+				std::wstring name{ prop->m_name.c_str() };
 				int32_t length{ static_cast<int32_t>(name.size()) };
 				file.write(reinterpret_cast<char*>(&length), sizeof(length));
-				file.write(reinterpret_cast<char*>(prop->name.data()), length * sizeof(wchar_t));
+				file.write(reinterpret_cast<char*>(prop->m_name.data()), length * sizeof(wchar_t));
 
 				// 타입
 				file.write(reinterpret_cast<char*>(&prop->m_type), sizeof(prop->m_type));
@@ -104,13 +109,13 @@ namespace Resource
 					file.write(reinterpret_cast<const char*>(data.data()), length * sizeof(wchar_t));
 					break;
 				}
-				case Type::IMAGE:
+				case Type::PNG:
 				{
-					auto data{ std::get<std::shared_ptr<Image>>(prop->m_data) };
-					auto buffer{ data->GetBuffer() };
-					auto size{ static_cast<uint32_t>(buffer.size_bytes()) };
+					auto data{ std::get<std::shared_ptr<PNG>>(prop->m_data) };
+					auto buffer{ data->GetBinary() };
+					auto size{ data->GetBinarySize() };
 					file.write(reinterpret_cast<char*>(&size), sizeof(size));
-					file.write(reinterpret_cast<char*>(buffer.data()), size);
+					file.write(reinterpret_cast<char*>(buffer), size);
 					break;
 				}
 				default:
@@ -118,24 +123,25 @@ namespace Resource
 					break;
 				}
 
-				int32_t count{ static_cast<int32_t>(prop->children.size()) };
+				int32_t count{ static_cast<int32_t>(prop->m_children.size()) };
 				file.write(reinterpret_cast<char*>(&count), sizeof(count));
 
-				for (const auto& child : prop->children)
+				for (const auto& child : prop->m_children)
 					lambda(child.get());
 			};
 
-		int32_t count{ static_cast<int32_t>(children.size()) };
+		int32_t count{ static_cast<int32_t>(m_children.size()) };
 		file.write(reinterpret_cast<char*>(&count), sizeof(count));
 
-		for (const auto& child : children)
+		for (const auto& child : m_children)
 			lambda(child.get());
 	}
 
 	void Property::Add(const std::shared_ptr<Property>& child)
 	{
-		children.push_back(child);
+		m_children.push_back(child);
 	}
+#endif
 
 	void Property::SetType(Type type)
 	{
@@ -154,15 +160,15 @@ namespace Resource
 		case Type::STRING:
 			m_data = L"";
 			break;
-		case Type::IMAGE:
-			m_data = std::shared_ptr<Resource::Image>{};
+		case Type::PNG:
+			m_data = std::shared_ptr<Resource::PNG>{};
 			break;
 		}
 	}
 
 	void Property::SetName(const std::wstring& name)
 	{
-		this->name = name;
+		this->m_name = name;
 	}
 
 	void Property::Set(int value)
@@ -185,7 +191,7 @@ namespace Resource
 		m_data = value;
 	}
 
-	void Property::Set(const std::shared_ptr<Image>& value)
+	void Property::Set(const std::shared_ptr<PNG>& value)
 	{
 		m_data = value;
 	}
@@ -197,10 +203,10 @@ namespace Resource
 
 	std::wstring Property::GetName() const
 	{
-		return name;
+		return m_name;
 	}
 
-	int Property::GetInt(const std::wstring& path) const
+	int Property::GetInt(std::wstring_view path) const
 	{
 		if (path.empty())
 		{
@@ -208,11 +214,11 @@ namespace Resource
 			return std::get<int>(m_data);
 		}
 
-		std::wstring name{ path };
-		std::wstring remain{};
+		std::wstring_view name{ path };
+		std::wstring_view remain{};
 
 		size_t pos{ path.find(Stringtable::DATA_PATH_SEPERATOR) };
-		if (pos != std::wstring::npos)
+		if (pos != std::wstring_view::npos)
 		{
 			name = path.substr(0, pos);
 			remain = path.substr(pos + 1);
@@ -224,7 +230,7 @@ namespace Resource
 		return 0;
 	}
 
-	INT2 Property::GetInt2(const std::wstring& path) const
+	INT2 Property::GetInt2(std::wstring_view path) const
 	{
 		if (path.empty())
 		{
@@ -232,11 +238,11 @@ namespace Resource
 			return std::get<INT2>(m_data);
 		}
 
-		std::wstring name{ path };
-		std::wstring remain{};
+		std::wstring_view name{ path };
+		std::wstring_view remain{};
 
 		size_t pos{ path.find(Stringtable::DATA_PATH_SEPERATOR) };
-		if (pos != std::wstring::npos)
+		if (pos != std::wstring_view::npos)
 		{
 			name = path.substr(0, pos);
 			remain = path.substr(pos + 1);
@@ -248,7 +254,7 @@ namespace Resource
 		return INT2{};
 	}
 
-	float Property::GetFloat(const std::wstring& path) const
+	float Property::GetFloat(std::wstring_view path) const
 	{
 		if (path.empty())
 		{
@@ -256,11 +262,11 @@ namespace Resource
 			return std::get<float>(m_data);
 		}
 
-		std::wstring name{ path };
-		std::wstring remain{};
+		std::wstring_view name{ path };
+		std::wstring_view remain{};
 
 		size_t pos{ path.find(Stringtable::DATA_PATH_SEPERATOR) };
-		if (pos != std::wstring::npos)
+		if (pos != std::wstring_view::npos)
 		{
 			name = path.substr(0, pos);
 			remain = path.substr(pos + 1);
@@ -272,7 +278,7 @@ namespace Resource
 		return 0.0f;
 	}
 
-	std::wstring Property::GetString(const std::wstring& path) const
+	std::wstring Property::GetString(std::wstring_view path) const
 	{
 		if (path.empty())
 		{
@@ -280,11 +286,11 @@ namespace Resource
 			return std::get<std::wstring>(m_data);
 		}
 
-		std::wstring name{ path };
-		std::wstring remain{};
+		std::wstring_view name{ path };
+		std::wstring_view remain{};
 
 		size_t pos{ path.find(Stringtable::DATA_PATH_SEPERATOR) };
-		if (pos != std::wstring::npos)
+		if (pos != std::wstring_view::npos)
 		{
 			name = path.substr(0, pos);
 			remain = path.substr(pos + 1);
@@ -296,19 +302,19 @@ namespace Resource
 		return L"";
 	}
 
-	std::shared_ptr<Image> Property::GetImage(const std::wstring& path) const
+	std::shared_ptr<PNG> Property::GetImage(std::wstring_view path) const
 	{
 		if (path.empty())
 		{
-			assert(m_type == Type::IMAGE);
-			return std::get<std::shared_ptr<Image>>(m_data);
+			assert(m_type == Type::PNG);
+			return std::get<std::shared_ptr<PNG>>(m_data);
 		}
 
-		std::wstring name{ path };
-		std::wstring remain{};
+		std::wstring_view name{ path };
+		std::wstring_view remain{};
 
 		size_t pos{ path.find(Stringtable::DATA_PATH_SEPERATOR) };
-		if (pos != std::wstring::npos)
+		if (pos != std::wstring_view::npos)
 		{
 			name = path.substr(0, pos);
 			remain = path.substr(pos + 1);
@@ -317,31 +323,44 @@ namespace Resource
 		if (const auto & child{ Get(name) })
 			return child->GetImage(remain);
 
-		assert(m_type == Type::IMAGE);
+		assert(m_type == Type::PNG);
 		return nullptr;
 	}
 
-	std::shared_ptr<Property> Property::Get(const std::wstring& path) const
+	std::shared_ptr<Property> Property::Get(std::wstring_view path) const
 	{
 		size_t pos{ path.find(Stringtable::DATA_PATH_SEPERATOR) };
 		if (pos != std::wstring::npos)
 		{
-			std::wstring childName{ path.substr(0, pos) };
-			std::wstring remain{ path.substr(pos + 1) };
-			auto it{ std::ranges::find_if(children, [&](const auto& p) { return p->name == childName; }) };
-			if (it == children.end())
+			std::wstring_view childName{ path.substr(0, pos) };
+			std::wstring_view remain{ path.substr(pos + 1) };
+			auto it{ std::ranges::find_if(m_children, [&](const auto& p) { return p->m_name == childName; }) };
+			if (it == m_children.end())
 				return nullptr;
 			return (*it)->Get(remain);
 		}
 
-		auto it{ std::ranges::find_if(children, [&](const auto& p) { return p->name == path; }) };
-		if (it == children.end())
+		auto it{ std::ranges::find_if(m_children, [&](const auto& p) { return p->m_name == path; }) };
+		if (it == m_children.end())
 			return nullptr;
 		return *it;
 	}
 
-	void Property::Flush()
+	void Property::Erase(std::wstring_view path)
 	{
-		std::erase_if(children, [](const auto& c) { return c.use_count() <= 1; });
+		size_t pos{ path.find(Stringtable::DATA_PATH_SEPERATOR) };
+		if (pos == std::wstring::npos)
+		{
+			std::erase_if(m_children, [path](const auto& prop) { return prop->m_name == path; });
+			return;
+		}
+
+		std::wstring_view remain{ path.substr(pos + 1) };
+		pos = remain.find(Stringtable::DATA_PATH_SEPERATOR);
+		if (pos != std::wstring_view::npos)
+			remain = remain.substr(0, pos);
+		auto it{ std::ranges::find_if(m_children, [&remain](const auto& prop) { return prop->m_name == remain; }) };
+		if (it != m_children.end())
+			(*it)->Erase(remain);
 	}
 }
