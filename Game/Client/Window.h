@@ -16,6 +16,8 @@ public:
 	virtual void Update(float deltaTime);
 	virtual void Render() const;
 
+	void Register(const std::shared_ptr<IControl>& control);
+
 private:
 	void UpdateMouseOverControl(int x, int y);
 	void UpdateFocusControl(int x, int y);

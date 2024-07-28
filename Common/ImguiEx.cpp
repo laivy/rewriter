@@ -345,4 +345,10 @@ namespace ImGui
 		ImGui_ImplWin32_Shutdown();
 		ImGui::DestroyContext();
 	}
+
+	bool Button(std::wstring_view label, const ImVec2& size_arg)
+	{
+		auto utf8Label{ Util::wstou8s(label) };
+		return Button(utf8Label.c_str(), size_arg);
+	}
 }

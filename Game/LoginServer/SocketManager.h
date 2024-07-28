@@ -1,21 +1,19 @@
 ﻿#pragma once
-#include "Common/Socket.h"
+#include "ClientSocket.h"
 
-class User;
-
-class UserAcceptor : public TSingleton<UserAcceptor>
+class SocketManager : public TSingleton<SocketManager>
 {
 public:
-	UserAcceptor();
-	~UserAcceptor();
+	SocketManager();
+	~SocketManager();
 
 	void Render();
 
 private:
 	void Run(std::stop_token stoken);
 	void OnAccept();
-	void OnReceive(User* user, Packet::Size ioSize);
-	void OnDisconnect(User* user);
+
+	void Disconnect(ClientSocket* socket);
 
 private:
 	HANDLE m_iocp;
@@ -26,4 +24,6 @@ private:
 	SOCKET m_clientSocket;
 	std::array<char, 64> m_acceptBuffer;
 	OVERLAPPEDEX m_overlappedEx;
+
+	std::vector<std::shared_ptr<ClientSocket>> m_sockets;
 };

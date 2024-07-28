@@ -19,9 +19,9 @@ public:
 	void SendPacket(const Packet& packet) const;
 
 	Type GetType() const;
-	Socket& GetSocket();
+	SocketEx& GetSocket();
 
 private:
 	Type m_type;
-	Socket m_socket;
+	SocketEx m_socket;
 };

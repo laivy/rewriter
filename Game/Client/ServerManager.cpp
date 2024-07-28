@@ -12,7 +12,10 @@ ServerManager::ServerManager() :
 		assert(false && "CREATE IOCP HANDLE FAIL");
 		return;
 	}
-	Connect(IServer::Type::Login, L"127.0.0.1", 9000);
+
+	// 로그인 서버에 연결
+	if (!Connect(IServer::Type::Login, L"127.0.0.1", 9000))
+		return;
 
 	m_thread = std::jthread{ std::bind_front(&ServerManager::Run, this) };
 }
@@ -84,8 +87,9 @@ void ServerManager::Run(std::stop_token stoken)
 		switch (error)
 		{
 		case ERROR_NETNAME_DELETED: // 서버에서 강제로 연결 끊음
-		case ERROR_ABANDONED_WAIT_0: // IOCP 핸들 닫힘
 			OnDisconnect(server);
+			continue;
+		case ERROR_ABANDONED_WAIT_0: // IOCP 핸들 닫힘
 			continue;
 		default:
 			assert(false && "IOCP ERROR");

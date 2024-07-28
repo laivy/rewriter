@@ -403,6 +403,8 @@ namespace Renderer
 		ExecuteCommandList();
 		WaitForGPU();
 
+		Resource::Init(ctx);
+
 		App::OnResize->Register(&OnResize);
 	}
 

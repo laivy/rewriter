@@ -3,6 +3,7 @@
 #include "Modal.h"
 #include "Renderer.h"
 #include "Window.h"
+#include "WindowBuilder.h"
 #include "WindowManager.h"
 
 #include "DebugWindow.h"
@@ -13,9 +14,11 @@ WindowManager::WindowManager()
 	App::OnMouseEvent->Register(this, std::bind_front(&WindowManager::OnMouseEvent, this));
 
 #ifdef _DEBUG
-	auto window{ std::make_unique<DebugWindow>() };
-	window->SetPosition({ App::size.x / 2, App::size.y / 2 }, Pivot::CENTER);
-	Register(std::move(window));
+	auto window = WindowBuilder<DebugWindow>{}
+		.Path(L"UI.dat/LoginUI")
+		.Position({ App::size.x / 2, App::size.y / 2 }, Pivot::CENTER)
+		.Build();
+	Register(window);
 #endif // _DEBUG
 }
 

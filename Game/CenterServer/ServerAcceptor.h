@@ -11,7 +11,7 @@ public:
 	void Render();
 
 private:
-	void Init();
+	void LoadConfig();
 
 	void Run(std::stop_token stoken);
 	void OnAccept();

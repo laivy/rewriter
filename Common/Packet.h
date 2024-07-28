@@ -6,7 +6,15 @@ public:
 	using Size = unsigned short; // 패킷 크기
 	enum class Type : unsigned short // 패킷 타입
 	{
-		RequestRegisterNewAccount,
+		// 회원가입
+		RequestRegister,
+		RequestRegisterToCenter,
+		RegisterCenterResult,
+		RegisterResult,
+
+		// 로그인
+		RequestLoginIn,
+		LoginResult,
 	};
 
 public:

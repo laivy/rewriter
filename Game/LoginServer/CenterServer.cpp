@@ -1,6 +1,6 @@
 ﻿#include "Stdafx.h"
 #include "CenterServer.h"
-#include "Util.h"
+#include "Common/Util.h"
 
 CenterServer::CenterServer(std::wstring_view config) :
 	m_socket{ INVALID_SOCKET },
@@ -19,6 +19,12 @@ CenterServer::~CenterServer()
 	m_thread.request_stop();
 	::shutdown(m_socket, SD_BOTH);
 	::closesocket(m_socket);
+}
+
+void CenterServer::Send(Packet& packet) const
+{
+	if (IsConnected())
+		::send(m_socket, packet.GetBuffer(), packet.GetSize(), 0);
 }
 
 bool CenterServer::IsConnected() const
@@ -41,7 +47,7 @@ void CenterServer::Run(std::stop_token stoken)
 	::InetPtonW(AF_INET, m_ip.c_str(), &(addr.sin_addr.s_addr));
 
 	// 연결될 때까지 1초마다 연결 시도
-	while (!stoken.stop_requested() && ::connect(m_socket, reinterpret_cast<sockaddr*>(&addr), sizeof(addr)))
+	while (!stoken.stop_requested() && ::connect(m_socket, reinterpret_cast<SOCKADDR*>(&addr), sizeof(addr)))
 		std::this_thread::sleep_for(1s);
 
 	while (!stoken.stop_requested())

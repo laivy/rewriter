@@ -1,9 +1,9 @@
 ﻿#include "Stdafx.h"
-#include "UserAcceptor.h"
+#include "SocketManager.h"
 #include "User.h"
 #include "UserManager.h"
 
-UserAcceptor::UserAcceptor() :
+SocketManager::SocketManager() :
 	m_iocp{ INVALID_HANDLE_VALUE },
 	m_listenSocket{ INVALID_SOCKET },
 	m_clientSocket{ INVALID_SOCKET },
@@ -62,7 +62,7 @@ UserAcceptor::UserAcceptor() :
 
 	if (!::AcceptEx(m_listenSocket, m_clientSocket, m_acceptBuffer.data(), 0, sizeof(SOCKADDR_IN) + 16, sizeof(SOCKADDR_IN) + 16, nullptr, &m_overlappedEx))
 	{
-		if (::WSAGetLastError() != ERROR_IO_PENDING)
+		if (::WSAGetLastError() != WSA_IO_PENDING)
 		{
 			assert(false && "ACCEPT FAIL");
 			return;
@@ -70,17 +70,17 @@ UserAcceptor::UserAcceptor() :
 	}
 
 	for (auto& thread : m_threads)
-		thread = std::jthread{ std::bind_front(&UserAcceptor::Run, this) };
+		thread = std::jthread{ std::bind_front(&SocketManager::Run, this) };
 }
 
-UserAcceptor::~UserAcceptor()
+SocketManager::~SocketManager()
 {
 	for (auto& thread : m_threads)
 		thread.request_stop();
 	::CloseHandle(m_iocp);
 }
 
-void UserAcceptor::Render()
+void SocketManager::Render()
 {
 	if (ImGui::Begin("SOCKET MANAGER"))
 	{
@@ -88,25 +88,25 @@ void UserAcceptor::Render()
 	ImGui::End();
 }
 
-void UserAcceptor::Run(std::stop_token stoken)
+void SocketManager::Run(std::stop_token stoken)
 {
 	unsigned long ioSize{};
-	User* user{ nullptr };
+	ClientSocket* socket{ nullptr };
 	OVERLAPPEDEX* overlappedEx{};
 	while (!stoken.stop_requested())
 	{
-		if (::GetQueuedCompletionStatus(m_iocp, &ioSize, reinterpret_cast<unsigned long long*>(&user), reinterpret_cast<OVERLAPPED**>(&overlappedEx), INFINITE))
+		if (::GetQueuedCompletionStatus(m_iocp, &ioSize, reinterpret_cast<unsigned long long*>(&socket), reinterpret_cast<OVERLAPPED**>(&overlappedEx), INFINITE))
 		{
-			switch (overlappedEx->op)
+			switch (overlappedEx->ioType)
 			{
-			case OVERLAPPEDEX::IOOP::ACCEPT:
+			case OVERLAPPEDEX::IOType::Accept:
 				OnAccept();
 				break;
-			case OVERLAPPEDEX::IOOP::RECEIVE:
+			case OVERLAPPEDEX::IOType::Receive:
 				if (ioSize > 0)
-					OnReceive(user, static_cast<Packet::Size>(ioSize));
+					socket->OnReceive(static_cast<Packet::Size>(ioSize));
 				else
-					OnDisconnect(user);
+					Disconnect(socket);
 				break;
 			}
 			continue;
@@ -116,7 +116,7 @@ void UserAcceptor::Run(std::stop_token stoken)
 		switch (error)
 		{
 		case ERROR_NETNAME_DELETED: // 클라이언트에서 강제로 연결 끊음
-			OnDisconnect(user);
+			Disconnect(socket);
 			continue;
 		case ERROR_ABANDONED_WAIT_0: // IOCP 핸들 닫힘
 			continue;
@@ -127,7 +127,7 @@ void UserAcceptor::Run(std::stop_token stoken)
 	}
 }
 
-void UserAcceptor::OnAccept()
+void SocketManager::OnAccept()
 {
 	// 클라이언트 소켓 특성을 리슨 소켓과 동일하게 설정
 	if (::setsockopt(m_clientSocket, SOL_SOCKET, SO_UPDATE_ACCEPT_CONTEXT, reinterpret_cast<char*>(&m_listenSocket), sizeof(m_listenSocket)))
@@ -136,19 +136,15 @@ void UserAcceptor::OnAccept()
 		return;
 	}
 
-	// 유저 객체 생성
-	auto socket{ std::make_shared<Socket>() };
-	socket->socket = m_clientSocket;
-	socket->overlappedEx.op = OVERLAPPEDEX::IOOP::RECEIVE;
+	// 소켓 객체 생성
+	auto socket{ std::make_shared<ClientSocket>(m_clientSocket) };
 
-	auto user{ std::make_shared<User>(socket) };
-	if (auto um{ UserManager::GetInstance() })
-		um->Register(user);
+	// IOCP 등록
+	::CreateIoCompletionPort(reinterpret_cast<HANDLE>(m_clientSocket), m_iocp, reinterpret_cast<unsigned long long>(socket.get()), 0);
 
-	::CreateIoCompletionPort(reinterpret_cast<HANDLE>(socket->socket), m_iocp, reinterpret_cast<unsigned long long>(user.get()), 0);
-	WSABUF wsaBuf{ static_cast<unsigned long>(socket->buffer.size()), socket->buffer.data() };
-	DWORD flag{};
-	::WSARecv(socket->socket, &wsaBuf, 1, 0, &flag, &socket->overlappedEx, nullptr);
+	// 수신 상태로 설정
+	socket->SetReceive();
+	m_sockets.push_back(socket);
 
 	// 새로운 Accept 소켓 생성
 	m_clientSocket = ::WSASocket(AF_INET, SOCK_STREAM, IPPROTO_TCP, 0, 0, WSA_FLAG_OVERLAPPED);
@@ -157,42 +153,11 @@ void UserAcceptor::OnAccept()
 	::AcceptEx(m_listenSocket, m_clientSocket, m_acceptBuffer.data(), 0, sizeof(SOCKADDR_IN) + 16, sizeof(SOCKADDR_IN) + 16, nullptr, &m_overlappedEx);
 }
 
-void UserAcceptor::OnReceive(User* user, Packet::Size ioSize)
+void SocketManager::Disconnect(ClientSocket* socket)
 {
-	const auto& socket{ user->GetSocket() };
-	if (socket->packet && socket->remainSize > 0)
+	if (socket)
 	{
-		socket->packet->EncodeBuffer(socket->buffer.data(), static_cast<Packet::Size>(ioSize));
-		socket->remainSize -= ioSize;
+		socket->OnDisconnect();
+		std::erase_if(m_sockets, [socket](const auto& s) { return s.get() == socket; });
 	}
-	else
-	{
-		socket->packet = std::make_unique<Packet>(socket->buffer.data(), static_cast<Packet::Size>(ioSize));
-
-		Packet::Size size{ 0 };
-		std::memcpy(&size, socket->buffer.data(), sizeof(size));
-		if (size > ioSize)
-			socket->remainSize = size - ioSize;
-	}
-
-	if (socket->packet && socket->remainSize == 0)
-	{
-		socket->packet->SetOffset(0);
-		user->OnPacket(*socket->packet);
-		socket->packet.reset();
-	}
-
-	WSABUF wsaBuf{ static_cast<unsigned long>(socket->buffer.size()), socket->buffer.data() };
-	DWORD flag{};
-	::WSARecv(socket->socket, &wsaBuf, 1, 0, &flag, &socket->overlappedEx, nullptr);
-}
-
-void UserAcceptor::OnDisconnect(User* user)
-{
-	const auto& socket{ user->GetSocket() };
-	::shutdown(socket->socket, SD_BOTH);
-	::closesocket(socket->socket);
-
-	if (auto um{ UserManager::GetInstance() })
-		um->Unregister(user);
 }

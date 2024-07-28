@@ -31,4 +31,5 @@ extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg
 
 // Project
 #include "Common/Packet.h"
+#include "Common/Protocol.h"
 #include "Common/Request.h"

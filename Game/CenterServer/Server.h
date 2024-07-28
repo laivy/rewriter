@@ -14,10 +14,10 @@ public:
 	IServer() = default;
 	virtual ~IServer() = default;
 
-	void SetSocket(Socket&& socket);
+	void SetSocket(SocketEx&& socket);
 
-	Socket& GetSocket();
+	SocketEx& GetSocket();
 
 protected:
-	Socket m_socket;
+	SocketEx m_socket;
 };

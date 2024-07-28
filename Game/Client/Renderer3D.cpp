@@ -33,7 +33,7 @@ namespace Renderer3D
 		Renderer::commandQueue->ExecuteCommandLists(_countof(ppCommandList), ppCommandList);
 	}
 
-	void DrawImage(const std::shared_ptr<Resource::Image>& image, const INT2& position, float opacity)
+	void DrawImage(const std::shared_ptr<Resource::PNG>& image, const INT2& position, float opacity)
 	{
 		
 	}

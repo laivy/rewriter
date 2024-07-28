@@ -1,5 +1,7 @@
 ﻿#pragma once
 #include <Windows.h>
+#include <string>
+#include "Util.h"
 #include "External/Imgui/imgui.h"
 #ifndef _IMGUI_STANDALONE
 #include <d3d12.h>
@@ -17,4 +19,14 @@ namespace ImGui
 	void BeginRender();
 	void EndRender();
 	void CleanUp();
+
+	// ImGui 유틸 함수
+	template<class... Args>
+	void Text(std::wstring_view fmt, Args... args)
+	{
+		auto utf8Fmt{ Util::wstou8s(fmt) };
+		Text(utf8Fmt.c_str(), args...);
+	}
+
+	bool Button(std::wstring_view label, const ImVec2& size = ImVec2(0, 0));
 }

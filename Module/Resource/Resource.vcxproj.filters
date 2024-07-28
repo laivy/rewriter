@@ -71,6 +71,5 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="README.md" />
-    <None Include="cpp.hint" />
   </ItemGroup>
 </Project>

@@ -10,7 +10,7 @@ ServerAcceptor::ServerAcceptor() :
 	m_acceptBuffer{},
 	m_overlappedEx{}
 {
-	Init();
+	LoadConfig();
 
 	m_listenSocket = ::WSASocket(AF_INET, SOCK_STREAM, IPPROTO_TCP, NULL, NULL, WSA_FLAG_OVERLAPPED);
 	if (m_listenSocket == INVALID_SOCKET)
@@ -64,7 +64,7 @@ ServerAcceptor::ServerAcceptor() :
 
 	if (!::AcceptEx(m_listenSocket, m_clientSocket, m_acceptBuffer.data(), 0, sizeof(SOCKADDR_IN) + 16, sizeof(SOCKADDR_IN) + 16, nullptr, &m_overlappedEx))
 	{
-		if (::WSAGetLastError() != ERROR_IO_PENDING)
+		if (::WSAGetLastError() != WSA_IO_PENDING)
 		{
 			assert(false && "ACCEPT FAIL");
 			return;
@@ -88,7 +88,7 @@ void ServerAcceptor::Render()
 	ImGui::End();
 }
 
-void ServerAcceptor::Init()
+void ServerAcceptor::LoadConfig()
 {
 	// 서버 정보 로드
 	auto root = Resource::Get(L"Center.dat");
@@ -140,6 +140,7 @@ void ServerAcceptor::Run(std::stop_token stoken)
 			continue;
 		case ERROR_ABANDONED_WAIT_0: // IOCP 핸들 닫힘
 		case ERROR_OPERATION_ABORTED:
+		case ERROR_CONNECTION_ABORTED:
 			continue;
 		default:
 			assert(false && "IOCP ERROR");

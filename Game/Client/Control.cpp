@@ -7,7 +7,17 @@ IControl::IControl(IWindow* owner) :
 {
 }
 
+void IControl::SetName(std::wstring_view name)
+{
+	m_name = name;
+}
+
 bool IControl::IsEnable() const
 {
 	return m_isEnable;
+}
+
+std::wstring_view IControl::GetName() const
+{
+	return m_name;
 }

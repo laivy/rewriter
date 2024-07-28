@@ -55,7 +55,7 @@ IServer::Type IServer::GetType() const
 	return m_type;
 }
 
-Socket& IServer::GetSocket()
+SocketEx& IServer::GetSocket()
 {
 	return m_socket;
 }

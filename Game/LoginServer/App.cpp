@@ -1,8 +1,8 @@
 ﻿#include "Stdafx.h"
 #include "App.h"
-#include "UserAcceptor.h"
+#include "CenterServer.h"
+#include "SocketManager.h"
 #include "UserManager.h"
-#include "Common/CenterServer.h"
 #include "Common/ImguiEx.h"
 
 App::App()
@@ -15,7 +15,7 @@ App::App()
 
 App::~App()
 {
-	UserAcceptor::Destroy(); // 유저 접속 차단
+	SocketManager::Destroy(); // 유저 접속 차단
 	UserManager::Destroy(); // 접속 중인 유저 정보 저장
 	ImGui::CleanUp();
 	::WSACleanup();
@@ -133,7 +133,7 @@ void App::InitApp()
 
 	CenterServer::Instantiate(L"Login.dat"); // 센터 서버 연결
 	UserManager::Instantiate();
-	UserAcceptor::Instantiate(); // 유저 접속 허용
+	SocketManager::Instantiate(); // 유저 접속 허용
 }
 
 void App::Update()
@@ -147,7 +147,7 @@ void App::Render()
 {
 	ImGui::BeginRender();
 	{
-		if (auto sm{ UserAcceptor::GetInstance() })
+		if (auto sm{ SocketManager::GetInstance() })
 			sm->Render();
 	}
 	ImGui::EndRender();

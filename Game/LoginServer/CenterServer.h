@@ -6,6 +6,8 @@ public:
 	CenterServer(std::wstring_view config);
 	~CenterServer();
 
+	void Send(Packet& packet) const;
+
 	bool IsConnected() const;
 
 private:

@@ -37,7 +37,7 @@ namespace Renderer2D
 		Renderer::ctx->FillRoundedRectangle(roundRect, brush.Get());
 	}
 
-	void DrawImage(const std::shared_ptr<Resource::Image>& image, const FLOAT2& position, float opacity)
+	void DrawImage(const std::shared_ptr<Resource::PNG>& image, const FLOAT2& position, float opacity)
 	{
 		image->Use(Renderer::ctx);
 		INT2 size{ image->GetSize() };
@@ -48,7 +48,7 @@ namespace Renderer2D
 		DrawImage(image, rect, opacity);
 	}
 
-	void DrawImage(const std::shared_ptr<Resource::Image>& image, const RECTF& rect, float opacity)
+	void DrawImage(const std::shared_ptr<Resource::PNG>& image, const RECTF& rect, float opacity)
 	{
 		image->Use(Renderer::ctx);
 		Renderer::ctx->DrawBitmap(static_cast<ID2D1Bitmap*>(image->Get()), rect, opacity);

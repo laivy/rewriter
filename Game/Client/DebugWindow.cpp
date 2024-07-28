@@ -59,56 +59,6 @@ private:
 
 DebugWindow::DebugWindow()
 {
-	m_size = { 600, 400 };
-	
-	auto idTextBlock{ std::make_shared<TextBlock>(this) };
-	idTextBlock->SetSize({ 20, 30 });
-	idTextBlock->SetPosition({ m_size.x / 2 - 90, m_size.y / 2 - 22 }, Pivot::CENTER);
-	idTextBlock->SetText(L"ID");
-	m_controls.push_back(idTextBlock);
-
-	auto idTextBox{ std::make_shared<TextBox>(this) };
-	idTextBox->SetSize({ 180, 30 });
-	idTextBox->SetPosition({ m_size.x / 2 - 80, m_size.y / 2 - 25 }, Pivot::LEFTCENTER);
-	m_controls.push_back(idTextBox);
-
-	auto pwTextBlock{ std::make_shared<TextBlock>(this) };
-	pwTextBlock->SetSize({ 25, 30 });
-	pwTextBlock->SetPosition({ m_size.x / 2 - 96, m_size.y / 2 + 17 }, Pivot::CENTER);
-	pwTextBlock->SetText(L"PW");
-	m_controls.push_back(pwTextBlock);
-
-	auto pwTextBox{ std::make_shared<TextBox>(this) };
-	pwTextBox->SetSize({ 180, 30 });
-	pwTextBox->SetPosition({ m_size.x / 2 - 80, m_size.y / 2 + 15 }, Pivot::LEFTCENTER);
-	m_controls.push_back(pwTextBox);
-
-	auto registerButton{ std::make_shared<Button>(this) };
-	registerButton->SetSize({ 97, 30 });
-	registerButton->SetPosition({ m_size.x / 2 - 100, m_size.y / 2 + 55 }, Pivot::LEFTCENTER);
-	registerButton->SetText(L"Register");
-	registerButton->OnButtonClick->Register(this,
-		[button = registerButton]()
-		{
-			button->m_state = Button::State::DEFAULT;
-			auto callback = [](IModal::Return retval) { };
-			std::shared_ptr<IModal> modal{ std::make_shared<RegisterAccountModal>(callback) };
-			if (auto wm{ WindowManager::GetInstance() })
-				wm->Register(modal);
-		});
-	m_controls.push_back(registerButton);
-
-	auto loginButton{ std::make_shared<Button>(this) };
-	loginButton->SetSize({ 97, 30 });
-	loginButton->SetPosition({ m_size.x / 2 + 100, m_size.y / 2 + 55 }, Pivot::RIGHTCENTER);
-	loginButton->SetText(L"Login");
-	loginButton->OnButtonClick->Register(this,
-		[]()
-		{
-
-		});
-	m_controls.push_back(loginButton);
-
 	App::OnPacket->Register(this, std::bind_front(&DebugWindow::OnPacket, this));
 }
 
@@ -129,14 +79,18 @@ void DebugWindow::Update(float deltaTime)
 
 void DebugWindow::Render() const
 {
-	RECTI rect{ 0, 0, m_size.x, m_size.y };
-	RECTI outline{ rect };
-	outline.left -= 5;
-	outline.top -= 5;
-	outline.right += 5;
-	outline.bottom += 5;
-	Renderer2D::DrawRect(outline, D2D1::ColorF::Black);
-	Renderer2D::DrawRect(rect, D2D1::ColorF::White);
+	auto b = Resource::Get(L"UI.dat/LoginUI/Background");
+	
+	Renderer2D::DrawImage(b->GetImage(), FLOAT2{});
+
+	//RECTI rect{ 0, 0, m_size.x, m_size.y };
+	//RECTI outline{ rect };
+	//outline.left -= 5;
+	//outline.top -= 5;
+	//outline.right += 5;
+	//outline.bottom += 5;
+	//Renderer2D::DrawRect(outline, D2D1::ColorF::Black);
+	//Renderer2D::DrawRect(rect, D2D1::ColorF::White);
 
 	IWindow::Render();
 }

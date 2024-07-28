@@ -1,9 +1,9 @@
 ﻿#include "Stdafx.h"
+#include "ClientSocket.h"
 #include "User.h"
 
-User::User(const std::shared_ptr<Socket>& socket) :
-	m_socket{ socket },
-	m_account{}
+User::User(ClientSocket* socket) :
+	m_socket{ socket }
 {
 }
 
@@ -15,12 +15,7 @@ void User::Update(float deltaTime)
 {
 }
 
-const std::shared_ptr<Socket>& User::GetSocket() const
+int User::GetAccountID() const
 {
-	return m_socket;
-}
-
-std::uint32_t User::GetAccountID() const
-{
-	return m_account.id;
+	return 0;
 }

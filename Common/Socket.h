@@ -18,7 +18,7 @@ struct OVERLAPPEDEX : OVERLAPPED
 #endif
 };
 
-struct Socket
+struct SocketEx
 {
 	SOCKET socket{ INVALID_SOCKET };
 	OVERLAPPEDEX overlappedEx{};

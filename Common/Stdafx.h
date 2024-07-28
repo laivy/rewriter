@@ -38,7 +38,7 @@ EXTERN_C IMAGE_DOS_HEADER __ImageBase;
 using namespace std::chrono_literals;
 
 // Project
-#include "Event.h"
+#include "Delegate.h"
 #include "Singleton.h"
 #include "StringTable.h"
 #include "Types.h"

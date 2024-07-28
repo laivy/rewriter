@@ -96,6 +96,11 @@ void IWindow::Render() const
 		control->Render();
 }
 
+void IWindow::Register(const std::shared_ptr<IControl>& control)
+{
+	m_controls.push_back(control);
+}
+
 void IWindow::UpdateMouseOverControl(int x, int y)
 {
 	auto rit{ std::ranges::find_if(std::views::reverse(m_controls), [x, y](const auto& control) { return control->IsContain({ x, y }); }) };

@@ -68,9 +68,6 @@
     <ClCompile Include="App.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\External\DirectX\WICTextureLoader12.cpp">
-      <Filter>외부 파일\DirectX</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\External\Imgui\imgui.cpp">
       <Filter>외부 파일\Imgui</Filter>
     </ClCompile>
@@ -176,6 +173,15 @@
     <ClCompile Include="LoginServer.cpp">
       <Filter>소스 파일\Server</Filter>
     </ClCompile>
+    <ClCompile Include="WindowBuilder.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\External\DirectX\DDSTextureLoader12.cpp">
+      <Filter>외부 파일\DirectX</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\External\DirectX\WICTextureLoader12.cpp">
+      <Filter>외부 파일\DirectX</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Stdafx.h">
@@ -185,9 +191,6 @@
       <Filter>헤더 파일</Filter>
     </ClInclude>
     <ClInclude Include="..\..\External\DirectX\d3dx12.h">
-      <Filter>외부 파일\DirectX</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\External\DirectX\WICTextureLoader12.h">
       <Filter>외부 파일\DirectX</Filter>
     </ClInclude>
     <ClInclude Include="..\..\External\Imgui\imconfig.h">
@@ -244,7 +247,7 @@
     <ClInclude Include="..\..\External\Imgui\imgui_stdlib.h">
       <Filter>외부 파일\Imgui</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\Common\Event.h">
+    <ClInclude Include="..\..\Common\Delegate.h">
       <Filter>헤더 파일\Common</Filter>
     </ClInclude>
     <ClInclude Include="Renderer.h">
@@ -321,6 +324,15 @@
     </ClInclude>
     <ClInclude Include="LoginServer.h">
       <Filter>헤더 파일\Server</Filter>
+    </ClInclude>
+    <ClInclude Include="WindowBuilder.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\External\DirectX\DDSTextureLoader12.h">
+      <Filter>외부 파일\DirectX</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\External\DirectX\WICTextureLoader12.h">
+      <Filter>외부 파일\DirectX</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

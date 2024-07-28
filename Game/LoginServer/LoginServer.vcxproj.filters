@@ -80,17 +80,20 @@
     <ClCompile Include="..\..\Common\ImguiEx.cpp">
       <Filter>소스 파일\Common</Filter>
     </ClCompile>
-    <ClCompile Include="UserAcceptor.cpp">
+    <ClCompile Include="SocketManager.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
     <ClCompile Include="..\..\Common\Timer.cpp">
       <Filter>소스 파일\Common</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\Common\CenterServer.cpp">
-      <Filter>소스 파일\Common</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\Common\Util.cpp">
       <Filter>소스 파일\Common</Filter>
+    </ClCompile>
+    <ClCompile Include="CenterServer.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="ClientSocket.cpp">
+      <Filter>소스 파일</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -160,16 +163,10 @@
     <ClInclude Include="..\..\Common\ImguiEx.h">
       <Filter>헤더 파일\Common</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\Common\Socket.h">
-      <Filter>헤더 파일\Common</Filter>
-    </ClInclude>
-    <ClInclude Include="UserAcceptor.h">
+    <ClInclude Include="SocketManager.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
     <ClInclude Include="..\..\Common\Timer.h">
-      <Filter>헤더 파일\Common</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Common\CenterServer.h">
       <Filter>헤더 파일\Common</Filter>
     </ClInclude>
     <ClInclude Include="..\..\Common\Stdafx.h">
@@ -177,6 +174,12 @@
     </ClInclude>
     <ClInclude Include="..\..\Common\Util.h">
       <Filter>헤더 파일\Common</Filter>
+    </ClInclude>
+    <ClInclude Include="ClientSocket.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="CenterServer.h">
+      <Filter>헤더 파일</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
