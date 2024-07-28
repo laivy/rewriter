@@ -21,7 +21,7 @@ private:
 
 public:
 	static constexpr auto WINDOW_TITLE_NAME{ L"CENTER SERVER" };
-	static inline auto OnResize{ std::make_shared<Event<int, int >>() };
+	static inline Delegate<int, int> OnResize;
 	static inline HWND hWnd{ NULL };
 	static inline INT2 size{ 600, 400 };
 

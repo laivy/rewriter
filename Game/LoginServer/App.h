@@ -20,9 +20,10 @@ private:
 	void Render();
 
 public:
+	static inline Delegate<int, int> OnResize;
+	static inline Delegate<Packet&> OnPacket;
+
 	static constexpr auto WINDOW_TITLE_NAME{ L"LOGIN SERVER" };
-	static inline auto OnResize{ std::make_shared<Event<int, int >>() };
-	static inline auto OnPacket{ std::make_shared<Event<size_t, std::shared_ptr<Packet>>>() };
 	static inline HWND hWnd{ NULL };
 	static inline INT2 size{ 600, 400 };
 

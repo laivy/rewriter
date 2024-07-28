@@ -28,14 +28,14 @@ public:
 		SetPosition({ App::size.x / 2, App::size.y / 2 }, Pivot::CENTER);
 
 		auto okButton{ std::make_shared<Button>(this) };
-		okButton->OnButtonClick->Register(this, std::bind(&RegisterAccountModal::OnButtonClicked, this, ButtonID::OK));
+		okButton->OnButtonClick.Register(this, std::bind(&RegisterAccountModal::OnButtonClicked, this, ButtonID::OK));
 		okButton->SetSize({ 80, 20 });
 		okButton->SetPosition({ m_size.x / 2 - 50, m_size.y / 2 + 120 }, Pivot::CENTER);
 		okButton->SetText(L"OK");
 		m_controls.push_back(okButton);
 
 		auto cancleButton{ std::make_shared<Button>(this) };
-		cancleButton->OnButtonClick->Register(this, std::bind(&RegisterAccountModal::OnButtonClicked, this, ButtonID::CANCLE));
+		cancleButton->OnButtonClick.Register(this, std::bind(&RegisterAccountModal::OnButtonClicked, this, ButtonID::CANCLE));
 		cancleButton->SetSize({ 80, 20 });
 		cancleButton->SetPosition({ m_size.x / 2 + 50, m_size.y / 2 + 120 }, Pivot::CENTER);
 		cancleButton->SetText(L"CANCLE");
@@ -59,7 +59,7 @@ private:
 
 DebugWindow::DebugWindow()
 {
-	App::OnPacket->Register(this, std::bind_front(&DebugWindow::OnPacket, this));
+	App::OnPacket.Register(this, std::bind_front(&DebugWindow::OnPacket, this));
 }
 
 void DebugWindow::OnMouseEvent(UINT message, int x, int y)

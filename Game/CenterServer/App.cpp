@@ -52,7 +52,7 @@ LRESULT App::WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 	}
 	case WM_SIZE:
 	{
-		App::OnResize->Notify(GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam));
+		App::OnResize.Notify(GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam));
 		break;
 	}
 	case WM_DESTROY:
@@ -105,7 +105,7 @@ void App::InitWindow()
 void App::InitImgui()
 {
 	ImGui::Init(hWnd, ImGuiConfigFlags_NavEnableKeyboard | ImGuiConfigFlags_DockingEnable);
-	OnResize->Register(&ImGui::OnResize);
+	OnResize.Register(&ImGui::OnResize);
 
 	auto& io{ ImGui::GetIO() };
 	io.IniFilename = "Data/imgui.ini";

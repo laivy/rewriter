@@ -177,7 +177,7 @@ namespace Resource
 			remain = path.substr(pos + 1);
 		}
 
-		if (const auto & child{ Get(name) })
+		if (const auto& child{ Get(name) })
 			return child->GetInt(remain);
 
 		return 0;
@@ -201,7 +201,7 @@ namespace Resource
 			remain = path.substr(pos + 1);
 		}
 
-		if (const auto & child{ Get(name) })
+		if (const auto& child{ Get(name) })
 			return child->GetInt2(remain);
 
 		return INT2{};
@@ -225,7 +225,7 @@ namespace Resource
 			remain = path.substr(pos + 1);
 		}
 
-		if (const auto & child{ Get(name) })
+		if (const auto& child{ Get(name) })
 			return child->GetFloat(remain);
 
 		return 0.0f;
@@ -249,7 +249,7 @@ namespace Resource
 			remain = path.substr(pos + 1);
 		}
 
-		if (const auto & child{ Get(name) })
+		if (const auto& child{ Get(name) })
 			return child->GetString(remain);
 
 		return L"";
@@ -273,7 +273,7 @@ namespace Resource
 			remain = path.substr(pos + 1);
 		}
 
-		if (const auto & child{ Get(name) })
+		if (const auto& child{ Get(name) })
 			return child->GetImage(remain);
 
 		assert(m_type == Type::PNG);

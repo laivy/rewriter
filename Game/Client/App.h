@@ -20,11 +20,12 @@ private:
 	void Render();
 
 public:
+	static inline Delegate<UINT, WPARAM, LPARAM> OnKeyboardEvent;
+	static inline Delegate<UINT, int, int> OnMouseEvent;
+	static inline Delegate<int, int> OnResize;
+	static inline Delegate<Packet&> OnPacket;
+
 	static constexpr auto WINDOW_TITLE_NAME{ L"REWRITER" };
-	static inline auto OnKeyboardEvent{ std::make_shared<Event<UINT, WPARAM, LPARAM>>() };
-	static inline auto OnMouseEvent{ std::make_shared<Event<UINT, int, int>>() };
-	static inline auto OnResize{ std::make_shared<Event<int, int>>() };
-	static inline auto OnPacket{ std::make_shared<Event<Packet&>>() };
 	static inline HWND hWnd{ NULL };
 	static inline INT2 size{ 1920, 1080 };
 

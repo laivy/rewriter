@@ -39,18 +39,14 @@ namespace Renderer2D
 
 	void DrawImage(const std::shared_ptr<Resource::PNG>& image, const FLOAT2& position, float opacity)
 	{
-		image->Use(Renderer::ctx);
 		INT2 size{ image->GetSize() };
-
 		RECTF rect{ 0.0f, 0.0f, static_cast<float>(size.x), static_cast<float>(size.y) };
 		rect.Offset(position);
-		
 		DrawImage(image, rect, opacity);
 	}
 
 	void DrawImage(const std::shared_ptr<Resource::PNG>& image, const RECTF& rect, float opacity)
 	{
-		image->Use(Renderer::ctx);
 		Renderer::ctx->DrawBitmap(static_cast<ID2D1Bitmap*>(image->Get()), rect, opacity);
 	}
 

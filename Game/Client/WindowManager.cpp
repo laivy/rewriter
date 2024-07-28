@@ -10,8 +10,8 @@
 
 WindowManager::WindowManager()
 {
-	App::OnKeyboardEvent->Register(this, std::bind_front(&WindowManager::OnKeyboardEvent, this));
-	App::OnMouseEvent->Register(this, std::bind_front(&WindowManager::OnMouseEvent, this));
+	App::OnKeyboardEvent.Register(this, std::bind_front(&WindowManager::OnKeyboardEvent, this));
+	App::OnMouseEvent.Register(this, std::bind_front(&WindowManager::OnMouseEvent, this));
 
 #ifdef _DEBUG
 	auto window = WindowBuilder<DebugWindow>{}

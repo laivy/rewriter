@@ -97,10 +97,10 @@ void ServerAcceptor::LoadConfig()
 	// 다른 서버들 로드
 	auto load = [this, &root](const std::wstring& name, IServer::Type type)
 		{
-			for (const auto& [_, index] : *root->Get(name))
+			for (const auto& child : root->Get(name)->GetChildren())
 			{
-				auto ip = index->GetString(L"IP");
-				auto port = index->GetInt(L"Port");
+				auto ip = child->GetString(L"IP");
+				auto port = child->GetInt(L"Port");
 				m_serverLists.emplace_back(type, ip, port);
 			}
 		};

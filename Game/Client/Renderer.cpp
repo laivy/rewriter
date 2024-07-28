@@ -405,7 +405,7 @@ namespace Renderer
 
 		Resource::Init(ctx);
 
-		App::OnResize->Register(&OnResize);
+		App::OnResize.Register(&OnResize);
 	}
 
 	void Present()

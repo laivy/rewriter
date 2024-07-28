@@ -119,7 +119,7 @@ void ServerManager::OnReceive(IServer* server, Packet::Size ioSize)
 	if (socket.packet && socket.remainSize == 0)
 	{
 		socket.packet->SetOffset(0);
-		App::OnPacket->Notify(*socket.packet);
+		App::OnPacket.Notify(*socket.packet);
 		socket.packet.reset();
 	}
 

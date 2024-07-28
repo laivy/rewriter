@@ -69,7 +69,7 @@ LRESULT CALLBACK App::WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPa
 	case WM_CHAR:
 	case WM_IME_COMPOSITION:
 	{
-		App::OnKeyboardEvent->Notify(message, wParam, lParam);
+		App::OnKeyboardEvent.Notify(message, wParam, lParam);
 		break;
 	}
 	case WM_MOUSEMOVE:
@@ -78,12 +78,12 @@ LRESULT CALLBACK App::WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPa
 	case WM_RBUTTONUP:
 	case WM_RBUTTONDOWN:
 	{
-		App::OnMouseEvent->Notify(message, GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam));
+		App::OnMouseEvent.Notify(message, GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam));
 		break;
 	}
 	case WM_SIZE:
 	{
-		App::OnResize->Notify(GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam));
+		App::OnResize.Notify(GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam));
 		break;
 	}
 	case WM_DESTROY:

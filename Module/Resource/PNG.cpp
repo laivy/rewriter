@@ -36,7 +36,7 @@ namespace Resource
 		m_binary.reset(new std::byte[size]{});
 		std::memcpy(m_binary.get(), binary, size);
 		m_binarySize = size;
-#endif
+#endif // _TOOL
 	}
 
 	DLL_API ID2D1Bitmap* PNG::Get() const

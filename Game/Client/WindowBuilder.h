@@ -47,20 +47,18 @@ private:
 				return Pivot::LEFTTOP;
 			};
 
-		for (const auto& [name, prop] : *prop)
+		for (const auto& child : prop->GetChildren())
 		{
-			// 버튼
 			constexpr auto CONTROL_TYPE_BUTTON{ L"Button: " };
+
+			// 버튼
+			auto name{ child->GetName() };
 			if (name.starts_with(CONTROL_TYPE_BUTTON))
 			{
 				auto button{ std::make_shared<Button>(m_window.get()) };
 
 				// 이름
-				std::wstring buttonName;
-				if (basePath.empty())
-					buttonName = name.substr(std::char_traits<wchar_t>::length(CONTROL_TYPE_BUTTON));
-				else
-					buttonName = basePath + name.substr(std::char_traits<wchar_t>::length(CONTROL_TYPE_BUTTON));
+				std::wstring buttonName{ basePath + name.substr(std::char_traits<wchar_t>::length(CONTROL_TYPE_BUTTON)) };
 				button->SetName(buttonName);
 
 				// 크기

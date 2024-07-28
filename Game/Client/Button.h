@@ -22,7 +22,7 @@ public:
 	void SetText(std::wstring_view text);
 
 public:
-	std::shared_ptr<Event<>> OnButtonClick;
+	Delegate<> OnButtonClick;
 
 public:
 	State m_state;

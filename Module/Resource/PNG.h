@@ -1,8 +1,6 @@
 ﻿#pragma once
 #if defined _CLIENT || defined _TOOL
 
-struct ID2D1DeviceContext2;
-
 namespace Resource
 {
 	class PNG

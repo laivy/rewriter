@@ -4,7 +4,7 @@
 
 LoginScene::LoginScene()
 {
-	App::OnPacket->Register(this, std::bind_front(&LoginScene::OnPacket, this));
+	App::OnPacket.Register(this, std::bind_front(&LoginScene::OnPacket, this));
 }
 
 void LoginScene::Update(float deltaTime)

@@ -182,6 +182,9 @@
     <ClCompile Include="..\..\External\DirectX\WICTextureLoader12.cpp">
       <Filter>외부 파일\DirectX</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\Common\Util.cpp">
+      <Filter>소스 파일\Common</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Stdafx.h">
@@ -333,6 +336,9 @@
     </ClInclude>
     <ClInclude Include="..\..\External\DirectX\WICTextureLoader12.h">
       <Filter>외부 파일\DirectX</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Common\Util.h">
+      <Filter>헤더 파일\Common</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

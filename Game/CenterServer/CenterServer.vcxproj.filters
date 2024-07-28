@@ -114,6 +114,9 @@
     <ClInclude Include="LoginServer.h">
       <Filter>헤더 파일\Server</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\Common\Util.h">
+      <Filter>헤더 파일\Common</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\Common\Packet.cpp">
@@ -169,6 +172,9 @@
     </ClCompile>
     <ClCompile Include="LoginServer.cpp">
       <Filter>소스 파일\Server</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Common\Util.cpp">
+      <Filter>소스 파일\Common</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

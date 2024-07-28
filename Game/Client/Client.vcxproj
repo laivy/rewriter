@@ -111,6 +111,7 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="..\..\Common\Util.cpp" />
     <ClCompile Include="..\..\External\DirectX\DDSTextureLoader12.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
@@ -220,6 +221,7 @@
     <ClInclude Include="..\..\Common\Time.h" />
     <ClInclude Include="..\..\Common\Timer.h" />
     <ClInclude Include="..\..\Common\Types.h" />
+    <ClInclude Include="..\..\Common\Util.h" />
     <ClInclude Include="..\..\External\DirectX\d3dx12.h" />
     <ClInclude Include="..\..\External\DirectX\DDSTextureLoader12.h" />
     <ClInclude Include="..\..\External\DirectX\WICTextureLoader12.h" />
