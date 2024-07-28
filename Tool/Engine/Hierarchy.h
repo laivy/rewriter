@@ -24,7 +24,7 @@ private:
 	void RenderMenu();
 	void RenderNode();
 
-	void Load(const std::filesystem::path& path);
+	void LoadDataFile(const std::filesystem::path& path);
 
 private:
 	static constexpr auto WINDOW_NAME{ "Hierarchy" };
@@ -35,6 +35,4 @@ private:
 	static constexpr auto MENU_FILE_SAVEAS{ "Save as" };
 	static constexpr auto DEFAULT_FILE_NAME{ L"NewFile" };
 	static constexpr auto DEFAULT_NODE_NAME{ L"NewNode" };
-
-	std::vector<std::weak_ptr<Resource::Property>> m_selectedPropertise;
 };

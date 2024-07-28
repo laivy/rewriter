@@ -7,13 +7,12 @@
 #include "Common/Timer.h"
 
 App::App() :
-	m_isActive{ true },
-	m_timer{ new Timer }
+	m_isActive{ true }
 {
 	InitWindow();
 	InitImGui();
 	InitApp();
-	m_timer->Tick();
+	m_timer.Tick();
 }
 
 App::~App()
@@ -60,7 +59,7 @@ LRESULT App::WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 	}
 	case WM_SIZE:
 	{
-		OnResize->Notify(GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam));
+		OnResize.Notify(GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam));
 		break;
 	}
 	case WM_DESTROY:
@@ -114,7 +113,7 @@ void App::InitWindow()
 void App::InitImGui()
 {
 	ImGui::Init(hWnd, ImGuiConfigFlags_NavEnableKeyboard | ImGuiConfigFlags_DockingEnable);
-	OnResize->Register(&ImGui::OnResize);
+	OnResize.Register(&ImGui::OnResize);
 
 	auto& io{ ImGui::GetIO() };
 	io.IniFilename = "Data/imgui.ini";
@@ -135,7 +134,7 @@ void App::InitApp()
 
 void App::Update()
 {
-	float deltaTime{ m_timer->Tick() };
+	float deltaTime{ m_timer.Tick() };
 	if (auto explorer{ Explorer::GetInstance() })
 		explorer->Update(deltaTime);
 	if (auto hierarchy{ Hierarchy::GetInstance() })

@@ -19,5 +19,5 @@ private:
 	static constexpr auto CHILD_WINDOW_NAME{ "FileViewer" };
 
 	std::filesystem::path m_path;
-	std::vector<std::string> m_folders;
+	std::vector<std::wstring> m_folders;
 };

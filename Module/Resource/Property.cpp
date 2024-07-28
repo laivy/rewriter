@@ -5,66 +5,14 @@
 
 namespace Resource
 {
-	Property::Iterator::Iterator(const Property* const prop, size_t index) :
-		m_property{ prop },
-		m_index{ index }
-	{
-	}
-
-	Property::Iterator& Property::Iterator::operator++()
-	{
-		++m_index;
-		return *this;
-	}
-
-	Property::Iterator& Property::Iterator::operator--()
-	{
-		--m_index;
-		return *this;
-	}
-
-	bool Property::Iterator::operator==(const Iterator& iter) const
-	{
-		return m_property == iter.m_property && m_index == iter.m_index;
-	}
-
-	bool Property::Iterator::operator!=(const Iterator& iter) const
-	{
-		if (m_property->m_children.empty())
-			return false;
-		if (m_property != iter.m_property)
-			return true;
-		if (m_index != iter.m_index)
-			return true;
-		return false;
-	}
-
-	std::pair<std::wstring, std::shared_ptr<Property>> Property::Iterator::operator*() const
-	{
-		return std::make_pair(
-			m_property->m_children[m_index]->m_name,
-			m_property->m_children[m_index]
-		);
-	}
-
-	Property::Property() :
+	DLL_API Property::Property() :
 		m_type{ Property::Type::FOLDER },
 		m_name{ L"" }
 	{
 	}
 
-	Property::Iterator Property::begin() const
-	{
-		return Iterator{ this, 0 };
-	}
-
-	Property::Iterator Property::end() const
-	{
-		return Iterator{ this, m_children.size() };
-	}
-
 #ifdef _TOOL
-	void Property::Save(const std::filesystem::path& path)
+	DLL_API void Property::Save(const std::filesystem::path& path)
 	{
 		std::ofstream file{ path, std::ios::binary };
 		std::function<void(Property*)> lambda = [&](Property* prop)
@@ -136,14 +84,19 @@ namespace Resource
 		for (const auto& child : m_children)
 			lambda(child.get());
 	}
+#endif
 
-	void Property::Add(const std::shared_ptr<Property>& child)
+	DLL_API void Property::Add(const std::shared_ptr<Property>& child)
 	{
 		m_children.push_back(child);
 	}
-#endif
 
-	void Property::SetType(Type type)
+	DLL_API void Property::Delete(const std::shared_ptr<Property>& child)
+	{
+		std::erase(m_children, child);
+	}
+
+	DLL_API void Property::SetType(Type type)
 	{
 		m_type = type;
 		switch (m_type)
@@ -166,47 +119,47 @@ namespace Resource
 		}
 	}
 
-	void Property::SetName(const std::wstring& name)
+	DLL_API void Property::SetName(const std::wstring& name)
 	{
 		this->m_name = name;
 	}
 
-	void Property::Set(int value)
+	DLL_API void Property::Set(int value)
 	{
 		m_data = value;
 	}
 
-	void Property::Set(const INT2& value)
+	DLL_API void Property::Set(const INT2& value)
 	{
 		m_data = value;
 	}
 
-	void Property::Set(float value)
+	DLL_API void Property::Set(float value)
 	{
 		m_data = value;
 	}
 
-	void Property::Set(const std::wstring& value)
+	DLL_API void Property::Set(const std::wstring& value)
 	{
 		m_data = value;
 	}
 
-	void Property::Set(const std::shared_ptr<PNG>& value)
+	DLL_API void Property::Set(const std::shared_ptr<PNG>& value)
 	{
 		m_data = value;
 	}
 
-	Property::Type Property::GetType() const
+	DLL_API Property::Type Property::GetType() const
 	{
 		return m_type;
 	}
 
-	std::wstring Property::GetName() const
+	DLL_API std::wstring Property::GetName() const
 	{
 		return m_name;
 	}
 
-	int Property::GetInt(std::wstring_view path) const
+	DLL_API int Property::GetInt(std::wstring_view path) const
 	{
 		if (path.empty())
 		{
@@ -224,13 +177,13 @@ namespace Resource
 			remain = path.substr(pos + 1);
 		}
 
-		if (const auto& child{ Get(name) })
+		if (const auto & child{ Get(name) })
 			return child->GetInt(remain);
 
 		return 0;
 	}
 
-	INT2 Property::GetInt2(std::wstring_view path) const
+	DLL_API INT2 Property::GetInt2(std::wstring_view path) const
 	{
 		if (path.empty())
 		{
@@ -248,13 +201,13 @@ namespace Resource
 			remain = path.substr(pos + 1);
 		}
 
-		if (const auto& child{ Get(name) })
+		if (const auto & child{ Get(name) })
 			return child->GetInt2(remain);
 
 		return INT2{};
 	}
 
-	float Property::GetFloat(std::wstring_view path) const
+	DLL_API float Property::GetFloat(std::wstring_view path) const
 	{
 		if (path.empty())
 		{
@@ -272,13 +225,13 @@ namespace Resource
 			remain = path.substr(pos + 1);
 		}
 
-		if (const auto& child{ Get(name) })
+		if (const auto & child{ Get(name) })
 			return child->GetFloat(remain);
 
 		return 0.0f;
 	}
 
-	std::wstring Property::GetString(std::wstring_view path) const
+	DLL_API std::wstring Property::GetString(std::wstring_view path) const
 	{
 		if (path.empty())
 		{
@@ -302,7 +255,7 @@ namespace Resource
 		return L"";
 	}
 
-	std::shared_ptr<PNG> Property::GetImage(std::wstring_view path) const
+	DLL_API std::shared_ptr<PNG> Property::GetImage(std::wstring_view path) const
 	{
 		if (path.empty())
 		{
@@ -327,7 +280,7 @@ namespace Resource
 		return nullptr;
 	}
 
-	std::shared_ptr<Property> Property::Get(std::wstring_view path) const
+	DLL_API std::shared_ptr<Property> Property::Get(std::wstring_view path) const
 	{
 		size_t pos{ path.find(Stringtable::DATA_PATH_SEPERATOR) };
 		if (pos != std::wstring::npos)
@@ -346,21 +299,13 @@ namespace Resource
 		return *it;
 	}
 
-	void Property::Erase(std::wstring_view path)
+	DLL_API const std::vector<std::shared_ptr<Property>>& Property::GetChildren() const
 	{
-		size_t pos{ path.find(Stringtable::DATA_PATH_SEPERATOR) };
-		if (pos == std::wstring::npos)
-		{
-			std::erase_if(m_children, [path](const auto& prop) { return prop->m_name == path; });
-			return;
-		}
+		return m_children;
+	}
 
-		std::wstring_view remain{ path.substr(pos + 1) };
-		pos = remain.find(Stringtable::DATA_PATH_SEPERATOR);
-		if (pos != std::wstring_view::npos)
-			remain = remain.substr(0, pos);
-		auto it{ std::ranges::find_if(m_children, [&remain](const auto& prop) { return prop->m_name == remain; }) };
-		if (it != m_children.end())
-			(*it)->Erase(remain);
+	DLL_API std::vector<std::shared_ptr<Property>>& Property::GetChildren()
+	{
+		return m_children;
 	}
 }

@@ -1,24 +1,24 @@
 ﻿#include "Stdafx.h"
+#include "App.h"
 #include "Global.h"
 #include "Hierarchy.h"
 #include "Inspector.h"
-#include "PropInfo.h"
 #include "Common/Util.h"
 
-std::map<Resource::Property::Type, std::string> PROPERTY_TYPES
+const std::map<Resource::Property::Type, std::string> PROPERTY_TYPES
 {
 	{ Resource::Property::Type::FOLDER, "GROUP" },
 	{ Resource::Property::Type::INT, "INT" },
 	{ Resource::Property::Type::INT2, "INT2" },
 	{ Resource::Property::Type::FLOAT, "FLOAT" },
 	{ Resource::Property::Type::STRING, "STRING" },
-	{ Resource::Property::Type::IMAGE, "IMAGE" }
+	{ Resource::Property::Type::PNG, "IMAGE" }
 };
 
 Inspector::Inspector()
 {
-	Global::OnPropertySelect->Register(this, std::bind_front(&Inspector::OnPropertySelect, this));
-	Global::OnPropertyDelete->Register(this, std::bind_front(&Inspector::OnPropertyDelete, this));
+	App::OnPropertySelect.Register(this, std::bind_front(&Inspector::OnPropertySelect, this));
+	App::OnPropertyDelete.Register(this, std::bind_front(&Inspector::OnPropertyDelete, this));
 }
 
 void Inspector::Update(float deltaTime)
@@ -55,14 +55,15 @@ void Inspector::RenderBasicInfo()
 
 	ImGui::AlignTextToFramePadding();
 	ImGui::SeparatorText("Property Info");
-	if (Global::propInfo[prop].isRoot)
+	if (IsRoot(prop))
 	{
+		auto& root{ GetRoot(prop) };
 		ImGui::Text("Path");
 		ImGui::SameLine(100);
-		if (Global::propInfo[prop].path.empty())
+		if (root.path.empty())
 			ImGui::InputText("##PATH", "-", 1, ImGuiInputTextFlags_ReadOnly);
 		else
-			ImGui::InputText("##PATH", &Util::u8stou8s(Global::propInfo[prop].path.u8string()), ImGuiInputTextFlags_ReadOnly);
+			ImGui::InputText("##PATH", &Util::u8stou8s(root.path.u8string()), ImGuiInputTextFlags_ReadOnly);
 	}
 	else
 	{
@@ -73,12 +74,12 @@ void Inspector::RenderBasicInfo()
 		{
 			do
 			{
-				if (auto parent{ Global::propInfo[prop].parent.lock() })
-				{
-					auto it{ std::ranges::find_if(parent->children, [&name](const auto& prop) { return prop->name == Util::u8stows(name); }) };
-					if (it != parent->children.cend())
-						break;
-				}
+				//if (auto parent{ Global::propInfo[prop].parent.lock() })
+				//{
+				//	auto it{ std::ranges::find_if(parent->GetChildren(), [&name](const auto& prop) { return prop->name == Util::u8stows(name); })};
+				//	if (it != parent->children.cend())
+				//		break;
+				//}
 				prop->SetName(Util::u8stows(name));
 			} while (false);
 		}
@@ -132,7 +133,7 @@ void Inspector::RenderBasicInfo()
 			prop->Set(Util::u8stows(data));
 		break;
 	}
-	case Resource::Property::Type::IMAGE:
+	case Resource::Property::Type::PNG:
 	{
 		if (!ImGui::Button("..."))
 			break;
@@ -159,8 +160,7 @@ void Inspector::RenderBasicInfo()
 		std::unique_ptr<std::byte[]> buffer{ new std::byte[size]{} };
 		file.read(reinterpret_cast<char*>(buffer.get()), size);
 
-		auto image{ std::make_shared<Resource::Image>() };
-		image->SetBuffer(buffer.release(), size);
+		auto image{ std::make_shared<Resource::PNG>(buffer.release(), size) };
 		prop->Set(image);
 		break;
 	}

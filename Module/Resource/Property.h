@@ -24,53 +24,34 @@ namespace Resource
 			FOLDER, INT, INT2, FLOAT, STRING, PNG, DDS
 		};
 
-		class Iterator
-		{
-		public:
-			Iterator(const Property* const prop, size_t index);
-			~Iterator() = default;
-
-			__declspec(dllexport) Iterator& operator++();
-			__declspec(dllexport) Iterator& operator--();
-			__declspec(dllexport) bool operator==(const Iterator& iter) const;
-			__declspec(dllexport) bool operator!=(const Iterator& iter) const;
-			__declspec(dllexport) std::pair<std::wstring, std::shared_ptr<Property>> operator*() const;
-
-		private:
-			const Property* const m_property;
-			size_t m_index;
-		};
-
 	public:
-		__declspec(dllexport) Property();
+		DLL_API Property();
 		~Property() = default;
 
-		__declspec(dllexport) Iterator begin() const;
-		__declspec(dllexport) Iterator end() const;
-
 #ifdef _TOOL
-		__declspec(dllexport) void Save(const std::filesystem::path& path);
-		__declspec(dllexport) void Add(const std::shared_ptr<Property>& child);
+		DLL_API void Save(const std::filesystem::path& path);
 #endif
+		DLL_API void Add(const std::shared_ptr<Property>& child);
+		DLL_API void Delete(const std::shared_ptr<Property>& child);
 
-		__declspec(dllexport) void SetType(Type type);
-		__declspec(dllexport) void SetName(const std::wstring& name);
-		__declspec(dllexport) void Set(int value);
-		__declspec(dllexport) void Set(const INT2& value);
-		__declspec(dllexport) void Set(float value);
-		__declspec(dllexport) void Set(const std::wstring& value);
-		__declspec(dllexport) void Set(const std::shared_ptr<PNG>& value);
+		DLL_API void SetType(Type type);
+		DLL_API void SetName(const std::wstring& name);
+		DLL_API void Set(int value);
+		DLL_API void Set(const INT2& value);
+		DLL_API void Set(float value);
+		DLL_API void Set(const std::wstring& value);
+		DLL_API void Set(const std::shared_ptr<PNG>& value);
 
-		__declspec(dllexport) Type GetType() const;
-		__declspec(dllexport) std::wstring GetName() const;
-		__declspec(dllexport) int GetInt(std::wstring_view path = L"") const;
-		__declspec(dllexport) INT2 GetInt2(std::wstring_view path = L"") const;
-		__declspec(dllexport) float GetFloat(std::wstring_view path = L"") const;
-		__declspec(dllexport) std::wstring GetString(std::wstring_view path = L"") const;
-		__declspec(dllexport) std::shared_ptr<PNG> GetImage(std::wstring_view path = L"") const;
-		__declspec(dllexport) std::shared_ptr<Property> Get(std::wstring_view path) const;
-
-		void Erase(std::wstring_view path);
+		DLL_API Type GetType() const;
+		DLL_API std::wstring GetName() const;
+		DLL_API int GetInt(std::wstring_view path = L"") const;
+		DLL_API INT2 GetInt2(std::wstring_view path = L"") const;
+		DLL_API float GetFloat(std::wstring_view path = L"") const;
+		DLL_API std::wstring GetString(std::wstring_view path = L"") const;
+		DLL_API std::shared_ptr<PNG> GetImage(std::wstring_view path = L"") const;
+		DLL_API std::shared_ptr<Property> Get(std::wstring_view path) const;
+		DLL_API const std::vector<std::shared_ptr<Property>>& GetChildren() const;
+		DLL_API std::vector<std::shared_ptr<Property>>& GetChildren();
 
 	private:
 		std::wstring m_name;

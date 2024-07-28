@@ -1,5 +1,6 @@
 ﻿#include "Stdafx.h"
 #include "Explorer.h"
+#include "Common/ImguiEx.h"
 #include "Common/Util.h"
 
 Explorer::Explorer()
@@ -38,11 +39,9 @@ void Explorer::SetPath(const std::filesystem::path& path)
 		if (p.has_root_directory())
 			continue;
 		if (p.has_root_name())
-		{
-			m_folders.push_back(p.string() + "/");
-			continue;
-		}
-		m_folders.push_back(p.string());
+			m_folders.push_back(p.wstring() + L"/");
+		else
+			m_folders.push_back(p.wstring());
 	}
 }
 
@@ -50,20 +49,20 @@ void Explorer::RenderAddressBar()
 {
 	ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2{});
 
-	std::string path{};
+	std::wstring path{};
 	for (const auto& folder : m_folders)
 	{
 		if (path.empty())
 			path += folder;
 		else
-			path += "/" + folder;
+			path += L"/" + folder;
 
 		ImVec2 val{ 0, 3 };
 		if (folder == m_folders.front() || folder == m_folders.back())
 			val.x = 4;
 		ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, val);
 
-		if (ImGui::Button((folder + "/").c_str()))
+		if (ImGui::Button(folder + L"/"))
 			SetPath(path);
 
 		ImGui::PopStyleVar();
@@ -81,15 +80,15 @@ void Explorer::RenderFileView()
 	if (m_path.compare(m_path.root_path()) != 0)
 	{
 		if (ImGui::Button(".."))
-			SetPath(std::filesystem::canonical(m_path / ".."));
+			SetPath(std::filesystem::canonical(m_path / L".."));
 	}
 
 	for (const auto& d : std::filesystem::directory_iterator{ m_path }
 					   | std::views::filter([](const auto& d) { return d.is_directory(); }))
 	{
 		std::wstring name{ d.path().filename().wstring() };
-		if (ImGui::Button(Util::wstou8s(name).c_str()))
-			SetPath(std::filesystem::canonical(m_path / name.c_str()));
+		if (ImGui::Button(name))
+			SetPath(std::filesystem::canonical(m_path / name));
 	}
 
 	for (const auto& d : std::filesystem::directory_iterator{ m_path }

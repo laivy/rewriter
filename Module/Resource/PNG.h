@@ -1,4 +1,5 @@
 ﻿#pragma once
+#if defined _CLIENT || defined _TOOL
 
 struct ID2D1DeviceContext2;
 
@@ -7,23 +8,24 @@ namespace Resource
 	class PNG
 	{
 	public:
-		__declspec(dllexport) PNG(std::byte* binary, size_t size);
+		DLL_API PNG(std::byte* binary, size_t size);
 		~PNG() = default;
 
-		__declspec(dllexport) ID2D1Bitmap* Get() const;
-		__declspec(dllexport) INT2 GetSize() const;
+		DLL_API ID2D1Bitmap* Get() const;
+		DLL_API INT2 GetSize() const;
 
 	private:
 		ComPtr<ID2D1Bitmap> m_bitmap;
 
 #ifdef _TOOL
 	public:
-		std::byte* GetBinary() const;
-		size_t GetBinarySize() const;
+		DLL_API std::byte* GetBinary() const;
+		DLL_API size_t GetBinarySize() const;
 
 	private:
 		std::unique_ptr<std::byte[]> m_binary;
 		size_t m_binarySize;
-#endif
+#endif // _TOOL
 	};
 }
+#endif // defined _CLIENT || defined _TOOL

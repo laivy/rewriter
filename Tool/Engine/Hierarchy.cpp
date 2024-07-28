@@ -1,13 +1,13 @@
 ﻿#include "Stdafx.h"
+#include "App.h"
 #include "Global.h"
 #include "Hierarchy.h"
 #include "Inspector.h"
-#include "PropInfo.h"
 #include "Common/Util.h"
 
 Hierarchy::Hierarchy()
 {
-	Global::OnPropertySelect->Register(this, std::bind_front(&Hierarchy::OnPropertySelect, this));
+	App::OnPropertySelect.Register(this, std::bind_front(&Hierarchy::OnPropertySelect, this));
 }
 
 Hierarchy::~Hierarchy()
@@ -17,17 +17,6 @@ Hierarchy::~Hierarchy()
 void Hierarchy::Update(float deltaTime)
 {
 	// 유효하지 않은 프로퍼티 삭제
-	std::function<void(const std::shared_ptr<Resource::Property>&)> func =
-		[&](const std::shared_ptr<Resource::Property>& prop)
-		{
-			std::erase_if(prop->children, [](const auto& prop) { return !Global::propInfo[prop].isValid; });
-			for (const auto& child : prop->children)
-				func(child);
-		};
-
-	std::erase_if(Global::properties, [](const auto& prop) { return !Global::propInfo[prop].isValid; });
-	for (const auto& prop : Global::properties)
-		func(prop);
 }
 
 void Hierarchy::Render()
@@ -42,6 +31,126 @@ void Hierarchy::Render()
 	}
 	ImGui::End();
 	ImGui::PopID();
+}
+
+void Hierarchy::OnPropertySelect(std::shared_ptr<Resource::Property> prop)
+{
+	// Ctrl키를 누르고 있으면 다른 노드들 선택 해제하지 않음
+	if (ImGui::IsKeyDown(ImGuiMod_Ctrl))
+	{
+		g_selectedPropertise.emplace_back(prop);
+		return;
+	}
+
+	g_selectedPropertise.clear();
+	g_selectedPropertise.emplace_back(prop);
+}
+
+void Hierarchy::OnFileDragDrop(std::string_view path)
+{
+	LoadDataFile(path);
+}
+
+void Hierarchy::OnMenuFileNew()
+{
+	size_t index{ 1 };
+	std::wstring name{ DEFAULT_FILE_NAME };
+	while (true)
+	{
+		auto it{ std::ranges::find_if(g_roots, [&name](const auto& root) { return root.prop->GetName() == name; }) };
+		if (it == g_roots.end())
+			break;
+		name = std::format(L"{}{}", DEFAULT_FILE_NAME, index++);
+	}
+
+	Root root{};
+	root.prop = std::make_shared<Resource::Property>();
+	root.prop->SetName(name + Stringtable::DATA_FILE_EXT);
+	g_roots.push_back(root);
+}
+
+void Hierarchy::OnMenuFileOpen()
+{
+	std::wstring filepath(MAX_PATH, L'\0');
+
+	OPENFILENAME ofn{};
+	ofn.lStructSize = sizeof(ofn);
+	ofn.lpstrFilter = L"Data Files (*.dat)\0*.dat\0";
+	ofn.lpstrFile = filepath.data();
+	ofn.nMaxFile = MAX_PATH;
+	ofn.Flags = OFN_ALLOWMULTISELECT | OFN_FILEMUSTEXIST | OFN_EXPLORER;
+	ofn.lpstrDefExt = L"dat";
+	if (!::GetOpenFileName(&ofn))
+		return;
+
+	// 경로 및 파일 이름들 추출
+	std::filesystem::path path{ ofn.lpstrFile };
+	std::vector<std::wstring> fileNames;
+	auto ptr{ ofn.lpstrFile };
+	ptr[ofn.nFileOffset - 1] = 0;
+	ptr += ofn.nFileOffset;
+	while (*ptr)
+	{
+		fileNames.emplace_back(ptr);
+		ptr += ::lstrlen(ptr) + 1;
+	}
+
+	// 로드
+	if (fileNames.size() == 1)
+	{
+		LoadDataFile(path);
+	}
+	else
+	{
+		for (const auto& file : fileNames)
+			LoadDataFile(path / file);
+	}
+}
+
+void Hierarchy::OnMenuFileSave()
+{
+	if (g_selectedPropertise.empty())
+		return;
+
+	auto prop{ g_selectedPropertise.back().lock() };
+	if (!prop)
+		return;
+
+	auto it{ std::ranges::find_if(g_roots, [&prop](const auto& root) { return root.prop == prop; }) };
+	if (it == g_roots.end())
+		return;
+	
+	Root& root{ *it };
+	if (root.path.empty())
+	{
+		std::wstring path{ prop->GetName() };
+		path.resize(MAX_PATH);
+
+		OPENFILENAME ofn{};
+		ofn.lStructSize = sizeof(OPENFILENAME);
+		ofn.lpstrFilter = L"Data File(*.dat)\0*.dat\0";
+		ofn.lpstrFile = path.data();
+		ofn.lpstrDefExt = Stringtable::DATA_FILE_EXT;
+		ofn.nMaxFile = MAX_PATH;
+		if (!::GetSaveFileName(&ofn))
+			return;
+		root.path = path;
+	}
+	prop->SetName(root.path.filename());
+	prop->Save(root.path);
+}
+
+void Hierarchy::OnMenuFileSaveAs()
+{
+}
+
+void Hierarchy::LoadDataFile(const std::filesystem::path& path)
+{
+	Root root{};
+	root.prop = Resource::Get(path.wstring());
+	root.prop->SetName(path.filename());
+	root.path = path;
+	g_roots.push_back(root);
 }
 
 void Hierarchy::Shortcut()
@@ -62,14 +171,16 @@ void Hierarchy::Shortcut()
 	}
 	if (ImGui::IsKeyPressed(ImGuiKey_Delete, false))
 	{
-		for (const auto& p : m_selectedPropertise)
+		for (const auto& selected : g_selectedPropertise)
 		{
-			auto prop{ p.lock() };
+			auto prop{ selected.lock() };
 			if (!prop)
 				continue;
 
-			Global::propInfo[prop].isValid = false;
-			Global::OnPropertyDelete->Notify(prop);
+			App::OnPropertyDelete.Notify(prop);
+
+			for (const auto& root : g_roots)
+				ForEachProperty(root.prop, [&prop](const auto& p) { std::erase(p->GetChildren(), prop); });
 		}
 	}
 }
@@ -123,7 +234,7 @@ void Hierarchy::RenderMenu()
 
 void Hierarchy::RenderNode()
 {
-	auto menu = [](std::shared_ptr<Resource::Property> prop)
+	auto menu = [this](std::shared_ptr<Resource::Property> prop)
 		{
 			if (!ImGui::BeginPopupContextItem("CONTEXT"))
 				return;
@@ -136,8 +247,9 @@ void Hierarchy::RenderNode()
 				std::wstring name{ DEFAULT_NODE_NAME };
 				while (true)
 				{
-					auto it = std::ranges::find_if(prop->children, [name](const auto& child) { return name == child->name; });
-					if (it == prop->children.end())
+					const auto& children{ prop->GetChildren() };
+					auto it = std::ranges::find_if(children, [name](const auto& prop) { return prop->GetName() == name; });
+					if (it == children.end())
 						break;
 					name = std::format(L"{}{}", DEFAULT_NODE_NAME, index);
 					++index;
@@ -146,14 +258,16 @@ void Hierarchy::RenderNode()
 				auto child{ std::make_shared<Resource::Property>() };
 				child->SetName(name);
 				prop->Add(child);
-				Global::propInfo[child].parent = prop;
-				Global::OnPropertyAdd->Notify(child);
+				App::OnPropertyAdd.Notify(child);
 			}
 			if (ImGui::Selectable("Del(D)") || ImGui::IsKeyPressed(ImGuiKey_D))
 			{
 				ImGui::CloseCurrentPopup();
-				Global::propInfo[prop].isValid = false;
-				Global::OnPropertyDelete->Notify(prop);
+
+				App::OnPropertyDelete.Notify(prop);
+
+				if (auto parent = GetParent(prop))
+					parent->Delete(prop);
 			}
 			ImGui::EndPopup();
 		};
@@ -161,37 +275,37 @@ void Hierarchy::RenderNode()
 	std::function<void(const std::shared_ptr<Resource::Property>&)> render = [&](const std::shared_ptr<Resource::Property>& prop)
 		{
 			ImGui::PushID(prop.get());
-			if (!Global::propInfo[prop].isRoot && prop->children.empty())
+			if (!IsRoot(prop) && prop->GetChildren().empty())
 			{
-				if (ImGui::Selectable(Util::wstou8s(prop->GetName()).c_str(), Global::propInfo[prop].isSelected))
-					Global::OnPropertySelect->Notify(prop);
+				if (ImGui::Selectable(Util::wstou8s(prop->GetName()).c_str(), IsSelected(prop)))
+					App::OnPropertySelect.Notify(prop);
 				menu(prop);
 				ImGui::PopID();
 				return;
 			}
 
-			ImGuiTreeNodeFlags flag{ 
+			ImGuiTreeNodeFlags flag{
 				ImGuiTreeNodeFlags_DefaultOpen | ImGuiTreeNodeFlags_OpenOnDoubleClick |
 				ImGuiTreeNodeFlags_SpanFullWidth | ImGuiTreeNodeFlags_FramePadding
 			};
 
 			ImVec2 padding{};
-			if (Global::propInfo[prop].isRoot)
+			if (IsRoot(prop))
 				padding = { 0.0f, 5.0f };
 			else
 				padding = { 0.0f, 2.0f };
 			ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, padding);
 
-			if (Global::propInfo[prop].isSelected)
+			if (IsSelected(prop))
 				flag |= ImGuiTreeNodeFlags_Selected;
 			if (ImGui::TreeNodeEx(Util::wstou8s(prop->GetName()).c_str(), flag))
 			{
 				if (ImGui::IsItemClicked())
-					Global::OnPropertySelect->Notify(prop);
+					App::OnPropertySelect.Notify(prop);
 
 				menu(prop);
 
-				for (const auto& [_, child] : *prop)
+				for (const auto& child : prop->GetChildren())
 					render(child);
 
 				ImGui::TreePop();
@@ -201,156 +315,7 @@ void Hierarchy::RenderNode()
 		};
 
 	ImGui::PushID("PROPERTY");
-	for (const auto& prop : Global::properties)
-		render(prop);
+	for (const auto& root : g_roots)
+		render(root.prop);
 	ImGui::PopID();
-}
-
-void Hierarchy::Load(const std::filesystem::path& path)
-{
-	auto prop{ Resource::Load(path) };
-	prop->SetName(std::filesystem::path{ path }.filename());
-	Global::properties.push_back(prop);
-	Global::propInfo[prop].path = path;
-	Global::propInfo[prop].isRoot = true;
-}
-
-void Hierarchy::OnPropertySelect(std::shared_ptr<Resource::Property> prop)
-{
-	std::function<void(const std::shared_ptr<Resource::Property>&)> lambda =
-		[&](const std::shared_ptr<Resource::Property>& p)
-		{
-			// 선택한 노드 외에 전부 선택 해제
-			Global::propInfo[p].isSelected = (p == prop);
-
-			// 재귀
-			for (const auto& child : p->children)
-				lambda(child);
-		};
-
-	// 노드 선택
-	// Ctrl키를 누르고 있으면 다른 노드들 선택 해제하지 않음
-	Global::propInfo[prop].isSelected = true;
-	if (ImGui::IsKeyDown(ImGuiMod_Ctrl))
-	{
-		m_selectedPropertise.emplace_back(prop);
-		return;
-	}
-
-	m_selectedPropertise.clear();
-	m_selectedPropertise.emplace_back(prop);
-	for (const auto& p : Global::properties)
-		lambda(p);
-}
-
-void Hierarchy::OnFileDragDrop(std::string_view path)
-{
-	Load(path);
-}
-
-void Hierarchy::OnMenuFileNew()
-{
-	size_t index{ 1 };
-	std::wstring name{ DEFAULT_FILE_NAME };
-	while (true)
-	{
-		auto it{ std::ranges::find_if(Global::properties, [&name](const auto& node)
-			{
-				return name == node->name;
-			}) };
-
-		if (it == Global::properties.cend())
-			break;
-
-		name = std::format(L"{}{}", DEFAULT_FILE_NAME, index++);
-	}
-
-	auto prop{ std::make_shared<Resource::Property>() };
-	prop->SetName(name + Stringtable::DATA_FILE_EXT);
-	Global::properties.push_back(prop);
-	Global::propInfo[prop].isRoot = true;
-}
-
-void Hierarchy::OnMenuFileOpen()
-{
-	std::wstring filepath(MAX_PATH, L'\0');
-
-	OPENFILENAME ofn{};
-	ofn.lStructSize = sizeof(ofn);
-	ofn.lpstrFilter = L"Data Files (*.dat)\0*.dat\0";
-	ofn.lpstrFile = filepath.data();
-	ofn.nMaxFile = MAX_PATH;
-	ofn.Flags = OFN_ALLOWMULTISELECT | OFN_FILEMUSTEXIST | OFN_EXPLORER;
-	ofn.lpstrDefExt = L"dat";
-	if (!::GetOpenFileName(&ofn))
-		return;
-
-	// 경로 및 파일 이름들 추출
-	std::filesystem::path path{ ofn.lpstrFile };
-	std::vector<std::wstring> fileNames;
-	auto ptr{ ofn.lpstrFile };
-	ptr[ofn.nFileOffset - 1] = 0;
-	ptr += ofn.nFileOffset;
-	while (*ptr)
-	{
-		fileNames.emplace_back(ptr);
-		ptr += ::lstrlen(ptr) + 1;
-	}
-
-	// 로드
-	if (fileNames.size() == 1)
-	{
-		Load(path);
-	}
-	else
-	{
-		for (const auto& file : fileNames)
-			Load(path / file);
-	}
-}
-
-void Hierarchy::OnMenuFileSave()
-{
-	if (m_selectedPropertise.empty())
-		return;
-
-	auto prop{ m_selectedPropertise.back().lock()};
-	if (!prop)
-		return;
-
-	while (!Global::propInfo[prop].isRoot)
-	{
-		auto parent{ Global::propInfo[prop].parent.lock() };
-		if (parent)
-			prop = parent;
-		else
-			break;
-	}
-
-	if (!Global::propInfo[prop].isRoot)
-		return;
-
-	if (Global::propInfo[prop].path.empty())
-	{
-		std::wstring path{ prop->GetName() };
-		path.resize(MAX_PATH);
-
-		OPENFILENAME ofn{};
-		ofn.lStructSize = sizeof(OPENFILENAME);
-		ofn.lpstrFilter = L"Data File(*.dat)\0*.dat\0";
-		ofn.lpstrFile = path.data();
-		ofn.lpstrDefExt = Stringtable::DATA_FILE_EXT;
-		ofn.nMaxFile = MAX_PATH;
-		if (!::GetSaveFileName(&ofn))
-			return;
-
-		Global::propInfo[prop].path = path;
-	}
-
-	prop->SetName(Global::propInfo[prop].path.filename());
-	prop->Save(Global::propInfo[prop].path);
-}
-
-void Hierarchy::OnMenuFileSaveAs()
-{
 }

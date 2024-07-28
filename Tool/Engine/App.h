@@ -1,6 +1,5 @@
 ﻿#pragma once
-
-class Timer;
+#include "Common/Timer.h"
 
 class App : public TSingleton<App>
 {
@@ -22,12 +21,16 @@ private:
 	void RenderImGuiMainDockSpace();
 
 public:
+	static inline auto OnResize{ Delegate<int, int>() };
+	static inline auto OnPropertyAdd{ Delegate<std::shared_ptr<Resource::Property>>() };
+	static inline auto OnPropertyDelete{ Delegate<std::shared_ptr<Resource::Property>>() };
+	static inline auto OnPropertySelect{ Delegate<std::shared_ptr<Resource::Property>>() };
+
 	static constexpr auto WINDOW_TITLE_NAME{ L"ENGINE" };
-	static inline auto OnResize{ std::make_shared<Event<int, int>>() };
 	static inline HWND hWnd{ NULL };
-	static inline INT2 size{ 1920, 1080 };
-	
+	static inline INT2 size{ 1920, 1080 };	
+
 private:
 	bool m_isActive;
-	std::unique_ptr<Timer> m_timer;
+	Timer m_timer;
 };

@@ -1,4 +1,5 @@
 ﻿#include "Stdafx.h"
+#if defined _CLIENT || defined _TOOL
 #include <d2d1_3.h>
 #include <d3d12.h>
 #include <wincodec.h>
@@ -7,7 +8,7 @@
 
 namespace Resource
 {
-	PNG::PNG(std::byte* binary, size_t size)
+	DLL_API PNG::PNG(std::byte* binary, size_t size)
 	{
 		ComPtr<ID2D1Bitmap> bitmap;
 		ComPtr<IWICImagingFactory> factory;
@@ -38,12 +39,12 @@ namespace Resource
 #endif
 	}
 
-	ID2D1Bitmap* PNG::Get() const
+	DLL_API ID2D1Bitmap* PNG::Get() const
 	{
 		return m_bitmap.Get();
 	}
 
-	INT2 PNG::GetSize() const
+	DLL_API INT2 PNG::GetSize() const
 	{
 		if (!m_bitmap)
 			return INT2{ 0, 0 };
@@ -53,14 +54,15 @@ namespace Resource
 	}
 
 #ifdef _TOOL
-	std::byte* PNG::GetBinary() const
+	DLL_API std::byte* PNG::GetBinary() const
 	{
 		return m_binary.get();
 	}
 
-	size_t PNG::GetBinarySize() const
+	DLL_API size_t PNG::GetBinarySize() const
 	{
 		return m_binarySize;
 	}
-#endif
+#endif // _TOOL
 }
+#endif // defined _CLIENT || defined _TOOL
