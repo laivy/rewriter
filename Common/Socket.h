@@ -1,29 +1,57 @@
 ﻿#pragma once
 #include <WinSock2.h>
-#include <array>
-#include <memory>
+#include "Packet.h"
 
-class Packet;
-
-struct OVERLAPPEDEX : OVERLAPPED
+class ISocket abstract
 {
-#ifndef _CLIENT
-	enum class IOOP
+public:
+	enum class IOOperation : unsigned char
 	{
-		ACCEPT,
-		RECEIVE,
+		Connect,
+		Send,
+		Receive
 	};
 
-	IOOP op{ IOOP::ACCEPT };
-#endif
-};
+	struct OverlappedEx : OVERLAPPED
+	{
+		IOOperation op{ IOOperation::Connect };
+	};
 
-struct SocketEx
-{
-	SOCKET socket{ INVALID_SOCKET };
-	OVERLAPPEDEX overlappedEx{};
-	std::array<char, 512> buffer{};
+protected:
+	struct SendBuffer
+	{
+		OverlappedEx overlappedEx;
+		std::unique_ptr<char[]> buffer;
+		Packet::Size size;
 
-	std::unique_ptr<Packet> packet;
-	Packet::Size remainSize{};
+		SendBuffer();
+		SendBuffer(const SendBuffer&) = delete;
+		SendBuffer(SendBuffer&& other) noexcept;
+		~SendBuffer() = default;
+		SendBuffer& operator=(const SendBuffer&) = delete;
+		SendBuffer& operator=(SendBuffer&& other) noexcept;
+	};
+
+	struct ReceiveBuffer
+	{
+		OverlappedEx overlappedEx;
+		std::array<char, 1024> buffer;
+		std::unique_ptr<Packet> packet;
+		int remainPacketSize;
+	};
+
+public:
+	ISocket();
+	virtual ~ISocket();
+
+	operator SOCKET();
+
+	virtual void OnDisconnect();
+	virtual void OnSend(Packet::Size ioSize);
+	virtual void OnReceive(Packet::Size ioSize);
+
+	void Send(const Packet& packet);
+
+private:
+	SOCKET m_socket;
 };

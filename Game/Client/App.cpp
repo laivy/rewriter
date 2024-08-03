@@ -1,10 +1,11 @@
 ﻿#include "Stdafx.h"
 #include "App.h"
+#include "LoginServer.h"
 #include "Renderer.h"
 #include "Renderer2D.h"
 #include "Renderer3D.h"
 #include "SceneManager.h"
-#include "ServerManager.h"
+#include "SocketManager.h"
 #include "Window.h"
 #include "WindowManager.h"
 #include "Common/ImguiEx.h"
@@ -26,8 +27,7 @@ App::~App()
 #endif
 	Renderer::CleanUp();
 	SceneManager::Destroy();
-	ServerManager::Destroy();
-	::WSACleanup();
+	SocketManager::Destroy();
 }
 
 void App::Run()
@@ -145,22 +145,8 @@ void App::InitApp()
 		ImGuiConfigFlags_NavEnableKeyboard | ImGuiConfigFlags_DockingEnable | ImGuiConfigFlags_ViewportsEnable
 	);
 #endif
-	WSADATA wsaData{};
-	if (::WSAStartup(MAKEWORD(2, 2), &wsaData))
-	{
-		assert(false && "WSA INIT FAIL");
-		return;
-	}
-
-	// 서버매니저 생성자에서 로그인 서버와 연결 시도
-	// 연결 실패 시 클라이언트 종료
-	if (auto sm{ ServerManager::Instantiate() })
-	{
-		if (sm->IsConnected(IServer::Type::Login))
-			::ShowWindow(hWnd, SW_SHOWNORMAL);
-		else
-			::PostQuitMessage(0);
-	}
+	SocketManager::Instantiate();
+	LoginServer::Instantiate();
 	SceneManager::Instantiate();
 }
 

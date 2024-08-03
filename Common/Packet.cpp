@@ -45,6 +45,15 @@ void Packet::End()
 	EncodeAt(GetSize(), 0);
 }
 
+char* Packet::Detach()
+{
+	m_type = Type::None;
+	m_bufferSize = 0;
+	m_encodedSize = 0;
+	m_offset = 0;
+	return m_buffer.release();
+}
+
 void Packet::SetOffset(Size offset)
 {
 	m_offset = offset;
@@ -55,7 +64,7 @@ Packet::Type Packet::GetType() const
 	return m_type;
 }
 
-const char* Packet::GetBuffer() const
+char* Packet::GetBuffer() const
 {
 	return m_buffer.get();
 }

@@ -5,7 +5,7 @@
 #include "DebugWindow.h"
 #include "Modal.h"
 #include "Renderer2D.h"
-#include "ServerManager.h"
+#include "SocketManager.h"
 #include "TextBlock.h"
 #include "TextBox.h"
 #include "WindowManager.h"

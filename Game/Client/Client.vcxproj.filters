@@ -152,7 +152,7 @@
     <ClCompile Include="Shader.cpp">
       <Filter>소스 파일\Renderer</Filter>
     </ClCompile>
-    <ClCompile Include="ServerManager.cpp">
+    <ClCompile Include="SocketManager.cpp">
       <Filter>소스 파일\Server</Filter>
     </ClCompile>
     <ClCompile Include="SceneManager.cpp">
@@ -167,14 +167,8 @@
     <ClCompile Include="..\..\Common\ImguiEx.cpp">
       <Filter>소스 파일\Common</Filter>
     </ClCompile>
-    <ClCompile Include="Server.cpp">
-      <Filter>소스 파일\Server</Filter>
-    </ClCompile>
     <ClCompile Include="LoginServer.cpp">
       <Filter>소스 파일\Server</Filter>
-    </ClCompile>
-    <ClCompile Include="WindowBuilder.cpp">
-      <Filter>소스 파일</Filter>
     </ClCompile>
     <ClCompile Include="..\..\External\DirectX\DDSTextureLoader12.cpp">
       <Filter>외부 파일\DirectX</Filter>
@@ -184,6 +178,15 @@
     </ClCompile>
     <ClCompile Include="..\..\Common\Util.cpp">
       <Filter>소스 파일\Common</Filter>
+    </ClCompile>
+    <ClCompile Include="LocalSocket.cpp">
+      <Filter>소스 파일\Server</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Common\Socket.cpp">
+      <Filter>소스 파일\Common</Filter>
+    </ClCompile>
+    <ClCompile Include="WindowBuilder.cpp">
+      <Filter>소스 파일\UI</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -307,7 +310,7 @@
     <ClInclude Include="Shader.h">
       <Filter>헤더 파일\Renderer</Filter>
     </ClInclude>
-    <ClInclude Include="ServerManager.h">
+    <ClInclude Include="SocketManager.h">
       <Filter>헤더 파일\Server</Filter>
     </ClInclude>
     <ClInclude Include="Scene.h">
@@ -322,14 +325,8 @@
     <ClInclude Include="..\..\Common\ImguiEx.h">
       <Filter>헤더 파일\Common</Filter>
     </ClInclude>
-    <ClInclude Include="Server.h">
-      <Filter>헤더 파일\Server</Filter>
-    </ClInclude>
     <ClInclude Include="LoginServer.h">
       <Filter>헤더 파일\Server</Filter>
-    </ClInclude>
-    <ClInclude Include="WindowBuilder.h">
-      <Filter>헤더 파일</Filter>
     </ClInclude>
     <ClInclude Include="..\..\External\DirectX\DDSTextureLoader12.h">
       <Filter>외부 파일\DirectX</Filter>
@@ -339,6 +336,15 @@
     </ClInclude>
     <ClInclude Include="..\..\Common\Util.h">
       <Filter>헤더 파일\Common</Filter>
+    </ClInclude>
+    <ClInclude Include="LocalSocket.h">
+      <Filter>헤더 파일\Server</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Common\Socket.h">
+      <Filter>헤더 파일\Common</Filter>
+    </ClInclude>
+    <ClInclude Include="WindowBuilder.h">
+      <Filter>헤더 파일\UI</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

@@ -6,6 +6,8 @@ public:
 	using Size = unsigned short; // 패킷 크기
 	enum class Type : unsigned short // 패킷 타입
 	{
+		None,
+
 		// 회원가입
 		RequestRegister,
 		RequestRegisterToCenter,
@@ -18,7 +20,7 @@ public:
 	};
 
 public:
-	Packet(Type type);
+	Packet(Type type = Type::None);
 	Packet(const char* buffer, Size size);
 	~Packet() = default;
 
@@ -48,10 +50,12 @@ public:
 	void EncodeBuffer(const char* buffer, Size size);
 	void End();
 
+	char* Detach();
+
 	void SetOffset(Size offset);
 
 	Type GetType() const;
-	const char* GetBuffer() const;
+	char* GetBuffer() const;
 	Size GetSize() const;
 
 private:
