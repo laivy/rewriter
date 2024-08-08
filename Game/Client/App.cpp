@@ -129,6 +129,7 @@ void App::InitWindow()
 		this
 	);
 	::SetWindowText(hWnd, WINDOW_TITLE_NAME);
+	::ShowWindow(hWnd, SW_SHOWNORMAL);
 	::UpdateWindow(hWnd);
 }
 

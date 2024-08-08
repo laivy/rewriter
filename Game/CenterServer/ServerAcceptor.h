@@ -30,7 +30,7 @@ private:
 	SOCKET m_listenSocket;
 	SOCKET m_clientSocket;
 	std::array<char, 64> m_acceptBuffer;
-	OVERLAPPEDEX m_overlappedEx;
+	OverlappedEx m_overlappedEx;
 
 	std::vector<std::unique_ptr<IServer>> m_servers;
 };

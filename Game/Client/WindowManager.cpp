@@ -3,23 +3,12 @@
 #include "Modal.h"
 #include "Renderer.h"
 #include "Window.h"
-#include "WindowBuilder.h"
 #include "WindowManager.h"
-
-#include "DebugWindow.h"
 
 WindowManager::WindowManager()
 {
 	App::OnKeyboardEvent.Register(this, std::bind_front(&WindowManager::OnKeyboardEvent, this));
 	App::OnMouseEvent.Register(this, std::bind_front(&WindowManager::OnMouseEvent, this));
-
-#ifdef _DEBUG
-	auto window = WindowBuilder<DebugWindow>{}
-		.Path(L"UI.dat/LoginUI")
-		.Position({ App::size.x / 2, App::size.y / 2 }, Pivot::CENTER)
-		.Build();
-	Register(window);
-#endif // _DEBUG
 }
 
 void WindowManager::Update(float deltaTime)

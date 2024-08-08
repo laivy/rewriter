@@ -179,9 +179,6 @@
     <ClCompile Include="..\..\Common\Util.cpp">
       <Filter>소스 파일\Common</Filter>
     </ClCompile>
-    <ClCompile Include="LocalSocket.cpp">
-      <Filter>소스 파일\Server</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\Common\Socket.cpp">
       <Filter>소스 파일\Common</Filter>
     </ClCompile>
@@ -325,9 +322,6 @@
     <ClInclude Include="..\..\Common\ImguiEx.h">
       <Filter>헤더 파일\Common</Filter>
     </ClInclude>
-    <ClInclude Include="LoginServer.h">
-      <Filter>헤더 파일\Server</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\External\DirectX\DDSTextureLoader12.h">
       <Filter>외부 파일\DirectX</Filter>
     </ClInclude>
@@ -337,14 +331,14 @@
     <ClInclude Include="..\..\Common\Util.h">
       <Filter>헤더 파일\Common</Filter>
     </ClInclude>
-    <ClInclude Include="LocalSocket.h">
-      <Filter>헤더 파일\Server</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\Common\Socket.h">
       <Filter>헤더 파일\Common</Filter>
     </ClInclude>
     <ClInclude Include="WindowBuilder.h">
       <Filter>헤더 파일\UI</Filter>
+    </ClInclude>
+    <ClInclude Include="LoginServer.h">
+      <Filter>헤더 파일\Server</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

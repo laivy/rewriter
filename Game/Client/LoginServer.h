@@ -1,8 +1,8 @@
 ﻿#pragma once
-#include "LocalSocket.h"
+#include "Common/Socket.h"
 
 class LoginServer :
-	public LocalSocket,
+	public ISocket,
 	public TSingleton<LoginServer>
 {
 public:

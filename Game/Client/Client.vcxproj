@@ -160,7 +160,6 @@
     </ClCompile>
     <ClCompile Include="Control.cpp" />
     <ClCompile Include="DebugWindow.cpp" />
-    <ClCompile Include="LocalSocket.cpp" />
     <ClCompile Include="LoginScene.cpp" />
     <ClCompile Include="LoginServer.cpp" />
     <ClCompile Include="Modal.cpp" />
@@ -245,7 +244,6 @@
     <ClInclude Include="Control.h" />
     <ClInclude Include="DebugWindow.h" />
     <ClInclude Include="DXUtil.h" />
-    <ClInclude Include="LocalSocket.h" />
     <ClInclude Include="LoginScene.h" />
     <ClInclude Include="LoginServer.h" />
     <ClInclude Include="Modal.h" />

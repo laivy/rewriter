@@ -34,10 +34,10 @@ protected:
 
 	struct ReceiveBuffer
 	{
-		OverlappedEx overlappedEx;
-		std::array<char, 1024> buffer;
+		OverlappedEx overlappedEx{};
+		std::array<char, 1024> buffer{};
 		std::unique_ptr<Packet> packet;
-		int remainPacketSize;
+		int remainPacketSize{};
 	};
 
 public:
@@ -50,8 +50,17 @@ public:
 	virtual void OnSend(Packet::Size ioSize);
 	virtual void OnReceive(Packet::Size ioSize);
 
-	void Send(const Packet& packet);
+	bool Connect(std::wstring_view ip, unsigned short port);
+	void Disconnect();
+	void Send(Packet& packet);
+	void Receive();
+
+	bool IsConnected() const;
+	
+protected:
+	SOCKET m_socket;
 
 private:
-	SOCKET m_socket;
+	std::vector<SendBuffer> m_sendBuffers;
+	ReceiveBuffer m_receiveBuffer;
 };

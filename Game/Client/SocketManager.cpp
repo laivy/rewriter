@@ -44,7 +44,7 @@ void SocketManager::Run(std::stop_token stoken)
 	ISocket::OverlappedEx* overlappedEx{};
 	while (!stoken.stop_requested())
 	{
-		if (::GetQueuedCompletionStatus(m_iocp, &ioSize, reinterpret_cast<PULONG_PTR>(&socket), reinterpret_cast<OVERLAPPED**>(&overlappedEx), INFINITE))
+		if (::GetQueuedCompletionStatus(m_iocp, &ioSize, reinterpret_cast<unsigned long long*>(&socket), reinterpret_cast<OVERLAPPED**>(&overlappedEx), INFINITE))
 		{
 			if (!socket)
 				continue;

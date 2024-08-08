@@ -112,17 +112,17 @@ void ServerAcceptor::Run(std::stop_token stoken)
 {
 	unsigned long ioSize{};
 	IServer* server{ nullptr };
-	OVERLAPPEDEX* overlappedEx{};
+	OverlappedEx* overlappedEx{};
 	while (!stoken.stop_requested())
 	{
 		if (::GetQueuedCompletionStatus(m_iocp, &ioSize, reinterpret_cast<unsigned long long*>(&server), reinterpret_cast<OVERLAPPED**>(&overlappedEx), INFINITE))
 		{
 			switch (overlappedEx->op)
 			{
-			case OVERLAPPEDEX::IOOP::ACCEPT:
+			case OverlappedEx::IOOP::ACCEPT:
 				OnAccept();
 				break;
-			case OVERLAPPEDEX::IOOP::RECEIVE:
+			case OverlappedEx::IOOP::RECEIVE:
 				if (ioSize > 0)
 					OnReceive(server, static_cast<Packet::Size>(ioSize));
 				else
@@ -179,7 +179,7 @@ void ServerAcceptor::OnAccept()
 	auto server{ std::make_unique<LoginServer>() };
 	auto& socket{ server->GetSocket() };
 	socket.socket = m_clientSocket;
-	socket.overlappedEx.op = OVERLAPPEDEX::IOOP::RECEIVE;
+	socket.overlappedEx.op = OverlappedEx::IOOP::RECEIVE;
 
 	::CreateIoCompletionPort(reinterpret_cast<HANDLE>(socket.socket), m_iocp, reinterpret_cast<unsigned long long>(server.get()), 0);
 	WSABUF wsaBuf{ static_cast<unsigned long>(socket.buffer.size()), socket.buffer.data() };

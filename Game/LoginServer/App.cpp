@@ -18,7 +18,6 @@ App::~App()
 	SocketManager::Destroy(); // 유저 접속 차단
 	UserManager::Destroy(); // 접속 중인 유저 정보 저장
 	ImGui::CleanUp();
-	::WSACleanup();
 }
 
 void App::Run()
@@ -124,16 +123,9 @@ void App::InitImgui()
 
 void App::InitApp()
 {
-	WSADATA wsaData{};
-	if (::WSAStartup(MAKEWORD(2, 2), &wsaData))
-	{
-		assert(false && "WSA INIT FAIL");
-		return;
-	}
-
-	CenterServer::Instantiate(L"Login.dat"); // 센터 서버 연결
 	UserManager::Instantiate();
-	SocketManager::Instantiate(); // 유저 접속 허용
+	SocketManager::Instantiate();
+	CenterServer::Instantiate(); // 센터 서버 연결
 }
 
 void App::Update()
