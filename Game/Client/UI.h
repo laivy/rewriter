@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 #include "Object.h"
 
 class IUserInterface abstract : public IObject2D

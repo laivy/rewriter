@@ -1,4 +1,4 @@
-﻿#include "Stdafx.h"
+#include "Stdafx.h"
 #include "Explorer.h"
 #include "Common/ImguiEx.h"
 #include "Common/Util.h"

@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 #include "Button.h"
 #include "Window.h"
 

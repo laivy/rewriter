@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 #include <chrono>
 
 template <class T>

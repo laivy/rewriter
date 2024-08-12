@@ -1,4 +1,4 @@
-﻿#include "Types.h"
+#include "Types.h"
 
 INT2::INT2(int32_t x, int32_t y) :
 	x{ x },

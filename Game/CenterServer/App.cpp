@@ -1,4 +1,4 @@
-﻿#include "Stdafx.h"
+#include "Stdafx.h"
 #include "App.h"
 #include "ServerAcceptor.h"
 #include "Common/ImguiEx.h"

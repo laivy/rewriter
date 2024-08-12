@@ -1,4 +1,4 @@
-﻿#include "Stdafx.h"
+#include "Stdafx.h"
 #include "App.h"
 
 int WINAPI WinMain(_In_		HINSTANCE hInstance,

@@ -1,4 +1,4 @@
-﻿#include "Stdafx.h"
+#include "Stdafx.h"
 #include "Global.h"
 
 std::vector<Root> g_roots;

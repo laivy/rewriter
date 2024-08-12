@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 #include "Common/Timer.h"
 
 class App : public TSingleton<App>

@@ -1,4 +1,4 @@
-﻿#include "Stdafx.h"
+#include "Stdafx.h"
 
 BOOL APIENTRY DllMain(HMODULE	hModule,
 					  DWORD		ul_reason_for_call,

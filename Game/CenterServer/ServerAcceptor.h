@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 #include "Server.h"
 #include "Common/Socket.h"
 

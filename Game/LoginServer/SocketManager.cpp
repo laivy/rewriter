@@ -1,4 +1,4 @@
-﻿#include "Stdafx.h"
+#include "Stdafx.h"
 #include "SocketManager.h"
 #include "User.h"
 #include "UserManager.h"

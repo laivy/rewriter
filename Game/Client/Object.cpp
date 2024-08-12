@@ -1,2 +1,2 @@
-﻿#include "Stdafx.h"
+#include "Stdafx.h"
 #include "Object.h"

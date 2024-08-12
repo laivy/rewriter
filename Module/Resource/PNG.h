@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 #if defined _CLIENT || defined _TOOL
 
 namespace Resource

@@ -1,4 +1,4 @@
-﻿#include "Stdafx.h"
+#include "Stdafx.h"
 #include "Packet.h"
 
 Packet::Packet(Packet::Type type) :

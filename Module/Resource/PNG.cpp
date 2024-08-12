@@ -1,4 +1,4 @@
-﻿#include "Stdafx.h"
+#include "Stdafx.h"
 #if defined _CLIENT || defined _TOOL
 #include <d2d1_3.h>
 #include <d3d12.h>

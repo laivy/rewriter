@@ -1,4 +1,4 @@
-﻿#include "ImguiEx.h"
+#include "ImguiEx.h"
 #include "External/Imgui/imgui.h"
 #include "External/Imgui/imgui_impl_dx12.h"
 #include "External/Imgui/imgui_impl_win32.h"

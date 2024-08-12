@@ -1,4 +1,4 @@
-﻿#include "Stdafx.h"
+#include "Stdafx.h"
 #include "LoginServer.h"
 #include "SocketManager.h"
 

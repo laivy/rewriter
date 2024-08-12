@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 #include "ClientSocket.h"
 
 class SocketManager : public TSingleton<SocketManager>

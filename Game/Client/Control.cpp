@@ -1,4 +1,4 @@
-﻿#include "stdafx.h"
+#include "stdafx.h"
 #include "Control.h"
 
 IControl::IControl(IWindow* owner) :

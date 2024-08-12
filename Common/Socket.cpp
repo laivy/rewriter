@@ -1,4 +1,4 @@
-﻿#include "Stdafx.h"
+#include "Stdafx.h"
 #include "Socket.h"
 #if defined _CLIENT
 #include "Game/Client/App.h"

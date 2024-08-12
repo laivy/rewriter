@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 
 struct ID2D1DeviceContext2;
 

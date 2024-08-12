@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 #ifndef DLL_API
 #define DLL_API __declspec(dllimport)
 #endif // DLL_API
