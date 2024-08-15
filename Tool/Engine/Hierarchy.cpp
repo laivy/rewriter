@@ -164,6 +164,52 @@ void Hierarchy::Shortcut()
 		OnMenuFileOpen();
 	if (ImGui::Shortcut(ImGuiMod_Ctrl | ImGuiKey_S))
 		OnMenuFileSave();
+	if (ImGui::Shortcut(ImGuiMod_Alt | ImGuiKey_UpArrow))
+	{
+		do
+		{
+			if (g_selectedPropertise.size() != 1)
+				break;
+
+			auto selected{ g_selectedPropertise.front().lock() };
+			if (!selected)
+				break;
+
+			auto parent{ GetParent(selected) };
+			if (!parent)
+				break;
+
+			auto& children{ parent->GetChildren() };
+			auto it{ std::ranges::find(children, selected) };
+			if (it == children.begin() || it == children.end())
+				break;
+
+			std::iter_swap(it, it - 1);
+		} while (false);
+	}
+	if (ImGui::Shortcut(ImGuiModFlags_Alt | ImGuiKey_DownArrow))
+	{
+		do
+		{
+			if (g_selectedPropertise.size() != 1)
+				break;
+
+			auto selected{ g_selectedPropertise.front().lock() };
+			if (!selected)
+				break;
+
+			auto parent{ GetParent(selected) };
+			if (!parent)
+				break;
+
+			auto& children{ parent->GetChildren() };
+			auto it{ std::ranges::find(children, selected) };
+			if (it == children.end() || it == children.end() - 1)
+				break;
+
+			std::iter_swap(it, it + 1);
+		} while (false);
+	}
 	if (ImGui::IsKeyPressed(ImGuiKey_F2, false))
 	{
 		auto window{ ImGui::FindWindowByName("Inspector") };
