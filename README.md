@@ -5,10 +5,12 @@
 </div>
 
 # ⚙️ 빌드 및 실행
-<img src="https://img.shields.io/badge/Visual%20Studio%202022-5C2D91.svg?style=for-the-badge&logo=visual-studio&logoColor=white">
-<img src="https://img.shields.io/badge/c++%2020-%2300599C.svg?style=for-the-badge&logo=c%2B%2B&logoColor=white">
-<img src="https://img.shields.io/badge/DirectX12-0078D6?style=for-the-badge&logo=windows&logoColor=white">
-<img src="https://img.shields.io/badge/Direct2D-0078D6?style=for-the-badge&logo=windows&logoColor=white">
+<div>
+	<img src="https://img.shields.io/badge/Visual%20Studio%202022-5C2D91.svg?style=for-the-badge&logo=visual-studio&logoColor=white"/>
+	<img src="https://img.shields.io/badge/c++%2020-%2300599C.svg?style=for-the-badge&logo=c%2B%2B&logoColor=white"/>
+	<img src="https://img.shields.io/badge/DirectX12-0078D6?style=for-the-badge&logo=windows&logoColor=white"/>
+	<img src="https://img.shields.io/badge/Direct2D-0078D6?style=for-the-badge&logo=windows&logoColor=white"/>
+</div>
 
 1. `Rewriter.sln` 를 Visual Studio 2022로 엶
 2. 원하는 프로젝트와 구성을 선택
