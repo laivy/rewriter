@@ -2,6 +2,8 @@
 #include "Socket.h"
 #if defined _CLIENT
 #include "Game/Client/App.h"
+#elif defined _CENTER_SERVER
+#include "Game/CenterServer/App.h"
 #elif defined _LOGIN_SERVER
 #include "Game/LoginServer/App.h"
 #endif

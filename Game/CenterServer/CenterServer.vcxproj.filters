@@ -51,9 +51,6 @@
     <ClInclude Include="..\..\Common\Timer.h">
       <Filter>헤더 파일\Common</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\Common\Event.h">
-      <Filter>헤더 파일\Common</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\Common\Packet.h">
       <Filter>헤더 파일\Common</Filter>
     </ClInclude>
@@ -99,10 +96,7 @@
     <ClInclude Include="..\..\Common\Types.h">
       <Filter>헤더 파일\Common</Filter>
     </ClInclude>
-    <ClInclude Include="ServerAcceptor.h">
-      <Filter>헤더 파일\Server</Filter>
-    </ClInclude>
-    <ClInclude Include="Server.h">
+    <ClInclude Include="SocketManager.h">
       <Filter>헤더 파일\Server</Filter>
     </ClInclude>
     <ClInclude Include="..\..\Module\Resource\Include\Manager.h">
@@ -115,6 +109,12 @@
       <Filter>헤더 파일\Server</Filter>
     </ClInclude>
     <ClInclude Include="..\..\Common\Util.h">
+      <Filter>헤더 파일\Common</Filter>
+    </ClInclude>
+    <ClInclude Include="ServerSocket.h">
+      <Filter>헤더 파일\Server</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Common\Socket.h">
       <Filter>헤더 파일\Common</Filter>
     </ClInclude>
   </ItemGroup>
@@ -164,16 +164,19 @@
     <ClCompile Include="..\..\Common\Types.cpp">
       <Filter>소스 파일\Common</Filter>
     </ClCompile>
-    <ClCompile Include="ServerAcceptor.cpp">
-      <Filter>소스 파일\Server</Filter>
-    </ClCompile>
-    <ClCompile Include="Server.cpp">
+    <ClCompile Include="SocketManager.cpp">
       <Filter>소스 파일\Server</Filter>
     </ClCompile>
     <ClCompile Include="LoginServer.cpp">
       <Filter>소스 파일\Server</Filter>
     </ClCompile>
     <ClCompile Include="..\..\Common\Util.cpp">
+      <Filter>소스 파일\Common</Filter>
+    </ClCompile>
+    <ClCompile Include="ServerSocket.cpp">
+      <Filter>소스 파일\Server</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Common\Socket.cpp">
       <Filter>소스 파일\Common</Filter>
     </ClCompile>
   </ItemGroup>

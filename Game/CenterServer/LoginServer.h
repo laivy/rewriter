@@ -1,7 +1,7 @@
 #pragma once
-#include "Server.h"
+#include "Common/Socket.h"
 
-class LoginServer final : public IServer
+class LoginServer final : public ISocket
 {
 public:
 	LoginServer() = default;

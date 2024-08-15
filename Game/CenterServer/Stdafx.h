@@ -4,14 +4,7 @@
 // Windows
 #include <WinSock2.h> // MSWSock.h 보다 위에 있어야함
 #include <MSWSock.h>
-
-// DirectX
-#include <d3d12.h>
-#include <dxgi1_6.h>
-#ifdef _DEBUG
-#include <dxgidebug.h>
-#endif
-#include "External/DirectX/d3dx12.h"
+#include <WS2tcpip.h>
 
 // Imgui
 #include "External/Imgui/imgui.h"

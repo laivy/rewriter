@@ -5,7 +5,7 @@ class App : public TSingleton<App>
 {
 public:
 	App();
-	~App();
+	~App() = default;
 
 	void Run();
 
@@ -20,8 +20,10 @@ private:
 	void Render();
 
 public:
-	static constexpr auto WINDOW_TITLE_NAME{ L"CENTER SERVER" };
 	static inline Delegate<int, int> OnResize;
+	static inline Delegate<Packet&> OnPacket;
+
+	static constexpr auto WINDOW_TITLE_NAME{ L"CENTER SERVER" };
 	static inline HWND hWnd{ NULL };
 	static inline INT2 size{ 600, 400 };
 

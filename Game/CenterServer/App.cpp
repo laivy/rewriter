@@ -11,11 +11,6 @@ App::App()
 	m_timer.Tick();
 }
 
-App::~App()
-{
-	::WSACleanup();
-}
-
 void App::Run()
 {
 	MSG msg{};
@@ -119,14 +114,7 @@ void App::InitImgui()
 
 void App::InitApp()
 {
-	WSADATA wsaData{};
-	if (::WSAStartup(MAKEWORD(2, 2), &wsaData))
-	{
-		assert(false && "WSA INIT FAIL");
-		return;
-	}
-
-	ServerAcceptor::Instantiate();
+	SocketManager::Instantiate();
 }
 
 void App::Update()
@@ -137,7 +125,7 @@ void App::Render()
 {
 	ImGui::BeginRender();
 	{
-		if (auto sm{ ServerAcceptor::GetInstance() })
+		if (auto sm{ SocketManager::GetInstance() })
 			sm->Render();
 		ImGui::ShowDemoWindow();
 	}
