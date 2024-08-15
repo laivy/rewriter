@@ -1,6 +1,5 @@
 #pragma once
-
-class Timer;
+#include "Common/Timer.h"
 
 class App : public TSingleton<App>
 {
@@ -31,5 +30,5 @@ public:
 
 private:
 	bool m_isActive;
-	std::unique_ptr<Timer> m_timer;
+	Timer m_timer;
 };

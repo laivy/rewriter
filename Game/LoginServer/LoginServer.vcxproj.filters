@@ -30,6 +30,18 @@
     <Filter Include="모듈 파일\Resource">
       <UniqueIdentifier>{858d5109-090a-4d87-bcc9-8e508bc340b9}</UniqueIdentifier>
     </Filter>
+    <Filter Include="헤더 파일\Network">
+      <UniqueIdentifier>{b538e98c-c864-44a1-a147-72c1761dad3e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="헤더 파일\User">
+      <UniqueIdentifier>{5af1a401-9948-4f33-aa6c-acf93dc078a4}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="소스 파일\Network">
+      <UniqueIdentifier>{cac256fc-d67f-429e-8a7b-313ac7a2f593}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="소스 파일\User">
+      <UniqueIdentifier>{aa2c693f-0871-47a3-b89f-834a1a59b197}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Main.cpp">
@@ -39,9 +51,6 @@
       <Filter>소스 파일</Filter>
     </ClCompile>
     <ClCompile Include="App.cpp">
-      <Filter>소스 파일</Filter>
-    </ClCompile>
-    <ClCompile Include="User.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
     <ClCompile Include="..\..\External\Imgui\imgui.cpp">
@@ -74,14 +83,8 @@
     <ClCompile Include="..\..\Common\Types.cpp">
       <Filter>소스 파일\Common</Filter>
     </ClCompile>
-    <ClCompile Include="UserManager.cpp">
-      <Filter>소스 파일</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\Common\ImguiEx.cpp">
       <Filter>소스 파일\Common</Filter>
-    </ClCompile>
-    <ClCompile Include="SocketManager.cpp">
-      <Filter>소스 파일</Filter>
     </ClCompile>
     <ClCompile Include="..\..\Common\Timer.cpp">
       <Filter>소스 파일\Common</Filter>
@@ -89,14 +92,23 @@
     <ClCompile Include="..\..\Common\Util.cpp">
       <Filter>소스 파일\Common</Filter>
     </ClCompile>
-    <ClCompile Include="CenterServer.cpp">
-      <Filter>소스 파일</Filter>
-    </ClCompile>
-    <ClCompile Include="ClientSocket.cpp">
-      <Filter>소스 파일</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\Common\Socket.cpp">
       <Filter>소스 파일\Common</Filter>
+    </ClCompile>
+    <ClCompile Include="CenterServer.cpp">
+      <Filter>소스 파일\Network</Filter>
+    </ClCompile>
+    <ClCompile Include="ClientSocket.cpp">
+      <Filter>소스 파일\Network</Filter>
+    </ClCompile>
+    <ClCompile Include="SocketManager.cpp">
+      <Filter>소스 파일\Network</Filter>
+    </ClCompile>
+    <ClCompile Include="User.cpp">
+      <Filter>소스 파일\User</Filter>
+    </ClCompile>
+    <ClCompile Include="UserManager.cpp">
+      <Filter>소스 파일\User</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -104,9 +116,6 @@
       <Filter>헤더 파일</Filter>
     </ClInclude>
     <ClInclude Include="App.h">
-      <Filter>헤더 파일</Filter>
-    </ClInclude>
-    <ClInclude Include="User.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
     <ClInclude Include="..\..\External\DirectX\d3dx12.h">
@@ -160,14 +169,8 @@
     <ClInclude Include="..\..\Module\Resource\Include\Property.h">
       <Filter>모듈 파일\Resource</Filter>
     </ClInclude>
-    <ClInclude Include="UserManager.h">
-      <Filter>헤더 파일</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\Common\ImguiEx.h">
       <Filter>헤더 파일\Common</Filter>
-    </ClInclude>
-    <ClInclude Include="SocketManager.h">
-      <Filter>헤더 파일</Filter>
     </ClInclude>
     <ClInclude Include="..\..\Common\Timer.h">
       <Filter>헤더 파일\Common</Filter>
@@ -178,14 +181,23 @@
     <ClInclude Include="..\..\Common\Util.h">
       <Filter>헤더 파일\Common</Filter>
     </ClInclude>
-    <ClInclude Include="ClientSocket.h">
-      <Filter>헤더 파일</Filter>
-    </ClInclude>
-    <ClInclude Include="CenterServer.h">
-      <Filter>헤더 파일</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\Common\Socket.h">
       <Filter>헤더 파일\Common</Filter>
+    </ClInclude>
+    <ClInclude Include="CenterServer.h">
+      <Filter>헤더 파일\Network</Filter>
+    </ClInclude>
+    <ClInclude Include="ClientSocket.h">
+      <Filter>헤더 파일\Network</Filter>
+    </ClInclude>
+    <ClInclude Include="SocketManager.h">
+      <Filter>헤더 파일\Network</Filter>
+    </ClInclude>
+    <ClInclude Include="User.h">
+      <Filter>헤더 파일\User</Filter>
+    </ClInclude>
+    <ClInclude Include="UserManager.h">
+      <Filter>헤더 파일\User</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

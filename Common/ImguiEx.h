@@ -1,21 +1,37 @@
 #pragma once
-#include <Windows.h>
+
+// C/C++
 #include <string>
-#include "Util.h"
-#include "External/Imgui/imgui.h"
-#ifndef _IMGUI_STANDALONE
+
+// Windows
+#ifndef WIN32_LEAN_AND_MEAN
+#define WIN32_LEAN_AND_MEAN
+#endif
+#include <Windows.h>
+
+// DirectX
 #include <d3d12.h>
 #include <dxgi1_6.h>
-#endif
+
+// ImGui
+#include "External/Imgui/imgui.h"
+#include "External/Imgui/imgui_impl_dx12.h"
+#include "External/Imgui/imgui_impl_win32.h"
+extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
+
+// Project
+#include "Util.h"
 
 namespace ImGui
 {
-#ifdef _IMGUI_STANDALONE
-	void Init(HWND _hWnd, ImGuiConfigFlags configFlags);
 	void OnResize(int width, int height);
-#else
+
+	// Standalone 초기화
+	void Init(HWND _hWnd, ImGuiConfigFlags configFlags);
+
+	// 이미 생성된 DX12 디바이스로 초기화
 	void Init(HWND _hWnd, ID3D12Device* device, ID3D12GraphicsCommandList* _commandList, int num_frames_in_flight, DXGI_FORMAT rtv_format, ImGuiConfigFlags configFlags);
-#endif
+
 	void BeginRender();
 	void EndRender();
 	void CleanUp();

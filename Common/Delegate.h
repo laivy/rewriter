@@ -38,15 +38,25 @@ public:
 
 	void Notify(const Params&... params)
 	{
-		for (const auto& c : m_rawCallbacks)
-			c(params...);
+		for (const auto& callback : m_rawCallbacks)
+			callback(params...);
 
-		std::erase_if(m_safeCallbacks, [](const auto& elem) { return elem.first.expired(); });
-		for (const auto& [o, c] : m_safeCallbacks)
-		{
-			if (auto lock{ o.lock() })
-				c(params...);
-		}
+		std::erase_if(
+			m_safeCallbacks,
+			[&params...](const auto& elem)
+			{
+				const auto& [ref, callback] { elem };
+				if (ref.expired())
+					return true;
+
+				auto lock{ ref.lock() };
+				if (!lock)
+					return true;
+
+				callback(params...);
+				return false;
+			}
+		);
 	}
 
 private:

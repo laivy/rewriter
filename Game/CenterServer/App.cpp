@@ -1,7 +1,9 @@
 #include "Stdafx.h"
 #include "App.h"
-#include "ServerAcceptor.h"
+#include "SocketManager.h"
+#ifdef _IMGUI
 #include "Common/ImguiEx.h"
+#endif
 
 App::App()
 {
@@ -33,8 +35,10 @@ void App::Run()
 
 LRESULT App::WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
+#ifdef _IMGUI
 	if (ImGui_ImplWin32_WndProcHandler(hWnd, message, wParam, lParam))
 		return 1;
+#endif
 
 	App* app{ reinterpret_cast<App*>(::GetWindowLongPtr(hWnd, GWLP_USERDATA)) };
 	switch (message)
@@ -99,6 +103,7 @@ void App::InitWindow()
 
 void App::InitImgui()
 {
+#ifdef _IMGUI
 	ImGui::Init(hWnd, ImGuiConfigFlags_NavEnableKeyboard | ImGuiConfigFlags_DockingEnable);
 	OnResize.Register(&ImGui::OnResize);
 
@@ -110,6 +115,7 @@ void App::InitImgui()
 	style.WindowMenuButtonPosition = ImGuiDir_None;
 	style.DockingSeparatorSize = 1.0f;
 	ImGui::StyleColorsDark();
+#endif
 }
 
 void App::InitApp()
@@ -123,6 +129,7 @@ void App::Update()
 
 void App::Render()
 {
+#ifdef _IMGUI
 	ImGui::BeginRender();
 	{
 		if (auto sm{ SocketManager::GetInstance() })
@@ -130,4 +137,5 @@ void App::Render()
 		ImGui::ShowDemoWindow();
 	}
 	ImGui::EndRender();
+#endif
 }

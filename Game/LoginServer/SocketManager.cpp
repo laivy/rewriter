@@ -3,6 +3,9 @@
 #include "User.h"
 #include "UserManager.h"
 #include "Common/Socket.h"
+#ifdef _IMGUI
+#include "Common/ImguiEx.h"
+#endif
 
 SocketManager::SocketManager() :
 	m_iocp{ INVALID_HANDLE_VALUE },
@@ -78,10 +81,12 @@ SocketManager::~SocketManager()
 
 void SocketManager::Render()
 {
+#ifdef _IMGUI
 	if (ImGui::Begin("SOCKET MANAGER"))
 	{
 	}
 	ImGui::End();
+#endif
 }
 
 void SocketManager::Register(ISocket* socket) const
@@ -93,9 +98,8 @@ void SocketManager::Register(ISocket* socket) const
 
 void SocketManager::Run(std::stop_token stoken)
 {
-	// 패킷 송수신 처리
 	unsigned long ioSize{};
-	ISocket* socket{ nullptr };
+	ISocket* socket{};
 	ISocket::OverlappedEx* overlappedEx{};
 	while (!stoken.stop_requested())
 	{

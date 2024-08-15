@@ -9,12 +9,11 @@ public:
 
 	void Render();
 
-	void Register(ISocket* socket) const;
-
 private:
 	void Run(std::stop_token stoken);
 	void Accept(std::stop_token stoken);
 
+	void Register(ISocket* socket) const;
 	void Disconnect(ClientSocket* socket);
 
 private:

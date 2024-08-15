@@ -8,16 +8,16 @@
 #include "SocketManager.h"
 #include "Window.h"
 #include "WindowManager.h"
+#ifdef _IMGUI
 #include "Common/ImguiEx.h"
-#include "Common/Timer.h"
+#endif
 
 App::App() :
-	m_isActive{ true },
-	m_timer{ new Timer }
+	m_isActive{ true }
 {
 	InitWindow();
 	InitApp();
-	m_timer->Tick();
+	m_timer.Tick();
 }
 
 App::~App()
@@ -136,9 +136,9 @@ void App::InitWindow()
 void App::InitApp()
 {
 	Renderer::Init();
-#ifdef _DEBUG
+#ifdef _IMGUI
 	ImGui::Init(
-		App::hWnd,
+		hWnd,
 		Renderer::d3dDevice.Get(),
 		Renderer::commandList.Get(),
 		Renderer::FRAME_COUNT,
@@ -153,7 +153,7 @@ void App::InitApp()
 
 void App::Update()
 {
-	float deltaTime{ m_timer->Tick() };
+	float deltaTime{ m_timer.Tick() };
 	if (auto wm{ WindowManager::GetInstance() })
 		wm->Update(deltaTime);
 	if (auto sm{ SceneManager::GetInstance() })
@@ -166,7 +166,7 @@ void App::Render()
 	{
 		if (auto sm{ SceneManager::GetInstance() })
 			sm->Render3D();
-#ifdef _DEBUG
+#ifdef _IMGUI
 		ImGui::BeginRender();
 		{
 			ImGui::ShowDemoWindow();

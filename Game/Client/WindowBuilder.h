@@ -38,43 +38,7 @@ public:
 	}
 
 private:
-	void Path(const std::shared_ptr<Resource::Property>& prop, const std::wstring& basePath)
-	{
-		auto ToPivot = [](std::wstring_view pivot)
-			{
-				if (pivot == L"Center")
-					return Pivot::CENTER;
-				return Pivot::LEFTTOP;
-			};
-
-		for (const auto& child : prop->GetChildren())
-		{
-			constexpr auto CONTROL_TYPE_BUTTON{ L"Button: " };
-
-			// 버튼
-			auto name{ child->GetName() };
-			if (name.starts_with(CONTROL_TYPE_BUTTON))
-			{
-				auto button{ std::make_shared<Button>(m_window.get()) };
-
-				// 이름
-				std::wstring buttonName{ basePath + name.substr(std::char_traits<wchar_t>::length(CONTROL_TYPE_BUTTON)) };
-				button->SetName(buttonName);
-
-				// 크기
-				auto defaultImage{ prop->GetImage(L"Default") };
-				button->SetSize(defaultImage->GetSize());
-
-				// 위치
-				button->SetPosition(prop->GetInt2(L"Position"), ToPivot(prop->GetString(L"Pivot")));
-
-				static_cast<IWindow*>(m_window.get())->Register(button);
-			}
-
-			// 재귀
-			Path(prop, name + L"/");
-		}
-	}
+	void Path(const std::shared_ptr<Resource::Property>& prop, const std::wstring& basePath);
 
 private:
 	std::shared_ptr<T> m_window;
