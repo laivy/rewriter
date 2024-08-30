@@ -32,14 +32,14 @@ public:
 		okButton->SetSize({ 80, 20 });
 		okButton->SetPosition({ m_size.x / 2 - 50, m_size.y / 2 + 120 }, Pivot::CENTER);
 		okButton->SetText(L"OK");
-		m_controls.push_back(okButton);
+		Register(okButton);
 
 		auto cancleButton{ std::make_shared<Button>(this) };
 		cancleButton->OnButtonClick.Register(this, std::bind(&RegisterAccountModal::OnButtonClicked, this, ButtonID::CANCLE));
 		cancleButton->SetSize({ 80, 20 });
 		cancleButton->SetPosition({ m_size.x / 2 + 50, m_size.y / 2 + 120 }, Pivot::CENTER);
 		cancleButton->SetText(L"CANCLE");
-		m_controls.push_back(cancleButton);
+		Register(cancleButton);
 	}
 
 	virtual void Render() const override final
@@ -79,18 +79,17 @@ void DebugWindow::Update(float deltaTime)
 
 void DebugWindow::Render() const
 {
-	auto b = Resource::Get(L"UI.dat/LoginUI/Background");
-	
-	Renderer2D::DrawImage(b->GetImage(), FLOAT2{});
+	//auto b = Resource::Get(L"UI.dat/LoginUI/Background");	
+	//Renderer2D::DrawImage(b->GetImage(), FLOAT2{});
 
-	//RECTI rect{ 0, 0, m_size.x, m_size.y };
-	//RECTI outline{ rect };
-	//outline.left -= 5;
-	//outline.top -= 5;
-	//outline.right += 5;
-	//outline.bottom += 5;
-	//Renderer2D::DrawRect(outline, D2D1::ColorF::Black);
-	//Renderer2D::DrawRect(rect, D2D1::ColorF::White);
+	RECTI rect{ 0, 0, m_size.x, m_size.y };
+	RECTI outline{ rect };
+	outline.left -= 5;
+	outline.top -= 5;
+	outline.right += 5;
+	outline.bottom += 5;
+	Renderer2D::DrawRect(outline, D2D1::ColorF::Black);
+	Renderer2D::DrawRect(rect, D2D1::ColorF::White);
 
 	IWindow::Render();
 }

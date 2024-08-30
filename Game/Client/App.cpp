@@ -52,9 +52,11 @@ void App::Run()
 
 LRESULT CALLBACK App::WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
-#ifdef _DEBUG
-	ImGui_ImplWin32_WndProcHandler(hWnd, message, wParam, lParam);
+#ifdef _IMGUI
+	if (::ImGui_ImplWin32_WndProcHandler(hWnd, message, wParam, lParam))
+		return 1;
 #endif
+
 	App* app{ reinterpret_cast<App*>(::GetWindowLongPtr(hWnd, GWLP_USERDATA)) };
 	switch (message)
 	{
@@ -92,9 +94,9 @@ LRESULT CALLBACK App::WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPa
 		break;
 	}
 	default:
-		return ::DefWindowProc(hWnd, message, wParam, lParam);
+		break;
 	}
-	return 0;
+	return ::DefWindowProc(hWnd, message, wParam, lParam);
 }
 
 void App::InitWindow()
@@ -145,6 +147,15 @@ void App::InitApp()
 		DXGI_FORMAT_R8G8B8A8_UNORM,
 		ImGuiConfigFlags_NavEnableKeyboard | ImGuiConfigFlags_DockingEnable | ImGuiConfigFlags_ViewportsEnable
 	);
+
+	auto& io{ ImGui::GetIO() };
+	io.IniFilename = "Data/imgui_client.ini";
+	io.Fonts->AddFontFromFileTTF("Data/Galmuri11.ttf", 14.0f, nullptr, io.Fonts->GetGlyphRangesKorean());
+
+	auto& style{ ImGui::GetStyle() };
+	style.WindowMenuButtonPosition = ImGuiDir_None;
+	style.DockingSeparatorSize = 1.0f;
+	ImGui::StyleColorsDark();
 #endif
 	SocketManager::Instantiate();
 	LoginServer::Instantiate();

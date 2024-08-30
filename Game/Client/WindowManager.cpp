@@ -34,17 +34,23 @@ void WindowManager::Render() const
 	for (const auto& window : m_windows)
 	{
 		auto pos{ window->GetPosition() };
+		auto size{ window->GetSize() };
 		Renderer::ctx->SetTransform(D2D1::Matrix3x2F::Translation(static_cast<float>(pos.x), static_cast<float>(pos.y)));
+		Renderer::ctx->PushAxisAlignedClip(RECTF{ 0.0f, 0.0f, static_cast<float>(size.y), static_cast<float>(size.y) }, D2D1_ANTIALIAS_MODE_ALIASED);
 		window->Render();
+		Renderer::ctx->PopAxisAlignedClip();
 	}
-	Renderer::ctx->SetTransform(D2D1::Matrix3x2F::Identity());
 
 	for (const auto& modal : m_modals)
 	{
 		auto pos{ modal->GetPosition() };
+		auto size{ modal->GetSize() };
 		Renderer::ctx->SetTransform(D2D1::Matrix3x2F::Translation(static_cast<float>(pos.x), static_cast<float>(pos.y)));
+		Renderer::ctx->PushAxisAlignedClip(RECTF{ 0.0f, 0.0f, static_cast<float>(size.y), static_cast<float>(size.y) }, D2D1_ANTIALIAS_MODE_ALIASED);
 		modal->Render();
+		Renderer::ctx->PopAxisAlignedClip();
 	}
+
 	Renderer::ctx->SetTransform(D2D1::Matrix3x2F::Identity());
 }
 

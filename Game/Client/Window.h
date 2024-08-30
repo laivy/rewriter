@@ -22,7 +22,7 @@ private:
 	void UpdateMouseOverControl(int x, int y);
 	void UpdateFocusControl(int x, int y);
 
-protected:
+private:
 	RECTI m_titleBarRect;
 	INT2 m_pickPos;
 	bool m_isPicked;

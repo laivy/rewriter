@@ -98,7 +98,14 @@ void IWindow::Render() const
 
 void IWindow::Register(const std::shared_ptr<IControl>& control)
 {
-	m_controls.push_back(control);
+	// 삽입 정렬
+	auto it{ std::ranges::lower_bound(m_controls, control->GetDepth(),
+		[](const auto& c, auto depth) -> bool
+		{
+			return c->GetDepth() > depth;
+		})
+	};
+	m_controls.insert(it, control);
 }
 
 void IWindow::UpdateMouseOverControl(int x, int y)
