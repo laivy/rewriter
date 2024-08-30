@@ -105,6 +105,12 @@
     <ClInclude Include="..\..\Module\Resource\Include\Lib.h">
       <Filter>모듈 파일\Resource</Filter>
     </ClInclude>
+    <ClInclude Include="UIEditor.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="MainMenuBar.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="App.cpp">
@@ -162,6 +168,12 @@
       <Filter>소스 파일\Common</Filter>
     </ClCompile>
     <ClCompile Include="Global.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="UIEditor.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="MainMenuBar.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
   </ItemGroup>

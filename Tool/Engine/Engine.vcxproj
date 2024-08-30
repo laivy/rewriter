@@ -114,7 +114,9 @@
     <ClInclude Include="Global.h" />
     <ClInclude Include="Hierarchy.h" />
     <ClInclude Include="Explorer.h" />
+    <ClInclude Include="MainMenuBar.h" />
     <ClInclude Include="Stdafx.h" />
+    <ClInclude Include="UIEditor.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\Common\ImguiEx.cpp">
@@ -168,10 +170,12 @@
     <ClCompile Include="Inspector.cpp" />
     <ClCompile Include="Main.cpp" />
     <ClCompile Include="Explorer.cpp" />
+    <ClCompile Include="MainMenuBar.cpp" />
     <ClCompile Include="Stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="UIEditor.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

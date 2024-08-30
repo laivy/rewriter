@@ -3,6 +3,8 @@
 #include "Explorer.h"
 #include "Hierarchy.h"
 #include "Inspector.h"
+#include "MainMenuBar.h"
+#include "UIEditor.h"
 #include "Common/ImguiEx.h"
 #include "Common/Timer.h"
 
@@ -20,7 +22,7 @@ App::~App()
 	Explorer::Destroy();
 	Hierarchy::Destroy();
 	Inspector::Destroy();
-	ImGui::CleanUp();	
+	ImGui::CleanUp();
 }
 
 void App::Run()
@@ -45,8 +47,8 @@ void App::Run()
 
 LRESULT App::WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
-	if (ImGui_ImplWin32_WndProcHandler(hWnd, message, wParam, lParam))
-		return true;
+	if (::ImGui_ImplWin32_WndProcHandler(hWnd, message, wParam, lParam))
+		return 1;
 
 	App* app{ reinterpret_cast<App*>(::GetWindowLongPtr(hWnd, GWLP_USERDATA)) };
 	switch (message)
@@ -127,6 +129,7 @@ void App::InitImGui()
 
 void App::InitApp()
 {
+	MainMenuBar::Instantiate();
 	Explorer::Instantiate();
 	Hierarchy::Instantiate();
 	Inspector::Instantiate();
@@ -147,12 +150,16 @@ void App::Render()
 {
 	ImGui::BeginRender();
 	{
+		if (auto mainMenuBar{ MainMenuBar::GetInstance() })
+			mainMenuBar->Render();
 		if (auto explorer{ Explorer::GetInstance() })
 			explorer->Render();
 		if (auto hierarchy{ Hierarchy::GetInstance() })
 			hierarchy->Render();
 		if (auto inspector{ Inspector::GetInstance() })
 			inspector->Render();
+		if (auto uiEditor{ UIEditor::GetInstance() })
+			uiEditor->Render();
 		ImGui::ShowDemoWindow();
 	}
 	ImGui::EndRender();
