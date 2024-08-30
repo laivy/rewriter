@@ -120,7 +120,7 @@ void App::InitImgui()
 
 	auto& io{ ImGui::GetIO() };
 	io.IniFilename = "Data/imgui.ini";
-	io.Fonts->AddFontFromFileTTF("Data/NEXON Lv2 Gothic.ttf", 16.0f, nullptr, io.Fonts->GetGlyphRangesKorean());
+	io.Fonts->AddFontFromFileTTF("Data/Galmuri11.ttf", 14.0f, nullptr, io.Fonts->GetGlyphRangesKorean());
 
 	auto& style{ ImGui::GetStyle() };
 	style.WindowMenuButtonPosition = ImGuiDir_None;

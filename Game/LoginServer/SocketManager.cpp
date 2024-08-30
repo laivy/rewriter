@@ -1,4 +1,5 @@
 #include "Stdafx.h"
+#include "ClientSocket.h"
 #include "SocketManager.h"
 #include "User.h"
 #include "UserManager.h"
@@ -89,13 +90,6 @@ void SocketManager::Render()
 #endif
 }
 
-void SocketManager::Register(ISocket* socket) const
-{
-	HANDLE iocp{ ::CreateIoCompletionPort(reinterpret_cast<HANDLE>(static_cast<SOCKET>(*socket)), m_iocp, reinterpret_cast<unsigned long long>(socket), 0) };
-	if (iocp != m_iocp)
-		assert(false && "REGISTER SOCKET TO IOCP FAIL");
-}
-
 void SocketManager::Run(std::stop_token stoken)
 {
 	unsigned long ioSize{};
@@ -147,14 +141,14 @@ void SocketManager::Accept(std::stop_token stoken)
 {
 	std::array<char, 64> acceptBuffer{};
 	ISocket::OverlappedEx acceptOverlappedEx{};
-	SOCKET acceptClientSocket{ ::WSASocket(AF_INET, SOCK_STREAM, IPPROTO_TCP, 0, 0, WSA_FLAG_OVERLAPPED) };
-	if (acceptClientSocket == INVALID_SOCKET)
+	SOCKET acceptSocket{ ::WSASocket(AF_INET, SOCK_STREAM, IPPROTO_TCP, 0, 0, WSA_FLAG_OVERLAPPED) };
+	if (acceptSocket == INVALID_SOCKET)
 	{
 		assert(false && "CREATE CLIENT SOCKET FAIL");
 		return;
 	}
 
-	if (!::AcceptEx(m_listenSocket, acceptClientSocket, acceptBuffer.data(), 0, sizeof(SOCKADDR_IN) + 16, sizeof(SOCKADDR_IN) + 16, nullptr, &acceptOverlappedEx) && ::WSAGetLastError() != WSA_IO_PENDING)
+	if (!::AcceptEx(m_listenSocket, acceptSocket, acceptBuffer.data(), 0, sizeof(SOCKADDR_IN) + 16, sizeof(SOCKADDR_IN) + 16, nullptr, &acceptOverlappedEx) && ::WSAGetLastError() != WSA_IO_PENDING)
 	{
 		assert(false && "ACCEPT FAIL");
 		return;
@@ -174,14 +168,14 @@ void SocketManager::Accept(std::stop_token stoken)
 			continue;
 
 		// 소켓 옵션 설정
-		if (::setsockopt(acceptClientSocket, SOL_SOCKET, SO_UPDATE_ACCEPT_CONTEXT, reinterpret_cast<char*>(&m_listenSocket), sizeof(m_listenSocket)))
+		if (::setsockopt(acceptSocket, SOL_SOCKET, SO_UPDATE_ACCEPT_CONTEXT, reinterpret_cast<char*>(&m_listenSocket), sizeof(m_listenSocket)))
 		{
 			assert(false && "UPDATE ACCEPT CONTEXT FAIL");
 			continue;
 		}
 
 		// 클라이언트 소켓 객체 생성
-		auto clientSocket{ std::make_shared<ClientSocket>(acceptClientSocket) };
+		std::shared_ptr<ISocket> clientSocket{ std::make_shared<ClientSocket>(acceptSocket) };
 		Register(clientSocket.get());
 		clientSocket->Receive();
 		m_sockets.push_back(clientSocket);
@@ -189,18 +183,25 @@ void SocketManager::Accept(std::stop_token stoken)
 		// 계속 Accept
 		acceptBuffer.fill(0);
 		acceptOverlappedEx = {};
-		acceptClientSocket = ::WSASocket(AF_INET, SOCK_STREAM, IPPROTO_TCP, 0, 0, WSA_FLAG_OVERLAPPED);
-		if (acceptClientSocket == INVALID_SOCKET)
+		acceptSocket = ::WSASocket(AF_INET, SOCK_STREAM, IPPROTO_TCP, 0, 0, WSA_FLAG_OVERLAPPED);
+		if (acceptSocket == INVALID_SOCKET)
 		{
 			assert(false && "CREATE SOCKET FAIL");
 			continue;
 		}
-		if (!::AcceptEx(m_listenSocket, acceptClientSocket, acceptBuffer.data(), 0, sizeof(SOCKADDR_IN) + 16, sizeof(SOCKADDR_IN) + 16, nullptr, &acceptOverlappedEx) && ::WSAGetLastError() != WSA_IO_PENDING)
+		if (!::AcceptEx(m_listenSocket, acceptSocket, acceptBuffer.data(), 0, sizeof(SOCKADDR_IN) + 16, sizeof(SOCKADDR_IN) + 16, nullptr, &acceptOverlappedEx) && ::WSAGetLastError() != WSA_IO_PENDING)
 			assert(false && "ACCEPT FAIL");
 	}
 }
 
-void SocketManager::Disconnect(ClientSocket* socket)
+void SocketManager::Register(ISocket* socket) const
+{
+	HANDLE iocp{ ::CreateIoCompletionPort(reinterpret_cast<HANDLE>(static_cast<SOCKET>(*socket)), m_iocp, reinterpret_cast<unsigned long long>(socket), 0) };
+	if (iocp != m_iocp)
+		assert(false && "REGISTER SOCKET TO IOCP FAIL");
+}
+
+void SocketManager::Disconnect(ISocket* socket)
 {
 	if (socket)
 	{
