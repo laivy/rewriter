@@ -1,7 +1,6 @@
 #include "Stdafx.h"
 #include "App.h"
 #include "Modal.h"
-#include "Renderer.h"
 #include "Window.h"
 #include "WindowManager.h"
 
@@ -35,23 +34,23 @@ void WindowManager::Render() const
 	{
 		auto pos{ window->GetPosition() };
 		auto size{ window->GetSize() };
-		Renderer::ctx->SetTransform(D2D1::Matrix3x2F::Translation(static_cast<float>(pos.x), static_cast<float>(pos.y)));
-		Renderer::ctx->PushAxisAlignedClip(RECTF{ 0.0f, 0.0f, static_cast<float>(size.y), static_cast<float>(size.y) }, D2D1_ANTIALIAS_MODE_ALIASED);
+		Graphics::D2D::SetTransform(Graphics::D2D::Matrix::Translation(static_cast<float>(pos.x), static_cast<float>(pos.y)));
+		Graphics::D2D::PushClipRect(RECTF{ 0.0f, 0.0f, static_cast<float>(size.x), static_cast<float>(size.y) });
 		window->Render();
-		Renderer::ctx->PopAxisAlignedClip();
+		Graphics::D2D::PopClipRect();
 	}
 
 	for (const auto& modal : m_modals)
 	{
 		auto pos{ modal->GetPosition() };
 		auto size{ modal->GetSize() };
-		Renderer::ctx->SetTransform(D2D1::Matrix3x2F::Translation(static_cast<float>(pos.x), static_cast<float>(pos.y)));
-		Renderer::ctx->PushAxisAlignedClip(RECTF{ 0.0f, 0.0f, static_cast<float>(size.y), static_cast<float>(size.y) }, D2D1_ANTIALIAS_MODE_ALIASED);
+		Graphics::D2D::SetTransform(Graphics::D2D::Matrix::Translation(static_cast<float>(pos.x), static_cast<float>(pos.y)));
+		Graphics::D2D::PushClipRect(RECTF{ 0.0f, 0.0f, static_cast<float>(size.x), static_cast<float>(size.y) });
 		modal->Render();
-		Renderer::ctx->PopAxisAlignedClip();
+		Graphics::D2D::PopClipRect();
 	}
 
-	Renderer::ctx->SetTransform(D2D1::Matrix3x2F::Identity());
+	Graphics::D2D::SetTransform(Graphics::D2D::Matrix::Identity());
 }
 
 void WindowManager::Register(const std::shared_ptr<IModal>& modal)

@@ -29,6 +29,5 @@ public:
 	static inline INT2 size{ 1920, 1080 };
 
 private:
-	bool m_isActive;
 	Timer m_timer;
 };

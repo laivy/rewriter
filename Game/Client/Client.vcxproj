@@ -65,7 +65,7 @@
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>d2d1.lib;d3d11.lib;d3d12.lib;d3dcompiler.lib;dwrite.lib;dxgi.lib;Resource.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>dxgi.lib;Graphics.lib;Resource.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalLibraryDirectories>$(OutDir)</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
@@ -75,7 +75,7 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>_WINDOWS;_CLIENT;NDEBUG;NOMINMAX;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_CLIENT;_WINDOWS;NDEBUG;NOMINMAX;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>false</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
       <AdditionalIncludeDirectories>$(SolutionDir);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
@@ -88,15 +88,11 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>d2d1.lib;d3d11.lib;d3d12.lib;d3dcompiler.lib;dwrite.lib;dxgi.lib;Resource.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>dxgi.lib;Graphics.lib;Resource.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalLibraryDirectories>$(OutDir)</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\Common\ImguiEx.cpp">
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
-    </ClCompile>
     <ClCompile Include="..\..\Common\Packet.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
@@ -166,9 +162,6 @@
     <ClCompile Include="LoginServer.cpp" />
     <ClCompile Include="Modal.cpp" />
     <ClCompile Include="Object.cpp" />
-    <ClCompile Include="Renderer.cpp" />
-    <ClCompile Include="Renderer2D.cpp" />
-    <ClCompile Include="Renderer3D.cpp" />
     <ClCompile Include="Mesh.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Use</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Use</PrecompiledHeader>
@@ -216,7 +209,6 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\Common\Delegate.h" />
-    <ClInclude Include="..\..\Common\ImguiEx.h" />
     <ClInclude Include="..\..\Common\Packet.h" />
     <ClInclude Include="..\..\Common\Singleton.h" />
     <ClInclude Include="..\..\Common\Socket.h" />
@@ -237,9 +229,8 @@
     <ClInclude Include="..\..\External\Imgui\imstb_rectpack.h" />
     <ClInclude Include="..\..\External\Imgui\imstb_textedit.h" />
     <ClInclude Include="..\..\External\Imgui\imstb_truetype.h" />
-    <ClInclude Include="..\..\Module\Resource\Include\Image.h" />
-    <ClInclude Include="..\..\Module\Resource\Include\Property.h" />
-    <ClInclude Include="..\..\Module\Resource\Include\ResourceManager.h" />
+    <ClInclude Include="..\..\Module\Graphics\Include\Lib.h" />
+    <ClInclude Include="..\..\Module\Resource\Include\Lib.h" />
     <ClInclude Include="Button.h" />
     <ClInclude Include="Camera.h" />
     <ClInclude Include="ConstantBuffer.h" />
@@ -250,9 +241,6 @@
     <ClInclude Include="LoginServer.h" />
     <ClInclude Include="Modal.h" />
     <ClInclude Include="Object.h" />
-    <ClInclude Include="Renderer.h" />
-    <ClInclude Include="Renderer2D.h" />
-    <ClInclude Include="Renderer3D.h" />
     <ClInclude Include="Mesh.h" />
     <ClInclude Include="App.h" />
     <ClInclude Include="Scene.h" />

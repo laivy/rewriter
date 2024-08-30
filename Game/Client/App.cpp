@@ -1,9 +1,6 @@
 #include "Stdafx.h"
 #include "App.h"
 #include "LoginServer.h"
-#include "Renderer.h"
-#include "Renderer2D.h"
-#include "Renderer3D.h"
 #include "SceneManager.h"
 #include "SocketManager.h"
 #include "Window.h"
@@ -12,8 +9,7 @@
 #include "Common/ImguiEx.h"
 #endif
 
-App::App() :
-	m_isActive{ true }
+App::App()
 {
 	InitWindow();
 	InitApp();
@@ -22,10 +18,7 @@ App::App() :
 
 App::~App()
 {
-#ifdef _DEBUG
-	ImGui::CleanUp();
-#endif
-	Renderer::CleanUp();
+	Graphics::CleanUp();
 	SceneManager::Destroy();
 	SocketManager::Destroy();
 }
@@ -33,7 +26,7 @@ App::~App()
 void App::Run()
 {
 	MSG msg{};
-	while (m_isActive)
+	while (true)
 	{
 		if (::PeekMessage(&msg, NULL, 0, 0, PM_REMOVE))
 		{
@@ -55,7 +48,7 @@ LRESULT CALLBACK App::WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPa
 #ifdef _IMGUI
 	if (::ImGui_ImplWin32_WndProcHandler(hWnd, message, wParam, lParam))
 		return 1;
-#endif
+#endif // _IMGUI
 
 	App* app{ reinterpret_cast<App*>(::GetWindowLongPtr(hWnd, GWLP_USERDATA)) };
 	switch (message)
@@ -137,16 +130,10 @@ void App::InitWindow()
 
 void App::InitApp()
 {
-	Renderer::Init();
+	Graphics::Initialize(hWnd);
 #ifdef _IMGUI
-	ImGui::Init(
-		hWnd,
-		Renderer::d3dDevice.Get(),
-		Renderer::commandList.Get(),
-		Renderer::FRAME_COUNT,
-		DXGI_FORMAT_R8G8B8A8_UNORM,
-		ImGuiConfigFlags_NavEnableKeyboard | ImGuiConfigFlags_DockingEnable | ImGuiConfigFlags_ViewportsEnable
-	);
+	ImGui::SetCurrentContext(Graphics::ImGui::GetContext());
+	OnResize.Register(&Graphics::OnResize);
 
 	auto& io{ ImGui::GetIO() };
 	io.IniFilename = "Data/imgui_client.ini";
@@ -158,7 +145,7 @@ void App::InitApp()
 	ImGui::StyleColorsDark();
 #endif
 	SocketManager::Instantiate();
-	LoginServer::Instantiate();
+	//LoginServer::Instantiate();
 	SceneManager::Instantiate();
 }
 
@@ -173,24 +160,24 @@ void App::Update()
 
 void App::Render()
 {
-	Renderer3D::Begin();
+	Graphics::D3D::Begin();
 	{
 		if (auto sm{ SceneManager::GetInstance() })
 			sm->Render3D();
 #ifdef _IMGUI
-		ImGui::BeginRender();
+		Graphics::ImGui::Begin();
 		{
 			ImGui::ShowDemoWindow();
 		}
-		ImGui::EndRender();
-#endif
+		Graphics::ImGui::End();
+#endif // _IMGUI
 	}
-	Renderer3D::End();
-	Renderer2D::Begin();
+	Graphics::D3D::End();
+	Graphics::D2D::Begin();
 	{
 		if (auto sm{ SceneManager::GetInstance() })
 			sm->Render2D();
 	}
-	Renderer2D::End();
-	Renderer::Present();
+	Graphics::D2D::End();
+	Graphics::Present();
 }

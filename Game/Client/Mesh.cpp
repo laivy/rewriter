@@ -1,14 +1,13 @@
 #include "Stdafx.h"
 #include "App.h"
 #include "Mesh.h"
-#include "Renderer.h"
 
 Mesh::Mesh() : 
 	m_primitiveTopology{ D3D_PRIMITIVE_TOPOLOGY_POINTLIST }, 
 	m_nVertices{ 1 }
 {
-	auto d3dDevice{ Renderer::d3dDevice };
-	auto commandList{ Renderer::commandList };
+	ComPtr<ID3D12Device> d3dDevice;
+	ComPtr<ID3D12GraphicsCommandList> commandList;
 
 	struct Vertex
 	{

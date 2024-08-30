@@ -1,7 +1,5 @@
 #include "Stdafx.h"
 #include "App.h"
-#include "Renderer.h"
-#include "Renderer2D.h"
 #include "TextBox.h"
 #include "Window.h"
 
@@ -16,7 +14,7 @@ TextBox::TextBox(IWindow* owner) :
 	m_hasVerticalScroll{ false },
 	m_hasHorizontalScroll{ false }
 {
-	m_textFormat = Renderer2D::CreateTextFormat(L"", 16);
+	//m_textFormat = Renderer2D::CreateTextFormat(L"", 16);
 }
 
 void TextBox::OnMouseEvent(UINT message, int x, int y)
@@ -191,10 +189,10 @@ void TextBox::RenderBackground() const
 	outline.Offset({ 0, 3 });
 
 	D2D1::ColorF outlineColor{ IsFocus() ? D2D1::ColorF::DeepSkyBlue : D2D1::ColorF::WhiteSmoke };
-	Renderer2D::DrawRoundRect(outline, { 3.0f, 3.0f }, outlineColor);
+	//Renderer2D::DrawRoundRect(outline, { 3.0f, 3.0f }, outlineColor);
 
 	D2D1::ColorF color{ IsFocus() ? D2D1::ColorF::White : D2D1::ColorF::Gray };
-	Renderer2D::DrawRoundRect(rect, { 2.0f, 2.0f }, color);
+	//Renderer2D::DrawRoundRect(rect, { 2.0f, 2.0f }, color);
 }
 
 void TextBox::RenderText() const
@@ -202,17 +200,16 @@ void TextBox::RenderText() const
 	if (!m_textLayout)
 		return;
 
-	Renderer::ctx->PushAxisAlignedClip(
+	Graphics::D2D::PushClipRect(
 		RECTF{
 			MARGIN_LEFT,
 			MARGIN_TOP,
 			static_cast<float>(m_size.x - MARGIN_RIGHT),
 			static_cast<float>(m_size.y - MARGIN_BOTTOM)
-		}.Offset(m_position),
-		D2D1_ANTIALIAS_MODE_ALIASED
+		}.Offset(m_position)
 	);
-	Renderer2D::DrawText(m_position + INT2{ MARGIN_LEFT, MARGIN_TOP } + m_offset, m_textLayout, D2D1::ColorF::Black);
-	Renderer::ctx->PopAxisAlignedClip();
+	//Renderer2D::DrawText(m_position + INT2{ MARGIN_LEFT, MARGIN_TOP } + m_offset, m_textLayout, D2D1::ColorF::Black);
+	Graphics::D2D::PopClipRect();
 }
 
 void TextBox::RenderCaret() const
@@ -231,13 +228,13 @@ void TextBox::RenderCaret() const
 		caret.Offset({ static_cast<int>(metrics.left), static_cast<int>(metrics.top) });
 	}
 	caret.Offset({ m_offset.x, m_offset.y });
-	Renderer2D::DrawRect(caret);
+	Graphics::D2D::DrawRect(caret, Graphics::D2D::Color::Black);
 }
 
 void TextBox::SetText(const std::wstring& text)
 {
 	m_text = text;
-	m_textLayout = Renderer2D::CreateTextLayout(m_text, m_textFormat, m_size.x - MARGIN_LEFT, m_size.y);
+	//m_textLayout = Renderer2D::CreateTextLayout(m_text, m_textFormat, m_size.x - MARGIN_LEFT, m_size.y);
 	if (!m_isMultiLine)
 		m_textLayout->SetWordWrapping(DWRITE_WORD_WRAPPING_NO_WRAP);
 	m_caretTimer = 0.0f;

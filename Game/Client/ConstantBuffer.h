@@ -1,5 +1,4 @@
 #pragma once
-#include "Renderer.h"
 
 template <class T>
 class ConstantBuffer
@@ -30,14 +29,14 @@ public:
 		if (!m_buffer)
 			return;
 
-		DX::ThrowIfFailed(Renderer::d3dDevice->CreateCommittedResource(
-			&CD3DX12_HEAP_PROPERTIES{ D3D12_HEAP_TYPE_UPLOAD },
-			D3D12_HEAP_FLAG_NONE,
-			&CD3DX12_RESOURCE_DESC::Buffer(BUFFER_SIZE),
-			D3D12_RESOURCE_STATE_GENERIC_READ,
-			NULL,
-			IID_PPV_ARGS(&m_buffer))
-		);
+		//DX::ThrowIfFailed(Renderer::d3dDevice->CreateCommittedResource(
+		//	&CD3DX12_HEAP_PROPERTIES{ D3D12_HEAP_TYPE_UPLOAD },
+		//	D3D12_HEAP_FLAG_NONE,
+		//	&CD3DX12_RESOURCE_DESC::Buffer(BUFFER_SIZE),
+		//	D3D12_RESOURCE_STATE_GENERIC_READ,
+		//	NULL,
+		//	IID_PPV_ARGS(&m_buffer))
+		//);
 		m_buffer->SetName(L"CONSTANT BUFFER");
 		DX::ThrowIfFailed(m_buffer->Map(0, nullptr, reinterpret_cast<void**>(&m_data)));
 
@@ -52,7 +51,7 @@ public:
 
 	void SetShaderVariable() const
 	{
-		Renderer::commandList->SetGraphicsRootConstantBufferView(T::INDEX, m_buffer->GetGPUVirtualAddress());
+		//Renderer::commandList->SetGraphicsRootConstantBufferView(T::INDEX, m_buffer->GetGPUVirtualAddress());
 	}
 
 	T* operator->() const

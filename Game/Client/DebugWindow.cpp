@@ -4,7 +4,6 @@
 #include "Control.h"
 #include "DebugWindow.h"
 #include "Modal.h"
-#include "Renderer2D.h"
 #include "SocketManager.h"
 #include "TextBlock.h"
 #include "TextBox.h"
@@ -45,7 +44,7 @@ public:
 	virtual void Render() const override final
 	{
 		RECTI rect{ 0, 0, m_size.x, m_size.y };
-		Renderer2D::DrawRect(rect);
+		Graphics::D2D::DrawRect(rect, Graphics::D2D::Color::White);
 		IWindow::Render();
 	}
 
@@ -83,13 +82,17 @@ void DebugWindow::Render() const
 	//Renderer2D::DrawImage(b->GetImage(), FLOAT2{});
 
 	RECTI rect{ 0, 0, m_size.x, m_size.y };
-	RECTI outline{ rect };
-	outline.left -= 5;
-	outline.top -= 5;
-	outline.right += 5;
-	outline.bottom += 5;
-	Renderer2D::DrawRect(outline, D2D1::ColorF::Black);
-	Renderer2D::DrawRect(rect, D2D1::ColorF::White);
+	//RECTI outline{ rect };
+	//outline.left -= 5;
+	//outline.top -= 5;
+	//outline.right += 5;
+	//outline.bottom += 5;
+	//Graphics::D2D::DrawRect(outline, D2D1::ColorF::Black);
+	Graphics::D2D::DrawRect(rect, D2D1::ColorF::White);
+
+	using namespace Graphics::D2D;
+	Font font{ L"", 16.0f };
+	DrawText(L"안녕하세요", { 50, 50 }, font, Color::Black);
 
 	IWindow::Render();
 }

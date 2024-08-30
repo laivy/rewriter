@@ -57,6 +57,9 @@
     <Filter Include="헤더 파일\Scene">
       <UniqueIdentifier>{ca2e0c38-df75-41d2-a42d-c46ed38ca33c}</UniqueIdentifier>
     </Filter>
+    <Filter Include="모듈 파일\Graphics">
+      <UniqueIdentifier>{c9664751-745f-402b-8ffe-7804686dd966}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Main.cpp">
@@ -103,15 +106,6 @@
     </ClCompile>
     <ClCompile Include="..\..\External\Imgui\imgui_stdlib.cpp">
       <Filter>외부 파일\Imgui</Filter>
-    </ClCompile>
-    <ClCompile Include="Renderer.cpp">
-      <Filter>소스 파일\Renderer</Filter>
-    </ClCompile>
-    <ClCompile Include="Renderer2D.cpp">
-      <Filter>소스 파일\Renderer</Filter>
-    </ClCompile>
-    <ClCompile Include="Renderer3D.cpp">
-      <Filter>소스 파일\Renderer</Filter>
     </ClCompile>
     <ClCompile Include="UI.cpp">
       <Filter>소스 파일\UI</Filter>
@@ -163,9 +157,6 @@
     </ClCompile>
     <ClCompile Include="LoginScene.cpp">
       <Filter>소스 파일\Scene</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\Common\ImguiEx.cpp">
-      <Filter>소스 파일\Common</Filter>
     </ClCompile>
     <ClCompile Include="LoginServer.cpp">
       <Filter>소스 파일\Server</Filter>
@@ -220,15 +211,6 @@
     <ClInclude Include="..\..\External\Imgui\imstb_truetype.h">
       <Filter>외부 파일\Imgui</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\Module\Resource\Include\Property.h">
-      <Filter>모듈 파일\Resource</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Module\Resource\Include\ResourceManager.h">
-      <Filter>모듈 파일\Resource</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Module\Resource\Include\Image.h">
-      <Filter>모듈 파일\Resource</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\Common\Packet.h">
       <Filter>헤더 파일\Common</Filter>
     </ClInclude>
@@ -252,15 +234,6 @@
     </ClInclude>
     <ClInclude Include="..\..\Common\Delegate.h">
       <Filter>헤더 파일\Common</Filter>
-    </ClInclude>
-    <ClInclude Include="Renderer.h">
-      <Filter>헤더 파일\Renderer</Filter>
-    </ClInclude>
-    <ClInclude Include="Renderer2D.h">
-      <Filter>헤더 파일\Renderer</Filter>
-    </ClInclude>
-    <ClInclude Include="Renderer3D.h">
-      <Filter>헤더 파일\Renderer</Filter>
     </ClInclude>
     <ClInclude Include="UI.h">
       <Filter>헤더 파일\UI</Filter>
@@ -319,9 +292,6 @@
     <ClInclude Include="LoginScene.h">
       <Filter>헤더 파일\Scene</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\Common\ImguiEx.h">
-      <Filter>헤더 파일\Common</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\External\DirectX\DDSTextureLoader12.h">
       <Filter>외부 파일\DirectX</Filter>
     </ClInclude>
@@ -339,6 +309,12 @@
     </ClInclude>
     <ClInclude Include="LoginServer.h">
       <Filter>헤더 파일\Server</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Module\Resource\Include\Lib.h">
+      <Filter>모듈 파일\Resource</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Module\Graphics\Include\Lib.h">
+      <Filter>모듈 파일\Graphics</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
