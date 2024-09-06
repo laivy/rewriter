@@ -130,10 +130,13 @@ void App::InitWindow()
 
 void App::InitApp()
 {
+	// 모듈 초기화
 	Graphics::Initialize(hWnd);
+	Resource::Initialize(Graphics::D2D::GetContext());
+	OnResize.Register(&Graphics::OnResize);
+
 #ifdef _IMGUI
 	ImGui::SetCurrentContext(Graphics::ImGui::GetContext());
-	OnResize.Register(&Graphics::OnResize);
 
 	auto& io{ ImGui::GetIO() };
 	io.IniFilename = "Data/imgui_client.ini";
@@ -144,6 +147,8 @@ void App::InitApp()
 	style.DockingSeparatorSize = 1.0f;
 	ImGui::StyleColorsDark();
 #endif
+
+	// 싱글톤 생성
 	SocketManager::Instantiate();
 	//LoginServer::Instantiate();
 	SceneManager::Instantiate();

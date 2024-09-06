@@ -1,9 +1,9 @@
 #include "Stdafx.h"
 #include "App.h"
+#include "Desktop.h"
 #include "Explorer.h"
 #include "Hierarchy.h"
 #include "Inspector.h"
-#include "MainMenuBar.h"
 #include "UIEditor.h"
 #include "Common/Timer.h"
 
@@ -112,9 +112,13 @@ void App::InitWindow()
 
 void App::InitApp()
 {
+	// 모듈 초기화
 	Graphics::Initialize(hWnd);
-	ImGui::SetCurrentContext(Graphics::ImGui::GetContext());
+	Resource::Initialize(Graphics::D2D::GetContext());
 	OnResize.Register(&Graphics::OnResize);
+
+	// ImGui 초기화
+	ImGui::SetCurrentContext(Graphics::ImGui::GetContext());
 
 	auto& io{ ImGui::GetIO() };
 	io.IniFilename = "Data/imgui_tool.ini";
@@ -125,7 +129,8 @@ void App::InitApp()
 	style.DockingSeparatorSize = 1.0f;
 	ImGui::StyleColorsDark();
 
-	MainMenuBar::Instantiate();
+	// 싱글톤 생성
+	Desktop::Instantiate();
 	Explorer::Instantiate();
 	Hierarchy::Instantiate();
 	Inspector::Instantiate();
@@ -148,8 +153,8 @@ void App::Render()
 	{
 		Graphics::ImGui::Begin();
 		{
-			if (auto mainMenuBar{ MainMenuBar::GetInstance() })
-				mainMenuBar->Render();
+			if (auto desktop{ Desktop::GetInstance() })
+				desktop->Render();
 			if (auto explorer{ Explorer::GetInstance() })
 				explorer->Render();
 			if (auto hierarchy{ Hierarchy::GetInstance() })

@@ -115,13 +115,13 @@ namespace Resource
 	std::map<std::wstring, std::shared_ptr<Property>> g_resources;
 
 #if defined _CLIENT || defined _TOOL
-	ComPtr<ID2D1DeviceContext2> g_ctx;
+	ComPtr<ID2D1DeviceContext2> d2dContext;
 
-	DLL_API void Init(const ComPtr<ID2D1DeviceContext2>& ctx)
+	DLL_API void Initialize(const ComPtr<ID2D1DeviceContext2>& d2dContext)
 	{
-		g_ctx = ctx;
+		Resource::d2dContext = d2dContext;
 	}
-#endif
+#endif // _CLIENT || _TOOL
 
 	DLL_API std::shared_ptr<Property> Get(std::wstring_view path)
 	{

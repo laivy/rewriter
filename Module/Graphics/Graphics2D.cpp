@@ -38,6 +38,11 @@ namespace Graphics::D2D
 		return true;
 	}
 
+	DLL_API ComPtr<ID2D1DeviceContext2> GetContext()
+	{
+		return d2dContext;
+	}
+
 	DLL_API void D2D::SetTransform(const Matrix& transform)
 	{
 		d2dContext->SetTransform(transform);

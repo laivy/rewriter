@@ -1,6 +1,8 @@
 #pragma once
 #include "Font.h"
 
+struct ID2D1DeviceContext2;
+
 namespace Graphics::D2D
 {
 	using Color = D2D1::ColorF;
@@ -8,6 +10,8 @@ namespace Graphics::D2D
 
 	DLL_API bool Begin();
 	DLL_API bool End();
+
+	DLL_API ComPtr<ID2D1DeviceContext2> GetContext();
 
 	DLL_API void SetTransform(const Matrix& transform);
 	DLL_API void PushClipRect(const RECTF& rect);

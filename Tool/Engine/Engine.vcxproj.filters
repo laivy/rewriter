@@ -108,7 +108,7 @@
     <ClInclude Include="UIEditor.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
-    <ClInclude Include="MainMenuBar.h">
+    <ClInclude Include="Desktop.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
     <ClInclude Include="..\..\Module\Graphics\Include\Lib.h">
@@ -173,7 +173,7 @@
     <ClCompile Include="UIEditor.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
-    <ClCompile Include="MainMenuBar.cpp">
+    <ClCompile Include="Desktop.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
   </ItemGroup>

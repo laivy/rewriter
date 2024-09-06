@@ -31,7 +31,7 @@ namespace Resource
 			return;
 		if (FAILED(converter->Initialize(frameDecode.Get(), GUID_WICPixelFormat32bppPBGRA, WICBitmapDitherTypeNone, nullptr, 0.0f, WICBitmapPaletteTypeMedianCut)))
 			return;
-		g_ctx->CreateBitmapFromWicBitmap(converter.Get(), &bitmap);
+		d2dContext->CreateBitmapFromWicBitmap(converter.Get(), &bitmap);
 
 #ifdef _TOOL
 		// 나중에 저장하기 위해 바이너리 데이터 복사

@@ -34,9 +34,9 @@ namespace Graphics
 	std::array<ComPtr<ID3D11Resource>, FRAME_COUNT> wrappedBackBuffers;
 
 	// D2D
-	ComPtr<ID2D1DeviceContext2> d2dContext;
 	ComPtr<ID2D1Factory3> d2dFactory;
 	ComPtr<ID2D1Device2> d2dDevice;
+	ComPtr<ID2D1DeviceContext2> d2dContext;
 	std::array<ComPtr<ID2D1Bitmap1>, FRAME_COUNT> d2dRenderTargets;
 
 	// DWRITE
