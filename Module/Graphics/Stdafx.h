@@ -23,5 +23,11 @@
 #include "External/Imgui/imgui_impl_win32.h"
 #endif // _IMGUI
 
+// Module
+#include "Module/Resource/Include/Lib.h"
+
 // Project
+#ifdef DLL_API
+#undef DLL_API
+#endif
 #define DLL_API __declspec(dllexport)

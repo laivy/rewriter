@@ -1,6 +1,5 @@
 #include "Stdafx.h"
 #include "Explorer.h"
-#include "Common/ImguiEx.h"
 #include "Common/Util.h"
 
 Explorer::Explorer()
@@ -62,7 +61,8 @@ void Explorer::RenderAddressBar()
 			val.x = 4;
 		ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, val);
 
-		if (ImGui::Button(folder + L"/"))
+		//if (ImGui::Button(folder + L"/"))
+		if (ImGui::Button("test"))
 			SetPath(path);
 
 		ImGui::PopStyleVar();
@@ -87,7 +87,7 @@ void Explorer::RenderFileView()
 					   | std::views::filter([](const auto& d) { return d.is_directory(); }))
 	{
 		std::wstring name{ d.path().filename().wstring() };
-		if (ImGui::Button(name))
+		if (ImGui::Button("test"))
 			SetPath(std::filesystem::canonical(m_path / name));
 	}
 

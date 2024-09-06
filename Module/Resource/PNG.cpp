@@ -17,19 +17,21 @@ namespace Resource
 		ComPtr<IWICBitmapFrameDecode> frameDecode;
 		ComPtr<IWICStream> stream;
 
-		HRESULT hr{ E_FAIL };
-		hr = ::CoCreateInstance(CLSID_WICImagingFactory, NULL, CLSCTX_INPROC_SERVER, IID_PPV_ARGS(&factory));
-		hr = factory->CreateStream(&stream);
-		hr = stream->InitializeFromMemory(
-			reinterpret_cast<WICInProcPointer>(binary),
-			static_cast<DWORD>(size)
-		);
-		hr = factory->CreateDecoderFromStream(stream.Get(), NULL, WICDecodeMetadataCacheOnLoad, &decoder);
-		hr = factory->CreateFormatConverter(&converter);
-		hr = decoder->GetFrame(0, &frameDecode);
-		hr = converter->Initialize(frameDecode.Get(), GUID_WICPixelFormat32bppPBGRA, WICBitmapDitherTypeNone, NULL, 0.0f, WICBitmapPaletteTypeMedianCut);
-		hr = g_ctx->CreateBitmapFromWicBitmap(converter.Get(), &bitmap);
-		assert(SUCCEEDED(hr));
+		if (FAILED(::CoCreateInstance(CLSID_WICImagingFactory, nullptr, CLSCTX_INPROC_SERVER, IID_PPV_ARGS(&factory))))
+			return;
+		if (FAILED(factory->CreateStream(&stream)))
+			return;
+		if (FAILED(stream->InitializeFromMemory(reinterpret_cast<WICInProcPointer>(binary), static_cast<DWORD>(size))))
+			return;
+		if (FAILED(factory->CreateDecoderFromStream(stream.Get(), nullptr, WICDecodeMetadataCacheOnLoad, &decoder)))
+			return;
+		if (FAILED(factory->CreateFormatConverter(&converter)))
+			return;
+		if (FAILED(decoder->GetFrame(0, &frameDecode)))
+			return;
+		if (FAILED(converter->Initialize(frameDecode.Get(), GUID_WICPixelFormat32bppPBGRA, WICBitmapDitherTypeNone, nullptr, 0.0f, WICBitmapPaletteTypeMedianCut)))
+			return;
+		g_ctx->CreateBitmapFromWicBitmap(converter.Get(), &bitmap);
 
 #ifdef _TOOL
 		// 나중에 저장하기 위해 바이너리 데이터 복사

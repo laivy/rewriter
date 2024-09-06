@@ -5,24 +5,22 @@
 #include "Inspector.h"
 #include "MainMenuBar.h"
 #include "UIEditor.h"
-#include "Common/ImguiEx.h"
 #include "Common/Timer.h"
 
 App::App() :
 	m_isActive{ true }
 {
 	InitWindow();
-	InitImGui();
 	InitApp();
 	m_timer.Tick();
 }
 
 App::~App()
 {
+	Graphics::CleanUp();
 	Explorer::Destroy();
 	Hierarchy::Destroy();
 	Inspector::Destroy();
-	ImGui::CleanUp();
 }
 
 void App::Run()
@@ -112,23 +110,21 @@ void App::InitWindow()
 	::UpdateWindow(hWnd);
 }
 
-void App::InitImGui()
+void App::InitApp()
 {
-	ImGui::Init(hWnd, ImGuiConfigFlags_NavEnableKeyboard | ImGuiConfigFlags_DockingEnable);
-	OnResize.Register(&ImGui::OnResize);
+	Graphics::Initialize(hWnd);
+	ImGui::SetCurrentContext(Graphics::ImGui::GetContext());
+	OnResize.Register(&Graphics::OnResize);
 
 	auto& io{ ImGui::GetIO() };
 	io.IniFilename = "Data/imgui_tool.ini";
 	io.Fonts->AddFontFromFileTTF("Data/Galmuri11.ttf", 14.0f, nullptr, io.Fonts->GetGlyphRangesKorean());
-	
+
 	auto& style{ ImGui::GetStyle() };
 	style.WindowMenuButtonPosition = ImGuiDir_None;
 	style.DockingSeparatorSize = 1.0f;
 	ImGui::StyleColorsDark();
-}
 
-void App::InitApp()
-{
 	MainMenuBar::Instantiate();
 	Explorer::Instantiate();
 	Hierarchy::Instantiate();
@@ -148,21 +144,31 @@ void App::Update()
 
 void App::Render()
 {
-	ImGui::BeginRender();
+	Graphics::D3D::Begin();
 	{
-		if (auto mainMenuBar{ MainMenuBar::GetInstance() })
-			mainMenuBar->Render();
-		if (auto explorer{ Explorer::GetInstance() })
-			explorer->Render();
-		if (auto hierarchy{ Hierarchy::GetInstance() })
-			hierarchy->Render();
-		if (auto inspector{ Inspector::GetInstance() })
-			inspector->Render();
-		if (auto uiEditor{ UIEditor::GetInstance() })
-			uiEditor->Render();
-		ImGui::ShowDemoWindow();
+		Graphics::ImGui::Begin();
+		{
+			if (auto mainMenuBar{ MainMenuBar::GetInstance() })
+				mainMenuBar->Render();
+			if (auto explorer{ Explorer::GetInstance() })
+				explorer->Render();
+			if (auto hierarchy{ Hierarchy::GetInstance() })
+				hierarchy->Render();
+			if (auto inspector{ Inspector::GetInstance() })
+				inspector->Render();
+			if (auto uiEditor{ UIEditor::GetInstance() })
+				uiEditor->Render();
+			ImGui::ShowDemoWindow();
+		}
+		Graphics::ImGui::End();
 	}
-	ImGui::EndRender();
+	Graphics::D3D::End();
+	Graphics::D2D::Begin();
+	{
+		// D2D
+	}
+	Graphics::D2D::End();
+	Graphics::Present();
 }
 
 void App::RenderImGuiMainDockSpace()

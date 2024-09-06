@@ -12,7 +12,6 @@ public:
 private:
 	static LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);
 	void InitWindow();
-	void InitImGui();
 	void InitApp();
 
 	void Update();

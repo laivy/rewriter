@@ -28,6 +28,12 @@
     <Filter Include="소스 파일\Common">
       <UniqueIdentifier>{1c10cf6a-6ec8-4a98-812e-c8e948694cb5}</UniqueIdentifier>
     </Filter>
+    <Filter Include="모듈 파일">
+      <UniqueIdentifier>{74f838f5-dbfd-425b-9df3-0c19cde6a8c5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="모듈 파일\Resource">
+      <UniqueIdentifier>{1f047f76-5024-44ad-9264-34d0407dba59}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="DllMain.cpp">
@@ -136,6 +142,9 @@
     </ClInclude>
     <ClInclude Include="..\..\Common\Types.h">
       <Filter>헤더 파일\Common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Resource\Include\Lib.h">
+      <Filter>모듈 파일\Resource</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

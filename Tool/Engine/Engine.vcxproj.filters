@@ -34,6 +34,9 @@
     <Filter Include="소스 파일\Common">
       <UniqueIdentifier>{2c2f03d0-2441-4526-be4f-ddb6031b5bdd}</UniqueIdentifier>
     </Filter>
+    <Filter Include="모듈 파일\Graphics">
+      <UniqueIdentifier>{67818a58-8ab6-4abf-bb29-6f49e3c746ba}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="App.h">
@@ -90,9 +93,6 @@
     <ClInclude Include="..\..\External\Imgui\imgui_stdlib.h">
       <Filter>외부 파일\Imgui</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\Common\ImguiEx.h">
-      <Filter>헤더 파일\Common</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\Common\Util.h">
       <Filter>헤더 파일\Common</Filter>
     </ClInclude>
@@ -110,6 +110,9 @@
     </ClInclude>
     <ClInclude Include="MainMenuBar.h">
       <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Module\Graphics\Include\Lib.h">
+      <Filter>모듈 파일\Graphics</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -160,9 +163,6 @@
     </ClCompile>
     <ClCompile Include="..\..\External\Imgui\imgui_stdlib.cpp">
       <Filter>외부 파일\Imgui</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\Common\ImguiEx.cpp">
-      <Filter>소스 파일\Common</Filter>
     </ClCompile>
     <ClCompile Include="..\..\Common\Util.cpp">
       <Filter>소스 파일\Common</Filter>

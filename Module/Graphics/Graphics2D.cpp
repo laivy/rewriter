@@ -109,7 +109,7 @@ namespace Graphics::D2D
 		}
 
 		ComPtr<IDWriteTextLayout> textLayout;
-		dwriteFactory->CreateTextLayout(text.data(), static_cast<UINT32>(text.size()), textFormat.Get(), std::numeric_limits<FLOAT>::max(), std::numeric_limits<float>::max(), &textLayout);
+		dwriteFactory->CreateTextLayout(text.data(), static_cast<UINT32>(text.size()), textFormat.Get(), std::numeric_limits<float>::max(), std::numeric_limits<float>::max(), &textLayout);
 		d2dContext->DrawTextLayout(FLOAT2{ position }, textLayout.Get(), colorBrush.Get());
 	}
 }
