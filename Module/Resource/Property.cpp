@@ -6,85 +6,10 @@
 namespace Resource
 {
 	DLL_API Property::Property() :
-		m_type{ Property::Type::FOLDER },
+		m_type{ Property::Type::Folder },
 		m_name{ L"" }
 	{
 	}
-
-#ifdef _TOOL
-	DLL_API void Property::Save(const std::filesystem::path& path)
-	{
-		std::ofstream file{ path, std::ios::binary };
-		std::function<void(Property*)> lambda = [&](Property* prop)
-			{
-				// 이름
-				std::wstring name{ prop->m_name.c_str() };
-				int32_t length{ static_cast<int32_t>(name.size()) };
-				file.write(reinterpret_cast<char*>(&length), sizeof(length));
-				file.write(reinterpret_cast<char*>(prop->m_name.data()), length * sizeof(wchar_t));
-
-				// 타입
-				file.write(reinterpret_cast<char*>(&prop->m_type), sizeof(prop->m_type));
-
-				// 데이터
-				switch (prop->m_type)
-				{
-				case Type::FOLDER:
-					break;
-				case Type::INT:
-				{
-					auto data{ std::get<int32_t>(prop->m_data) };
-					file.write(reinterpret_cast<char*>(&data), sizeof(data));
-					break;
-				}
-				case Type::INT2:
-				{
-					const auto& data{ std::get<INT2>(prop->m_data) };
-					file.write(reinterpret_cast<const char*>(&data), sizeof(data));
-					break;
-				}
-				case Type::FLOAT:
-				{
-					auto data{ std::get<float>(prop->m_data) };
-					file.write(reinterpret_cast<char*>(&data), sizeof(data));
-					break;
-				}
-				case Type::STRING:
-				{
-					const auto& data{ std::get<std::wstring>(prop->m_data) };
-					length = static_cast<int32_t>(data.size());
-					file.write(reinterpret_cast<char*>(&length), sizeof(length));
-					file.write(reinterpret_cast<const char*>(data.data()), length * sizeof(wchar_t));
-					break;
-				}
-				case Type::PNG:
-				{
-					auto data{ std::get<std::shared_ptr<PNG>>(prop->m_data) };
-					auto buffer{ data->GetBinary() };
-					auto size{ data->GetBinarySize() };
-					file.write(reinterpret_cast<char*>(&size), sizeof(size));
-					file.write(reinterpret_cast<char*>(buffer), size);
-					break;
-				}
-				default:
-					assert(false && "INVALID PROPERTY TYPE");
-					break;
-				}
-
-				int32_t count{ static_cast<int32_t>(prop->m_children.size()) };
-				file.write(reinterpret_cast<char*>(&count), sizeof(count));
-
-				for (const auto& child : prop->m_children)
-					lambda(child.get());
-			};
-
-		int32_t count{ static_cast<int32_t>(m_children.size()) };
-		file.write(reinterpret_cast<char*>(&count), sizeof(count));
-
-		for (const auto& child : m_children)
-			lambda(child.get());
-	}
-#endif
 
 	DLL_API void Property::Add(const std::shared_ptr<Property>& child)
 	{
@@ -101,19 +26,19 @@ namespace Resource
 		m_type = type;
 		switch (m_type)
 		{
-		case Type::INT:
+		case Type::Int:
 			m_data = 0;
 			break;
-		case Type::INT2:
+		case Type::Int2:
 			m_data = INT2{ 0, 0 };
 			break;
-		case Type::FLOAT:
+		case Type::Float:
 			m_data = 0.0f;
 			break;
-		case Type::STRING:
+		case Type::String:
 			m_data = L"";
 			break;
-		case Type::PNG:
+		case Type::Image:
 			m_data = std::shared_ptr<Resource::PNG>{};
 			break;
 		}
@@ -124,7 +49,7 @@ namespace Resource
 		this->m_name = name;
 	}
 
-	DLL_API void Property::Set(int value)
+	DLL_API void Property::Set(int32_t value)
 	{
 		m_data = value;
 	}
@@ -159,12 +84,12 @@ namespace Resource
 		return m_name;
 	}
 
-	DLL_API int Property::GetInt(std::wstring_view path) const
+	DLL_API int32_t Property::GetInt(std::wstring_view path) const
 	{
 		if (path.empty())
 		{
-			assert(m_type == Type::INT);
-			return std::get<int>(m_data);
+			assert(m_type == Type::Int);
+			return std::get<int32_t>(m_data);
 		}
 
 		std::wstring_view name{ path };
@@ -187,7 +112,7 @@ namespace Resource
 	{
 		if (path.empty())
 		{
-			assert(m_type == Type::INT2);
+			assert(m_type == Type::Int2);
 			return std::get<INT2>(m_data);
 		}
 
@@ -211,7 +136,7 @@ namespace Resource
 	{
 		if (path.empty())
 		{
-			assert(m_type == Type::FLOAT);
+			assert(m_type == Type::Float);
 			return std::get<float>(m_data);
 		}
 
@@ -235,7 +160,7 @@ namespace Resource
 	{
 		if (path.empty())
 		{
-			assert(m_type == Type::STRING);
+			assert(m_type == Type::String);
 			return std::get<std::wstring>(m_data);
 		}
 
@@ -259,7 +184,7 @@ namespace Resource
 	{
 		if (path.empty())
 		{
-			assert(m_type == Type::PNG);
+			assert(m_type == Type::Image);
 			return std::get<std::shared_ptr<PNG>>(m_data);
 		}
 
@@ -276,24 +201,24 @@ namespace Resource
 		if (const auto& child{ Get(name) })
 			return child->GetImage(remain);
 
-		assert(m_type == Type::PNG);
+		assert(m_type == Type::Image);
 		return nullptr;
 	}
 
 	DLL_API std::shared_ptr<Property> Property::Get(std::wstring_view path) const
 	{
 		size_t pos{ path.find(Stringtable::DATA_PATH_SEPERATOR) };
-		if (pos != std::wstring::npos)
+		if (pos != std::wstring_view::npos)
 		{
-			std::wstring_view childName{ path.substr(0, pos) };
-			std::wstring_view remain{ path.substr(pos + 1) };
-			auto it{ std::ranges::find_if(m_children, [&](const auto& p) { return p->m_name == childName; }) };
+			auto childName{ path.substr(0, pos) };
+			auto remain{ path.substr(pos + 1) };
+			auto it{ std::ranges::find_if(m_children, [childName](const auto& p) { return p->m_name == childName; }) };
 			if (it == m_children.end())
 				return nullptr;
 			return (*it)->Get(remain);
 		}
 
-		auto it{ std::ranges::find_if(m_children, [&](const auto& p) { return p->m_name == path; }) };
+		auto it{ std::ranges::find_if(m_children, [path](const auto& p) { return p->m_name == path; }) };
 		if (it == m_children.end())
 			return nullptr;
 		return *it;

@@ -4,6 +4,7 @@
 namespace Resource
 {
 	class PNG;
+	class Property;
 }
 
 template<class T>
@@ -19,24 +20,26 @@ namespace Resource
 	class Property
 	{
 	public:
-		enum class Type : unsigned char
+		enum class Type : uint8_t
 		{
-			FOLDER, INT, INT2, FLOAT, STRING, PNG, DDS
+			Folder,
+			Int,
+			Int2,
+			Float,
+			String,
+			Image
 		};
 
 	public:
 		DLL_API Property();
 		~Property() = default;
 
-#ifdef _TOOL
-		DLL_API void Save(const std::filesystem::path& path);
-#endif
 		DLL_API void Add(const std::shared_ptr<Property>& child);
 		DLL_API void Delete(const std::shared_ptr<Property>& child);
 
 		DLL_API void SetType(Type type);
 		DLL_API void SetName(const std::wstring& name);
-		DLL_API void Set(int value);
+		DLL_API void Set(int32_t value);
 		DLL_API void Set(const INT2& value);
 		DLL_API void Set(float value);
 		DLL_API void Set(const std::wstring& value);
@@ -44,7 +47,7 @@ namespace Resource
 
 		DLL_API Type GetType() const;
 		DLL_API std::wstring GetName() const;
-		DLL_API int GetInt(std::wstring_view path = L"") const;
+		DLL_API int32_t GetInt(std::wstring_view path = L"") const;
 		DLL_API INT2 GetInt2(std::wstring_view path = L"") const;
 		DLL_API float GetFloat(std::wstring_view path = L"") const;
 		DLL_API std::wstring GetString(std::wstring_view path = L"") const;

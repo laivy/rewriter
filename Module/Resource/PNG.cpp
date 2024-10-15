@@ -8,14 +8,14 @@
 
 namespace Resource
 {
-	DLL_API PNG::PNG(std::byte* binary, size_t size)
+	DLL_API PNG::PNG(std::byte* binary, uint32_t size)
 	{
-		ComPtr<ID2D1Bitmap> bitmap;
 		ComPtr<IWICImagingFactory> factory;
+		ComPtr<IWICStream> stream;
 		ComPtr<IWICBitmapDecoder> decoder;
 		ComPtr<IWICFormatConverter> converter;
 		ComPtr<IWICBitmapFrameDecode> frameDecode;
-		ComPtr<IWICStream> stream;
+		ComPtr<ID2D1Bitmap> bitmap;
 
 		if (FAILED(::CoCreateInstance(CLSID_WICImagingFactory, nullptr, CLSCTX_INPROC_SERVER, IID_PPV_ARGS(&factory))))
 			return;
@@ -31,14 +31,14 @@ namespace Resource
 			return;
 		if (FAILED(converter->Initialize(frameDecode.Get(), GUID_WICPixelFormat32bppPBGRA, WICBitmapDitherTypeNone, nullptr, 0.0f, WICBitmapPaletteTypeMedianCut)))
 			return;
-		d2dContext->CreateBitmapFromWicBitmap(converter.Get(), &bitmap);
+		g_d2dContext->CreateBitmapFromWicBitmap(converter.Get(), &bitmap);
 
 #ifdef _TOOL
 		// 나중에 저장하기 위해 바이너리 데이터 복사
 		m_binary.reset(new std::byte[size]{});
 		std::memcpy(m_binary.get(), binary, size);
 		m_binarySize = size;
-#endif // _TOOL
+#endif
 	}
 
 	DLL_API ID2D1Bitmap* PNG::Get() const
@@ -56,15 +56,15 @@ namespace Resource
 	}
 
 #ifdef _TOOL
+	DLL_API uint32_t PNG::GetBinarySize() const
+	{
+		return m_binarySize;
+	}
+
 	DLL_API std::byte* PNG::GetBinary() const
 	{
 		return m_binary.get();
 	}
-
-	DLL_API size_t PNG::GetBinarySize() const
-	{
-		return m_binarySize;
-	}
-#endif // _TOOL
+#endif
 }
-#endif // defined _CLIENT || defined _TOOL
+#endif

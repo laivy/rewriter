@@ -1,142 +1,235 @@
 #include "Stdafx.h"
-#include "PNG.h"
-#include "Property.h"
-#include "Resource.h"
 #if defined _CLIENT || defined _TOOL
 #include <d2d1_3.h>
+#include "PNG.h"
 #endif
+#include "Property.h"
+#include "Resource.h"
 
 namespace
 {
-	std::shared_ptr<Resource::Property> Load(std::ifstream& file, std::wstring_view subPath)
+	using namespace Resource;
+
+#ifdef _TOOL
+	bool _Save(std::ofstream& file, const std::shared_ptr<Property>& prop)
 	{
-		std::function<std::shared_ptr<Resource::Property>(std::ifstream&, std::wstring_view)> loadChild =
-			[](std::ifstream& file, std::wstring_view subPath) -> std::shared_ptr<Resource::Property>
-			{
-				auto prop{ std::make_shared<Resource::Property>() };
+		// 이름
+		auto name{ prop->GetName() };
+		auto length{ static_cast<uint16_t>(name.size()) };
+		file.write(reinterpret_cast<const char*>(&length), sizeof(length));
+		file.write(reinterpret_cast<const char*>(name.data()), name.size() * sizeof(std::wstring::value_type));
 
-				// 이름
-				int32_t length{ 0 };
-				file.read(reinterpret_cast<char*>(&length), sizeof(length));
+		// 타입
+		auto type{ prop->GetType() };
+		file.write(reinterpret_cast<const char*>(&type), sizeof(type));
 
-				std::array<wchar_t, 128> buffer{};
-				file.read(reinterpret_cast<char*>(buffer.data()), length * sizeof(wchar_t));
+		// 데이터
+		switch (type)
+		{
+		case Property::Type::Folder:
+		{
+			break;
+		}
+		case Property::Type::Int:
+		{
+			auto data{ prop->GetInt() };
+			file.write(reinterpret_cast<const char*>(&data), sizeof(data));
+			break;
+		}
+		case Property::Type::Int2:
+		{
+			auto data{ prop->GetInt2() };
+			file.write(reinterpret_cast<const char*>(&data), sizeof(data));
+			break;
+		}
+		case Property::Type::Float:
+		{
+			auto data{ prop->GetFloat() };
+			file.write(reinterpret_cast<const char*>(&data), sizeof(data));
+			break;
+		}
+		case Property::Type::String:
+		{
+			auto data{ prop->GetString() };
+			auto length{ static_cast<uint16_t>(data.size()) };
+			file.write(reinterpret_cast<const char*>(&length), sizeof(length));
+			file.write(reinterpret_cast<const char*>(data.data()), data.size() * sizeof(std::wstring::value_type));
+			break;
+		}
+		case Property::Type::Image:
+		{
+			auto data{ prop->GetImage() };
+			auto length{ data->GetBinarySize() };
+			auto binary{ data->GetBinary() };
+			file.write(reinterpret_cast<const char*>(&length), sizeof(length));
+			file.write(reinterpret_cast<const char*>(binary), length);
+			break;
+		}
+		default:
+			assert(false && "INVALID PROPERTY TYPE");
+			return false;
+		}
 
-				std::wstring name{ buffer.data(), static_cast<size_t>(length) };
-				prop->SetName(name);
+		// 자식
+		auto children{ prop->GetChildren() };
+		auto count{ static_cast<uint16_t>(children.size()) };
+		file.write(reinterpret_cast<const char*>(&count), sizeof(count));
+		for (const auto& child : children)
+		{
+			if (!_Save(file, child))
+				return false;
+		}
+		return true;
+	}
+#endif
 
-				// 타입
-				Resource::Property::Type type{};
-				file.read(reinterpret_cast<char*>(&type), sizeof(type));
-				prop->SetType(type);
+	std::shared_ptr<Property> _Load(std::ifstream& file, std::wstring_view subPath)
+	{
+		auto prop{ std::make_shared<Property>() };
 
-				// 데이터
-				switch (type)
-				{
-				case Resource::Property::Type::FOLDER:
-				{
-					break;
-				}
-				case Resource::Property::Type::INT:
-				{
-					int32_t value{};
-					file.read(reinterpret_cast<char*>(&value), sizeof(value));
-					prop->Set(value);
-					break;
-				}
-				case Resource::Property::Type::INT2:
-				{
-					INT2 value{};
-					file.read(reinterpret_cast<char*>(&value), sizeof(value));
-					prop->Set(value);
-					break;
-				}
-				case Resource::Property::Type::FLOAT:
-				{
-					float value{};
-					file.read(reinterpret_cast<char*>(&value), sizeof(value));
-					prop->Set(value);
-					break;
-				}
-				case Resource::Property::Type::STRING:
-				{
-					int32_t len{ 0 };
-					file.read(reinterpret_cast<char*>(&len), sizeof(len));
+		// 이름
+		uint16_t length{};
+		file.read(reinterpret_cast<char*>(&length), sizeof(length));
 
-					buffer.fill(0);
-					file.read(reinterpret_cast<char*>(buffer.data()), len * sizeof(wchar_t));
+		std::wstring name(length, L'\0');
+		file.read(reinterpret_cast<char*>(name.data()), length * sizeof(std::wstring::value_type));
+		prop->SetName(name);
 
-					std::wstring value{ buffer.data(), static_cast<size_t>(len) };
-					prop->Set(value);
-					break;
-				}
-				case Resource::Property::Type::PNG:
-				{
-					int32_t size{};
-					file.read(reinterpret_cast<char*>(&size), sizeof(size));
-#if defined _CLIENT || defined _TOOL
-					std::unique_ptr<std::byte[]> buffer{ new std::byte[size]{} };
-					file.read(reinterpret_cast<char*>(buffer.get()), size);
+		// 타입
+		auto type{ Property::Type::Folder };
+		file.read(reinterpret_cast<char*>(&type), sizeof(type));
+		prop->SetType(type);
 
-					auto value{ std::make_shared<Resource::PNG>(buffer.get(), static_cast<size_t>(size)) };
-					prop->Set(value);
-#else // defined _CLIENT || defined _TOOL
-					file.ignore(size);
-#endif 
-					break;
-				}
-				case Resource::Property::Type::DDS:
-				{
-					// TODO
-					break;
-				}
-				default:
-					assert(false && "INVALID PROPERTY TYPE");
-					return nullptr;
-				}
+		// 데이터
+		switch (type)
+		{
+		case Property::Type::Folder:
+		{
+			break;
+		}
+		case Property::Type::Int:
+		{
+			int32_t data{};
+			file.read(reinterpret_cast<char*>(&data), sizeof(data));
+			prop->Set(data);
+			break;
+		}
+		case Property::Type::Int2:
+		{
+			INT2 data{};
+			file.read(reinterpret_cast<char*>(&data), sizeof(data));
+			prop->Set(data);
+			break;
+		}
+		case Property::Type::Float:
+		{
+			float data{};
+			file.read(reinterpret_cast<char*>(&data), sizeof(data));
+			prop->Set(data);
+			break;
+		}
+		case Property::Type::String:
+		{
+			uint16_t length{};
+			file.read(reinterpret_cast<char*>(&length), sizeof(length));
 
-				return prop;
-			};
+			std::wstring data(length, L'\0');
+			file.read(reinterpret_cast<char*>(data.data()), length * sizeof(std::wstring::value_type));
+			prop->Set(data);
+			break;
+		}
+		case Property::Type::Image:
+		{
+			uint32_t length{};
+			file.read(reinterpret_cast<char*>(&length), sizeof(length));
+#ifdef _SERVER
+			file.ignore(length);
+#else
+			std::unique_ptr<std::byte[]> binary{ new std::byte[length]{} };
+			file.read(reinterpret_cast<char*>(binary.get()), length);
 
-		auto root{ std::make_shared<Resource::Property>() };
-		root->SetType(Resource::Property::Type::FOLDER);
-		root->SetName(L"Root");
+			auto data{ std::make_shared<PNG>(binary.get(), length) };
+			prop->Set(data);
+#endif
+			break;
+		}
+		default:
+			assert(false && "INVALID PROPERTY TYPE");
+			return nullptr;
+		}
 
-		int32_t childCount{ 0 };
-		file.read(reinterpret_cast<char*>(&childCount), sizeof(childCount));
-		for (int32_t i = 0; i < childCount; ++i)
-			root->Add(loadChild(file, subPath));
+		// 자식
+		uint16_t count{};
+		file.read(reinterpret_cast<char*>(&count), sizeof(count));
+		for (uint16_t i{ 0 }; i < count; ++i)
+		{
+			auto child{ _Load(file, subPath) };
+			prop->Add(child);
+		}
+		return prop;
+	}
+
+	std::shared_ptr<Property> Load(std::wstring_view filePath, std::wstring_view subPath)
+	{
+#ifdef _TOOL
+		std::ifstream file{ filePath.data(), std::ios::binary };
+#else
+		std::ifstream file{ Stringtable::DATA_FOLDER_PATH + std::wstring{ filePath }, std::ios::binary };
+#endif
+		if (!file)
+		{
+			assert(false && "CAN NOT LOAD DATA FILE");
+			return nullptr;
+		}
+
+		auto root{ _Load(file, subPath) };
+		if (!subPath.empty())
+			return root->Get(subPath);
 		return root;
 	}
 };
 
 namespace Resource
 {
-	std::map<std::wstring, std::shared_ptr<Property>> g_resources;
-
 #if defined _CLIENT || defined _TOOL
-	ComPtr<ID2D1DeviceContext2> d2dContext;
-
+	ComPtr<ID2D1DeviceContext2> g_d2dContext;
 	DLL_API void Initialize(const ComPtr<ID2D1DeviceContext2>& d2dContext)
 	{
-		Resource::d2dContext = d2dContext;
+		Resource::g_d2dContext = d2dContext;
 	}
-#endif // _CLIENT || _TOOL
+#endif // _CLIENT || defined _TOOL
+
+	std::map<std::wstring, std::shared_ptr<Property>> g_resources;
+
+#ifdef _TOOL
+	DLL_API bool Save(const std::shared_ptr<Property>& prop, std::wstring_view path)
+	{
+		prop->SetName(Stringtable::ROOT);
+
+		std::ofstream file{ path.data(), std::ios::binary };
+		if (!file)
+		{
+			assert(false && "CAN NOT SAVE DATA FILE");
+			return false;
+		}
+		return _Save(file, prop);
+	}
+#endif
 
 	DLL_API std::shared_ptr<Property> Get(std::wstring_view path)
 	{
 		std::wstring filePath{ path };
 		std::wstring_view subPath{};
 
-		// 파라미터로부터 파일 이름과
+		// 파라미터를 파일 경로와 세부 경로로 나눔
 		size_t pos{ path.find(Stringtable::DATA_FILE_EXT) };
 		if (pos != std::wstring_view::npos)
 		{
-			constexpr auto EXT_LENGTH{ std::char_traits<wchar_t>::length(Stringtable::DATA_FILE_EXT) };
+			constexpr std::wstring_view EXTENSION{ Stringtable::DATA_FILE_EXT };
 
-			filePath = path.substr(0, pos + EXT_LENGTH);
-			if (path.size() > pos + EXT_LENGTH + 1)
-				subPath = path.substr(pos + EXT_LENGTH + 1);
+			filePath = path.substr(0, pos + EXTENSION.size());
+			if (path.size() > pos + EXTENSION.size() + 1)
+				subPath = path.substr(pos + EXTENSION.size() + 1);
 		}
 
 #ifdef _DEBUG
@@ -156,20 +249,8 @@ namespace Resource
 		}
 
 		// 로드
-#ifdef _TOOL
-		std::ifstream file{ filePath, std::ios::binary };
-#else
-		std::ifstream file{ Stringtable::DATA_FOLDER_PATH + filePath, std::ios::binary };
-#endif
-		if (!file)
-		{
-			assert(false && "CAN NOT FIND DATA FILE");
-			return nullptr;
-		}
-
-		auto root{ Load(file, subPath) };
+		auto root{ Load(filePath, subPath) };
 		g_resources.emplace(filePath, root);
-
 		if (subPath.empty())
 			return root;
 		return root->Get(subPath);

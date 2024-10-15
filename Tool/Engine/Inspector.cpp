@@ -7,12 +7,12 @@
 
 const std::map<Resource::Property::Type, std::string> PROPERTY_TYPES
 {
-	{ Resource::Property::Type::FOLDER, "GROUP" },
-	{ Resource::Property::Type::INT, "INT" },
-	{ Resource::Property::Type::INT2, "INT2" },
-	{ Resource::Property::Type::FLOAT, "FLOAT" },
-	{ Resource::Property::Type::STRING, "STRING" },
-	{ Resource::Property::Type::PNG, "IMAGE" }
+	{ Resource::Property::Type::Folder, "GROUP" },
+	{ Resource::Property::Type::Int, "INT" },
+	{ Resource::Property::Type::Int2, "INT2" },
+	{ Resource::Property::Type::Float, "FLOAT" },
+	{ Resource::Property::Type::String, "STRING" },
+	{ Resource::Property::Type::Image, "IMAGE" }
 };
 
 Inspector::Inspector()
@@ -98,42 +98,42 @@ void Inspector::RenderBasicInfo()
 	}
 
 	auto type{ prop->GetType() };
-	if (type == Resource::Property::Type::FOLDER)
+	if (type == Resource::Property::Type::Folder)
 		return;
 
 	ImGui::Text("Value");
 	ImGui::SameLine(100);
 	switch (type)
 	{
-	case Resource::Property::Type::INT:
+	case Resource::Property::Type::Int:
 	{
 		auto data{ prop->GetInt() };
 		if (ImGui::InputInt("##INSPECTOR/INT", &data))
 			prop->Set(data);
 		break;
 	}
-	case Resource::Property::Type::INT2:
+	case Resource::Property::Type::Int2:
 	{
 		auto data{ prop->GetInt2() };
 		if (ImGui::InputInt2("##INSPECTOR/INT2", reinterpret_cast<int*>(&data)))
 			prop->Set(data);
 		break;
 	}
-	case Resource::Property::Type::FLOAT:
+	case Resource::Property::Type::Float:
 	{
 		auto data{ prop->GetFloat() };
 		if (ImGui::InputFloat("##INSPECTOR/FLOAT", &data))
 			prop->Set(data);
 		break;
 	}
-	case Resource::Property::Type::STRING:
+	case Resource::Property::Type::String:
 	{
 		auto data{ Util::wstou8s(prop->GetString()) };
 		if (ImGui::InputTextMultiline("##INSPECTOR/STRING", &data))
 			prop->Set(Util::u8stows(data));
 		break;
 	}
-	case Resource::Property::Type::PNG:
+	case Resource::Property::Type::Image:
 	{
 		if (!ImGui::Button("..."))
 			break;
@@ -154,7 +154,7 @@ void Inspector::RenderBasicInfo()
 			break;
 
 		file.seekg(0, std::ios::end);
-		auto size{ static_cast<size_t>(file.tellg()) };
+		auto size{ static_cast<uint32_t>(file.tellg()) };
 		file.seekg(0, std::ios::beg);
 
 		std::unique_ptr<std::byte[]> buffer{ new std::byte[size]{} };

@@ -1,6 +1,7 @@
 #include "Stdafx.h"
 #include "Globals.h"
 #include "GraphicsImGui.h"
+#include "Common/Util.h"
 
 namespace Graphics::ImGui
 {
@@ -26,5 +27,10 @@ namespace Graphics::ImGui
 	DLL_API ImGuiContext* GetContext()
 	{
 		return ::ImGui::GetCurrentContext();
+	}
+
+	DLL_API bool Button(std::wstring_view label, const ImVec2& size)
+	{
+		return ::ImGui::Button(Util::wstou8s(label).c_str(), size);
 	}
 }

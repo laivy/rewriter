@@ -137,7 +137,7 @@ void Hierarchy::OnMenuFileSave()
 		root.path = path;
 	}
 	prop->SetName(root.path.filename());
-	prop->Save(root.path);
+	Resource::Save(prop, root.path.wstring());
 }
 
 void Hierarchy::OnMenuFileSaveAs()
