@@ -155,7 +155,7 @@ void ISocket::Receive()
 	m_receiveBuffer.overlappedEx.op = IOOperation::Receive;
 	WSABUF wsaBuf{ static_cast<unsigned long>(m_receiveBuffer.buffer.size()), m_receiveBuffer.buffer.data() };
 	DWORD flag{};
-	if (::WSARecv(m_socket, &wsaBuf, 1, 0, &flag, &m_receiveBuffer.overlappedEx, nullptr))
+	if (::WSARecv(m_socket, &wsaBuf, 1, 0, &flag, &m_receiveBuffer.overlappedEx, nullptr) && ::WSAGetLastError() != WSA_IO_PENDING)
 		Disconnect();
 }
 

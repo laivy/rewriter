@@ -7,10 +7,8 @@ public:
 	template <class... Args>
 	static T* Instantiate(Args&&... args)
 	{
-		if (m_instance)
-			return m_instance.get();
-
-		m_instance = std::make_unique<T>(std::forward<Args>(args)...);
+		if (!m_instance)
+			m_instance = std::make_unique<T>(std::forward<Args>(args)...);
 		return m_instance.get();
 	}
 
@@ -34,5 +32,5 @@ protected:
 	virtual ~TSingleton() = default;
 
 private:
-	static inline std::unique_ptr<T> m_instance{ nullptr };
+	static inline std::unique_ptr<T> m_instance;
 };

@@ -3,8 +3,8 @@
 class Packet
 {
 public:
-	using Size = unsigned short; // 패킷 크기
-	enum class Type : unsigned short // 패킷 타입
+	using Size = uint16_t; // 패킷 타입 크기
+	enum class Type : Size
 	{
 		None,
 
@@ -20,7 +20,7 @@ public:
 	};
 
 public:
-	Packet(Type type = Type::None);
+	Packet(Type type);
 	Packet(const char* buffer, Size size);
 	~Packet() = default;
 

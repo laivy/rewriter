@@ -5,7 +5,7 @@
 class ISocket abstract
 {
 public:
-	enum class IOOperation : unsigned char
+	enum class IOOperation : uint8_t
 	{
 		Connect,
 		Send,
@@ -20,16 +20,16 @@ public:
 protected:
 	struct SendBuffer
 	{
-		OverlappedEx overlappedEx;
-		std::unique_ptr<char[]> buffer;
-		Packet::Size size;
-
 		SendBuffer();
 		SendBuffer(const SendBuffer&) = delete;
 		SendBuffer(SendBuffer&& other) noexcept;
 		~SendBuffer() = default;
 		SendBuffer& operator=(const SendBuffer&) = delete;
 		SendBuffer& operator=(SendBuffer&& other) noexcept;
+
+		OverlappedEx overlappedEx;
+		std::unique_ptr<char[]> buffer;
+		Packet::Size size;
 	};
 
 	struct ReceiveBuffer

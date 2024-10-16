@@ -63,13 +63,8 @@ SocketManager::SocketManager() :
 	}
 
 	// 첫번째 스레드는 클라이언트 연결, 나머지는 패킷 송수신 처리
-	for (size_t i = 0; i < m_threads.size(); ++i)
-	{
-		if (i == 0)
-			m_threads[i] = std::jthread{ std::bind_front(&SocketManager::Accept, this) };
-		else
-			m_threads[i] = std::jthread{ std::bind_front(&SocketManager::Run, this) };
-	}
+	for (size_t i{ 0 }; i < m_threads.size(); ++i)
+		m_threads[i] = std::jthread{ std::bind_front(i == 0 ? &SocketManager::Accept : &SocketManager::Run, this) };
 }
 
 SocketManager::~SocketManager()
@@ -92,12 +87,12 @@ void SocketManager::Render()
 
 void SocketManager::Run(std::stop_token stoken)
 {
-	unsigned long ioSize{};
+	DWORD ioSize{};
 	ISocket* socket{};
 	ISocket::OverlappedEx* overlappedEx{};
 	while (!stoken.stop_requested())
 	{
-		if (::GetQueuedCompletionStatus(m_iocp, &ioSize, reinterpret_cast<unsigned long long*>(&socket), reinterpret_cast<OVERLAPPED**>(&overlappedEx), INFINITE))
+		if (::GetQueuedCompletionStatus(m_iocp, &ioSize, reinterpret_cast<PULONG_PTR>(&socket), reinterpret_cast<OVERLAPPED**>(&overlappedEx), INFINITE))
 		{
 			if (socket)
 				continue;
@@ -141,26 +136,37 @@ void SocketManager::Accept(std::stop_token stoken)
 {
 	std::array<char, 64> acceptBuffer{};
 	ISocket::OverlappedEx acceptOverlappedEx{};
-	SOCKET acceptSocket{ ::WSASocket(AF_INET, SOCK_STREAM, IPPROTO_TCP, 0, 0, WSA_FLAG_OVERLAPPED) };
-	if (acceptSocket == INVALID_SOCKET)
-	{
-		assert(false && "CREATE CLIENT SOCKET FAIL");
-		return;
-	}
+	SOCKET acceptSocket{ INVALID_SOCKET };
 
-	if (!::AcceptEx(m_listenSocket, acceptSocket, acceptBuffer.data(), 0, sizeof(SOCKADDR_IN) + 16, sizeof(SOCKADDR_IN) + 16, nullptr, &acceptOverlappedEx) && ::WSAGetLastError() != WSA_IO_PENDING)
-	{
-		assert(false && "ACCEPT FAIL");
+	auto createAcceptSocket =
+		[this, &acceptBuffer, &acceptOverlappedEx, &acceptSocket]()
+		{
+			acceptBuffer.fill(0);
+			acceptOverlappedEx = {};
+			acceptSocket = ::WSASocket(AF_INET, SOCK_STREAM, IPPROTO_TCP, 0, 0, WSA_FLAG_OVERLAPPED);
+			if (acceptSocket == INVALID_SOCKET)
+			{
+				assert(false && "CREATE CLIENT SOCKET FAIL");
+				return false;
+			}
+			if (!::AcceptEx(m_listenSocket, acceptSocket, acceptBuffer.data(), 0, sizeof(SOCKADDR_IN) + 16, sizeof(SOCKADDR_IN) + 16, nullptr, &acceptOverlappedEx) && ::WSAGetLastError() != WSA_IO_PENDING)
+			{
+				assert(false && "ACCEPT FAIL");
+				return false;
+			}
+			return true;
+		};
+
+	if (!createAcceptSocket())
 		return;
-	}
 
 	// 클라이언트 연결 처리
-	unsigned long ioSize{};
-	ISocket* socket{ nullptr };
+	DWORD ioSize{};
+	ISocket* socket{};
 	ISocket::OverlappedEx* overlappedEx{};
 	while (!stoken.stop_requested())
 	{
-		if (!::GetQueuedCompletionStatus(m_iocp, &ioSize, reinterpret_cast<unsigned long long*>(&socket), reinterpret_cast<OVERLAPPED**>(&overlappedEx), INFINITE))
+		if (!::GetQueuedCompletionStatus(m_iocp, &ioSize, reinterpret_cast<PULONG_PTR>(&socket), reinterpret_cast<OVERLAPPED**>(&overlappedEx), INFINITE))
 			continue;
 		if (!overlappedEx)
 			continue;
@@ -181,22 +187,14 @@ void SocketManager::Accept(std::stop_token stoken)
 		m_sockets.push_back(clientSocket);
 
 		// 계속 Accept
-		acceptBuffer.fill(0);
-		acceptOverlappedEx = {};
-		acceptSocket = ::WSASocket(AF_INET, SOCK_STREAM, IPPROTO_TCP, 0, 0, WSA_FLAG_OVERLAPPED);
-		if (acceptSocket == INVALID_SOCKET)
-		{
-			assert(false && "CREATE SOCKET FAIL");
-			continue;
-		}
-		if (!::AcceptEx(m_listenSocket, acceptSocket, acceptBuffer.data(), 0, sizeof(SOCKADDR_IN) + 16, sizeof(SOCKADDR_IN) + 16, nullptr, &acceptOverlappedEx) && ::WSAGetLastError() != WSA_IO_PENDING)
-			assert(false && "ACCEPT FAIL");
+		if (!createAcceptSocket())
+			break;
 	}
 }
 
 void SocketManager::Register(ISocket* socket) const
 {
-	HANDLE iocp{ ::CreateIoCompletionPort(reinterpret_cast<HANDLE>(static_cast<SOCKET>(*socket)), m_iocp, reinterpret_cast<unsigned long long>(socket), 0) };
+	HANDLE iocp{ ::CreateIoCompletionPort(reinterpret_cast<HANDLE>(static_cast<SOCKET>(*socket)), m_iocp, reinterpret_cast<ULONG_PTR>(socket), 0) };
 	if (iocp != m_iocp)
 		assert(false && "REGISTER SOCKET TO IOCP FAIL");
 }

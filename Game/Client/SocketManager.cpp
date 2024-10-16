@@ -39,12 +39,12 @@ void SocketManager::Register(ISocket* socket) const
 
 void SocketManager::Run(std::stop_token stoken)
 {
-	unsigned long ioSize{};
+	DWORD ioSize{};
 	ISocket* socket{};
 	ISocket::OverlappedEx* overlappedEx{};
 	while (!stoken.stop_requested())
 	{
-		if (::GetQueuedCompletionStatus(m_iocp, &ioSize, reinterpret_cast<unsigned long long*>(&socket), reinterpret_cast<OVERLAPPED**>(&overlappedEx), INFINITE))
+		if (::GetQueuedCompletionStatus(m_iocp, &ioSize, reinterpret_cast<PULONG_PTR>(&socket), reinterpret_cast<OVERLAPPED**>(&overlappedEx), INFINITE))
 		{
 			if (!socket)
 				continue;
