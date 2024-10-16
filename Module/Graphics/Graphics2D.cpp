@@ -4,6 +4,20 @@
 
 namespace Graphics::D2D
 {
+	struct FontCompare
+	{
+		bool operator()(const Font& lhs, const Font& rhs) const
+		{
+			if (lhs.fontName != rhs.fontName)
+				return lhs.fontName < rhs.fontName;
+			if (lhs.fontSize != rhs.fontSize)
+				return lhs.fontSize < rhs.fontSize;
+			if (lhs.hAlign != rhs.hAlign)
+				return lhs.hAlign < rhs.hAlign;
+			return lhs.vAlign < rhs.vAlign;
+		}
+	};
+
 	struct ColorCompare
 	{
 		bool operator()(const Color& lhs, const Color& rhs) const
@@ -18,7 +32,7 @@ namespace Graphics::D2D
 		}
 	};
 
-	std::map<Font, ComPtr<IDWriteTextFormat>> textFormats;
+	std::map<Font, ComPtr<IDWriteTextFormat>, FontCompare> textFormats;
 	std::map<Color, ComPtr<ID2D1SolidColorBrush>, ColorCompare> colorBrushes;
 
 	DLL_API bool Begin()
