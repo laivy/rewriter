@@ -14,8 +14,8 @@ namespace Graphics::D2D
 			Top, Center, Bottom
 		};
 
-		std::wstring_view fontName;
-		float fontSize;
+		std::wstring_view name;
+		float size;
 		HAlign hAlign;
 		VAlign vAlign;
 	};

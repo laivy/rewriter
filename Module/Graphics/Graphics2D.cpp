@@ -8,10 +8,10 @@ namespace Graphics::D2D
 	{
 		bool operator()(const Font& lhs, const Font& rhs) const
 		{
-			if (lhs.fontName != rhs.fontName)
-				return lhs.fontName < rhs.fontName;
-			if (lhs.fontSize != rhs.fontSize)
-				return lhs.fontSize < rhs.fontSize;
+			if (lhs.name != rhs.name)
+				return lhs.name < rhs.name;
+			if (lhs.size != rhs.size)
+				return lhs.size < rhs.size;
 			if (lhs.hAlign != rhs.hAlign)
 				return lhs.hAlign < rhs.hAlign;
 			return lhs.vAlign < rhs.vAlign;
@@ -32,15 +32,60 @@ namespace Graphics::D2D
 		}
 	};
 
-	std::map<Font, ComPtr<IDWriteTextFormat>, FontCompare> textFormats;
-	std::map<Color, ComPtr<ID2D1SolidColorBrush>, ColorCompare> colorBrushes;
+	std::map<Font, ComPtr<IDWriteTextFormat>, FontCompare> g_textFormats;
+	std::map<Color, ComPtr<ID2D1SolidColorBrush>, ColorCompare> g_colorBrushes;
+	ID2D1RenderTarget* g_renderTarget;
 
-	DLL_API bool Begin()
+	Layer::Layer(ComPtr<ID2D1BitmapRenderTarget> target) :
+		m_target{ target }
+	{
+	}
+
+	DLL_API void Layer::Begin()
+	{
+		if (!m_target)
+			return;
+
+		m_target->BeginDraw();
+		g_renderTarget = m_target.Get();
+	}
+
+	DLL_API bool Layer::End()
+	{
+		if (!m_target)
+			return false;
+
+		if (FAILED(m_target->EndDraw()))
+			return false;
+
+		g_renderTarget = d2dContext.Get();
+		return true;
+	}
+
+	DLL_API void Layer::Draw(const FLOAT2& position)
+	{
+		if (!m_target)
+			return;
+
+		ID2D1Bitmap* target{};
+		if (FAILED(m_target->GetBitmap(&target)))
+			return;
+
+		auto size{ target->GetSize() };
+		d2dContext->DrawBitmap(target, RECTF{ position.x, position.y, position.x + size.width, position.y + size.height });
+	}
+
+	ComPtr<ID2D1BitmapRenderTarget> Layer::GetTarget() const
+	{
+		return m_target;
+	}
+
+	DLL_API void Begin()
 	{
 		d3d11On12Device->AcquireWrappedResources(wrappedBackBuffers[frameIndex].GetAddressOf(), 1);
 		d2dContext->SetTarget(d2dRenderTargets[frameIndex].Get());
 		d2dContext->BeginDraw();
-		return true;
+		g_renderTarget = d2dContext.Get();
 	}
 
 	DLL_API bool End()
@@ -57,38 +102,46 @@ namespace Graphics::D2D
 		return d2dContext;
 	}
 
+	DLL_API std::shared_ptr<Layer> CreateLayer(const FLOAT2& size)
+	{
+		ComPtr<ID2D1BitmapRenderTarget> target;
+		if (FAILED(d2dContext->CreateCompatibleRenderTarget(D2D1_SIZE_F{ size.x, size.y }, &target)))
+			return nullptr;
+		return std::make_shared<Layer>(target);
+	}
+
 	DLL_API void D2D::SetTransform(const Matrix& transform)
 	{
-		d2dContext->SetTransform(transform);
+		g_renderTarget->SetTransform(transform);
 	}
 
 	DLL_API void D2D::PushClipRect(const RECTF& rect)
 	{
-		d2dContext->PushAxisAlignedClip(rect, D2D1_ANTIALIAS_MODE_ALIASED);
+		g_renderTarget->PushAxisAlignedClip(rect, D2D1_ANTIALIAS_MODE_ALIASED);
 	}
 
 	DLL_API void D2D::PopClipRect()
 	{
-		d2dContext->PopAxisAlignedClip();
+		g_renderTarget->PopAxisAlignedClip();
 	}
 
 	DLL_API void DrawRect(const RECTF& rect, const Color& color)
 	{
-		ComPtr<ID2D1SolidColorBrush> brush{};
-		d2dContext->CreateSolidColorBrush(color, &brush);
-		d2dContext->FillRectangle(rect, brush.Get());
+		ComPtr<ID2D1SolidColorBrush> brush;
+		g_renderTarget->CreateSolidColorBrush(color, &brush);
+		g_renderTarget->FillRectangle(rect, brush.Get());
 	}
 
-	DLL_API void DrawText(std::wstring_view text, const INT2& position, const Font& font, const Color& color)
+	DLL_API void DrawText(std::wstring_view text, const FLOAT2& position, const Font& font, const Color& color)
 	{
 		ComPtr<IDWriteTextFormat> textFormat;
-		if (textFormats.contains(font))
+		if (g_textFormats.contains(font))
 		{
-			textFormat = textFormats[font];
+			textFormat = g_textFormats[font];
 		}
 		else
 		{
-			dwriteFactory->CreateTextFormat(font.fontName.data(), nullptr, DWRITE_FONT_WEIGHT_NORMAL, DWRITE_FONT_STYLE_NORMAL, DWRITE_FONT_STRETCH_NORMAL, font.fontSize, L"", &textFormat);
+			dwriteFactory->CreateTextFormat(font.name.data(), nullptr, DWRITE_FONT_WEIGHT_NORMAL, DWRITE_FONT_STYLE_NORMAL, DWRITE_FONT_STRETCH_NORMAL, font.size, L"", &textFormat);
 			switch (font.vAlign)
 			{
 			case Font::VAlign::Top:
@@ -113,22 +166,22 @@ namespace Graphics::D2D
 				textFormat->SetTextAlignment(DWRITE_TEXT_ALIGNMENT_TRAILING);
 				break;
 			}
-			textFormats.emplace(font, textFormat);
+			g_textFormats.emplace(font, textFormat);
 		}
 
 		ComPtr<ID2D1SolidColorBrush> colorBrush;
-		if (colorBrushes.contains(color))
+		if (g_colorBrushes.contains(color))
 		{
-			colorBrush = colorBrushes[color];
+			colorBrush = g_colorBrushes[color];
 		}
 		else
 		{
-			d2dContext->CreateSolidColorBrush(color, &colorBrush);
-			colorBrushes.emplace(color, colorBrush);
+			g_renderTarget->CreateSolidColorBrush(color, &colorBrush);
+			g_colorBrushes.emplace(color, colorBrush);
 		}
 
 		ComPtr<IDWriteTextLayout> textLayout;
 		dwriteFactory->CreateTextLayout(text.data(), static_cast<UINT32>(text.size()), textFormat.Get(), std::numeric_limits<float>::max(), std::numeric_limits<float>::max(), &textLayout);
-		d2dContext->DrawTextLayout(FLOAT2{ position }, textLayout.Get(), colorBrush.Get());
+		g_renderTarget->DrawTextLayout(position, textLayout.Get(), colorBrush.Get());
 	}
 }

@@ -283,7 +283,7 @@ namespace Graphics
 		return true;
 	}
 
-	static bool CreateBitmap(HWND hWnd)
+	static bool CreateD2DRenderTarget(HWND hWnd)
 	{
 		UINT dpi{ ::GetDpiForWindow(hWnd) };
 		auto bitmapProperties{ D2D1::BitmapProperties1(
@@ -301,6 +301,8 @@ namespace Graphics
 			if (FAILED(d2dContext->CreateBitmapFromDxgiSurface(surface.Get(), &bitmapProperties, &d2dRenderTargets[i])))
 				return false;
 		}
+
+		d2dContext->SetTarget(d2dRenderTargets.front().Get());
 		return true;
 	}
 
@@ -436,7 +438,7 @@ namespace Graphics
 			return false;
 		if (!CreateD2DDevice())
 			return false;
-		if (!CreateBitmap(hWnd))
+		if (!CreateD2DRenderTarget(hWnd))
 			return false;
 
 		// DWRITE
@@ -519,6 +521,6 @@ namespace Graphics
 		CreateRenderTargetView();
 		CreateDepthStencilView(hWnd);
 		CreateWrappedResource();
-		CreateBitmap(hWnd);
+		CreateD2DRenderTarget(hWnd);
 	}
 }
