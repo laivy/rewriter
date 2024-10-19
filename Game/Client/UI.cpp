@@ -51,33 +51,33 @@ void IUserInterface::SetPosition(const INT2& position, Pivot pivot)
 	// 기본 피봇인 중심 기준 위치로 설정함
 	switch (pivot)
 	{
-	case Pivot::LEFTTOP:
+	case Pivot::LeftTop:
 		break;
-	case Pivot::CENTERTOP:
+	case Pivot::CenterTop:
 		m_position.x -= m_size.x / 2;
 		break;
-	case Pivot::RIGHTTOP:
+	case Pivot::RightTop:
 		m_position.x -= m_size.x;
 		break;
-	case Pivot::LEFTCENTER:
+	case Pivot::LeftCenter:
 		m_position.y -= m_size.y / 2;
 		break;
-	case Pivot::CENTER:
+	case Pivot::Center:
 		m_position.x -= m_size.x / 2;
 		m_position.y -= m_size.y / 2;
 		break;
-	case Pivot::RIGHTCENTER:
+	case Pivot::RightCenter:
 		m_position.x -= m_size.x;
 		m_position.y -= m_size.y / 2;
 		break;
-	case Pivot::LEFTBOT:
+	case Pivot::LeftBot:
 		m_position.y -= m_size.y;
 		break;
-	case Pivot::CENTERBOT:
+	case Pivot::CenterBot:
 		m_position.x -= m_size.x / 2;
 		m_position.y -= m_size.y;
 		break;
-	case Pivot::RIGHTBOT:
+	case Pivot::RightBot:
 		m_position.x -= m_size.x;
 		m_position.y -= m_size.y;
 		break;
@@ -112,33 +112,33 @@ INT2 IUserInterface::GetPosition(Pivot pivot) const
 	INT2 position{ m_position };
 	switch (pivot)
 	{
-	case Pivot::LEFTTOP:
+	case Pivot::LeftTop:
 		break;
-	case Pivot::CENTERTOP:
+	case Pivot::CenterTop:
 		position.x += m_size.x / 2;
 		break;
-	case Pivot::RIGHTTOP:
+	case Pivot::RightTop:
 		position.x += m_size.x;
 		break;
-	case Pivot::LEFTCENTER:
+	case Pivot::LeftCenter:
 		position.y += m_size.y / 2;
 		break;
-	case Pivot::CENTER:
+	case Pivot::Center:
 		position.x += m_size.x / 2;
 		position.y += m_size.y / 2;
 		break;
-	case Pivot::RIGHTCENTER:
+	case Pivot::RightCenter:
 		position.x += m_size.x;
 		position.y += m_size.y / 2;
 		break;
-	case Pivot::LEFTBOT:
+	case Pivot::LeftBot:
 		position.y += m_size.y;
 		break;
-	case Pivot::CENTERBOT:
+	case Pivot::CenterBot:
 		position.x += m_size.x / 2;
 		position.y += m_size.y;
 		break;
-	case Pivot::RIGHTBOT:
+	case Pivot::RightBot:
 		position.x += m_size.x;
 		position.y += m_size.y;
 		break;

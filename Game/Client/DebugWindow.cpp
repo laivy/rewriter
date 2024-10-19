@@ -24,20 +24,18 @@ public:
 		IModal{ callback }
 	{
 		m_size = { 500, 300 };
-		SetPosition({ App::size.x / 2, App::size.y / 2 }, Pivot::CENTER);
+		SetPosition({ App::size.x / 2, App::size.y / 2 }, Pivot::Center);
 
 		auto okButton{ std::make_shared<Button>(this) };
 		okButton->OnButtonClick.Register(this, std::bind(&RegisterAccountModal::OnButtonClicked, this, ButtonID::OK));
 		okButton->SetSize({ 80, 20 });
-		okButton->SetPosition({ m_size.x / 2 - 50, m_size.y / 2 + 120 }, Pivot::CENTER);
-		okButton->SetText(L"OK");
+		okButton->SetPosition({ m_size.x / 2 - 50, m_size.y / 2 + 120 }, Pivot::Center);
 		Register(okButton);
 
 		auto cancleButton{ std::make_shared<Button>(this) };
 		cancleButton->OnButtonClick.Register(this, std::bind(&RegisterAccountModal::OnButtonClicked, this, ButtonID::CANCLE));
 		cancleButton->SetSize({ 80, 20 });
-		cancleButton->SetPosition({ m_size.x / 2 + 50, m_size.y / 2 + 120 }, Pivot::CENTER);
-		cancleButton->SetText(L"CANCLE");
+		cancleButton->SetPosition({ m_size.x / 2 + 50, m_size.y / 2 + 120 }, Pivot::Center);
 		Register(cancleButton);
 	}
 
@@ -58,7 +56,7 @@ private:
 
 DebugWindow::DebugWindow()
 {
-	SetSize(INT2{ 800, 600 });
+	SetSize(INT2{ 900, 300 });
 	if (auto layer{ GetLayer(0) })
 	{
 		layer->Begin();
@@ -97,10 +95,14 @@ DebugWindow::DebugWindow()
 	}
 	if (auto layer{ GetLayer(1) })
 	{
-		layer->Begin();
-		Graphics::D2D::Font font{ L"", 128.0f };
-		Graphics::D2D::DrawText(L"안녕하세요", { 0.0f, 0.0f }, font, Graphics::D2D::Color::Black);
-		layer->End();
+		auto button{ std::make_shared<Button>(this) };
+		button->SetZ(1);
+		button->SetSize(INT2{ 200, 50 });
+		button->SetPosition(INT2{ 450, 150 }, Pivot::Center);
+		Register(button);
+	}
+	if (auto layer{ GetLayer(2) })
+	{
 	}
 	App::OnPacket.Register(this, std::bind_front(&DebugWindow::OnPacket, this));
 }
@@ -115,13 +117,23 @@ void DebugWindow::OnKeyboardEvent(UINT message, WPARAM wParam, LPARAM lParam)
 	IWindow::OnKeyboardEvent(message, wParam, lParam);
 }
 
+static float sum{ 0.0f };
 void DebugWindow::Update(float deltaTime)
 {
+	sum = deltaTime;
 	IWindow::Update(deltaTime);
 }
 
 void DebugWindow::Render() const
 {
+	if (auto layer{ GetLayer(2) })
+	{
+		layer->Begin();
+		layer->Clear();
+		constexpr Graphics::D2D::Font font{ L"", 64.0f };
+		Graphics::D2D::DrawText(std::format(L"{}FPS", static_cast<int>(1.0f / sum) ), font, Graphics::D2D::Color::Black, FLOAT2{ 450.0f, 150.0f }, Pivot::Center);
+		layer->End();
+	}
 	IWindow::Render();
 }
 

@@ -11,8 +11,8 @@ LoginScene::LoginScene()
 
 #ifdef _DEBUG
 	auto window = WindowBuilder<DebugWindow>{}
-		//.Path(L"UI.dat/LoginUI")
-		.Position({ App::size.x / 2, App::size.y / 2 }, Pivot::CENTER)
+		//.Path(L"UI.dat/Debug")
+		.Position({ App::size.x / 2, App::size.y / 2 }, Pivot::Center)
 		.Build();
 	WindowManager::GetInstance()->Register(window);
 #endif // _DEBUG

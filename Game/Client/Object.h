@@ -1,12 +1,5 @@
 #pragma once
 
-enum class Pivot
-{
-	LEFTTOP, CENTERTOP, RIGHTTOP,
-	LEFTCENTER, CENTER, RIGHTCENTER,
-	LEFTBOT, CENTERBOT, RIGHTBOT
-};
-
 class IObject abstract
 {
 public:
@@ -20,7 +13,7 @@ public:
 class IObject2D abstract : public IObject
 {
 public:
-	void SetZ(int depth);
+	void SetZ(int z);
 
 	int GetZ() const;
 

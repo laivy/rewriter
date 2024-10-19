@@ -10,11 +10,7 @@ namespace Graphics::D2D
 		{
 			if (lhs.name != rhs.name)
 				return lhs.name < rhs.name;
-			if (lhs.size != rhs.size)
-				return lhs.size < rhs.size;
-			if (lhs.hAlign != rhs.hAlign)
-				return lhs.hAlign < rhs.hAlign;
-			return lhs.vAlign < rhs.vAlign;
+			return lhs.size < rhs.size;
 		}
 	};
 
@@ -74,6 +70,11 @@ namespace Graphics::D2D
 		d2dContext->DrawBitmap(target, RECTF{ position.x, position.y, position.x + size.width, position.y + size.height });
 	}
 
+	DLL_API void Layer::Clear()
+	{
+		m_target->Clear();
+	}
+
 	ComPtr<ID2D1BitmapRenderTarget> Layer::GetTarget() const
 	{
 		return m_target;
@@ -131,7 +132,7 @@ namespace Graphics::D2D
 		g_d2dCurrentRenderTarget->FillRectangle(rect, brush.Get());
 	}
 
-	DLL_API void DrawText(std::wstring_view text, const FLOAT2& position, const Font& font, const Color& color)
+	DLL_API void DrawText(std::wstring_view text, const Font& font, const Color& color, const FLOAT2& position, Pivot pivot)
 	{
 		ComPtr<IDWriteTextFormat> textFormat;
 		if (g_textFormats.contains(font))
@@ -141,30 +142,8 @@ namespace Graphics::D2D
 		else
 		{
 			dwriteFactory->CreateTextFormat(font.name.data(), nullptr, DWRITE_FONT_WEIGHT_NORMAL, DWRITE_FONT_STYLE_NORMAL, DWRITE_FONT_STRETCH_NORMAL, font.size, L"", &textFormat);
-			switch (font.vAlign)
-			{
-			case Font::VAlign::Top:
-				textFormat->SetParagraphAlignment(DWRITE_PARAGRAPH_ALIGNMENT_NEAR);
-				break;
-			case Font::VAlign::Center:
-				textFormat->SetParagraphAlignment(DWRITE_PARAGRAPH_ALIGNMENT_CENTER);
-				break;
-			case Font::VAlign::Bottom:
-				textFormat->SetParagraphAlignment(DWRITE_PARAGRAPH_ALIGNMENT_FAR);
-				break;
-			}
-			switch (font.hAlign)
-			{
-			case Font::HAlign::Left:
-				textFormat->SetTextAlignment(DWRITE_TEXT_ALIGNMENT_LEADING);
-				break;
-			case Font::HAlign::Center:
-				textFormat->SetTextAlignment(DWRITE_TEXT_ALIGNMENT_CENTER);
-				break;
-			case Font::HAlign::Right:
-				textFormat->SetTextAlignment(DWRITE_TEXT_ALIGNMENT_TRAILING);
-				break;
-			}
+			textFormat->SetParagraphAlignment(DWRITE_PARAGRAPH_ALIGNMENT_NEAR);
+			textFormat->SetTextAlignment(DWRITE_TEXT_ALIGNMENT_LEADING);
 			g_textFormats.emplace(font, textFormat);
 		}
 
@@ -181,7 +160,46 @@ namespace Graphics::D2D
 
 		ComPtr<IDWriteTextLayout> textLayout;
 		dwriteFactory->CreateTextLayout(text.data(), static_cast<UINT32>(text.size()), textFormat.Get(), std::numeric_limits<float>::max(), std::numeric_limits<float>::max(), &textLayout);
-		g_d2dCurrentRenderTarget->DrawTextLayout(position, textLayout.Get(), colorBrush.Get());
+
+		DWRITE_TEXT_METRICS metrics{};
+		textLayout->GetMetrics(&metrics);
+		FLOAT2 offset{};
+		switch (pivot)
+		{
+		case Pivot::LeftTop:
+			break;
+		case Pivot::CenterTop:
+			offset.x -= metrics.width / 2.0f;
+			break;
+		case Pivot::RightTop:
+			offset.x -= metrics.width;
+			break;
+		case Pivot::LeftCenter:
+			offset.y -= metrics.height / 2.0f;
+			break;
+		case Pivot::Center:
+			offset.x -= metrics.width / 2.0f;
+			offset.y -= metrics.height / 2.0f;
+			break;
+		case Pivot::RightCenter:
+			offset.x -= metrics.width;
+			offset.y -= metrics.height / 2.0f;
+			break;
+		case Pivot::LeftBot:
+			offset.y -= metrics.height;
+			break;
+		case Pivot::CenterBot:
+			offset.x -= metrics.width / 2.0f;
+			offset.y -= metrics.height;
+			break;
+		case Pivot::RightBot:
+			offset.x -= metrics.width;
+			offset.y -= metrics.height;
+			break;
+		default:
+			break;
+		}
+		g_d2dCurrentRenderTarget->DrawTextLayout(position + offset, textLayout.Get(), colorBrush.Get());
 	}
 
 	DLL_API void DrawSprite(const std::shared_ptr<Resource::Sprite>& sprite, const FLOAT2& position, float opacity)

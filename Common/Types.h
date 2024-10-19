@@ -4,6 +4,19 @@
 
 class FLOAT2;
 
+enum class Pivot
+{
+	LeftTop,
+	CenterTop,
+	RightTop,
+	LeftCenter,
+	Center,
+	RightCenter,
+	LeftBot,
+	CenterBot,
+	RightBot
+};
+
 class INT2
 {
 public:

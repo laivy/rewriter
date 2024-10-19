@@ -17,14 +17,14 @@ public:
 	virtual void Destroy();
 
 	virtual void SetFocus(bool focus);
-	virtual void SetPosition(const INT2& position, Pivot pivot = Pivot::LEFTTOP);
+	virtual void SetPosition(const INT2& position, Pivot pivot = Pivot::LeftTop);
 	virtual void SetSize(const INT2& size);
 
 	virtual bool IsValid() const;
 	virtual bool IsFocus() const;
 
 	bool Contains(const INT2& point) const;
-	INT2 GetPosition(Pivot pivot = Pivot::LEFTTOP) const;
+	INT2 GetPosition(Pivot pivot = Pivot::LeftTop) const;
 	INT2 GetSize() const;
 
 protected:
