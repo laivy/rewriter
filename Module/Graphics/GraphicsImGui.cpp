@@ -1,4 +1,5 @@
 #include "Stdafx.h"
+#ifdef _IMGUI
 #include "Global.h"
 #include "GraphicsImGui.h"
 #include "Common/Util.h"
@@ -34,3 +35,4 @@ namespace Graphics::ImGui
 		return ::ImGui::Button(Util::wstou8s(label).c_str(), size);
 	}
 }
+#endif

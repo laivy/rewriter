@@ -2,12 +2,18 @@
 #include "Button.h"
 #include "Window.h"
 
+namespace
+{
+	constexpr std::wstring_view BUTTON_PREFIX{ L"Button:" };
+}
+
 template<class T>
 requires std::is_base_of_v<IWindow, T>
 class WindowBuilder
 {
 public:
-	WindowBuilder() : m_window{ new T{} }
+	WindowBuilder() :
+		m_window{ new T{} }
 	{
 	}
 
@@ -15,8 +21,7 @@ public:
 
 	WindowBuilder& Path(std::wstring_view path)
 	{
-		m_property = Resource::Get(path);
-		Path(m_property, L"");
+		auto prop{ Resource::Get(path) };
 		return *this;
 	}
 
@@ -26,7 +31,7 @@ public:
 		return *this;
 	}
 
-	WindowBuilder& Position(const INT2& position, Pivot pivot = Pivot::LEFTTOP)
+	WindowBuilder& Position(const INT2& position, Pivot pivot = Pivot::LeftTop)
 	{
 		m_window->SetPosition(position, pivot);
 		return *this;
@@ -38,9 +43,5 @@ public:
 	}
 
 private:
-	void Path(const std::shared_ptr<Resource::Property>& prop, const std::wstring& basePath);
-
-private:
 	std::shared_ptr<T> m_window;
-	std::shared_ptr<Resource::Property> m_property;
 };
