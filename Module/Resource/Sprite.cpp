@@ -6,7 +6,8 @@
 
 namespace Resource
 {
-	DLL_API Sprite::Sprite()
+	DLL_API Sprite::Sprite() :
+		m_size{}
 	{
 #ifdef _TOOL
 		m_binarySize = 0;
@@ -38,6 +39,9 @@ namespace Resource
 
 		g_d2dContext->CreateBitmapFromWicBitmap(converter.Get(), m_bitmap.GetAddressOf());
 
+		auto size{ m_bitmap->GetSize() };
+		m_size = FLOAT2{ size.width, size.height };
+
 #ifdef _TOOL
 		// 나중에 저장하기 위해 바이너리 데이터 복사
 		m_binary.reset(new std::byte[binary.size()]{});
@@ -51,13 +55,9 @@ namespace Resource
 		return m_bitmap.Get();
 	}
 
-	DLL_API INT2 Sprite::GetSize() const
+	DLL_API FLOAT2 Sprite::GetSize() const
 	{
-		if (!m_bitmap)
-			return INT2{ 0, 0 };
-
-		auto [w, h] { m_bitmap->GetSize() };
-		return INT2{ static_cast<int32_t>(w), static_cast<int32_t>(h) };
+		return m_size;
 	}
 
 #ifdef _TOOL

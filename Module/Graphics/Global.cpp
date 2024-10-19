@@ -38,6 +38,7 @@ namespace Graphics
 	ComPtr<ID2D1Device2> d2dDevice;
 	ComPtr<ID2D1DeviceContext2> d2dContext;
 	std::array<ComPtr<ID2D1Bitmap1>, FRAME_COUNT> d2dRenderTargets;
+	ID2D1RenderTarget* g_d2dCurrentRenderTarget;
 
 	// DWRITE
 	ComPtr<IDWriteFactory5> dwriteFactory;

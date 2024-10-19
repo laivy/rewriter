@@ -3,6 +3,11 @@
 
 struct ID2D1DeviceContext2;
 
+namespace Resource
+{
+	class Sprite;
+}
+
 namespace Graphics::D2D
 {
 	class Layer
@@ -36,4 +41,6 @@ namespace Graphics::D2D
 
 	DLL_API void DrawRect(const RECTF& rect, const Color& color);
 	DLL_API void DrawText(std::wstring_view text, const FLOAT2& position, const Font& font, const Color& color);
+	DLL_API void DrawSprite(const std::shared_ptr<Resource::Sprite>& sprite, const FLOAT2& position, float opacity = 1.0f);
+	DLL_API void DrawSprite(const std::shared_ptr<Resource::Sprite>& sprite, const RECTF& rect, float opacity = 1.0f);
 }

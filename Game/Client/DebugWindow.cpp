@@ -9,8 +9,6 @@
 #include "TextBox.h"
 #include "WindowManager.h"
 
-//auto root{ Resource::Get(L"test.dat") };
-
 class RegisterAccountModal :
 	public IModal,
 	public IObserver
@@ -61,7 +59,49 @@ private:
 DebugWindow::DebugWindow()
 {
 	SetSize(INT2{ 800, 600 });
-	GetLayer(0);
+	if (auto layer{ GetLayer(0) })
+	{
+		layer->Begin();
+
+		auto root{ Resource::Get(L"UI.dat") };
+		auto ninePatch{ root->Get(L"Basic/NinePatch") };
+
+		auto lt{ ninePatch->GetSprite(L"lt") };
+		Graphics::D2D::DrawSprite(lt, FLOAT2{});
+
+		auto rt{ ninePatch->GetSprite(L"rt") };
+		Graphics::D2D::DrawSprite(rt, FLOAT2{ m_size.x - rt->GetSize().x, 0.0f });
+
+		auto t{ ninePatch->GetSprite(L"t") };
+		Graphics::D2D::DrawSprite(t, RECTF{ lt->GetSize().x, 0.0f, m_size.x - rt->GetSize().x, t->GetSize().y });
+
+		auto lb{ ninePatch->GetSprite(L"lb") };
+		Graphics::D2D::DrawSprite(lb, FLOAT2{ 0.0f, m_size.y - lb->GetSize().y });
+
+		auto rb{ ninePatch->GetSprite(L"rb") };
+		Graphics::D2D::DrawSprite(rb, FLOAT2{ m_size.x - rb->GetSize().x, m_size.y - rb->GetSize().y });
+
+		auto b{ ninePatch->GetSprite(L"b") };
+		Graphics::D2D::DrawSprite(b, RECTF{ lb->GetSize().x, m_size.y - b->GetSize().y, m_size.x - b->GetSize().x, static_cast<float>(m_size.y) });
+
+		auto l{ ninePatch->GetSprite(L"l") };
+		Graphics::D2D::DrawSprite(l, RECTF{ 0.0f, lt->GetSize().y, l->GetSize().x, m_size.y - lb->GetSize().y });
+
+		auto r{ ninePatch->GetSprite(L"r") };
+		Graphics::D2D::DrawSprite(l, RECTF{ m_size.x - r->GetSize().x, rt->GetSize().y, static_cast<float>(m_size.x), m_size.y - rb->GetSize().y });
+
+		auto c{ ninePatch->GetSprite(L"c") };
+		Graphics::D2D::DrawSprite(c, RECTF{ lt->GetSize().x, lt->GetSize().y, m_size.x - rb->GetSize().x, m_size.y - rb->GetSize().y });
+
+		layer->End();
+	}
+	if (auto layer{ GetLayer(1) })
+	{
+		layer->Begin();
+		Graphics::D2D::Font font{ L"", 128.0f };
+		Graphics::D2D::DrawText(L"안녕하세요", { 0.0f, 0.0f }, font, Graphics::D2D::Color::Black);
+		layer->End();
+	}
 	App::OnPacket.Register(this, std::bind_front(&DebugWindow::OnPacket, this));
 }
 
@@ -82,11 +122,6 @@ void DebugWindow::Update(float deltaTime)
 
 void DebugWindow::Render() const
 {
-	auto root{ Resource::Get(L"test.dat") };
-
-	Graphics::D2D::Font font{ L"", 128.0f };
-	DrawText(L"안녕하세요", { 50.0f, 50.0f }, font, Graphics::D2D::Color::Black);
-
 	IWindow::Render();
 }
 

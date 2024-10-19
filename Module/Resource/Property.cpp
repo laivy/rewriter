@@ -26,6 +26,8 @@ namespace Resource
 		m_type = type;
 		switch (m_type)
 		{
+		case Type::Folder:
+			break;
 		case Type::Int:
 			m_data = 0;
 			break;
@@ -39,7 +41,7 @@ namespace Resource
 			m_data = L"";
 			break;
 		case Type::Sprite:
-			m_data = Resource::Sprite{};
+			m_data.emplace<std::shared_ptr<Sprite>>(nullptr);
 			break;
 		case Type::Texture:
 			// TODO
@@ -75,7 +77,7 @@ namespace Resource
 		m_data = value;
 	}
 
-	DLL_API void Property::Set(const Sprite& value)
+	DLL_API void Property::Set(const std::shared_ptr<Sprite>& value)
 	{
 		m_data = value;
 	}
@@ -186,12 +188,12 @@ namespace Resource
 		return L"";
 	}
 
-	DLL_API Sprite Property::GetSprite(std::wstring_view path) const
+	DLL_API std::shared_ptr<Sprite> Property::GetSprite(std::wstring_view path) const
 	{
 		if (path.empty())
 		{
 			assert(m_type == Type::Sprite);
-			return std::get<Sprite>(m_data);
+			return std::get<std::shared_ptr<Sprite>>(m_data);
 		}
 
 		std::wstring_view name{ path };
@@ -208,7 +210,7 @@ namespace Resource
 			return child->GetSprite(remain);
 
 		assert(m_type == Type::Sprite);
-		return Sprite{};
+		return nullptr;
 	}
 
 	DLL_API std::shared_ptr<Property> Property::Get(std::wstring_view path) const

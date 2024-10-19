@@ -57,8 +57,8 @@ namespace
 		case Property::Type::Sprite:
 		{
 			auto data{ prop->GetSprite() };
-			auto length{ data.GetBinarySize() };
-			auto binary{ data.GetBinary() };
+			auto length{ data->GetBinarySize() };
+			auto binary{ data->GetBinary() };
 			file.write(reinterpret_cast<const char*>(&length), sizeof(length));
 			file.write(reinterpret_cast<const char*>(binary), length);
 			break;
@@ -146,7 +146,7 @@ namespace
 			std::unique_ptr<std::byte[]> binary{ new std::byte[length]{} };
 			file.read(reinterpret_cast<char*>(binary.get()), length);
 
-			Sprite data{ std::span{ binary.get(), length } };
+			auto data{ std::make_shared<Sprite>(std::span{ binary.get(), length }) };
 			prop->Set(data);
 #endif
 			break;
@@ -196,12 +196,15 @@ namespace Resource
 		if (FAILED(::CoInitializeEx(nullptr, COINIT_MULTITHREADED)))
 			assert(false && "COINITIALIZE FAIL");
 	}
-#endif // _CLIENT || defined _TOOL
+#endif
 
 	DLL_API void CleanUp()
 	{
 		g_resources.clear();
+#if defined _CLIENT || defined _TOOL
+		g_d2dContext.Reset();
 		::CoUninitialize();
+#endif
 	}
 
 #ifdef _TOOL

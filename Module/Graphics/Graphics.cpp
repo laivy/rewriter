@@ -303,6 +303,7 @@ namespace Graphics
 		}
 
 		d2dContext->SetTarget(d2dRenderTargets.front().Get());
+		g_d2dCurrentRenderTarget = d2dContext.Get();
 		return true;
 	}
 

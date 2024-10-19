@@ -11,7 +11,7 @@ namespace Resource
 		~Sprite() = default;
 
 		DLL_API ID2D1Bitmap* Get() const;
-		DLL_API INT2 GetSize() const;
+		DLL_API FLOAT2 GetSize() const;
 
 #ifdef _TOOL
 		DLL_API uint32_t GetBinarySize() const;
@@ -20,6 +20,7 @@ namespace Resource
 
 	private:
 		ComPtr<ID2D1Bitmap> m_bitmap;
+		FLOAT2 m_size;
 
 #ifdef _TOOL
 		uint32_t m_binarySize;

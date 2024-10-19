@@ -160,7 +160,7 @@ void Inspector::RenderBasicInfo()
 		std::unique_ptr<std::byte[]> buffer{ new std::byte[size]{} };
 		file.read(reinterpret_cast<char*>(buffer.get()), size);
 
-		Resource::Sprite sprite{ std::span{ buffer.release(), size } };
+		auto sprite{ std::make_shared<Resource::Sprite>(std::span{ buffer.release(), size }) };
 		prop->Set(sprite);
 		break;
 	}
