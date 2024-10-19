@@ -1,6 +1,6 @@
 #include "Stdafx.h"
-#include "PNG.h"
 #include "Property.h"
+#include "Sprite.h"
 #include "External/DirectX/WICTextureLoader12.h"
 
 namespace Resource
@@ -38,15 +38,21 @@ namespace Resource
 		case Type::String:
 			m_data = L"";
 			break;
-		case Type::Image:
-			m_data = std::shared_ptr<Resource::PNG>{};
+		case Type::Sprite:
+			m_data = Resource::Sprite{};
+			break;
+		case Type::Texture:
+			// TODO
+			break;
+		default:
+			assert(false && "INVALID TYPE");
 			break;
 		}
 	}
 
 	DLL_API void Property::SetName(const std::wstring& name)
 	{
-		this->m_name = name;
+		m_name = name;
 	}
 
 	DLL_API void Property::Set(int32_t value)
@@ -69,7 +75,7 @@ namespace Resource
 		m_data = value;
 	}
 
-	DLL_API void Property::Set(const std::shared_ptr<PNG>& value)
+	DLL_API void Property::Set(const Sprite& value)
 	{
 		m_data = value;
 	}
@@ -180,12 +186,12 @@ namespace Resource
 		return L"";
 	}
 
-	DLL_API std::shared_ptr<PNG> Property::GetImage(std::wstring_view path) const
+	DLL_API Sprite Property::GetSprite(std::wstring_view path) const
 	{
 		if (path.empty())
 		{
-			assert(m_type == Type::Image);
-			return std::get<std::shared_ptr<PNG>>(m_data);
+			assert(m_type == Type::Sprite);
+			return std::get<Sprite>(m_data);
 		}
 
 		std::wstring_view name{ path };
@@ -199,10 +205,10 @@ namespace Resource
 		}
 
 		if (const auto& child{ Get(name) })
-			return child->GetImage(remain);
+			return child->GetSprite(remain);
 
-		assert(m_type == Type::Image);
-		return nullptr;
+		assert(m_type == Type::Sprite);
+		return Sprite{};
 	}
 
 	DLL_API std::shared_ptr<Property> Property::Get(std::wstring_view path) const

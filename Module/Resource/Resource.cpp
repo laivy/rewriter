@@ -1,10 +1,8 @@
 #include "Stdafx.h"
-#if defined _CLIENT || defined _TOOL
-#include <d2d1_3.h>
-#include "PNG.h"
-#endif
+#include "Global.h"
 #include "Property.h"
 #include "Resource.h"
+#include "Sprite.h"
 
 namespace
 {
@@ -56,11 +54,11 @@ namespace
 			file.write(reinterpret_cast<const char*>(data.data()), data.size() * sizeof(std::wstring::value_type));
 			break;
 		}
-		case Property::Type::Image:
+		case Property::Type::Sprite:
 		{
-			auto data{ prop->GetImage() };
-			auto length{ data->GetBinarySize() };
-			auto binary{ data->GetBinary() };
+			auto data{ prop->GetSprite() };
+			auto length{ data.GetBinarySize() };
+			auto binary{ data.GetBinary() };
 			file.write(reinterpret_cast<const char*>(&length), sizeof(length));
 			file.write(reinterpret_cast<const char*>(binary), length);
 			break;
@@ -138,7 +136,7 @@ namespace
 			prop->Set(data);
 			break;
 		}
-		case Property::Type::Image:
+		case Property::Type::Sprite:
 		{
 			uint32_t length{};
 			file.read(reinterpret_cast<char*>(&length), sizeof(length));
@@ -148,7 +146,7 @@ namespace
 			std::unique_ptr<std::byte[]> binary{ new std::byte[length]{} };
 			file.read(reinterpret_cast<char*>(binary.get()), length);
 
-			auto data{ std::make_shared<PNG>(binary.get(), length) };
+			Sprite data{ std::span{ binary.get(), length } };
 			prop->Set(data);
 #endif
 			break;
@@ -192,14 +190,19 @@ namespace
 namespace Resource
 {
 #if defined _CLIENT || defined _TOOL
-	ComPtr<ID2D1DeviceContext2> g_d2dContext;
 	DLL_API void Initialize(const ComPtr<ID2D1DeviceContext2>& d2dContext)
 	{
-		Resource::g_d2dContext = d2dContext;
+		g_d2dContext = d2dContext;
+		if (FAILED(::CoInitializeEx(nullptr, COINIT_MULTITHREADED)))
+			assert(false && "COINITIALIZE FAIL");
 	}
 #endif // _CLIENT || defined _TOOL
 
-	std::map<std::wstring, std::shared_ptr<Property>> g_resources;
+	DLL_API void CleanUp()
+	{
+		g_resources.clear();
+		::CoUninitialize();
+	}
 
 #ifdef _TOOL
 	DLL_API bool Save(const std::shared_ptr<Property>& prop, std::wstring_view path)
@@ -250,6 +253,9 @@ namespace Resource
 
 		// 로드
 		auto root{ Load(filePath, subPath) };
+		if (!root)
+			return nullptr;
+
 		g_resources.emplace(filePath, root);
 		if (subPath.empty())
 			return root;

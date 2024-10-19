@@ -92,7 +92,7 @@ void WindowManager::OnMouseEvent(UINT message, int x, int y)
 	// 이벤트 전달
 	for (const auto& window : m_windows)
 	{
-		if (!window->IsContain({ x, y }))
+		if (!window->Contains({ x, y }))
 			continue;
 
 		auto pos{ window->GetPosition() };
@@ -104,7 +104,7 @@ void WindowManager::UpdateMouseOverWindow(int x, int y)
 {
 	if (!m_modals.empty())
 	{
-		auto rit{ std::ranges::find_if(std::views::reverse(m_modals), [x, y](const auto& modal) { return modal->IsContain({ x, y }); }) };
+		auto rit{ std::ranges::find_if(std::views::reverse(m_modals), [x, y](const auto& modal) { return modal->Contains({ x, y }); }) };
 		if (rit == m_modals.rend())
 		{
 			if (auto window{ m_mouseOverWindow.lock() })
@@ -123,7 +123,7 @@ void WindowManager::UpdateMouseOverWindow(int x, int y)
 		return;
 	}
 
-	auto rit{ std::ranges::find_if(std::views::reverse(m_windows), [x, y](const auto& window) { return window->IsContain({ x, y }); }) };
+	auto rit{ std::ranges::find_if(std::views::reverse(m_windows), [x, y](const auto& window) { return window->Contains({ x, y }); }) };
 	if (rit == m_windows.rend())
 	{
 		if (auto window{ m_mouseOverWindow.lock() })
@@ -143,7 +143,7 @@ void WindowManager::UpdateMouseOverWindow(int x, int y)
 
 void WindowManager::UpdateFocusWindow(int x, int y)
 {
-	auto rit{ std::ranges::find_if(std::views::reverse(m_windows), [x, y](const auto& window) { return window->IsContain({ x, y }); }) };
+	auto rit{ std::ranges::find_if(std::views::reverse(m_windows), [x, y](const auto& window) { return window->Contains({ x, y }); }) };
 	if (rit == m_windows.rend())
 	{
 		m_focusWindow.reset();

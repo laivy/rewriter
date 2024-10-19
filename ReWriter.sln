@@ -41,9 +41,6 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Etc", "Etc", "{BAF5740A-288
 	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Graphics", "Module\Graphics\Graphics.vcxproj", "{46B7BA29-B491-4871-BFBD-3AF71FA89B0A}"
-	ProjectSection(ProjectDependencies) = postProject
-		{ECE58EE1-CBF9-4731-9CA5-C89FA63034E8} = {ECE58EE1-CBF9-4731-9CA5-C89FA63034E8}
-	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

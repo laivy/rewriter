@@ -23,7 +23,7 @@ public:
 	virtual bool IsValid() const;
 	virtual bool IsFocus() const;
 
-	bool IsContain(const INT2& point) const;
+	bool Contains(const INT2& point) const;
 	INT2 GetPosition(Pivot pivot = Pivot::LEFTTOP) const;
 	INT2 GetSize() const;
 

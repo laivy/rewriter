@@ -1,5 +1,5 @@
 #include "Stdafx.h"
-#include "Globals.h"
+#include "Global.h"
 
 namespace Graphics
 {

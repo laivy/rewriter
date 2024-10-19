@@ -1,17 +1,12 @@
 #include "Stdafx.h"
 #include "Object.h"
 
-IObject::IObject() :
-	m_depth{ 0 }
+void IObject2D::SetZ(int z)
 {
+	m_z = z;
 }
 
-void IObject::SetDepth(unsigned int depth)
+int IObject2D::GetZ() const
 {
-	m_depth = depth;
-}
-
-unsigned int IObject::GetDepth() const
-{
-	return m_depth;
+	return m_z;
 }

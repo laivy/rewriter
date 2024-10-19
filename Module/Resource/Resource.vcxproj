@@ -248,7 +248,8 @@
     <ClInclude Include="..\..\Common\Singleton.h" />
     <ClInclude Include="..\..\Common\Stdafx.h" />
     <ClInclude Include="..\..\Common\Types.h" />
-    <ClInclude Include="PNG.h" />
+    <ClInclude Include="Global.h" />
+    <ClInclude Include="Sprite.h" />
     <ClInclude Include="Include\Lib.h" />
     <ClInclude Include="Property.h" />
     <ClInclude Include="Resource.h" />
@@ -264,7 +265,8 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release_Server|x64'">NotUsing</PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="DllMain.cpp" />
-    <ClCompile Include="PNG.cpp" />
+    <ClCompile Include="Global.cpp" />
+    <ClCompile Include="Sprite.cpp" />
     <ClCompile Include="Property.cpp" />
     <ClCompile Include="Resource.cpp" />
     <ClCompile Include="Stdafx.cpp">

@@ -18,6 +18,10 @@ public:
 
 	void Register(const std::shared_ptr<IControl>& control);
 
+protected:
+	std::shared_ptr<Graphics::D2D::Layer> GetLayer(int z);
+	std::shared_ptr<Graphics::D2D::Layer> GetLayer(int z) const;
+
 private:
 	void UpdateMouseOverControl(int x, int y);
 	void UpdateFocusControl(int x, int y);
@@ -27,6 +31,7 @@ private:
 	INT2 m_pickPos;
 	bool m_isPicked;
 
+	std::map<int, std::shared_ptr<Graphics::D2D::Layer>> m_layers;
 	std::vector<std::shared_ptr<IControl>> m_controls;
 	std::weak_ptr<IControl> m_mouseOverControl;
 	std::weak_ptr<IControl> m_focusControl;

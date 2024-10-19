@@ -29,7 +29,7 @@ void IWindow::OnMouseEvent(UINT message, int x, int y)
 	case WM_LBUTTONDOWN:
 	{
 		// 피킹 됐는지 확인
-		if (m_titleBarRect.IsContain({ x, y }))
+		if (m_titleBarRect.Contains({ x, y }))
 		{
 			m_isPicked = true;
 			m_pickPos = { x, y };
@@ -50,7 +50,7 @@ void IWindow::OnMouseEvent(UINT message, int x, int y)
 
 	for (const auto& control : m_controls)
 	{
-		if (!control->IsContain({x, y}))
+		if (!control->Contains({x, y}))
 			continue;
 
 		auto pos{ control->GetPosition() };
@@ -93,24 +93,40 @@ void IWindow::Update(float deltaTime)
 void IWindow::Render() const
 {
 	for (const auto& control : m_controls)
+	{
+		const auto& layer{ GetLayer(control->GetZ()) };
+		layer->Begin();
 		control->Render();
+		layer->End();
+	}
+
+	for (const auto& layer : m_layers | std::views::values)
+		layer->Draw();
 }
 
 void IWindow::Register(const std::shared_ptr<IControl>& control)
 {
-	// 삽입 정렬
-	auto it{ std::ranges::lower_bound(m_controls, control->GetDepth(),
-		[](const auto& c, auto depth) -> bool
-		{
-			return c->GetDepth() > depth;
-		})
-	};
-	m_controls.insert(it, control);
+	m_controls.push_back(control);
+}
+
+std::shared_ptr<Graphics::D2D::Layer> IWindow::GetLayer(int z)
+{
+	if (!m_layers.contains(z))
+		m_layers.emplace(z, Graphics::D2D::CreateLayer(m_size));
+	return m_layers[z];
+}
+
+std::shared_ptr<Graphics::D2D::Layer> IWindow::GetLayer(int z) const
+{
+	if (m_layers.contains(z))
+		return m_layers.at(z);
+	assert(false && "LAYER IS NOT EXIST");
+	return nullptr;
 }
 
 void IWindow::UpdateMouseOverControl(int x, int y)
 {
-	auto rit{ std::ranges::find_if(std::views::reverse(m_controls), [x, y](const auto& control) { return control->IsContain({ x, y }); }) };
+	auto rit{ std::ranges::find_if(std::views::reverse(m_controls), [x, y](const auto& control) { return control->Contains({ x, y }); }) };
 	if (rit == m_controls.rend())
 	{
 		if (auto control{ m_mouseOverControl.lock() })
@@ -135,7 +151,7 @@ void IWindow::UpdateFocusControl(int x, int y)
 	m_focusControl.reset();
 	for (const auto& control : m_controls)
 	{
-		if (control->IsEnable() && control->IsContain({ x, y }))
+		if (control->IsEnable() && control->Contains({ x, y }))
 		{
 			control->SetFocus(true);
 			m_focusControl = control;

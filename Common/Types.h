@@ -8,6 +8,7 @@ class INT2
 {
 public:
 	INT2(int32_t x = 0, int32_t y = 0);
+	INT2(float x, float y);
 	INT2(const FLOAT2& float2);
 
 private:
@@ -25,6 +26,7 @@ class FLOAT2 : public D2D1_POINT_2F
 {
 public:
 	FLOAT2(FLOAT x = 0.0f, FLOAT y = 0.0f);
+	FLOAT2(int32_t x, int32_t y);
 	FLOAT2(const INT2& int2);
 
 private:
@@ -42,7 +44,7 @@ public:
 	RECTI(int32_t left = 0, int32_t top = 0, int32_t right = 0, int32_t bottom = 0);
 
 	RECTI& Offset(const INT2& offset);
-	bool IsContain(const INT2& point) const;
+	bool Contains(const INT2& point) const;
 
 public:
 	int32_t left;
@@ -58,7 +60,7 @@ public:
 	RECTF(const RECTI& rect);
 
 	RECTF& Offset(const FLOAT2& offset);
-	bool IsContain(const FLOAT2& point) const;
+	bool Contains(const FLOAT2& point) const;
 };
 
 using MATRIX = D2D1::Matrix3x2F;

@@ -12,7 +12,7 @@ const std::map<Resource::Property::Type, std::string> PROPERTY_TYPES
 	{ Resource::Property::Type::Int2, "INT2" },
 	{ Resource::Property::Type::Float, "FLOAT" },
 	{ Resource::Property::Type::String, "STRING" },
-	{ Resource::Property::Type::Image, "IMAGE" }
+	{ Resource::Property::Type::Sprite, "IMAGE" }
 };
 
 Inspector::Inspector()
@@ -133,7 +133,7 @@ void Inspector::RenderBasicInfo()
 			prop->Set(Util::u8stows(data));
 		break;
 	}
-	case Resource::Property::Type::Image:
+	case Resource::Property::Type::Sprite:
 	{
 		if (!ImGui::Button("..."))
 			break;
@@ -160,8 +160,8 @@ void Inspector::RenderBasicInfo()
 		std::unique_ptr<std::byte[]> buffer{ new std::byte[size]{} };
 		file.read(reinterpret_cast<char*>(buffer.get()), size);
 
-		auto image{ std::make_shared<Resource::PNG>(buffer.release(), size) };
-		prop->Set(image);
+		Resource::Sprite sprite{ std::span{ buffer.release(), size } };
+		prop->Set(sprite);
 		break;
 	}
 	}

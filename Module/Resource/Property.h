@@ -1,9 +1,9 @@
 #pragma once
 #include <variant>
+#include "Sprite.h"
 
 namespace Resource
 {
-	class PNG;
 	class Property;
 }
 
@@ -13,21 +13,22 @@ concept is_property_data_type_v =
 	std::is_same_v<T, INT2> ||
 	std::is_same_v<T, float> ||
 	std::is_same_v<T, std::wstring> ||
-	std::is_same_v<T, std::shared_ptr<Resource::PNG>>;
+	std::is_same_v<T, Resource::Sprite>;
 
 namespace Resource
 {
 	class Property
 	{
 	public:
-		enum class Type : uint8_t
+		enum class Type : int8_t
 		{
 			Folder,
 			Int,
 			Int2,
 			Float,
 			String,
-			Image
+			Sprite,
+			Texture
 		};
 
 	public:
@@ -43,7 +44,7 @@ namespace Resource
 		DLL_API void Set(const INT2& value);
 		DLL_API void Set(float value);
 		DLL_API void Set(const std::wstring& value);
-		DLL_API void Set(const std::shared_ptr<PNG>& value);
+		DLL_API void Set(const Sprite& value);
 
 		DLL_API Type GetType() const;
 		DLL_API std::wstring GetName() const;
@@ -51,7 +52,7 @@ namespace Resource
 		DLL_API INT2 GetInt2(std::wstring_view path = L"") const;
 		DLL_API float GetFloat(std::wstring_view path = L"") const;
 		DLL_API std::wstring GetString(std::wstring_view path = L"") const;
-		DLL_API std::shared_ptr<PNG> GetImage(std::wstring_view path = L"") const;
+		DLL_API Sprite GetSprite(std::wstring_view path = L"") const;
 		DLL_API std::shared_ptr<Property> Get(std::wstring_view path) const;
 		DLL_API const std::vector<std::shared_ptr<Property>>& GetChildren() const;
 		DLL_API std::vector<std::shared_ptr<Property>>& GetChildren();
@@ -64,7 +65,7 @@ namespace Resource
 			INT2,
 			float,
 			std::wstring,
-			std::shared_ptr<PNG>
+			Sprite
 		> m_data;
 		std::vector<std::shared_ptr<Property>> m_children;
 	};

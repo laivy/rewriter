@@ -6,8 +6,15 @@ INT2::INT2(int32_t x, int32_t y) :
 {
 }
 
-INT2::INT2(const FLOAT2& float2) : 
-	INT2{ static_cast<int32_t>(float2.x), static_cast<int32_t>(float2.y) }
+INT2::INT2(float x, float y) :
+	x{ static_cast<int32_t>(x) },
+	y{ static_cast<int32_t>(y) }
+{
+}
+
+INT2::INT2(const FLOAT2& float2) :
+	x{ static_cast<int32_t>(float2.x) },
+	y{ static_cast<int32_t>(float2.y) }
 {
 }
 
@@ -43,9 +50,16 @@ FLOAT2::FLOAT2(FLOAT x, FLOAT y)
 	this->y = y;
 }
 
-FLOAT2::FLOAT2(const INT2& int2) :
-	FLOAT2{ static_cast<float>(int2.x), static_cast<float>(int2.y) }
+FLOAT2::FLOAT2(int32_t x, int32_t y)
 {
+	this->x = static_cast<float>(x);
+	this->y = static_cast<float>(y);
+}
+
+FLOAT2::FLOAT2(const INT2& int2)
+{
+	this->x = static_cast<float>(int2.x);
+	this->y = static_cast<float>(int2.y);
 }
 
 FLOAT2 operator+(const FLOAT2& lhs, const FLOAT2& rhs)
@@ -99,7 +113,7 @@ RECTI& RECTI::Offset(const INT2& offset)
 	return *this;
 }
 
-bool RECTI::IsContain(const INT2& point) const
+bool RECTI::Contains(const INT2& point) const
 {
 	if (left <= point.x && point.x <= right &&
 		top <= point.y && point.y <= bottom)
@@ -132,7 +146,7 @@ RECTF& RECTF::Offset(const FLOAT2& offset)
 	return *this;
 }
 
-bool RECTF::IsContain(const FLOAT2& point) const
+bool RECTF::Contains(const FLOAT2& point) const
 {
 	if (left <= point.x && point.x <= right &&
 		top <= point.y && point.y <= bottom)

@@ -99,12 +99,12 @@ bool IUserInterface::IsFocus() const
 	return m_isFocus;
 }
 
-bool IUserInterface::IsContain(const INT2& point) const
+bool IUserInterface::Contains(const INT2& point) const
 {
 	// point는 부모 좌표계 기준의 좌표
 	RECTI rect{ 0, 0, m_size.x, m_size.y };
 	rect.Offset(m_position);
-	return rect.IsContain(point);
+	return rect.Contains(point);
 }
 
 INT2 IUserInterface::GetPosition(Pivot pivot) const

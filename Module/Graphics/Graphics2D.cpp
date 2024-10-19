@@ -1,5 +1,5 @@
 #include "Stdafx.h"
-#include "Globals.h"
+#include "Global.h"
 #include "Graphics2D.h"
 
 namespace Graphics::D2D
@@ -110,17 +110,17 @@ namespace Graphics::D2D
 		return std::make_shared<Layer>(target);
 	}
 
-	DLL_API void D2D::SetTransform(const Matrix& transform)
+	DLL_API void SetTransform(const Matrix& transform)
 	{
 		g_renderTarget->SetTransform(transform);
 	}
 
-	DLL_API void D2D::PushClipRect(const RECTF& rect)
+	DLL_API void PushClipRect(const RECTF& rect)
 	{
 		g_renderTarget->PushAxisAlignedClip(rect, D2D1_ANTIALIAS_MODE_ALIASED);
 	}
 
-	DLL_API void D2D::PopClipRect()
+	DLL_API void PopClipRect()
 	{
 		g_renderTarget->PopAxisAlignedClip();
 	}

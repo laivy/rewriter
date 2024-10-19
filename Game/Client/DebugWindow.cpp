@@ -9,6 +9,8 @@
 #include "TextBox.h"
 #include "WindowManager.h"
 
+//auto root{ Resource::Get(L"test.dat") };
+
 class RegisterAccountModal :
 	public IModal,
 	public IObserver
@@ -58,6 +60,8 @@ private:
 
 DebugWindow::DebugWindow()
 {
+	SetSize(INT2{ 800, 600 });
+	GetLayer(0);
 	App::OnPacket.Register(this, std::bind_front(&DebugWindow::OnPacket, this));
 }
 
@@ -78,21 +82,10 @@ void DebugWindow::Update(float deltaTime)
 
 void DebugWindow::Render() const
 {
-	//auto b = Resource::Get(L"UI.dat/LoginUI/Background");	
-	//Renderer2D::DrawImage(b->GetImage(), FLOAT2{});
+	auto root{ Resource::Get(L"test.dat") };
 
-	RECTI rect{ 0, 0, m_size.x, m_size.y };
-	//RECTI outline{ rect };
-	//outline.left -= 5;
-	//outline.top -= 5;
-	//outline.right += 5;
-	//outline.bottom += 5;
-	//Graphics::D2D::DrawRect(outline, D2D1::ColorF::Black);
-	Graphics::D2D::DrawRect(rect, D2D1::ColorF::White);
-
-	using namespace Graphics::D2D;
-	Font font{ L"", 16.0f };
-	DrawText(L"안녕하세요", { 50, 50 }, font, Color::Black);
+	Graphics::D2D::Font font{ L"", 128.0f };
+	DrawText(L"안녕하세요", { 50.0f, 50.0f }, font, Graphics::D2D::Color::Black);
 
 	IWindow::Render();
 }

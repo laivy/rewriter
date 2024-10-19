@@ -19,6 +19,7 @@ App::App()
 App::~App()
 {
 	Graphics::CleanUp();
+	Resource::CleanUp();
 	SceneManager::Destroy();
 	SocketManager::Destroy();
 }
