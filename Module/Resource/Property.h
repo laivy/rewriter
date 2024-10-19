@@ -31,9 +31,27 @@ namespace Resource
 			Texture
 		};
 
+		class Iterator
+		{
+		public:
+			Iterator(const Property* const prop, size_t index);
+			~Iterator() = default;
+
+			DLL_API Iterator& operator++();
+			DLL_API bool operator!=(const Iterator& iter) const;
+			DLL_API std::pair<std::wstring, std::shared_ptr<Resource::Property>> operator*() const;
+
+		private:
+			const Property* const m_property;
+			size_t m_index;
+		};
+
 	public:
 		DLL_API Property();
 		~Property() = default;
+
+		DLL_API Iterator begin() const;
+		DLL_API Iterator end() const;
 
 		DLL_API void Add(const std::shared_ptr<Property>& child);
 		DLL_API void Delete(const std::shared_ptr<Property>& child);

@@ -5,10 +5,43 @@
 
 namespace Resource
 {
+	Property::Iterator::Iterator(const Property* const prop, size_t index) :
+		m_property{ prop },
+		m_index{ index }
+	{
+	}
+
+	DLL_API Property::Iterator& Property::Iterator::operator++()
+	{
+		++m_index;
+		return *this;
+	}
+
+	DLL_API bool Property::Iterator::operator!=(const Iterator& iter) const
+	{
+		return (m_property != iter.m_property) || (m_index != iter.m_index);
+	}
+
+	DLL_API std::pair<std::wstring, std::shared_ptr<Resource::Property>> Property::Iterator::operator*() const
+	{
+		auto child{ m_property->m_children[m_index] };
+		return std::make_pair(child->GetName(), child);
+	}
+
 	DLL_API Property::Property() :
 		m_type{ Property::Type::Folder },
 		m_name{ L"" }
 	{
+	}
+
+	DLL_API Property::Iterator Property::begin() const
+	{
+		return Iterator{ this, 0 };
+	}
+
+	DLL_API Property::Iterator Property::end() const
+	{
+		return Iterator{ this, m_children.size() };
 	}
 
 	DLL_API void Property::Add(const std::shared_ptr<Property>& child)
