@@ -56,7 +56,7 @@ private:
 
 DebugWindow::DebugWindow()
 {
-	SetSize(INT2{ 900, 300 });
+	SetSize(INT2{ 900, 600 });
 	if (auto layer{ GetLayer(0) })
 	{
 		layer->Begin();
@@ -93,17 +93,6 @@ DebugWindow::DebugWindow()
 
 		layer->End();
 	}
-	if (auto layer{ GetLayer(1) })
-	{
-		auto button{ std::make_shared<Button>(this) };
-		button->SetZ(1);
-		button->SetSize(INT2{ 200, 50 });
-		button->SetPosition(INT2{ 450, 150 }, Pivot::Center);
-		Register(button);
-	}
-	if (auto layer{ GetLayer(2) })
-	{
-	}
 	App::OnPacket.Register(this, std::bind_front(&DebugWindow::OnPacket, this));
 }
 
@@ -126,14 +115,6 @@ void DebugWindow::Update(float deltaTime)
 
 void DebugWindow::Render() const
 {
-	if (auto layer{ GetLayer(2) })
-	{
-		layer->Begin();
-		layer->Clear();
-		constexpr Graphics::D2D::Font font{ L"", 64.0f };
-		Graphics::D2D::DrawText(std::format(L"{}FPS", static_cast<int>(1.0f / sum) ), font, Graphics::D2D::Color::Black, FLOAT2{ 450.0f, 150.0f }, Pivot::Center);
-		layer->End();
-	}
 	IWindow::Render();
 }
 

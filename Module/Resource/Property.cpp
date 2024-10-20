@@ -22,7 +22,7 @@ namespace Resource
 		return (m_property != iter.m_property) || (m_index != iter.m_index);
 	}
 
-	DLL_API std::pair<std::wstring, std::shared_ptr<Resource::Property>> Property::Iterator::operator*() const
+	DLL_API std::pair<std::wstring_view, std::shared_ptr<Resource::Property>> Property::Iterator::operator*() const
 	{
 		auto child{ m_property->m_children[m_index] };
 		return std::make_pair(child->GetName(), child);
@@ -120,7 +120,7 @@ namespace Resource
 		return m_type;
 	}
 
-	DLL_API std::wstring Property::GetName() const
+	DLL_API std::wstring_view Property::GetName() const
 	{
 		return m_name;
 	}

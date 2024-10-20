@@ -39,7 +39,7 @@ namespace Resource
 
 			DLL_API Iterator& operator++();
 			DLL_API bool operator!=(const Iterator& iter) const;
-			DLL_API std::pair<std::wstring, std::shared_ptr<Resource::Property>> operator*() const;
+			DLL_API std::pair<std::wstring_view, std::shared_ptr<Resource::Property>> operator*() const;
 
 		private:
 			const Property* const m_property;
@@ -65,7 +65,7 @@ namespace Resource
 		DLL_API void Set(const std::shared_ptr<Sprite>& value);
 
 		DLL_API Type GetType() const;
-		DLL_API std::wstring GetName() const;
+		DLL_API std::wstring_view GetName() const;
 		DLL_API int32_t GetInt(std::wstring_view path = L"") const;
 		DLL_API INT2 GetInt2(std::wstring_view path = L"") const;
 		DLL_API float GetFloat(std::wstring_view path = L"") const;

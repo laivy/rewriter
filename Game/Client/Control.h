@@ -17,5 +17,5 @@ public:
 protected:
 	IWindow* m_owner; // 이 컨트롤을 보유하고 있는 윈도우
 	bool m_isEnable;
-	std::wstring_view m_name;
+	std::wstring m_name;
 };

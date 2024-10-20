@@ -41,6 +41,7 @@ namespace Graphics::D2D
 	DLL_API void PopClipRect();
 
 	DLL_API void DrawRect(const RECTF& rect, const Color& color);
+	DLL_API void DrawRoundRect(const RECTF& rect, const FLOAT2& radius, const Color& color);
 	DLL_API void DrawText(std::wstring_view text, const Font& font, const Color& color, const FLOAT2& position, Pivot pivot);
 	DLL_API void DrawSprite(const std::shared_ptr<Resource::Sprite>& sprite, const FLOAT2& position, float opacity = 1.0f);
 	DLL_API void DrawSprite(const std::shared_ptr<Resource::Sprite>& sprite, const RECTF& rect, float opacity = 1.0f);

@@ -2,11 +2,11 @@
 #include "Global.h"
 #include "Graphics2D.h"
 
-namespace Graphics::D2D
+namespace
 {
 	struct FontCompare
 	{
-		bool operator()(const Font& lhs, const Font& rhs) const
+		bool operator()(const Graphics::D2D::Font& lhs, const Graphics::D2D::Font& rhs) const
 		{
 			if (lhs.name != rhs.name)
 				return lhs.name < rhs.name;
@@ -16,7 +16,7 @@ namespace Graphics::D2D
 
 	struct ColorCompare
 	{
-		bool operator()(const Color& lhs, const Color& rhs) const
+		bool operator()(const Graphics::D2D::Color& lhs, const Graphics::D2D::Color& rhs) const
 		{
 			if (lhs.r != rhs.r)
 				return lhs.r < rhs.r;
@@ -28,9 +28,44 @@ namespace Graphics::D2D
 		}
 	};
 
-	std::map<Font, ComPtr<IDWriteTextFormat>, FontCompare> g_textFormats;
-	std::map<Color, ComPtr<ID2D1SolidColorBrush>, ColorCompare> g_colorBrushes;
+	std::map<Graphics::D2D::Font, ComPtr<IDWriteTextFormat>, FontCompare> g_textFormats;
+	std::map<Graphics::D2D::Color, ComPtr<ID2D1SolidColorBrush>, ColorCompare> g_colorBrushes;
 
+	ComPtr<IDWriteTextFormat> GetTextFormat(const Graphics::D2D::Font& font)
+	{
+		ComPtr<IDWriteTextFormat> textFormat;
+		if (g_textFormats.contains(font))
+		{
+			textFormat = g_textFormats[font];
+		}
+		else
+		{
+			Graphics::dwriteFactory->CreateTextFormat(font.name.data(), nullptr, DWRITE_FONT_WEIGHT_NORMAL, DWRITE_FONT_STYLE_NORMAL, DWRITE_FONT_STRETCH_NORMAL, font.size, L"", &textFormat);
+			textFormat->SetParagraphAlignment(DWRITE_PARAGRAPH_ALIGNMENT_NEAR);
+			textFormat->SetTextAlignment(DWRITE_TEXT_ALIGNMENT_LEADING);
+			g_textFormats.emplace(font, textFormat);
+		}
+		return textFormat;
+	}
+
+	ComPtr<ID2D1SolidColorBrush> GetColorBrush(const Graphics::D2D::Color& color)
+	{
+		ComPtr<ID2D1SolidColorBrush> colorBrush;
+		if (g_colorBrushes.contains(color))
+		{
+			colorBrush = g_colorBrushes[color];
+		}
+		else
+		{
+			Graphics::g_d2dCurrentRenderTarget->CreateSolidColorBrush(color, &colorBrush);
+			g_colorBrushes.emplace(color, colorBrush);
+		}
+		return colorBrush;
+	}
+}
+
+namespace Graphics::D2D
+{
 	Layer::Layer(ComPtr<ID2D1BitmapRenderTarget> target) :
 		m_target{ target }
 	{
@@ -127,36 +162,22 @@ namespace Graphics::D2D
 
 	DLL_API void DrawRect(const RECTF& rect, const Color& color)
 	{
-		ComPtr<ID2D1SolidColorBrush> brush;
-		g_d2dCurrentRenderTarget->CreateSolidColorBrush(color, &brush);
-		g_d2dCurrentRenderTarget->FillRectangle(rect, brush.Get());
+		g_d2dCurrentRenderTarget->FillRectangle(rect, GetColorBrush(color).Get());
+	}
+
+	DLL_API void DrawRoundRect(const RECTF& rect, const FLOAT2& radius, const Color& color)
+	{
+		D2D1_ROUNDED_RECT roundRect{};
+		roundRect.rect = rect;
+		roundRect.radiusX = radius.x;
+		roundRect.radiusY = radius.y;
+		g_d2dCurrentRenderTarget->FillRoundedRectangle(roundRect, GetColorBrush(color).Get());
 	}
 
 	DLL_API void DrawText(std::wstring_view text, const Font& font, const Color& color, const FLOAT2& position, Pivot pivot)
 	{
-		ComPtr<IDWriteTextFormat> textFormat;
-		if (g_textFormats.contains(font))
-		{
-			textFormat = g_textFormats[font];
-		}
-		else
-		{
-			dwriteFactory->CreateTextFormat(font.name.data(), nullptr, DWRITE_FONT_WEIGHT_NORMAL, DWRITE_FONT_STYLE_NORMAL, DWRITE_FONT_STRETCH_NORMAL, font.size, L"", &textFormat);
-			textFormat->SetParagraphAlignment(DWRITE_PARAGRAPH_ALIGNMENT_NEAR);
-			textFormat->SetTextAlignment(DWRITE_TEXT_ALIGNMENT_LEADING);
-			g_textFormats.emplace(font, textFormat);
-		}
-
-		ComPtr<ID2D1SolidColorBrush> colorBrush;
-		if (g_colorBrushes.contains(color))
-		{
-			colorBrush = g_colorBrushes[color];
-		}
-		else
-		{
-			g_d2dCurrentRenderTarget->CreateSolidColorBrush(color, &colorBrush);
-			g_colorBrushes.emplace(color, colorBrush);
-		}
+		auto textFormat{ GetTextFormat(font) };
+		auto colorBrush{ GetColorBrush(color) };
 
 		ComPtr<IDWriteTextLayout> textLayout;
 		dwriteFactory->CreateTextLayout(text.data(), static_cast<UINT32>(text.size()), textFormat.Get(), std::numeric_limits<float>::max(), std::numeric_limits<float>::max(), &textLayout);

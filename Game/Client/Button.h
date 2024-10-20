@@ -4,11 +4,14 @@
 class Button : public IControl
 {
 public:
+	using Visual = std::variant<std::shared_ptr<Resource::Sprite>, std::tuple<FLOAT2, FLOAT2, int32_t>>;
+
+private:
 	enum class State
 	{
-		Enable,
-		MouseOver,
-		MouseDown,
+		Normal,
+		Hover,
+		Active,
 		Disable
 	};
 
@@ -22,9 +25,15 @@ public:
 
 	virtual void Render() const override final;
 
+	void SetVisuals(const Visual& normal, const Visual& hover, const Visual& active, const Visual& disable);
+
 public:
 	Delegate<> OnButtonClick;
 
-public:
+private:
 	State m_state;
+	Visual m_normal;
+	Visual m_hover;
+	Visual m_active;
+	Visual m_disable;
 };

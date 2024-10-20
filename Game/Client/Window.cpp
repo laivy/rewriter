@@ -106,6 +106,7 @@ void IWindow::Render() const
 
 void IWindow::Register(const std::shared_ptr<IControl>& control)
 {
+	GetLayer(control->GetZ());
 	m_controls.push_back(control);
 }
 
@@ -160,5 +161,18 @@ void IWindow::UpdateFocusControl(int x, int y)
 		{
 			control->SetFocus(false);
 		}
+	}
+}
+
+void IWindow::SetNinePatch(const std::shared_ptr<Resource::Property>& prop)
+{
+	m_ninePatch.fill(nullptr);
+
+	size_t index{ 0 };
+	for (const auto& name : { L"lt", L"t", L"rt", L"l", L"c", L"r", L"lb", L"b", L"rb" })
+	{
+		if (auto sprite{ prop->GetSprite(name) })
+			m_ninePatch[index] = sprite;
+		++index;
 	}
 }
