@@ -6,7 +6,7 @@ std::vector<std::weak_ptr<Resource::Property>> g_selectedPropertise;
 
 void ForEachProperty(const std::shared_ptr<Resource::Property>& prop, const std::function<void(const std::shared_ptr<Resource::Property>&)>& func)
 {
-	for (const auto& child : prop->GetChildren())
+	for (const auto& [_, child] : *prop)
 		ForEachProperty(child, func);
 	func(prop);
 }
@@ -28,6 +28,7 @@ std::shared_ptr<Resource::Property> GetParent(const std::shared_ptr<Resource::Pr
 {
 	std::shared_ptr<Resource::Property> parent;
 	for (const auto& root : g_roots)
+	{
 		ForEachProperty(root.prop,
 			[&prop, &parent](const auto& p)
 			{
@@ -36,7 +37,17 @@ std::shared_ptr<Resource::Property> GetParent(const std::shared_ptr<Resource::Pr
 				if (it != children.end())
 					parent = p;
 			});
+	}
 	return parent;
+}
+
+std::shared_ptr<Resource::Property> GetAncestor(const std::shared_ptr<Resource::Property>& prop)
+{
+	auto ancestor{ prop };
+	auto parent{ prop };
+	while (parent = GetParent(parent))
+		ancestor = parent;
+	return ancestor;
 }
 
 bool IsRoot(const std::shared_ptr<Resource::Property>& prop)

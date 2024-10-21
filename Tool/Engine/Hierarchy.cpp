@@ -1,5 +1,6 @@
 #include "Stdafx.h"
 #include "App.h"
+#include "Clipboard.h"
 #include "Global.h"
 #include "Hierarchy.h"
 #include "Inspector.h"
@@ -65,7 +66,7 @@ void Hierarchy::OnMenuFileNew()
 
 	Root root{};
 	root.prop = std::make_shared<Resource::Property>();
-	root.prop->SetName(name + Stringtable::DATA_FILE_EXT);
+	root.prop->SetName(name);
 	g_roots.push_back(root);
 }
 
@@ -116,14 +117,14 @@ void Hierarchy::OnMenuFileSave()
 	if (!prop)
 		return;
 
-	auto it{ std::ranges::find_if(g_roots, [&prop](const auto& root) { return root.prop == prop; }) };
-	if (it == g_roots.end())
+	auto ancestor{ GetAncestor(prop) };
+	if (!IsRoot(ancestor))
 		return;
 	
-	Root& root{ *it };
+	Root& root{ GetRoot(ancestor) };
 	if (root.path.empty())
 	{
-		std::wstring path{ prop->GetName() };
+		std::wstring path{ ancestor->GetName() };
 		path.resize(MAX_PATH);
 
 		OPENFILENAME ofn{};
@@ -136,8 +137,8 @@ void Hierarchy::OnMenuFileSave()
 			return;
 		root.path = path;
 	}
-	prop->SetName(root.path.filename());
-	Resource::Save(prop, root.path.wstring());
+	Resource::Save(ancestor, root.path.wstring());
+	ancestor->SetName(root.path.filename().wstring());
 }
 
 void Hierarchy::OnMenuFileSaveAs()
@@ -148,7 +149,7 @@ void Hierarchy::LoadDataFile(const std::filesystem::path& path)
 {
 	Root root{};
 	root.prop = Resource::Get(path.wstring());
-	root.prop->SetName(path.filename());
+	root.prop->SetName(path.filename().wstring());
 	root.path = path;
 	g_roots.push_back(root);
 }
@@ -210,6 +211,31 @@ void Hierarchy::Shortcut()
 			std::iter_swap(it, it + 1);
 		} while (false);
 	}
+	if (ImGui::Shortcut(ImGuiModFlags_Ctrl | ImGuiKey_C))
+	{
+		std::vector<std::shared_ptr<Resource::Property>> targets;
+		for (const auto& prop : g_selectedPropertise)
+			targets.push_back(prop.lock());
+
+		auto clipboard{ Clipboard::GetInstance() };
+		clipboard->Clear();
+		clipboard->Copy(targets);
+	}
+	if (ImGui::Shortcut(ImGuiModFlags_Ctrl | ImGuiKey_V))
+	{
+		do
+		{
+			if (g_selectedPropertise.size() != 1)
+				break;
+
+			auto selected{ g_selectedPropertise.front().lock() };
+			if (!selected)
+				break;
+
+			auto clipboard{ Clipboard::GetInstance() };
+			clipboard->Paste(selected);
+		} while (false);
+	}
 	if (ImGui::IsKeyPressed(ImGuiKey_F2, false))
 	{
 		auto window{ ImGui::FindWindowByName("Inspector") };
@@ -223,10 +249,10 @@ void Hierarchy::Shortcut()
 			if (!prop)
 				continue;
 
-			App::OnPropertyDelete.Notify(prop);
-
-			for (const auto& root : g_roots)
-				ForEachProperty(root.prop, [&prop](const auto& p) { std::erase(p->GetChildren(), prop); });
+			if (auto parent = GetParent(prop))
+				parent->Delete(prop);
+			else if (IsRoot(prop))
+				std::erase_if(g_roots, [&prop](const auto& root) { return root.prop == prop; });
 		}
 	}
 }
@@ -285,7 +311,7 @@ void Hierarchy::RenderNode()
 			if (!ImGui::BeginPopupContextItem("CONTEXT"))
 				return;
 
-			if (ImGui::Selectable("Add(A)") || ImGui::IsKeyPressed(ImGuiKey_A))
+			if (ImGui::Selectable("Add (A)") || ImGui::IsKeyPressed(ImGuiKey_A))
 			{
 				ImGui::CloseCurrentPopup();
 
@@ -306,7 +332,7 @@ void Hierarchy::RenderNode()
 				prop->Add(child);
 				App::OnPropertyAdd.Notify(child);
 			}
-			if (ImGui::Selectable("Del(D)") || ImGui::IsKeyPressed(ImGuiKey_D))
+			if (ImGui::Selectable("Delete (D)") || ImGui::IsKeyPressed(ImGuiKey_D))
 			{
 				ImGui::CloseCurrentPopup();
 
@@ -314,6 +340,8 @@ void Hierarchy::RenderNode()
 
 				if (auto parent = GetParent(prop))
 					parent->Delete(prop);
+				else if (IsRoot(prop))
+					std::erase_if(g_roots, [&prop](const auto& root) { return root.prop == prop; });
 			}
 			ImGui::EndPopup();
 		};
@@ -346,12 +374,12 @@ void Hierarchy::RenderNode()
 				flag |= ImGuiTreeNodeFlags_Selected;
 			if (ImGui::TreeNodeEx(Util::wstou8s(prop->GetName()).c_str(), flag))
 			{
-				if (ImGui::IsItemClicked())
+				if (ImGui::IsItemClicked() || (ImGui::IsItemHovered() && ImGui::IsMouseReleased(ImGuiMouseButton_Right)))
 					App::OnPropertySelect.Notify(prop);
 
 				menu(prop);
 
-				for (const auto& child : prop->GetChildren())
+				for (const auto& [_, child] : *prop)
 					render(child);
 
 				ImGui::TreePop();

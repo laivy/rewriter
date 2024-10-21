@@ -13,5 +13,6 @@ void ForEachProperty(const std::shared_ptr<Resource::Property>& prop, const std:
 void DeleteProperty(const std::shared_ptr<Resource::Property>& prop);
 Root& GetRoot(const std::shared_ptr<Resource::Property>& prop);
 std::shared_ptr<Resource::Property> GetParent(const std::shared_ptr<Resource::Property>& prop);
+std::shared_ptr<Resource::Property> GetAncestor(const std::shared_ptr<Resource::Property>& prop);
 bool IsRoot(const std::shared_ptr<Resource::Property>& prop);
 bool IsSelected(const std::shared_ptr<Resource::Property>& prop);

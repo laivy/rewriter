@@ -1,5 +1,6 @@
 #include "Stdafx.h"
 #include "App.h"
+#include "Clipboard.h"
 #include "Desktop.h"
 #include "Explorer.h"
 #include "Hierarchy.h"
@@ -134,6 +135,7 @@ void App::InitApp()
 	Explorer::Instantiate();
 	Hierarchy::Instantiate();
 	Inspector::Instantiate();
+	Clipboard::Instantiate();
 }
 
 void App::Update()

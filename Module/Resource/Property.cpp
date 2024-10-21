@@ -5,10 +5,17 @@
 
 namespace Resource
 {
-	Property::Iterator::Iterator(const Property* const prop, size_t index) :
+	Property::Iterator::Iterator(const Property* prop, size_t index) :
 		m_property{ prop },
 		m_index{ index }
 	{
+	}
+
+	DLL_API Property::Iterator& Property::Iterator::operator=(const Iterator& iter)
+	{
+		m_property = iter.m_property;
+		m_index = iter.m_index;
+		return *this;
 	}
 
 	DLL_API Property::Iterator& Property::Iterator::operator++()
@@ -85,7 +92,7 @@ namespace Resource
 		}
 	}
 
-	DLL_API void Property::SetName(const std::wstring& name)
+	DLL_API void Property::SetName(std::wstring_view name)
 	{
 		m_name = name;
 	}
@@ -105,9 +112,9 @@ namespace Resource
 		m_data = value;
 	}
 
-	DLL_API void Property::Set(const std::wstring& value)
+	DLL_API void Property::Set(std::wstring_view value)
 	{
-		m_data = value;
+		m_data.emplace<std::wstring>(value);
 	}
 
 	DLL_API void Property::Set(const std::shared_ptr<Sprite>& value)
@@ -120,7 +127,7 @@ namespace Resource
 		return m_type;
 	}
 
-	DLL_API std::wstring_view Property::GetName() const
+	DLL_API std::wstring Property::GetName() const
 	{
 		return m_name;
 	}

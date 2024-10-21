@@ -114,6 +114,9 @@
     <ClInclude Include="..\..\Module\Graphics\Include\Lib.h">
       <Filter>모듈 파일\Graphics</Filter>
     </ClInclude>
+    <ClInclude Include="Clipboard.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="App.cpp">
@@ -174,6 +177,9 @@
       <Filter>소스 파일</Filter>
     </ClCompile>
     <ClCompile Include="Desktop.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="Clipboard.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
   </ItemGroup>

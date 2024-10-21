@@ -34,15 +34,16 @@ namespace Resource
 		class Iterator
 		{
 		public:
-			Iterator(const Property* const prop, size_t index);
+			Iterator(const Property* prop, size_t index);
 			~Iterator() = default;
 
+			DLL_API Iterator& operator=(const Iterator& iter);
 			DLL_API Iterator& operator++();
 			DLL_API bool operator!=(const Iterator& iter) const;
 			DLL_API std::pair<std::wstring_view, std::shared_ptr<Resource::Property>> operator*() const;
 
 		private:
-			const Property* const m_property;
+			const Property* m_property;
 			size_t m_index;
 		};
 
@@ -57,15 +58,15 @@ namespace Resource
 		DLL_API void Delete(const std::shared_ptr<Property>& child);
 
 		DLL_API void SetType(Type type);
-		DLL_API void SetName(const std::wstring& name);
+		DLL_API void SetName(std::wstring_view name);
 		DLL_API void Set(int32_t value);
 		DLL_API void Set(const INT2& value);
 		DLL_API void Set(float value);
-		DLL_API void Set(const std::wstring& value);
+		DLL_API void Set(std::wstring_view value);
 		DLL_API void Set(const std::shared_ptr<Sprite>& value);
 
 		DLL_API Type GetType() const;
-		DLL_API std::wstring_view GetName() const;
+		DLL_API std::wstring GetName() const;
 		DLL_API int32_t GetInt(std::wstring_view path = L"") const;
 		DLL_API INT2 GetInt2(std::wstring_view path = L"") const;
 		DLL_API float GetFloat(std::wstring_view path = L"") const;
