@@ -55,15 +55,15 @@ void Inspector::RenderBasicInfo()
 
 	ImGui::AlignTextToFramePadding();
 	ImGui::SeparatorText("Property Info");
-	if (IsRoot(prop))
+	if (false)
 	{
-		auto& root{ GetRoot(prop) };
-		ImGui::Text("Path");
-		ImGui::SameLine(100);
-		if (root.path.empty())
-			ImGui::InputText("##PATH", "-", 1, ImGuiInputTextFlags_ReadOnly);
-		else
-			ImGui::InputText("##PATH", &Util::u8stou8s(root.path.u8string()), ImGuiInputTextFlags_ReadOnly);
+		//auto& root{ GetRoot(prop) };
+		//ImGui::Text("Path");
+		//ImGui::SameLine(100);
+		//if (root.path.empty())
+		//	ImGui::InputText("##PATH", "-", 1, ImGuiInputTextFlags_ReadOnly);
+		//else
+		//	ImGui::InputText("##PATH", &Util::u8stou8s(root.path.u8string()), ImGuiInputTextFlags_ReadOnly);
 	}
 	else
 	{

@@ -1,6 +1,7 @@
 #include "Stdafx.h"
 #include "Global.h"
 
+/*
 std::vector<Root> g_roots;
 std::vector<std::weak_ptr<Resource::Property>> g_selectedPropertise;
 
@@ -59,3 +60,4 @@ bool IsSelected(const std::shared_ptr<Resource::Property>& prop)
 {
 	return std::ranges::find_if(g_selectedPropertise, [&prop](const auto& p) { return p.lock() == prop; }) != g_selectedPropertise.end();
 }
+*/

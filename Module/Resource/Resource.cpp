@@ -210,6 +210,7 @@ namespace Resource
 #ifdef _TOOL
 	DLL_API bool Save(const std::shared_ptr<Property>& prop, std::wstring_view path)
 	{
+		auto name{ prop->GetName() };
 		prop->SetName(Stringtable::ROOT);
 
 		std::ofstream file{ path.data(), std::ios::binary };
@@ -218,7 +219,12 @@ namespace Resource
 			assert(false && "CAN NOT SAVE DATA FILE");
 			return false;
 		}
-		return _Save(file, prop);
+
+		if (!_Save(file, prop))
+			return false;
+
+		prop->SetName(name);
+		return true;
 	}
 #endif
 

@@ -1,5 +1,6 @@
 #pragma once
 
+/*
 struct Root
 {
 	std::shared_ptr<Resource::Property> prop;
@@ -16,3 +17,4 @@ std::shared_ptr<Resource::Property> GetParent(const std::shared_ptr<Resource::Pr
 std::shared_ptr<Resource::Property> GetAncestor(const std::shared_ptr<Resource::Property>& prop);
 bool IsRoot(const std::shared_ptr<Resource::Property>& prop);
 bool IsSelected(const std::shared_ptr<Resource::Property>& prop);
+*/

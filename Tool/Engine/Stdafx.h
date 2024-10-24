@@ -1,6 +1,9 @@
 #pragma once
 #include "Common/Stdafx.h"
 
+// C/C++
+#include <set>
+
 // Windows
 #include <commdlg.h>
 #include <windowsx.h>
