@@ -17,5 +17,7 @@ private:
 	static constexpr auto WINDOW_NAME{ "UI Editor" };
 	bool m_isVisible;
 	RECTF m_clipRect;
+
 	std::shared_ptr<Resource::Property> m_prop;
+	std::string m_fullPath;
 };

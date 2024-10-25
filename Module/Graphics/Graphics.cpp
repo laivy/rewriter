@@ -324,7 +324,7 @@ namespace Graphics
 		if (FAILED(d3dDevice->CreateDescriptorHeap(&srvHeapDesc, IID_PPV_ARGS(&imGuiSrvDescHeap))))
 			return false;
 
-		::IMGUI_CHECKVERSION();
+		IMGUI_CHECKVERSION();
 		::ImGui::CreateContext();
 		::ImGui::GetIO().ConfigFlags |= (ImGuiConfigFlags_NavEnableKeyboard | ImGuiConfigFlags_DockingEnable | ImGuiConfigFlags_ViewportsEnable);
 

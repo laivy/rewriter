@@ -1,6 +1,7 @@
 #include "Stdafx.h"
 #include "App.h"
 #include "UIEditor.h"
+#include "Common/Util.h"
 
 UIEditor::UIEditor() :
 	m_isVisible{false},
@@ -14,8 +15,13 @@ void UIEditor::Render()
 	if (ImGui::Begin(WINDOW_NAME))
 	{
 		m_isVisible = true;
+
 		DragDrop();
-		CalcClipRect();
+		ImGui::TextUnformatted(m_fullPath.c_str());
+		ImGui::Separator();
+		if (ImGui::BeginChild("VIEWER"))
+			CalcClipRect();
+		ImGui::EndChild();
 	}
 	else
 	{
@@ -47,7 +53,15 @@ void UIEditor::DragDrop()
 		return;
 
 	auto prop{ reinterpret_cast<std::shared_ptr<Resource::Property>*>(payload->Data) };
+	if (!prop)
+		return;
+
 	m_prop = *prop;
+	auto fullPath{ m_prop->GetName() };
+	for (auto parent{ m_prop->GetParent() }; parent != nullptr; parent = parent->GetParent())
+		fullPath = std::format(L"{}{}{}", parent->GetName(), Stringtable::DATA_PATH_SEPERATOR, fullPath);
+	m_fullPath = Util::wstou8s(fullPath);
+	App::OnPropertySelect.Notify(m_prop);
 }
 
 void UIEditor::CalcClipRect()
@@ -59,11 +73,5 @@ void UIEditor::CalcClipRect()
 	POINT rb{ static_cast<long>(pos.x + size.x), static_cast<long>(pos.y + size.y) };
 	::ScreenToClient(App::hWnd, &lt);
 	::ScreenToClient(App::hWnd, &rb);
-
-	const auto& style{ ImGui::GetStyle() };
-	lt.x += static_cast<long>(style.FramePadding.x);
-	lt.y += static_cast<long>(style.FramePadding.y + window->TitleBarHeight() + window->MenuBarHeight());
-	rb.x -= static_cast<long>(style.FramePadding.x);
-	rb.y -= static_cast<long>(style.FramePadding.y);
 	m_clipRect = RECTF{ static_cast<float>(lt.x), static_cast<float>(lt.y), static_cast<float>(rb.x), static_cast<float>(rb.y) };
 }
