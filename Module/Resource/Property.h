@@ -76,6 +76,10 @@ namespace Resource
 		DLL_API const std::vector<std::shared_ptr<Property>>& GetChildren() const;
 		DLL_API std::vector<std::shared_ptr<Property>>& GetChildren();
 
+#ifdef _TOOL
+		DLL_API Property* GetParent() const;
+#endif
+
 	private:
 		std::wstring m_name;
 		Type m_type;
@@ -87,5 +91,8 @@ namespace Resource
 			std::shared_ptr<Sprite>
 		> m_data;
 		std::vector<std::shared_ptr<Property>> m_children;
+#ifdef _TOOL
+		Property* m_parent;
+#endif
 	};
 }

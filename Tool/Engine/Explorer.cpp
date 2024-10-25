@@ -98,7 +98,7 @@ void Explorer::RenderFileView()
 		if (ImGui::BeginDragDropSource())
 		{
 			auto fullPath{ d.path().string() };
-			ImGui::SetDragDropPayload("DRAGDROP", fullPath.data(), fullPath.size() + 1);
+			ImGui::SetDragDropPayload("OPENFILE", fullPath.data(), fullPath.size() + 1);
 			ImGui::Text(name.c_str());
 			ImGui::EndDragDropSource();
 		}

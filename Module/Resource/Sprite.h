@@ -14,8 +14,7 @@ namespace Resource
 		DLL_API FLOAT2 GetSize() const;
 
 #ifdef _TOOL
-		DLL_API uint32_t GetBinarySize() const;
-		DLL_API std::byte* GetBinary() const;
+		DLL_API std::span<const std::byte> GetBinary() const;
 #endif
 
 	private:
@@ -23,8 +22,7 @@ namespace Resource
 		FLOAT2 m_size;
 
 #ifdef _TOOL
-		uint32_t m_binarySize;
-		std::shared_ptr<std::byte[]> m_binary;
+		std::vector<std::byte> m_binary;
 #endif
 #endif
 	};

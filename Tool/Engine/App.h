@@ -17,8 +17,6 @@ private:
 	void Update();
 	void Render();
 
-	void RenderImGuiMainDockSpace();
-
 public:
 	static inline auto OnResize{ Delegate<int, int>() };
 	static inline auto OnPropertyAdd{ Delegate<std::shared_ptr<Resource::Property>>() };

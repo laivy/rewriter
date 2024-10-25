@@ -260,7 +260,7 @@ void Hierarchy::Shortcut()
 	if (ImGui::IsKeyPressed(ImGuiKey_F2, false))
 	{
 		auto window{ ImGui::FindWindowByName("Inspector") };
-		ImGui::ActivateItemByID(window->GetID("##NAME"));
+		ImGui::ActivateItemByID(window->GetID("##INSPECTOR/NAME"));
 	}
 	if (ImGui::IsKeyPressed(ImGuiKey_Delete, false))
 	{
@@ -281,7 +281,7 @@ void Hierarchy::DragDrop()
 	if (!ImGui::BeginDragDropTargetCustom(window->ContentRegionRect, window->ID))
 		return;
 
-	if (auto payload{ ImGui::AcceptDragDropPayload("DRAGDROP") })
+	if (auto payload{ ImGui::AcceptDragDropPayload("OPENFILE") })
 	{
 		std::string filePath{ static_cast<const char*>(payload->Data) };
 		OnFileDragDrop(filePath);
@@ -343,6 +343,12 @@ void Hierarchy::RenderNode(const std::shared_ptr<Resource::Property>& prop)
 		auto label{ Util::wstou8s(prop->GetName()) };
 		if (ImGui::Selectable(label.c_str(), selected))
 			App::OnPropertySelect.Notify(prop);
+		if (ImGui::BeginDragDropSource())
+		{
+			ImGui::SetDragDropPayload("PROPERTY", &prop, sizeof(prop));
+			ImGui::Text(label.c_str());
+			ImGui::EndDragDropSource();
+		}
 		RenderNodeContextMenu(prop);
 	}
 	else

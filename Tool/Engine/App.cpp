@@ -19,6 +19,7 @@ App::App() :
 App::~App()
 {
 	Graphics::CleanUp();
+	Resource::CleanUp();
 	Explorer::Destroy();
 	Hierarchy::Destroy();
 	Inspector::Destroy();
@@ -60,7 +61,8 @@ LRESULT App::WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 	}
 	case WM_SIZE:
 	{
-		OnResize.Notify(GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam));
+		if (wParam != SIZE_MINIMIZED)
+			OnResize.Notify(GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam));
 		break;
 	}
 	case WM_DESTROY:
@@ -172,27 +174,9 @@ void App::Render()
 	Graphics::D3D::End();
 	Graphics::D2D::Begin();
 	{
-		// D2D
+		if (auto uiEditor{ UIEditor::GetInstance() })
+			uiEditor->Render2D();
 	}
 	Graphics::D2D::End();
 	Graphics::Present();
-}
-
-void App::RenderImGuiMainDockSpace()
-{
-	ImGuiWindowFlags windowFlag{ ImGuiWindowFlags_NoDocking };
-
-	const ImGuiViewport* viewport = ImGui::GetMainViewport();
-	ImGui::SetNextWindowPos(viewport->WorkPos);
-	ImGui::SetNextWindowSize(viewport->WorkSize);
-	ImGui::SetNextWindowViewport(viewport->ID);
-	windowFlag |= ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove;
-	windowFlag |= ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_NoNavFocus;
-	windowFlag |= ImGuiDockNodeFlags_PassthruCentralNode;
-
-	ImGui::PushID("DESKTOP");
-	ImGui::Begin("DESKTOP", NULL, windowFlag);
-	ImGui::DockSpace(ImGui::GetID("DESKTOP"), {}, ImGuiDockNodeFlags_PassthruCentralNode);
-	ImGui::End();
-	ImGui::PopID();
 }

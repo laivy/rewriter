@@ -15,7 +15,10 @@ private:
 	void OnPropertyDelete(std::shared_ptr<Resource::Property> prop);
 	void OnPropertySelect(std::shared_ptr<Resource::Property> prop);
 
-	void RenderBasicInfo();
+	void RenderNode();
+	void RenderNodeName(const std::shared_ptr<Resource::Property>& prop);
+	void RenderNodeType(const std::shared_ptr<Resource::Property>& prop);
+	void RenderNodeValue(const std::shared_ptr<Resource::Property>& prop);
 
 private:
 	static constexpr auto WINDOW_NAME{ "Inspector" };

@@ -9,9 +9,6 @@ namespace Resource
 	DLL_API Sprite::Sprite() :
 		m_size{}
 	{
-#ifdef _TOOL
-		m_binarySize = 0;
-#endif
 	}
 
 	DLL_API Sprite::Sprite(std::span<std::byte> binary)
@@ -44,9 +41,8 @@ namespace Resource
 
 #ifdef _TOOL
 		// 나중에 저장하기 위해 바이너리 데이터 복사
-		m_binary.reset(new std::byte[binary.size()]{});
-		std::memcpy(m_binary.get(), binary.data(), binary.size());
-		m_binarySize = static_cast<uint32_t>(binary.size());
+		m_binary.reserve(binary.size());
+		std::ranges::copy(binary, std::back_inserter(m_binary));
 #endif
 	}
 
@@ -61,14 +57,9 @@ namespace Resource
 	}
 
 #ifdef _TOOL
-	DLL_API uint32_t Sprite::GetBinarySize() const
+	DLL_API std::span<const std::byte> Sprite::GetBinary() const
 	{
-		return m_binarySize;
-	}
-
-	DLL_API std::byte* Sprite::GetBinary() const
-	{
-		return m_binary.get();
+		return std::span{ m_binary.data(), m_binary.size() };
 	}
 #endif
 }

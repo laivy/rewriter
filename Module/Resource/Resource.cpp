@@ -57,10 +57,10 @@ namespace
 		case Property::Type::Sprite:
 		{
 			auto data{ prop->GetSprite() };
-			auto length{ data->GetBinarySize() };
 			auto binary{ data->GetBinary() };
+			auto length{ static_cast<uint32_t>(binary.size()) };
 			file.write(reinterpret_cast<const char*>(&length), sizeof(length));
-			file.write(reinterpret_cast<const char*>(binary), length);
+			file.write(reinterpret_cast<const char*>(binary.data()), length);
 			break;
 		}
 		default:
