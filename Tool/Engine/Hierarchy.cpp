@@ -210,7 +210,7 @@ void Hierarchy::Shortcut()
 			if (!selected)
 				break;
 
-			auto parent{ GetParent(selected) };
+			auto parent{ selected->GetParent() };
 			if (!parent)
 				break;
 
@@ -233,7 +233,7 @@ void Hierarchy::Shortcut()
 			if (!selected)
 				break;
 
-			auto parent{ GetParent(selected) };
+			auto parent{ selected->GetParent() };
 			if (!parent)
 				break;
 
@@ -340,13 +340,13 @@ void Hierarchy::RenderNode(const std::shared_ptr<Resource::Property>& prop)
 	if (!isRoot && prop->GetChildren().empty())
 	{
 		// 루트가 아닌 말단 노드는 Selectable
-		auto label{ Util::wstou8s(prop->GetName()) };
-		if (ImGui::Selectable(label.c_str(), selected))
+		auto name{ Util::wstou8s(prop->GetName()) };
+		if (ImGui::Selectable(name.c_str(), selected))
 			App::OnPropertySelect.Notify(prop);
 		if (ImGui::BeginDragDropSource())
 		{
 			ImGui::SetDragDropPayload("PROPERTY", &prop, sizeof(prop));
-			ImGui::Text(label.c_str());
+			ImGui::Text(name.c_str());
 			ImGui::EndDragDropSource();
 		}
 		RenderNodeContextMenu(prop);
@@ -369,7 +369,8 @@ void Hierarchy::RenderNode(const std::shared_ptr<Resource::Property>& prop)
 		if (selected)
 			flag |= ImGuiTreeNodeFlags_Selected;
 
-		if (ImGui::TreeNodeEx(Util::wstou8s(prop->GetName()).c_str(), flag))
+		auto name{ Util::wstou8s(prop->GetName()) };
+		if (ImGui::TreeNodeEx(name.c_str(), flag))
 		{
 			if (ImGui::IsItemClicked())
 			{
@@ -377,6 +378,12 @@ void Hierarchy::RenderNode(const std::shared_ptr<Resource::Property>& prop)
 					OnPropertySelect(prop);
 				else
 					App::OnPropertySelect.Notify(prop);
+			}
+			if (ImGui::BeginDragDropSource())
+			{
+				ImGui::SetDragDropPayload("PROPERTY", &prop, sizeof(prop));
+				ImGui::Text(name.c_str());
+				ImGui::EndDragDropSource();
 			}
 			RenderNodeContextMenu(prop);
 			for (const auto& [_, child] : *prop)
