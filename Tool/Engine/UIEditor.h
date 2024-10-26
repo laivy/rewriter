@@ -2,6 +2,16 @@
 
 class UIEditor : public TSingleton<UIEditor>
 {
+private:
+	struct Window
+	{
+		std::string fullPath;
+
+		INT2 size;
+		int32_t backgroundColor;
+		INT2 backgroundRectRadius;
+	};
+
 public:
 	UIEditor();
 	~UIEditor() = default;
@@ -11,6 +21,7 @@ public:
 
 private:
 	void DragDrop();
+	void BuildWindow();
 	void CalcClipRect();
 
 private:
@@ -19,5 +30,5 @@ private:
 	RECTF m_clipRect;
 
 	std::shared_ptr<Resource::Property> m_prop;
-	std::string m_fullPath;
+	Window m_window;
 };

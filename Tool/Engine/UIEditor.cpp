@@ -15,10 +15,7 @@ void UIEditor::Render()
 	if (ImGui::Begin(WINDOW_NAME))
 	{
 		m_isVisible = true;
-
 		DragDrop();
-		ImGui::TextUnformatted(m_fullPath.c_str());
-		ImGui::Separator();
 		if (ImGui::BeginChild("VIEWER"))
 			CalcClipRect();
 		ImGui::EndChild();
@@ -37,7 +34,12 @@ void UIEditor::Render2D()
 		return;
 
 	Graphics::D2D::PushClipRect(m_clipRect);
-	Graphics::D2D::DrawRect(RECTF{ 0.0f, 0.0f, 9999.0f, 9999.0f }, Graphics::D2D::Color::Blue);
+
+	RECTF rect{ 0.0f, 0.0f, static_cast<float>(m_window.size.x), static_cast<float>(m_window.size.y) };
+	FLOAT2 radius{ m_window.backgroundRectRadius };
+	Graphics::D2D::DrawRoundRect(rect.Offset({ m_clipRect.left, m_clipRect.top }), radius, m_window.backgroundColor);
+
+	//Graphics::D2D::DrawRect(RECTF{ 0.0f, 0.0f, 9999.0f, 9999.0f }, Graphics::D2D::Color::Blue);
 	//Graphics::D2D::DrawRect(contentRegion, Graphics::D2D::Color::Red);
 	Graphics::D2D::PopClipRect();
 }
@@ -56,12 +58,22 @@ void UIEditor::DragDrop()
 	if (!prop)
 		return;
 
+	// 전달받은 프로퍼티를 기반으로 윈도우 생성
 	m_prop = *prop;
-	auto fullPath{ m_prop->GetName() };
-	for (auto parent{ m_prop->GetParent() }; parent != nullptr; parent = parent->GetParent())
-		fullPath = std::format(L"{}{}{}", parent->GetName(), Stringtable::DATA_PATH_SEPERATOR, fullPath);
-	m_fullPath = Util::wstou8s(fullPath);
+	BuildWindow();
+
 	App::OnPropertySelect.Notify(m_prop);
+}
+
+void UIEditor::BuildWindow()
+{
+	m_window = {};
+	if (auto info{ m_prop->Get(L"Info") })
+	{
+		m_window.size = info->GetInt2(L"Size");
+		m_window.backgroundColor = info->GetInt(L"BackgroundColor");
+		m_window.backgroundRectRadius = info->GetInt2(L"BackgroundRadius");
+	}
 }
 
 void UIEditor::CalcClipRect()

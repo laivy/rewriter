@@ -13,7 +13,6 @@ public:
 
 private:
 	void OnPropertySelect(std::shared_ptr<Resource::Property> prop);
-	void OnFileDragDrop(std::string_view path);
 	void OnMenuFileNew();
 	void OnMenuFileOpen();
 	void OnMenuFileSave();

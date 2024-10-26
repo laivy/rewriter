@@ -47,11 +47,6 @@ void Hierarchy::OnPropertySelect(std::shared_ptr<Resource::Property> prop)
 	m_selects.push_back(prop);
 }
 
-void Hierarchy::OnFileDragDrop(std::string_view path)
-{
-	LoadDataFile(path);
-}
-
 void Hierarchy::OnMenuFileNew()
 {
 	size_t index{ 0 };
@@ -268,8 +263,8 @@ void Hierarchy::Shortcut()
 		{
 			if (auto prop{ select.lock() })
 			{
-				App::OnPropertyDelete.Notify(prop);
 				Delete(prop);
+				App::OnPropertyDelete.Notify(prop);
 			}
 		}
 	}
@@ -284,7 +279,7 @@ void Hierarchy::DragDrop()
 	if (auto payload{ ImGui::AcceptDragDropPayload("OPENFILE") })
 	{
 		std::string filePath{ static_cast<const char*>(payload->Data) };
-		OnFileDragDrop(filePath);
+		LoadDataFile(filePath);
 	}
 
 	ImGui::EndDragDropTarget();
@@ -429,8 +424,8 @@ void Hierarchy::RenderNodeContextMenu(const std::shared_ptr<Resource::Property>&
 		{
 			if (auto prop{ select.lock() })
 			{
-				App::OnPropertyDelete.Notify(prop);
 				Delete(prop);
+				App::OnPropertyDelete.Notify(prop);
 			}
 		}
 	}
@@ -440,6 +435,9 @@ void Hierarchy::RenderNodeContextMenu(const std::shared_ptr<Resource::Property>&
 
 void Hierarchy::LoadDataFile(const std::filesystem::path& path)
 {
+	auto root{ Resource::Get(path.wstring()) };
+	root->SetName(path.filename().wstring());
+	m_roots.emplace(root, path);
 }
 
 void Hierarchy::Recurse(const std::shared_ptr<Resource::Property>& prop, const std::function<void(const std::shared_ptr<Resource::Property>&)>& func)
