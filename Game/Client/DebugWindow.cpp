@@ -54,45 +54,15 @@ private:
 	}
 };
 
-DebugWindow::DebugWindow()
+DebugWindow::DebugWindow(std::wstring_view path) :
+	IWindow{ path }
 {
-	SetSize(INT2{ 900, 600 });
-	if (auto layer{ GetLayer(0) })
-	{
-		layer->Begin();
-
-		auto root{ Resource::Get(L"UI.dat") };
-		auto ninePatch{ root->Get(L"Basic/NinePatch") };
-
-		auto lt{ ninePatch->GetSprite(L"lt") };
-		Graphics::D2D::DrawSprite(lt, FLOAT2{});
-
-		auto rt{ ninePatch->GetSprite(L"rt") };
-		Graphics::D2D::DrawSprite(rt, FLOAT2{ m_size.x - rt->GetSize().x, 0.0f });
-
-		auto t{ ninePatch->GetSprite(L"t") };
-		Graphics::D2D::DrawSprite(t, RECTF{ lt->GetSize().x, 0.0f, m_size.x - rt->GetSize().x, t->GetSize().y });
-
-		auto lb{ ninePatch->GetSprite(L"lb") };
-		Graphics::D2D::DrawSprite(lb, FLOAT2{ 0.0f, m_size.y - lb->GetSize().y });
-
-		auto rb{ ninePatch->GetSprite(L"rb") };
-		Graphics::D2D::DrawSprite(rb, FLOAT2{ m_size.x - rb->GetSize().x, m_size.y - rb->GetSize().y });
-
-		auto b{ ninePatch->GetSprite(L"b") };
-		Graphics::D2D::DrawSprite(b, RECTF{ lb->GetSize().x, m_size.y - b->GetSize().y, m_size.x - b->GetSize().x, static_cast<float>(m_size.y) });
-
-		auto l{ ninePatch->GetSprite(L"l") };
-		Graphics::D2D::DrawSprite(l, RECTF{ 0.0f, lt->GetSize().y, l->GetSize().x, m_size.y - lb->GetSize().y });
-
-		auto r{ ninePatch->GetSprite(L"r") };
-		Graphics::D2D::DrawSprite(l, RECTF{ m_size.x - r->GetSize().x, rt->GetSize().y, static_cast<float>(m_size.x), m_size.y - rb->GetSize().y });
-
-		auto c{ ninePatch->GetSprite(L"c") };
-		Graphics::D2D::DrawSprite(c, RECTF{ lt->GetSize().x, lt->GetSize().y, m_size.x - rb->GetSize().x, m_size.y - rb->GetSize().y });
-
-		layer->End();
-	}
+	SetPosition(App::size / 2, Pivot::Center);
+	GetControl<Button>(L"Button")->OnButtonClick.Register(
+		[]()
+		{
+			::OutputDebugString(L"Button Clicked!\n");
+		});
 	App::OnPacket.Register(this, std::bind_front(&DebugWindow::OnPacket, this));
 }
 
@@ -106,10 +76,8 @@ void DebugWindow::OnKeyboardEvent(UINT message, WPARAM wParam, LPARAM lParam)
 	IWindow::OnKeyboardEvent(message, wParam, lParam);
 }
 
-static float sum{ 0.0f };
 void DebugWindow::Update(float deltaTime)
 {
-	sum = deltaTime;
 	IWindow::Update(deltaTime);
 }
 

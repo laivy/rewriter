@@ -18,10 +18,10 @@ App::App()
 
 App::~App()
 {
-	Graphics::CleanUp();
-	Resource::CleanUp();
 	SceneManager::Destroy();
 	SocketManager::Destroy();
+	Graphics::CleanUp();
+	Resource::CleanUp();
 }
 
 void App::Run()

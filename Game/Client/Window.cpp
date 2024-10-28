@@ -1,13 +1,23 @@
 #include "Stdafx.h"
 #include "App.h"
+#include "Button.h"
 #include "Control.h"
 #include "Window.h"
 
-IWindow::IWindow() :
+namespace
+{
+	constexpr std::wstring_view NINE_PATCH{ L"NinePatch" };
+	constexpr std::wstring_view BUTTON_PREFIX{ L"Button:" };
+}
+
+IWindow::IWindow(std::wstring_view path) :
 	m_titleBarRect{},
 	m_pickPos{},
 	m_isPicked{ false }
 {
+	auto prop{ Resource::Get(path) };
+	SetSize(prop->GetInt2(L"Size"));
+	Build(prop);
 }
 
 void IWindow::OnMouseLeave(int x, int y)
@@ -92,6 +102,8 @@ void IWindow::Update(float deltaTime)
 
 void IWindow::Render() const
 {
+	RenderNinePatch();
+
 	for (const auto& control : m_controls)
 	{
 		const auto& layer{ GetLayer(control->GetZ()) };
@@ -123,6 +135,89 @@ std::shared_ptr<Graphics::D2D::Layer> IWindow::GetLayer(int z) const
 		return m_layers.at(z);
 	assert(false && "LAYER IS NOT EXIST");
 	return nullptr;
+}
+
+void IWindow::Build(const std::shared_ptr<Resource::Property>& prop, std::wstring_view path)
+{
+	for (const auto& [name, child] : *prop)
+	{
+		if (name.starts_with(NINE_PATCH))
+			SetNinePatch(child);
+		if (name.starts_with(BUTTON_PREFIX))
+			RegisterButton(child, path);
+		Build(child, std::format(L"{}/{}", path, name));
+	}
+}
+
+void IWindow::SetNinePatch(const std::shared_ptr<Resource::Property>& prop)
+{
+	m_ninePatch.fill(nullptr);
+
+	size_t index{ 0 };
+	for (const auto& name : { L"lt", L"t", L"rt", L"l", L"c", L"r", L"lb", L"b", L"rb" })
+	{
+		if (auto sprite{ prop->GetSprite(name) })
+			m_ninePatch[index] = sprite;
+		++index;
+	}
+}
+
+void IWindow::RegisterButton(const std::shared_ptr<Resource::Property>& prop, std::wstring_view path)
+{
+	/*
+	- Z(Int)
+		- 그려질 레이어의 z값
+	- Position(INT2)
+		- 위치
+	- Normal, Hover, Active, Disable
+		- 각 상태일 때 보여질 이미지. 아래 1, 2번 중 한 가지여야 함
+		1. Sprite
+			- 해당 스프라이트를 그림
+		2. Folder
+			- Size(INT2) : 가로, 세로 길이
+			- Radius(INT2) : 모서리의 둥근 정도
+			- Color(Int) : RGB(0xRRGGBB)
+	*/
+
+	auto name{ prop->GetName().substr(BUTTON_PREFIX.size()) };
+	auto z{ prop->GetInt(L"Z") };
+	auto position{ prop->GetInt2(L"Position") };
+
+	std::array visuals{
+		std::pair{ L"Normal", Button::Visual{} },
+		std::pair{ L"Hover", Button::Visual{} },
+		std::pair{ L"Active", Button::Visual{} },
+		std::pair{ L"Disable", Button::Visual{} }
+	};
+	for (auto& [key, visual] : visuals)
+	{
+		auto p{ prop->Get(key) };
+		switch (p->GetType())
+		{
+		case Resource::Property::Type::Folder:
+		{
+			FLOAT2 size{ p->GetInt2(L"Size") };
+			FLOAT2 radius{ p->GetInt2(L"Radius") };
+			int32_t color{ p->GetInt(L"Color") };
+			visual = std::make_tuple(size, radius, color);
+			break;
+		}
+		case Resource::Property::Type::Sprite:
+		{
+			visual = p->GetSprite();
+			break;
+		}
+		default:
+			break;
+		}
+	}
+
+	auto button{ std::make_shared<Button>(this) };
+	button->SetZ(z);
+	button->SetPosition(position);
+	button->SetName(path.empty() ? name : std::format(L"{}/{}", path, name));
+	button->SetVisuals(visuals[0].second, visuals[1].second, visuals[2].second, visuals[3].second);
+	Register(button);
 }
 
 void IWindow::UpdateMouseOverControl(int x, int y)
@@ -164,15 +259,16 @@ void IWindow::UpdateFocusControl(int x, int y)
 	}
 }
 
-void IWindow::SetNinePatch(const std::shared_ptr<Resource::Property>& prop)
+void IWindow::RenderNinePatch() const
 {
-	m_ninePatch.fill(nullptr);
-
-	size_t index{ 0 };
-	for (const auto& name : { L"lt", L"t", L"rt", L"l", L"c", L"r", L"lb", L"b", L"rb" })
-	{
-		if (auto sprite{ prop->GetSprite(name) })
-			m_ninePatch[index] = sprite;
-		++index;
-	}
+	const auto& [lt, t, rt, l, c, r, lb, b, rb] { m_ninePatch };
+	Graphics::D2D::DrawSprite(lt, FLOAT2{});
+	Graphics::D2D::DrawSprite(rt, FLOAT2{ m_size.x - rt->GetSize().x, 0.0f });
+	Graphics::D2D::DrawSprite(t, RECTF{ lt->GetSize().x, 0.0f, m_size.x - rt->GetSize().x, t->GetSize().y });
+	Graphics::D2D::DrawSprite(lb, FLOAT2{ 0.0f, m_size.y - lb->GetSize().y });
+	Graphics::D2D::DrawSprite(rb, FLOAT2{ m_size.x - rb->GetSize().x, m_size.y - rb->GetSize().y });
+	Graphics::D2D::DrawSprite(b, RECTF{ lb->GetSize().x, m_size.y - b->GetSize().y, m_size.x - b->GetSize().x, static_cast<float>(m_size.y) });
+	Graphics::D2D::DrawSprite(l, RECTF{ 0.0f, lt->GetSize().y, l->GetSize().x, m_size.y - lb->GetSize().y });
+	Graphics::D2D::DrawSprite(l, RECTF{ m_size.x - r->GetSize().x, rt->GetSize().y, static_cast<float>(m_size.x), m_size.y - rb->GetSize().y });
+	Graphics::D2D::DrawSprite(c, RECTF{ lt->GetSize().x, lt->GetSize().y, m_size.x - rb->GetSize().x, m_size.y - rb->GetSize().y });
 }

@@ -173,9 +173,6 @@
     <ClCompile Include="..\..\Common\Socket.cpp">
       <Filter>소스 파일\Common</Filter>
     </ClCompile>
-    <ClCompile Include="WindowBuilder.cpp">
-      <Filter>소스 파일\UI</Filter>
-    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Stdafx.h">
@@ -303,9 +300,6 @@
     </ClInclude>
     <ClInclude Include="..\..\Common\Socket.h">
       <Filter>헤더 파일\Common</Filter>
-    </ClInclude>
-    <ClInclude Include="WindowBuilder.h">
-      <Filter>헤더 파일\UI</Filter>
     </ClInclude>
     <ClInclude Include="LoginServer.h">
       <Filter>헤더 파일\Server</Filter>

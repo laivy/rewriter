@@ -2,7 +2,6 @@
 #include "App.h"
 #include "DebugWindow.h"
 #include "LoginScene.h"
-#include "WindowBuilder.h"
 #include "WindowManager.h"
 
 LoginScene::LoginScene()
@@ -10,10 +9,7 @@ LoginScene::LoginScene()
 	App::OnPacket.Register(this, std::bind_front(&LoginScene::OnPacket, this));
 
 #ifdef _DEBUG
-	auto window = WindowBuilder<DebugWindow>{}
-		.Path(L"UI.dat/Debug")
-		.Position({ App::size.x / 2, App::size.y / 2 }, Pivot::Center)
-		.Build();
+	auto window{ std::make_shared<DebugWindow>(L"UI.dat/Debug")};
 	WindowManager::GetInstance()->Register(window);
 #endif // _DEBUG
 }

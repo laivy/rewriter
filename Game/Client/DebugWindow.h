@@ -6,7 +6,7 @@ class DebugWindow :
 	public IObserver
 {
 public:
-	DebugWindow();
+	DebugWindow(std::wstring_view path);
 	~DebugWindow() = default;
 
 	virtual void OnMouseEvent(UINT message, int x, int y) override final;

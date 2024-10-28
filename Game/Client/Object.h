@@ -13,6 +13,9 @@ public:
 class IObject2D abstract : public IObject
 {
 public:
+	IObject2D() = default;
+	virtual ~IObject2D() = default;
+
 	void SetZ(int z);
 
 	int GetZ() const;

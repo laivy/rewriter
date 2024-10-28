@@ -10,7 +10,7 @@ class IWindow abstract : public IUserInterface
 	friend class WindowBuilder;
 
 public:
-	IWindow();
+	IWindow(std::wstring_view path = L"");
 	virtual ~IWindow() = default;
 
 	virtual void OnMouseLeave(int x, int y) override;
@@ -37,11 +37,14 @@ protected:
 	}
 
 private:
+	void Build(const std::shared_ptr<Resource::Property>& prop, std::wstring_view path = L"");
+	void SetNinePatch(const std::shared_ptr<Resource::Property>& prop);
+	void RegisterButton(const std::shared_ptr<Resource::Property>& prop, std::wstring_view basePath);
+
 	void UpdateMouseOverControl(int x, int y);
 	void UpdateFocusControl(int x, int y);
 
-	// WindowBuilder에서 사용하는 함수
-	void SetNinePatch(const std::shared_ptr<Resource::Property>& prop);
+	void RenderNinePatch() const;
 
 private:
 	RECTI m_titleBarRect;
