@@ -40,7 +40,7 @@ namespace Resource
 			DLL_API Iterator& operator=(const Iterator& iter);
 			DLL_API Iterator& operator++();
 			DLL_API bool operator!=(const Iterator& iter) const;
-			DLL_API std::pair<std::wstring_view, std::shared_ptr<Resource::Property>> operator*() const;
+			DLL_API std::pair<std::wstring, std::shared_ptr<Resource::Property>> operator*() const;
 
 		private:
 			const Property* m_property;

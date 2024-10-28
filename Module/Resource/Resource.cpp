@@ -181,8 +181,6 @@ namespace
 		}
 
 		auto root{ _Load(file, subPath) };
-		if (!subPath.empty())
-			return root->Get(subPath);
 		return root;
 	}
 };
