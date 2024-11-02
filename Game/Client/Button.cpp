@@ -3,10 +3,11 @@
 #include "Button.h"
 #include "Window.h"
 
-Button::Button(IWindow* owner) :
+Button::Button(IWindow* owner, const std::shared_ptr<Resource::Property>& prop) :
 	IControl{ owner },
 	m_state{ State::Normal }
 {
+	Build(prop);
 }
 
 void Button::OnMouseEnter(int x, int y)
@@ -41,64 +42,85 @@ void Button::OnMouseEvent(UINT message, int x, int y)
 
 void Button::Render() const
 {
-	auto draw = [](const Visual& visual, const FLOAT2& position)
-		{
-			if (std::holds_alternative<std::shared_ptr<Resource::Sprite>>(visual))
-			{
-				auto sprite{ std::get<std::shared_ptr<Resource::Sprite>>(visual) };
-				Graphics::D2D::DrawSprite(sprite, FLOAT2{ position });
-			}
-			else
-			{
-				const auto& [size, radius, color] { std::get<std::tuple<FLOAT2, FLOAT2, int32_t>>(visual) };
-				RECTF rect{ 0.0f, 0.0f, size.x, size.y };
-				Graphics::D2D::DrawRoundRect(rect.Offset(position), radius, color);
-			}
-		};
-
-	switch (m_state)
+	const auto& visual{ m_visuals[static_cast<size_t>(m_state)] };
+	if (std::holds_alternative<std::shared_ptr<Resource::Sprite>>(visual))
 	{
-	case State::Normal:
-	{
-		draw(m_normal, m_position);
-		break;
+		auto sprite{ std::get<std::shared_ptr<Resource::Sprite>>(visual) };
+		Graphics::D2D::DrawSprite(sprite, FLOAT2{ m_position });
 	}
-	case State::Hover:
+	else
 	{
-		draw(m_hover, m_position);
-		break;
-	}
-	case State::Active:
-	{
-		draw(m_active, m_position);
-		break;
-	}
-	case State::Disable:
-	{
-		draw(m_disable, m_position);
-		break;
-	}
-	default:
-		break;
+		const auto& [size, radius, color] { std::get<1>(visual) };
+		RECTF rect{ 0.0f, 0.0f, static_cast<float>(size.x), static_cast<float>(size.y) };
+		Graphics::D2D::DrawRoundRect(rect.Offset(m_position), radius, color);
 	}
 }
 
-void Button::SetVisuals(const Visual& normal, const Visual& hover, const Visual& active, const Visual& disable)
+void Button::Build(const std::shared_ptr<Resource::Property>& prop)
 {
-	m_normal = normal;
-	m_hover = hover;
-	m_active = active;
-	m_disable = disable;
+	/*
+	- Z(Int)
+		- 그려질 레이어의 z값
+	- Position(Int2)
+		- 위치
+	- Normal, Hover, Active, Disable
+		- 각 상태일 때 보여질 이미지. 아래 1, 2번 중 한 가지여야 함
+		1. Sprite
+			- 해당 스프라이트를 그림
+		2. Folder
+			- Size(Int2) : 가로, 세로 길이
+			- Radius(Int2) : 모서리의 둥근 정도
+			- Color(Int) : RGB(0xRRGGBB)
+	*/
 
-	// 버튼 크기는 "normal" 을 기준으로 설정
-	if (std::holds_alternative<std::shared_ptr<Resource::Sprite>>(m_normal))
+	if (!prop)
+		return;
+
+	SetZ(prop->GetInt(L"Z"));
+	SetPosition(prop->GetInt2(L"Position"));
+
+	std::array visuals{
+		std::pair{ L"Normal", Visual{} },
+		std::pair{ L"Hover", Visual{} },
+		std::pair{ L"Active", Visual{} },
+		std::pair{ L"Disable", Visual{} }
+	};
+
+	for (auto& [key, visual] : visuals)
 	{
-		auto sprite{ std::get<std::shared_ptr<Resource::Sprite>>(m_normal) };
+		auto p{ prop->Get(key) };
+		switch (p->GetType())
+		{
+		case Resource::Property::Type::Folder:
+		{
+			INT2 size{ p->GetInt2(L"Size") };
+			FLOAT2 radius{ p->GetInt2(L"Radius") };
+			int32_t color{ p->GetInt(L"Color") };
+			visual = std::make_tuple(size, radius, color);
+			break;
+		}
+		case Resource::Property::Type::Sprite:
+		{
+			visual = p->GetSprite();
+			break;
+		}
+		default:
+			assert(false && "INVALID TYPE");
+			break;
+		}
+	}
+
+	std::ranges::copy(visuals | std::views::elements<1>, m_visuals.begin());
+
+	// 크기는 "normal" 을 기준으로 설정
+	if (std::holds_alternative<std::shared_ptr<Resource::Sprite>>(m_visuals[0]))
+	{
+		auto sprite{ std::get<std::shared_ptr<Resource::Sprite>>(m_visuals[0]) };
 		SetSize(sprite->GetSize());
 	}
 	else
 	{
-		const auto& [size, _, __] {std::get<std::tuple<FLOAT2, FLOAT2, int32_t>>(m_normal)};
+		const auto& [size, _, __] { std::get<1>(m_visuals[0]) };
 		SetSize(size);
 	}
 }

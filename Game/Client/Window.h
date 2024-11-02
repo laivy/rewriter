@@ -38,8 +38,8 @@ protected:
 
 private:
 	void Build(const std::shared_ptr<Resource::Property>& prop, std::wstring_view path = L"");
+	void SetInfo(const std::shared_ptr<Resource::Property>& prop);
 	void SetNinePatch(const std::shared_ptr<Resource::Property>& prop);
-	void RegisterButton(const std::shared_ptr<Resource::Property>& prop, std::wstring_view basePath);
 
 	void UpdateMouseOverControl(int x, int y);
 	void UpdateFocusControl(int x, int y);
@@ -48,13 +48,13 @@ private:
 
 private:
 	RECTI m_titleBarRect;
-	INT2 m_pickPos;
 	bool m_isPicked;
+	INT2 m_pickPos;
 
+	std::array<std::shared_ptr<Resource::Sprite>, 9> m_ninePatch;
 	std::map<int, std::shared_ptr<Graphics::D2D::Layer>> m_layers;
+
 	std::vector<std::shared_ptr<IControl>> m_controls;
 	std::weak_ptr<IControl> m_mouseOverControl;
 	std::weak_ptr<IControl> m_focusControl;
-
-	std::array<std::shared_ptr<Resource::Sprite>, 9> m_ninePatch;
 };

@@ -3,11 +3,13 @@
 
 class TextBox : public IControl
 {
+private:
+	using Visual = std::variant<std::shared_ptr<Resource::Sprite>, std::tuple<INT2, int32_t, int32_t>>;
+
 public:
-	TextBox(IWindow* owner);
+	TextBox(IWindow* owner, const std::shared_ptr<Resource::Property>& prop = nullptr);
 	~TextBox() = default;
 
-	virtual void OnMouseEvent(UINT message, int x, int y) override final;
 	virtual void OnKeyboardEvent(UINT message, WPARAM wParam, LPARAM lParam) override final;
 
 	virtual void Update(float deltaTime) override final;
@@ -16,41 +18,37 @@ public:
 	virtual void SetFocus(bool focus) override final;
 	virtual bool IsFocus() const override final;
 
-	void SetMultiLine(bool isMultiLine);
-	void SetVerticalScroll(bool hasVerticalScroll);
-	void SetHorizontalScroll(bool hasHorizontalScroll);
-
 private:
-	void UpdateOffset();
+	void Build(const std::shared_ptr<Resource::Property>& prop);
 
 	void RenderBackground() const;
 	void RenderText() const;
 	void RenderCaret() const;
 
-	void SetText(const std::wstring& text);
-	void MoveCaret(int count);
+	void SetText(std::wstring_view text);
+	void MoveCaret(int distance);
+	void UpdateScrollOffset();
 	void InsertCharacter(wchar_t character);
 	void EraseCharacter();
 
-	DWRITE_HIT_TEST_METRICS GetTextMetrics(int position) const;
-
 private:
-	static constexpr auto MARGIN_LEFT = 5;
-	static constexpr auto MARGIN_TOP = 2;
-	static constexpr auto MARGIN_RIGHT = 5;
-	static constexpr auto MARGIN_BOTTOM = 2;
+	static constexpr auto PADDING_LEFT = 5;
+	static constexpr auto PADDING_TOP = 2;
+	static constexpr auto PADDING_RIGHT = 5;
+	static constexpr auto PADDING_BOTTOM = 2;
 
-	ComPtr<IDWriteTextFormat> m_textFormat;
-	ComPtr<IDWriteTextLayout> m_textLayout;
+	std::array<Visual, 2> m_visuals;
+
 	std::wstring m_text;
-	bool m_isCompositing;
+	Graphics::D2D::Font m_font;
+	Graphics::D2D::TextMetrics m_metrics;
 
-	int m_caret;
-	float m_caretTimer;
-	bool m_drawCaret;
-
-	INT2 m_offset;
 	bool m_isMultiLine;
-	bool m_hasVerticalScroll;
-	bool m_hasHorizontalScroll;
+	bool m_isPassword;
+
+	bool m_onCompositing;
+	bool m_isCaretVisible;
+	float m_caretTimer;
+	int m_caretPosition;
+	INT2 m_scrollOffset;
 };

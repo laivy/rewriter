@@ -37,6 +37,10 @@ EXTERN_C IMAGE_DOS_HEADER __ImageBase;
 #undef DrawText
 #endif
 
+#ifdef GetTextMetrics
+#undef GetTextMetrics
+#endif
+
 // Project
 #include "Delegate.h"
 #include "Singleton.h"

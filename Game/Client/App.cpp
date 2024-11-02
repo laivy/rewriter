@@ -88,9 +88,9 @@ LRESULT CALLBACK App::WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPa
 		break;
 	}
 	default:
-		break;
+		return ::DefWindowProc(hWnd, message, wParam, lParam);
 	}
-	return ::DefWindowProc(hWnd, message, wParam, lParam);
+	return 0;
 }
 
 void App::InitWindow()

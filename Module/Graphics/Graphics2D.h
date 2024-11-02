@@ -27,6 +27,14 @@ namespace Graphics::D2D
 		ComPtr<ID2D1BitmapRenderTarget> m_target;
 	};
 
+	struct TextMetrics
+	{
+		float left;
+		float top;
+		float width;
+		float height;
+	};
+
 	using Color = D2D1::ColorF;
 	using Matrix = D2D1::Matrix3x2F;
 
@@ -42,7 +50,9 @@ namespace Graphics::D2D
 
 	DLL_API void DrawRect(const RECTF& rect, const Color& color);
 	DLL_API void DrawRoundRect(const RECTF& rect, const FLOAT2& radius, const Color& color);
-	DLL_API void DrawText(std::wstring_view text, const Font& font, const Color& color, const FLOAT2& position, Pivot pivot);
+	DLL_API void DrawText(std::wstring_view text, const Font& font, const Color& color, const FLOAT2& position, Pivot pivot = Pivot::LeftTop);
 	DLL_API void DrawSprite(const std::shared_ptr<Resource::Sprite>& sprite, const FLOAT2& position, float opacity = 1.0f);
 	DLL_API void DrawSprite(const std::shared_ptr<Resource::Sprite>& sprite, const RECTF& rect, float opacity = 1.0f);
+
+	DLL_API TextMetrics GetTextMetrics(std::wstring_view text, const Font& font);
 }

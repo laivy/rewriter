@@ -233,4 +233,29 @@ namespace Graphics::D2D
 	{
 		g_d2dCurrentRenderTarget->DrawBitmap(sprite->Get(), rect, opacity);
 	}
+
+	DLL_API TextMetrics GetTextMetrics(std::wstring_view text, const Font& font)
+	{
+		auto textFormat{ GetTextFormat(font) };
+
+		ComPtr<IDWriteTextLayout> textLayout;
+		dwriteFactory->CreateTextLayout(text.data(), static_cast<UINT32>(text.size()), textFormat.Get(), std::numeric_limits<float>::max(), std::numeric_limits<float>::max(), &textLayout);
+
+		FLOAT2 pos{};
+		DWRITE_HIT_TEST_METRICS metrics{};
+		textLayout->HitTestTextPosition(
+			static_cast<UINT32>(text.size()),
+			TRUE,
+			&pos.x,
+			&pos.y,
+			&metrics
+		);
+
+		TextMetrics textMetrics{};
+		textMetrics.left = metrics.left;
+		textMetrics.top = metrics.top;
+		textMetrics.width = metrics.width;
+		textMetrics.height = metrics.height;
+		return textMetrics;
+	}
 }

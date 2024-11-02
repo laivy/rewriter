@@ -3,22 +3,20 @@
 #include "TextBox.h"
 #include "Window.h"
 
-TextBox::TextBox(IWindow* owner) :
+TextBox::TextBox(IWindow* owner, const std::shared_ptr<Resource::Property>& prop) :
 	IControl{ owner },
-	m_isCompositing{ false },
-	m_caret{ 0 },
-	m_caretTimer{ 0.0f },
-	m_drawCaret{ true },
-	m_offset{},
-	m_isMultiLine{ false },
-	m_hasVerticalScroll{ false },
-	m_hasHorizontalScroll{ false }
+	m_visuals{},
+	m_font{ L"", 16.0f },
+	m_metrics{},
+	m_isMultiLine{},
+	m_isPassword{},
+	m_onCompositing{},
+	m_isCaretVisible{ true },
+	m_caretTimer{},
+	m_caretPosition{},
+	m_scrollOffset{}
 {
-	//m_textFormat = Renderer2D::CreateTextFormat(L"", 16);
-}
-
-void TextBox::OnMouseEvent(UINT message, int x, int y)
-{
+	Build(prop);
 }
 
 void TextBox::OnKeyboardEvent(UINT message, WPARAM wParam, LPARAM lParam)
@@ -30,23 +28,39 @@ void TextBox::OnKeyboardEvent(UINT message, WPARAM wParam, LPARAM lParam)
 		switch (wParam)
 		{
 		case VK_BACK:
+		{
+			if (m_caretPosition == 0)
+				break;
 			MoveCaret(-1);
 			EraseCharacter();
 			break;
+		}
 		case VK_END:
+		{
 			MoveCaret(static_cast<int>(m_text.size()));
 			break;
+		}
 		case VK_HOME:
+		{
 			MoveCaret(-static_cast<int>(m_text.size()));
 			break;
+		}
 		case VK_LEFT:
+		{
 			MoveCaret(-1);
 			break;
+		}
 		case VK_RIGHT:
+		{
 			MoveCaret(1);
 			break;
+		}
 		case VK_DELETE:
+		{
 			EraseCharacter();
+			break;
+		}
+		default:
 			break;
 		}
 		break;
@@ -55,6 +69,7 @@ void TextBox::OnKeyboardEvent(UINT message, WPARAM wParam, LPARAM lParam)
 	{
 		if (wParam == VK_BACK)
 			break;
+
 		if (wParam == VK_RETURN && !m_isMultiLine)
 			break;
 
@@ -66,39 +81,41 @@ void TextBox::OnKeyboardEvent(UINT message, WPARAM wParam, LPARAM lParam)
 	{
 		if (lParam & GCS_COMPSTR)
 		{
-			HIMC hImc{ ImmGetContext(App::hWnd) };
+			HIMC hImc{ ::ImmGetContext(App::hWnd) };
 			int length{ ImmGetCompositionString(hImc, GCS_COMPSTR, NULL, 0) };
 
 			// 조합중이라면 글자 교체
-			if (m_isCompositing && !m_text.empty())
+			if (m_onCompositing && !m_text.empty())
 			{
 				MoveCaret(-1);
 				EraseCharacter();
 			}
 
 			// 백스페이스로 조합 중인 글자를 다 지우면 길이가 0이될 수 있음
-			m_isCompositing = length ? true : false;
-			if (length)
+			m_onCompositing = length > 0;
+			if (m_onCompositing)
 			{
 				InsertCharacter(static_cast<wchar_t>(wParam));
 				MoveCaret(1);
 			}
 
-			ImmReleaseContext(App::hWnd, hImc);
+			::ImmReleaseContext(App::hWnd, hImc);
 		}
 		if (lParam & GCS_RESULTSTR)
 		{
-			if (m_isCompositing && !m_text.empty())
+			if (m_onCompositing)
 			{
 				MoveCaret(-1);
 				EraseCharacter();
 			}
 			InsertCharacter(static_cast<wchar_t>(wParam));
 			MoveCaret(1);
-			m_isCompositing = false;
+			m_onCompositing = false;
 		}
 		break;
 	}
+	default:
+		break;
 	}
 }
 
@@ -110,7 +127,7 @@ void TextBox::Update(float deltaTime)
 		if (m_caretTimer > 1.0f)
 		{
 			m_caretTimer -= 1.0f;
-			m_drawCaret = !m_drawCaret;
+			m_isCaretVisible = !m_isCaretVisible;
 		}
 	}
 }
@@ -126,133 +143,209 @@ void TextBox::SetFocus(bool focus)
 {
 	IControl::SetFocus(focus);
 	if (focus)
-	{
-		m_caret = 0;
 		MoveCaret(static_cast<int>(m_text.size()));
-		m_caretTimer = 0.0f;
-		m_drawCaret = true;
-	}
 }
 
 bool TextBox::IsFocus() const
 {
-	if (!m_owner)
+	if (!IControl::IsFocus())
 		return false;
-	return m_owner->IsFocus() && m_isFocus;
+	if (!m_owner->IsFocus())
+		return false;
+	return true;
 }
 
-void TextBox::SetMultiLine(bool isMultiLine)
+void TextBox::Build(const std::shared_ptr<Resource::Property>& prop)
 {
-	m_isMultiLine = isMultiLine;
-}
+	/*
+	- Z(Int)
+		- 그려질 레이어의 z값
+	- Position(Int2)
+		- 위치
+	- FontName(String)
+		- 폰트 이름
+	- FontSize(Float)
+		- 폰트 크기
+	- MultiLine(Int)
+		- 1이면 여러줄 입력 가능. 그 외는 한 줄만 입력 가능
+	- Password(Int)
+		- 1이면 텍스트를 '*' 로 표시
+	- Normal, Focus
+		- 각 상태일 때 보여질 이미지. 아래 1, 2번 중 한 가지여야 함
+		1. Sprite
+			- 해당 스프라이트를 그림
+		2. Folder
+			- Size(Int2) : 가로, 세로 길이
+			- BackgroundColor(Int) : 배경 색깔 RGB(0xRRGGBB)
+			- OutlineColor(Int) : 테두리 색깔 RGB(0xRRGGBB)
+	*/
 
-void TextBox::SetVerticalScroll(bool hasVerticalScroll)
-{
-	m_hasVerticalScroll = hasVerticalScroll;
-}
+	if (!prop)
+		return;
 
-void TextBox::SetHorizontalScroll(bool hasHorizontalScroll)
-{
-	m_hasHorizontalScroll = hasHorizontalScroll;
-}
+	SetZ(prop->GetInt(L"Z"));
+	SetPosition(prop->GetInt2(L"Position"));
+	m_isMultiLine = prop->GetInt(L"MultiLine") == 1;
+	m_isPassword = prop->GetInt(L"Password") == 1;
 
-void TextBox::UpdateOffset()
-{
-	auto metrics{ GetTextMetrics(m_caret) };
-	int textWidth{ static_cast<int>(metrics.left) };
-	int textBoxWidth{ m_size.x - (MARGIN_LEFT + MARGIN_RIGHT) };
-	int textBoxHeight{ m_size.y - (MARGIN_TOP + MARGIN_BOTTOM) };
+	std::array visuals{
+		std::pair{ L"Normal", Visual{} },
+		std::pair{ L"Focus", Visual{} }
+	};
 
-	// 우측 스크롤
-	if (textWidth + m_offset.x >= textBoxWidth)
-		m_offset.x = textBoxWidth - textWidth;
+	for (auto& [key, visual] : visuals)
+	{
+		auto p{ prop->Get(key) };
+		switch (p->GetType())
+		{
+		case Resource::Property::Type::Folder:
+		{
+			INT2 size{ p->GetInt2(L"Size") };
+			int32_t backgroundColor{ p->GetInt(L"BackgroundColor") };
+			int32_t outlineColor{ p->GetInt(L"OutlineColor") };
+			visual = std::make_tuple(size, backgroundColor, outlineColor);
+			break;
+		}
+		case Resource::Property::Type::Sprite:
+		{
+			visual = p->GetSprite();
+			break;
+		}
+		default:
+			assert(false && "INVALID TYPE");
+			break;
+		}
+	}
 
-	// 좌측 스크롤
-	else if (textWidth + m_offset.x < 0)
-		m_offset.x = -textWidth;
+	std::ranges::copy(visuals | std::views::elements<1>, m_visuals.begin());
 
-	// 하단 스크롤
-	if (metrics.top + metrics.height + m_offset.y > textBoxHeight)
-		m_offset.y = textBoxHeight - static_cast<int>(metrics.top + metrics.height);
-
-	// 상단 스크롤
-	else if (metrics.top + m_offset.y < 0)
-		m_offset.y = static_cast<int>(-metrics.top) + MARGIN_TOP;
+	// 크기는 "normal" 을 기준으로 설정
+	if (std::holds_alternative<std::shared_ptr<Resource::Sprite>>(m_visuals[0]))
+	{
+		auto sprite{ std::get<std::shared_ptr<Resource::Sprite>>(m_visuals[0]) };
+		SetSize(sprite->GetSize());
+	}
+	else
+	{
+		const auto& [size, _, __] { std::get<1>(m_visuals[0]) };
+		SetSize(size);
+	}
 }
 
 void TextBox::RenderBackground() const
 {
-	RECTI rect{ 0, 0, m_size.x, m_size.y };
-	rect.Offset(m_position);
+	const auto& visual{ IsFocus() ? m_visuals[1] : m_visuals[0] };
+	if (visual.index() == 0)
+	{
 
-	RECTI outline{ rect };
-	outline.Offset({ 0, 3 });
+	}
+	else
+	{
+		auto [size, backgroundColor, outlineColor] { std::get<1>(visual) };
 
-	D2D1::ColorF outlineColor{ IsFocus() ? D2D1::ColorF::DeepSkyBlue : D2D1::ColorF::WhiteSmoke };
-	//Renderer2D::DrawRoundRect(outline, { 3.0f, 3.0f }, outlineColor);
+		RECTF rect{ 0, 0, static_cast<float>(size.x), static_cast<float>(size.y) };
+		rect.Offset(m_position);
 
-	D2D1::ColorF color{ IsFocus() ? D2D1::ColorF::White : D2D1::ColorF::Gray };
-	//Renderer2D::DrawRoundRect(rect, { 2.0f, 2.0f }, color);
+		RECTF outlineRect{ rect };
+		outlineRect.Offset({ 0, 3 });
+
+		Graphics::D2D::DrawRoundRect(outlineRect, { 7.0f, 7.0f }, outlineColor);
+		Graphics::D2D::DrawRoundRect(rect, { 5.0f, 5.0f }, backgroundColor);
+	}
 }
 
 void TextBox::RenderText() const
 {
-	if (!m_textLayout)
-		return;
-
 	Graphics::D2D::PushClipRect(
 		RECTF{
-			MARGIN_LEFT,
-			MARGIN_TOP,
-			static_cast<float>(m_size.x - MARGIN_RIGHT),
-			static_cast<float>(m_size.y - MARGIN_BOTTOM)
+			PADDING_LEFT,
+			PADDING_TOP,
+			static_cast<float>(m_size.x - PADDING_RIGHT),
+			static_cast<float>(m_size.y - PADDING_BOTTOM)
 		}.Offset(m_position)
 	);
-	//Renderer2D::DrawText(m_position + INT2{ MARGIN_LEFT, MARGIN_TOP } + m_offset, m_textLayout, D2D1::ColorF::Black);
+
+	std::wstring text;
+	if (m_isPassword)
+		text.assign(m_text.size(), L'*');
+	else
+		text = m_text;
+	Graphics::D2D::DrawText(text, m_font, Graphics::D2D::Color::Black, m_position + INT2{ PADDING_LEFT, PADDING_TOP } + m_scrollOffset, Pivot::LeftTop);
 	Graphics::D2D::PopClipRect();
 }
 
 void TextBox::RenderCaret() const
 {
-	if (!IsFocus() || !m_drawCaret)
+	if (!IsFocus() || !m_isCaretVisible)
 		return;
 
 	constexpr auto CARET_WIDTH{ 2 };
-	constexpr auto CARET_HEIGHT{ 16 };
-	RECTI caret{ 0, 0, CARET_WIDTH, CARET_HEIGHT };
+	RECTI caret{ 0, 0, CARET_WIDTH, static_cast<int>(m_font.size) };
 	caret.Offset(m_position);
-	caret.Offset({ MARGIN_LEFT, 5 });
-	if (m_textLayout)
-	{
-		auto metrics{ GetTextMetrics(m_caret) };
-		caret.Offset({ static_cast<int>(metrics.left), static_cast<int>(metrics.top) });
-	}
-	caret.Offset({ m_offset.x, m_offset.y });
+	caret.Offset(INT2{ m_metrics.left, m_metrics.top });
+	caret.Offset(INT2{ m_scrollOffset.x, m_scrollOffset.y });
+	caret.Offset(INT2{ PADDING_LEFT, static_cast<int>(m_metrics.height - m_font.size) });
 	Graphics::D2D::DrawRect(caret, Graphics::D2D::Color::Black);
 }
 
-void TextBox::SetText(const std::wstring& text)
+void TextBox::SetText(std::wstring_view text)
 {
 	m_text = text;
-	//m_textLayout = Renderer2D::CreateTextLayout(m_text, m_textFormat, m_size.x - MARGIN_LEFT, m_size.y);
-	if (!m_isMultiLine)
-		m_textLayout->SetWordWrapping(DWRITE_WORD_WRAPPING_NO_WRAP);
+
+	std::wstring temp;
+	if (m_isPassword)
+		temp.assign(m_caretPosition, L'*');
+	else
+		temp = m_text.substr(0, m_caretPosition);
+	m_metrics = Graphics::D2D::GetTextMetrics(temp, m_font);
+
+	m_isCaretVisible = true;
 	m_caretTimer = 0.0f;
-	m_drawCaret = true;
 }
 
-void TextBox::MoveCaret(int count)
+void TextBox::MoveCaret(int distance)
 {
-	m_caret = std::clamp(m_caret + count, 0, static_cast<int>(m_text.size()));
-	m_caretTimer = 0.0f;
-	m_drawCaret = true;
+	m_caretPosition = std::clamp(m_caretPosition + distance, 0, static_cast<int>(m_text.size()));
 
-	UpdateOffset();
+	std::wstring temp;
+	if (m_isPassword)
+		temp.assign(m_caretPosition, L'*');
+	else
+		temp = m_text.substr(0, m_caretPosition);
+	m_metrics = Graphics::D2D::GetTextMetrics(temp, m_font);
+
+	m_isCaretVisible = true;
+	m_caretTimer = 0.0f;
+
+	UpdateScrollOffset();
+}
+
+void TextBox::UpdateScrollOffset()
+{
+	int textWidth{ static_cast<int>(m_metrics.left) };
+	int textBoxWidth{ m_size.x - (PADDING_LEFT + PADDING_RIGHT) };
+	int textBoxHeight{ m_size.y - (PADDING_TOP + PADDING_BOTTOM) };
+
+	// 우측 스크롤
+	if (textWidth + m_scrollOffset.x >= textBoxWidth)
+		m_scrollOffset.x = textBoxWidth - textWidth;
+
+	// 좌측 스크롤
+	else if (textWidth + m_scrollOffset.x < 0)
+		m_scrollOffset.x = -textWidth;
+
+	// 하단 스크롤
+	if (m_metrics.top + m_metrics.height + m_scrollOffset.y > textBoxHeight)
+		m_scrollOffset.y = textBoxHeight - static_cast<int>(m_metrics.top + m_metrics.height);
+
+	// 상단 스크롤
+	else if (m_metrics.top + m_scrollOffset.y < 0)
+		m_scrollOffset.y = static_cast<int>(-m_metrics.top) + PADDING_TOP;
 }
 
 void TextBox::InsertCharacter(wchar_t character)
 {
-	m_text.insert(m_caret, 1, character);
+	m_text.insert(m_caretPosition, 1, character);
 	SetText(m_text);
 }
 
@@ -260,17 +353,7 @@ void TextBox::EraseCharacter()
 {
 	if (m_text.empty())
 		return;
-	m_text.erase(m_caret, 1);
+
+	m_text.erase(m_caretPosition, 1);
 	SetText(m_text);
-}
-
-DWRITE_HIT_TEST_METRICS TextBox::GetTextMetrics(int position) const
-{
-	if (!m_textLayout || position < 0)
-		return {};
-
-	FLOAT2 pos{};
-	DWRITE_HIT_TEST_METRICS metrics{};
-	m_textLayout->HitTestTextPosition(position, TRUE, &pos.x, &pos.y, &metrics);
-	return metrics;
 }

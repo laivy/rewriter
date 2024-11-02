@@ -4,7 +4,7 @@ namespace Graphics::D2D
 {
 	struct Font
 	{
-		std::wstring_view name;
+		std::wstring name;
 		float size;
 	};
 }

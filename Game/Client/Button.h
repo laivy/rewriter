@@ -3,10 +3,9 @@
 
 class Button : public IControl
 {
-public:
-	using Visual = std::variant<std::shared_ptr<Resource::Sprite>, std::tuple<FLOAT2, FLOAT2, int32_t>>;
-
 private:
+	using Visual = std::variant<std::shared_ptr<Resource::Sprite>, std::tuple<INT2, FLOAT2, int32_t>>;
+
 	enum class State
 	{
 		Normal,
@@ -16,7 +15,7 @@ private:
 	};
 
 public:
-	Button(IWindow* owner);
+	Button(IWindow* owner, const std::shared_ptr<Resource::Property>& prop = nullptr);
 	~Button() = default;
 
 	virtual void OnMouseEnter(int x, int y) override final;
@@ -25,15 +24,13 @@ public:
 
 	virtual void Render() const override final;
 
-	void SetVisuals(const Visual& normal, const Visual& hover, const Visual& active, const Visual& disable);
+private:
+	void Build(const std::shared_ptr<Resource::Property>& prop);
 
 public:
 	Delegate<> OnButtonClick;
 
 private:
 	State m_state;
-	Visual m_normal;
-	Visual m_hover;
-	Visual m_active;
-	Visual m_disable;
+	std::array<Visual, 4> m_visuals;
 };

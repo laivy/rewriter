@@ -2,21 +2,23 @@
 #include "App.h"
 #include "Button.h"
 #include "Control.h"
+#include "TextBox.h"
 #include "Window.h"
 
 namespace
 {
+	constexpr std::wstring_view INFO{ L"Info" };
 	constexpr std::wstring_view NINE_PATCH{ L"NinePatch" };
 	constexpr std::wstring_view BUTTON_PREFIX{ L"Button:" };
+	constexpr std::wstring_view TEXTBOX_PREFIX{ L"TextBox:" };
 }
 
 IWindow::IWindow(std::wstring_view path) :
 	m_titleBarRect{},
-	m_pickPos{},
-	m_isPicked{ false }
+	m_isPicked{},
+	m_pickPos{}
 {
 	auto prop{ Resource::Get(path) };
-	SetSize(prop->GetInt2(L"Size"));
 	Build(prop);
 }
 
@@ -141,12 +143,54 @@ void IWindow::Build(const std::shared_ptr<Resource::Property>& prop, std::wstrin
 {
 	for (const auto& [name, child] : *prop)
 	{
-		if (name.starts_with(NINE_PATCH))
+		if (name.starts_with(INFO))
+		{
+			SetInfo(child);
+		}
+		else if (name.starts_with(NINE_PATCH))
+		{
 			SetNinePatch(child);
-		if (name.starts_with(BUTTON_PREFIX))
-			RegisterButton(child, path);
+		}
+		else if (name.starts_with(BUTTON_PREFIX))
+		{
+			auto button{ std::make_shared<Button>(this, child) };
+			std::wstring controlName{ name.substr(BUTTON_PREFIX.size()) };
+			if (!path.empty())
+				controlName = std::format(L"{}/{}", path, controlName);
+			button->SetName(controlName);
+			Register(button);
+		}
+		else if (name.starts_with(TEXTBOX_PREFIX))
+		{
+			auto textBox{ std::make_shared<TextBox>(this, child) };
+			std::wstring controlName{ name.substr(TEXTBOX_PREFIX.size()) };
+			if (!path.empty())
+				controlName = std::format(L"{}/{}", path, controlName);
+			textBox->SetName(controlName);
+			Register(textBox);
+		}
+
 		Build(child, std::format(L"{}/{}", path, name));
 	}
+}
+
+void IWindow::SetInfo(const std::shared_ptr<Resource::Property>& prop)
+{
+	/*
+	- Size(Int2)
+		- 윈도우 크기
+	- TitleBarLT(Int2), TitleBarRB(Int2)
+		- 타이틀바(드래그 영역) 좌상단, 우하단 좌표
+	*/
+
+	SetSize(prop->GetInt2(L"Size"));
+
+	auto titleBarLT{ prop->GetInt2(L"TitleBarLT") };
+	auto titleBarRB{ prop->GetInt2(L"TitleBarRB") };
+	m_titleBarRect.left = titleBarLT.x;
+	m_titleBarRect.top = titleBarLT.y;
+	m_titleBarRect.right = titleBarRB.x;
+	m_titleBarRect.bottom = titleBarRB.y;
 }
 
 void IWindow::SetNinePatch(const std::shared_ptr<Resource::Property>& prop)
@@ -160,64 +204,6 @@ void IWindow::SetNinePatch(const std::shared_ptr<Resource::Property>& prop)
 			m_ninePatch[index] = sprite;
 		++index;
 	}
-}
-
-void IWindow::RegisterButton(const std::shared_ptr<Resource::Property>& prop, std::wstring_view path)
-{
-	/*
-	- Z(Int)
-		- 그려질 레이어의 z값
-	- Position(INT2)
-		- 위치
-	- Normal, Hover, Active, Disable
-		- 각 상태일 때 보여질 이미지. 아래 1, 2번 중 한 가지여야 함
-		1. Sprite
-			- 해당 스프라이트를 그림
-		2. Folder
-			- Size(INT2) : 가로, 세로 길이
-			- Radius(INT2) : 모서리의 둥근 정도
-			- Color(Int) : RGB(0xRRGGBB)
-	*/
-
-	auto name{ prop->GetName().substr(BUTTON_PREFIX.size()) };
-	auto z{ prop->GetInt(L"Z") };
-	auto position{ prop->GetInt2(L"Position") };
-
-	std::array visuals{
-		std::pair{ L"Normal", Button::Visual{} },
-		std::pair{ L"Hover", Button::Visual{} },
-		std::pair{ L"Active", Button::Visual{} },
-		std::pair{ L"Disable", Button::Visual{} }
-	};
-	for (auto& [key, visual] : visuals)
-	{
-		auto p{ prop->Get(key) };
-		switch (p->GetType())
-		{
-		case Resource::Property::Type::Folder:
-		{
-			FLOAT2 size{ p->GetInt2(L"Size") };
-			FLOAT2 radius{ p->GetInt2(L"Radius") };
-			int32_t color{ p->GetInt(L"Color") };
-			visual = std::make_tuple(size, radius, color);
-			break;
-		}
-		case Resource::Property::Type::Sprite:
-		{
-			visual = p->GetSprite();
-			break;
-		}
-		default:
-			break;
-		}
-	}
-
-	auto button{ std::make_shared<Button>(this) };
-	button->SetZ(z);
-	button->SetPosition(position);
-	button->SetName(path.empty() ? name : std::format(L"{}/{}", path, name));
-	button->SetVisuals(visuals[0].second, visuals[1].second, visuals[2].second, visuals[3].second);
-	Register(button);
 }
 
 void IWindow::UpdateMouseOverControl(int x, int y)
