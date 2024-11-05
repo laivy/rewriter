@@ -5,10 +5,6 @@ class IControl;
 
 class IWindow abstract : public IUserInterface
 {
-	template<class T>
-	requires std::is_base_of_v<IWindow, T>
-	friend class WindowBuilder;
-
 public:
 	IWindow(std::wstring_view path = L"");
 	virtual ~IWindow() = default;
@@ -23,7 +19,6 @@ public:
 	void Register(const std::shared_ptr<IControl>& control);
 
 protected:
-	std::shared_ptr<Graphics::D2D::Layer> GetLayer(int z);
 	std::shared_ptr<Graphics::D2D::Layer> GetLayer(int z) const;
 
 	template<class T = IControl>

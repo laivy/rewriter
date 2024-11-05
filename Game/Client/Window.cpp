@@ -41,7 +41,7 @@ void IWindow::OnMouseEvent(UINT message, int x, int y)
 	case WM_LBUTTONDOWN:
 	{
 		// 피킹 됐는지 확인
-		if (m_titleBarRect.Contains({ x, y }))
+		if (m_titleBarRect.Contains(INT2{ x, y }))
 		{
 			m_isPicked = true;
 			m_pickPos = { x, y };
@@ -60,11 +60,8 @@ void IWindow::OnMouseEvent(UINT message, int x, int y)
 		break;
 	}
 
-	for (const auto& control : m_controls)
+	if (auto control{ m_focusControl.lock() })
 	{
-		if (!control->Contains({x, y}))
-			continue;
-
 		auto pos{ control->GetPosition() };
 		control->OnMouseEvent(message, x - pos.x, y - pos.y);
 	}
@@ -75,13 +72,17 @@ void IWindow::OnKeyboardEvent(UINT message, WPARAM wParam, LPARAM lParam)
 	switch (message)
 	{
 	case WM_KEYDOWN:
+	{
 		if (wParam == VK_ESCAPE)
 			Destroy();
 		break;
 	}
+	default:
+		break;
+	}
 
-	if (auto c{ m_focusControl.lock() })
-		c->OnKeyboardEvent(message, wParam, lParam);
+	if (auto control{ m_focusControl.lock() })
+		control->OnKeyboardEvent(message, wParam, lParam);
 }
 
 void IWindow::Update(float deltaTime)
@@ -120,15 +121,13 @@ void IWindow::Render() const
 
 void IWindow::Register(const std::shared_ptr<IControl>& control)
 {
-	GetLayer(control->GetZ());
-	m_controls.push_back(control);
-}
-
-std::shared_ptr<Graphics::D2D::Layer> IWindow::GetLayer(int z)
-{
+	// 레이어 생성
+	int z{ control->GetZ() };
 	if (!m_layers.contains(z))
-		m_layers.emplace(z, Graphics::D2D::CreateLayer(m_size));
-	return m_layers[z];
+		m_layers.emplace(z, Graphics::D2D::CreateLayer(GetSize()));
+
+	// 삽입 정렬
+	m_controls.insert(std::ranges::upper_bound(m_controls, control, [](const auto& lhs, const auto& rhs) { return lhs->GetZ() < rhs->GetZ(); }), control);
 }
 
 std::shared_ptr<Graphics::D2D::Layer> IWindow::GetLayer(int z) const

@@ -155,6 +155,11 @@ bool TextBox::IsFocus() const
 	return true;
 }
 
+std::wstring TextBox::GetText() const
+{
+	return m_text;
+}
+
 void TextBox::Build(const std::shared_ptr<Resource::Property>& prop)
 {
 	/*
@@ -185,6 +190,8 @@ void TextBox::Build(const std::shared_ptr<Resource::Property>& prop)
 
 	SetZ(prop->GetInt(L"Z"));
 	SetPosition(prop->GetInt2(L"Position"));
+	m_font.name = prop->GetString(L"FontName");
+	m_font.size = prop->GetFloat(L"FontSize");
 	m_isMultiLine = prop->GetInt(L"MultiLine") == 1;
 	m_isPassword = prop->GetInt(L"Password") == 1;
 

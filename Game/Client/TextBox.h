@@ -18,6 +18,8 @@ public:
 	virtual void SetFocus(bool focus) override final;
 	virtual bool IsFocus() const override final;
 
+	std::wstring GetText() const;
+
 private:
 	void Build(const std::shared_ptr<Resource::Property>& prop);
 
