@@ -151,7 +151,7 @@ void App::InitApp()
 
 	// 싱글톤 생성
 	SocketManager::Instantiate();
-	//LoginServer::Instantiate();
+	LoginServer::Instantiate();
 	SceneManager::Instantiate();
 }
 

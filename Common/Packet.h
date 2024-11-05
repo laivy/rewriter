@@ -11,11 +11,11 @@ public:
 		// 회원가입
 		RequestRegister,
 		RequestRegisterToCenter,
-		RegisterCenterResult,
+		RegisterResultToLogin,
 		RegisterResult,
 
 		// 로그인
-		RequestLoginIn,
+		RequestLogin,
 		LoginResult,
 	};
 
@@ -48,7 +48,6 @@ public:
 	}
 
 	void EncodeBuffer(const char* buffer, Size size);
-	void End();
 
 	char* Detach();
 
@@ -59,15 +58,6 @@ public:
 	Size GetSize() const;
 
 private:
-	template<class T>
-	void EncodeAt(const T& data, unsigned int offset)
-	{
-		auto temp{ m_offset };
-		SetOffset(offset);
-		_Encode(data);
-		SetOffset(temp);
-	}
-
 	// 버퍼에 sizeof(T) 만큼 씀
 	template<class T>
 	void _Encode(const T& data)
@@ -77,16 +67,19 @@ private:
 
 		std::memcpy(m_buffer.get() + m_offset, &data, sizeof(T));
 		m_offset += sizeof(T);
-		m_encodedSize = std::max<unsigned int>(m_encodedSize, m_offset);
+		m_encodedSize = std::max<Size>(m_encodedSize, m_offset);
+
+		// 패킷 크기 갱신
+		std::memcpy(m_buffer.get(), &m_encodedSize, sizeof(m_encodedSize));
 	}
 
 	// 배열은 원소 개수 + 데이터를 씀
-	template<class T>
+	template<class T, size_t N>
 	requires std::is_array_v<T>
-	void _Encode(const T& data)
+	void _Encode(T (&data)[N])
 	{
-		_Encode(data.size());
-		EncodeBuffer(data.data(), sizeof(T));
+		_Encode(static_cast<unsigned int>(N));
+		EncodeBuffer(data, N * sizeof(T));
 	}
 
 	// 문자열은 글자 개수 + 데이터를 씀
@@ -96,6 +89,15 @@ private:
 	{
 		_Encode(static_cast<unsigned int>(data.size()));
 		EncodeBuffer(reinterpret_cast<const char*>(data.data()), static_cast<Packet::Size>(data.size() * sizeof(T::value_type)));
+	}
+
+	template<class T>
+	void EncodeAt(const T& data, Size offset)
+	{
+		auto temp{ m_offset };
+		SetOffset(offset);
+		_Encode(data);
+		SetOffset(temp);
 	}
 
 	// 버퍼에서 sizeof(T) 만큼 읽어서 T로 반환

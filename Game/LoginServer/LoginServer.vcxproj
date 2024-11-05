@@ -107,6 +107,10 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="..\..\Common\Socket.cpp" />
+    <ClCompile Include="..\..\Common\Time.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
+    </ClCompile>
     <ClCompile Include="..\..\Common\Timer.cpp" />
     <ClCompile Include="..\..\Common\Types.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
@@ -165,6 +169,7 @@
     <ClInclude Include="..\..\Common\Socket.h" />
     <ClInclude Include="..\..\Common\Stdafx.h" />
     <ClInclude Include="..\..\Common\Stringtable.h" />
+    <ClInclude Include="..\..\Common\Time.h" />
     <ClInclude Include="..\..\Common\Timer.h" />
     <ClInclude Include="..\..\Common\Types.h" />
     <ClInclude Include="..\..\Common\Util.h" />

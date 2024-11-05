@@ -9,8 +9,9 @@ public:
 	ClientSocket(SOCKET socket);
 	~ClientSocket();
 
+	virtual void OnPacket(Packet& packet) override final;
+
 private:
-	void OnPacket(Packet& packet);
 	void OnRegisterRequest(Packet& packet);
 	void OnLoginRequest(Packet& packet);
 

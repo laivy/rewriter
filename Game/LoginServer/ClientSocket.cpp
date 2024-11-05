@@ -4,9 +4,9 @@
 #include "User.h"
 #include "UserManager.h"
 
-ClientSocket::ClientSocket(SOCKET socket)
+ClientSocket::ClientSocket(SOCKET socket) :
+	ISocket{ socket }
 {
-	m_socket = socket;
 }
 
 ClientSocket::~ClientSocket()
@@ -32,7 +32,7 @@ void ClientSocket::OnPacket(Packet& packet)
 	case Packet::Type::RequestRegister:
 		OnRegisterRequest(packet);
 		break;
-	case Packet::Type::RequestLoginIn:
+	case Packet::Type::RequestLogin:
 		OnLoginRequest(packet);
 		break;
 	}
@@ -50,8 +50,6 @@ void ClientSocket::OnRegisterRequest(Packet& packet)
 
 void ClientSocket::OnLoginRequest(Packet& packet)
 {
-	auto [id, pw] { packet.Decode<std::string, std::string>() };
-
 	Packet outPacket{ Packet::Type::LoginResult };
 	outPacket.Encode(false);
 	Send(outPacket);

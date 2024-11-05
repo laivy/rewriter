@@ -1,12 +1,5 @@
 #include "Stdafx.h"
 #include "Socket.h"
-#if defined _CLIENT
-#include "Game/Client/App.h"
-#elif defined _CENTER_SERVER
-#include "Game/CenterServer/App.h"
-#elif defined _LOGIN_SERVER
-#include "Game/LoginServer/App.h"
-#endif
 
 ISocket::SendBuffer::SendBuffer() :
 	overlappedEx{},
@@ -34,8 +27,8 @@ ISocket::SendBuffer& ISocket::SendBuffer::operator=(SendBuffer&& other) noexcept
 	return *this;
 }
 
-ISocket::ISocket() :
-	m_socket{ INVALID_SOCKET }
+ISocket::ISocket(SOCKET socket) :
+	m_socket{ socket }
 {
 }
 
@@ -54,17 +47,18 @@ ISocket::operator SOCKET()
 	return m_socket;
 }
 
-void ISocket::OnDisconnect()
+void ISocket::OnSend(OverlappedEx* overlappedEx)
 {
-	Disconnect();
-}
-
-void ISocket::OnSend(Packet::Size ioSize)
-{
+	std::lock_guard lock{ m_mutex };
+	auto it{ std::ranges::find_if(m_sendBuffers, [overlappedEx](const auto& sendBuffer) { return &sendBuffer.overlappedEx == overlappedEx; }) };
+	if (it != m_sendBuffers.end())
+		m_sendBuffers.erase(it);
 }
 
 void ISocket::OnReceive(Packet::Size ioSize)
 {
+	std::lock_guard lock{ m_mutex };
+
 	// 조립 중인 패킷이 있는 경우는 버퍼 뒤에 붙임
 	if (m_receiveBuffer.packet && m_receiveBuffer.remainPacketSize > 0)
 	{
@@ -80,21 +74,29 @@ void ISocket::OnReceive(Packet::Size ioSize)
 	{
 		m_receiveBuffer.packet = std::make_unique<Packet>(m_receiveBuffer.buffer.data(), ioSize);
 
-		Packet::Size packetSize{ 0 };
-		std::memcpy(&packetSize, m_receiveBuffer.buffer.data(), sizeof(packetSize));
-		if (packetSize > ioSize)
-			m_receiveBuffer.remainPacketSize = packetSize - ioSize;
+		auto size{ m_receiveBuffer.packet->GetSize() };
+		if (size > ioSize)
+			m_receiveBuffer.remainPacketSize = size - ioSize;
 	}
 
 	// 패킷 완성
 	if (m_receiveBuffer.packet && m_receiveBuffer.remainPacketSize == 0)
 	{
 		m_receiveBuffer.packet->SetOffset(0);
-		App::OnPacket.Notify(*m_receiveBuffer.packet);
+		OnPacket(*m_receiveBuffer.packet);
 		m_receiveBuffer.packet.reset();
 	}
 
 	Receive();
+}
+
+void ISocket::OnPacket(Packet& packet)
+{
+}
+
+void ISocket::OnDisconnect()
+{
+	Disconnect();
 }
 
 bool ISocket::Connect(std::wstring_view ip, unsigned short port)
@@ -110,7 +112,7 @@ bool ISocket::Connect(std::wstring_view ip, unsigned short port)
 	addr.sin_family = AF_INET;
 	addr.sin_port = ::htons(port);
 	::InetPtonW(AF_INET, ip.data(), &(addr.sin_addr.s_addr));
-	if (::WSAConnect(m_socket, reinterpret_cast<sockaddr*>(&addr), sizeof(addr), nullptr, nullptr, nullptr, nullptr))
+	if (::WSAConnect(m_socket, reinterpret_cast<sockaddr*>(&addr), sizeof(addr), nullptr, nullptr, nullptr, nullptr) == SOCKET_ERROR)
 	{
 		assert(false && "CONNECT FAIL");
 		Disconnect();
@@ -128,35 +130,47 @@ void ISocket::Disconnect()
 		m_socket = INVALID_SOCKET;
 	}
 
-	std::vector<SendBuffer>{}.swap(m_sendBuffers);
+	std::lock_guard lock{ m_mutex };
+	std::list<SendBuffer>{}.swap(m_sendBuffers);
 	m_receiveBuffer = {};
 	m_receiveBuffer.overlappedEx.op = IOOperation::Receive;
 }
 
 void ISocket::Send(Packet& packet)
 {
-	SendBuffer sendBuffer{};
+	std::lock_guard lock{ m_mutex };
+
+	auto& sendBuffer{ m_sendBuffers.emplace_back() };
 	sendBuffer.overlappedEx.op = IOOperation::Send;
 	sendBuffer.size = packet.GetSize();
 	sendBuffer.buffer.reset(packet.Detach());
 
 	WSABUF wsaBuf{ sendBuffer.size, sendBuffer.buffer.get() };
-	if (::WSASend(m_socket, &wsaBuf, 1, 0, 0, &sendBuffer.overlappedEx, nullptr) && ::WSAGetLastError() != WSA_IO_PENDING)
+	if (::WSASend(m_socket, &wsaBuf, 1, nullptr, 0, &sendBuffer.overlappedEx, nullptr) == SOCKET_ERROR)
 	{
-		Disconnect();
-		return;
+		if (::WSAGetLastError() != WSA_IO_PENDING)
+		{
+			OnDisconnect();
+			return;
+		}
 	}
-
-	m_sendBuffers.push_back(std::move(sendBuffer));
 }
 
 void ISocket::Receive()
 {
+	std::lock_guard lock{ m_mutex };
+
 	m_receiveBuffer.overlappedEx.op = IOOperation::Receive;
 	WSABUF wsaBuf{ static_cast<unsigned long>(m_receiveBuffer.buffer.size()), m_receiveBuffer.buffer.data() };
 	DWORD flag{};
-	if (::WSARecv(m_socket, &wsaBuf, 1, 0, &flag, &m_receiveBuffer.overlappedEx, nullptr) && ::WSAGetLastError() != WSA_IO_PENDING)
-		Disconnect();
+	if (::WSARecv(m_socket, &wsaBuf, 1, nullptr, &flag, &m_receiveBuffer.overlappedEx, nullptr) == SOCKET_ERROR)
+	{
+		if (::WSAGetLastError() != WSA_IO_PENDING)
+		{
+			Disconnect();
+			return;
+		}
+	}
 }
 
 bool ISocket::IsConnected() const

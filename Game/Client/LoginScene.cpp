@@ -6,8 +6,6 @@
 
 LoginScene::LoginScene()
 {
-	App::OnPacket.Register(this, std::bind_front(&LoginScene::OnPacket, this));
-
 #ifdef _DEBUG
 	auto window{ std::make_shared<DebugWindow>(L"UI.dat/Debug")};
 	WindowManager::GetInstance()->Register(window);

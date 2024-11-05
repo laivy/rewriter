@@ -22,7 +22,6 @@ public:
 	static inline Delegate<UINT, WPARAM, LPARAM> OnKeyboardEvent;
 	static inline Delegate<UINT, int, int> OnMouseEvent;
 	static inline Delegate<int, int> OnResize;
-	static inline Delegate<Packet&> OnPacket;
 
 	static constexpr auto WINDOW_TITLE_NAME{ L"REWRITER" };
 	static inline HWND hWnd{ NULL };

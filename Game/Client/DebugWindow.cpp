@@ -3,6 +3,7 @@
 #include "Button.h"
 #include "Control.h"
 #include "DebugWindow.h"
+#include "LoginServer.h"
 #include "Modal.h"
 #include "SocketManager.h"
 #include "TextBlock.h"
@@ -58,12 +59,11 @@ DebugWindow::DebugWindow(std::wstring_view path) :
 	IWindow{ path }
 {
 	SetPosition(App::size / 2, Pivot::Center);
-	GetControl<Button>(L"Button")->OnButtonClick.Register(
-		[]()
-		{
-			::OutputDebugString(L"Button Clicked!\n");
-		});
-	App::OnPacket.Register(this, std::bind_front(&DebugWindow::OnPacket, this));
+	if (auto button{ GetControl<Button>(L"Login") })
+		button->OnButtonClick.Register([this]() { OnLoginButtonClicked(); });
+	if (auto button{ GetControl<Button>(L"Register") })
+		button->OnButtonClick.Register([this]() { OnRegisterButtonClicked(); });
+	//App::OnPacket.Register(this, std::bind_front(&DebugWindow::OnPacket, this));
 }
 
 void DebugWindow::OnMouseEvent(UINT message, int x, int y)
@@ -87,5 +87,23 @@ void DebugWindow::Render() const
 }
 
 void DebugWindow::OnPacket(Packet& packet)
+{
+}
+
+void DebugWindow::OnLoginButtonClicked()
+{
+	Packet packet{ Packet::Type::RequestLogin };
+	if (auto textBox{ GetControl<TextBox>(L"ID") })
+		packet.Encode(textBox->GetText());
+	else
+		packet.Encode(L"");
+	if (auto textBox{ GetControl<TextBox>(L"Password") })
+		packet.Encode(textBox->GetText());
+	else
+		packet.Encode(L"");
+	LoginServer::GetInstance()->Send(packet);
+}
+
+void DebugWindow::OnRegisterButtonClicked()
 {
 }

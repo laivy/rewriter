@@ -6,11 +6,15 @@
 #include "Common/Socket.h"
 #ifdef _IMGUI
 #include "Common/ImguiEx.h"
+#include "Common/Time.h"
 #endif
 
 SocketManager::SocketManager() :
 	m_iocp{ INVALID_HANDLE_VALUE },
-	m_listenSocket{ INVALID_SOCKET }
+	m_listenSocket{ INVALID_SOCKET },
+	m_acceptSocket{ INVALID_SOCKET },
+	m_acceptBuffer{},
+	m_acceptOverlappedEx{}
 {
 	WSADATA wsaData{};
 	if (::WSAStartup(MAKEWORD(2, 2), &wsaData))
@@ -62,9 +66,10 @@ SocketManager::SocketManager() :
 		return;
 	}
 
-	// 첫번째 스레드는 클라이언트 연결, 나머지는 패킷 송수신 처리
-	for (size_t i{ 0 }; i < m_threads.size(); ++i)
-		m_threads[i] = std::jthread{ std::bind_front(i == 0 ? &SocketManager::Accept : &SocketManager::Run, this) };
+	for (auto& thread : m_threads)
+		thread = std::jthread{ std::bind_front(&SocketManager::Run, this) };
+
+	Accept();
 }
 
 SocketManager::~SocketManager()
@@ -78,8 +83,10 @@ SocketManager::~SocketManager()
 void SocketManager::Render()
 {
 #ifdef _IMGUI
-	if (ImGui::Begin("SOCKET MANAGER"))
+	if (ImGui::Begin("Socket Manager"))
 	{
+		for (const auto& log : m_logs)
+			ImGui::TextUnformatted(log.c_str());
 	}
 	ImGui::End();
 #endif
@@ -94,23 +101,39 @@ void SocketManager::Run(std::stop_token stoken)
 	{
 		if (::GetQueuedCompletionStatus(m_iocp, &ioSize, reinterpret_cast<PULONG_PTR>(&socket), reinterpret_cast<OVERLAPPED**>(&overlappedEx), INFINITE))
 		{
-			if (socket)
+			if (ioSize == 0 && overlappedEx && overlappedEx->op == ISocket::IOOperation::Connect)
+			{
+				OnConnect();
+				continue;
+			}
+
+			if (!socket)
 				continue;
 
 			if (ioSize == 0)
 			{
-				socket->OnDisconnect();
+				Disconnect(socket);
 				continue;
 			}
 
 			switch (overlappedEx->op)
 			{
 			case ISocket::IOOperation::Send:
-				socket->OnSend(static_cast<Packet::Size>(ioSize));
+			{
+				socket->OnSend(overlappedEx);
 				break;
+			}
 			case ISocket::IOOperation::Receive:
+			{
 				socket->OnReceive(static_cast<Packet::Size>(ioSize));
 				break;
+			}
+			default:
+			{
+				assert(false && "INVALID SOCKET STATE");
+				Disconnect(socket);
+				continue;
+			}
 			}
 			continue;
 		}
@@ -119,76 +142,85 @@ void SocketManager::Run(std::stop_token stoken)
 		switch (error)
 		{
 		case ERROR_NETNAME_DELETED: // 클라이언트에서 강제로 연결 끊음
-			if (socket)
-				socket->OnDisconnect();
+		{
+			Disconnect(socket);
 			continue;
+		}
 		case ERROR_ABANDONED_WAIT_0: // IOCP 핸들 닫힘
-		case ERROR_OPERATION_ABORTED:
+		case ERROR_OPERATION_ABORTED: // IO 작업 취소됨
+		{
 			continue;
+		}
 		default:
+		{
 			assert(false && "IOCP ERROR");
+			Disconnect(socket);
 			continue;
+		}
 		}
 	}
 }
 
-void SocketManager::Accept(std::stop_token stoken)
+void SocketManager::OnConnect()
 {
-	std::array<char, 64> acceptBuffer{};
-	ISocket::OverlappedEx acceptOverlappedEx{};
-	SOCKET acceptSocket{ INVALID_SOCKET };
+	std::lock_guard lock{ m_acceptMutex };
 
-	auto createAcceptSocket =
-		[this, &acceptBuffer, &acceptOverlappedEx, &acceptSocket]()
-		{
-			acceptBuffer.fill(0);
-			acceptOverlappedEx = {};
-			acceptSocket = ::WSASocket(AF_INET, SOCK_STREAM, IPPROTO_TCP, 0, 0, WSA_FLAG_OVERLAPPED);
-			if (acceptSocket == INVALID_SOCKET)
-			{
-				assert(false && "CREATE CLIENT SOCKET FAIL");
-				return false;
-			}
-			if (!::AcceptEx(m_listenSocket, acceptSocket, acceptBuffer.data(), 0, sizeof(SOCKADDR_IN) + 16, sizeof(SOCKADDR_IN) + 16, nullptr, &acceptOverlappedEx) && ::WSAGetLastError() != WSA_IO_PENDING)
-			{
-				assert(false && "ACCEPT FAIL");
-				return false;
-			}
-			return true;
-		};
-
-	if (!createAcceptSocket())
-		return;
-
-	// 클라이언트 연결 처리
-	DWORD ioSize{};
-	ISocket* socket{};
-	ISocket::OverlappedEx* overlappedEx{};
-	while (!stoken.stop_requested())
+	// 소켓 옵션 설정
+	if (::setsockopt(m_acceptSocket, SOL_SOCKET, SO_UPDATE_ACCEPT_CONTEXT, reinterpret_cast<char*>(&m_listenSocket), sizeof(m_listenSocket)))
 	{
-		if (!::GetQueuedCompletionStatus(m_iocp, &ioSize, reinterpret_cast<PULONG_PTR>(&socket), reinterpret_cast<OVERLAPPED**>(&overlappedEx), INFINITE))
-			continue;
-		if (!overlappedEx)
-			continue;
-		if (overlappedEx->op != ISocket::IOOperation::Connect)
-			continue;
+		assert(false && "UPDATE ACCEPT CONTEXT FAIL");
+		return;
+	}
 
-		// 소켓 옵션 설정
-		if (::setsockopt(acceptSocket, SOL_SOCKET, SO_UPDATE_ACCEPT_CONTEXT, reinterpret_cast<char*>(&m_listenSocket), sizeof(m_listenSocket)))
+	auto& clientSocket{ m_sockets.emplace_back(std::make_shared<ClientSocket>(m_acceptSocket)) };
+	Register(clientSocket.get());
+	clientSocket->Receive();
+
+#ifdef _IMGUI
+	SOCKADDR_IN* localAddr{};
+	SOCKADDR_IN* remoteAddr{};
+	int localAddrLen{};
+	int remoteAddrLen{};
+	::GetAcceptExSockaddrs(
+		&m_acceptBuffer,
+		0,
+		sizeof(SOCKADDR_IN) + 16,
+		sizeof(SOCKADDR_IN) + 16,
+		reinterpret_cast<sockaddr**>(&localAddr),
+		&localAddrLen,
+		reinterpret_cast<sockaddr**>(&remoteAddr),
+		&remoteAddrLen
+	);
+
+	std::string ip(INET_ADDRSTRLEN, '\0');
+	::inet_ntop(AF_INET, &remoteAddr->sin_addr, ip.data(), ip.size());
+	std::erase(ip, '\0');
+	Logging(std::format("Accept Client {}:{}", ip, remoteAddr->sin_port));
+#endif
+
+	Accept();
+}
+
+void SocketManager::Accept()
+{
+	std::lock_guard lock{ m_acceptMutex };
+
+	m_acceptBuffer.fill(0);
+	m_acceptOverlappedEx = {};
+	m_acceptSocket = ::WSASocket(AF_INET, SOCK_STREAM, IPPROTO_TCP, 0, 0, WSA_FLAG_OVERLAPPED);
+	if (m_acceptSocket == INVALID_SOCKET)
+	{
+		assert(false && "CREATE ACCEPT SOCKET FAIL");
+		return;
+	}
+
+	if (!::AcceptEx(m_listenSocket, m_acceptSocket, m_acceptBuffer.data(), 0, sizeof(SOCKADDR_IN) + 16, sizeof(SOCKADDR_IN) + 16, nullptr, &m_acceptOverlappedEx))
+	{
+		if (::WSAGetLastError() != WSA_IO_PENDING)
 		{
-			assert(false && "UPDATE ACCEPT CONTEXT FAIL");
-			continue;
+			assert(false && "ACCEPT FAIL");
+			return;
 		}
-
-		// 클라이언트 소켓 객체 생성
-		std::shared_ptr<ISocket> clientSocket{ std::make_shared<ClientSocket>(acceptSocket) };
-		Register(clientSocket.get());
-		clientSocket->Receive();
-		m_sockets.push_back(clientSocket);
-
-		// 계속 Accept
-		if (!createAcceptSocket())
-			break;
 	}
 }
 
@@ -207,3 +239,12 @@ void SocketManager::Disconnect(ISocket* socket)
 		std::erase_if(m_sockets, [socket](const auto& s) { return s.get() == socket; });
 	}
 }
+
+#ifdef _IMGUI
+void SocketManager::Logging(const std::string& log)
+{
+	Time now{ Time::Now() };
+	std::string prefix{ std::format("[{}-{:02}-{:02} {:02}:{:02}:{:02}] ", now.Year(), now.Month(), now.Day(), now.Hour(), now.Min(), now.Sec()) };
+	m_logs.push_back(prefix + log);
+}
+#endif

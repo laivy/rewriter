@@ -13,14 +13,12 @@ Packet::Packet(Packet::Type type) :
 }
 
 Packet::Packet(const char* buffer, Size size) :
-	m_buffer{ nullptr },
-	m_bufferSize{ 0 },
-	m_encodedSize{ 0 },
 	m_offset{ 0 }
 {
 	// 패킷 사이즈만큼 버퍼를 생성
-	std::memcpy(&m_bufferSize, buffer, sizeof(m_bufferSize));
-	m_buffer.reset(new char[m_bufferSize]{});
+	std::memcpy(&m_encodedSize, buffer, sizeof(m_encodedSize));
+	m_buffer.reset(new char[m_encodedSize]{});
+	m_bufferSize = m_encodedSize;
 
 	// 타입
 	std::memcpy(&m_type, buffer + sizeof(m_bufferSize), sizeof(m_type));
@@ -37,12 +35,9 @@ void Packet::EncodeBuffer(const char* buffer, Size size)
 	std::memcpy(m_buffer.get() + m_offset, buffer, size);
 	m_offset += size;
 	m_encodedSize = std::max<Size>(m_encodedSize, m_offset);
-}
 
-void Packet::End()
-{
-	// 패킷 크기를 0 위치에 씀
-	EncodeAt(GetSize(), 0);
+	// 패킷 크기 갱신
+	std::memcpy(m_buffer.get(), &m_encodedSize, sizeof(m_encodedSize));
 }
 
 char* Packet::Detach()

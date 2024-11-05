@@ -75,9 +75,3 @@ public:
 	RECTF& Offset(const FLOAT2& offset);
 	bool Contains(const FLOAT2& point) const;
 };
-
-using MATRIX = D2D1::Matrix3x2F;
-
-using ButtonID = unsigned int;
-using CharacterID = unsigned int;
-using GameObjectID = unsigned int;

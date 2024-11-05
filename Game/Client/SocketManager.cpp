@@ -58,7 +58,7 @@ void SocketManager::Run(std::stop_token stoken)
 			switch (overlappedEx->op)
 			{
 			case ISocket::IOOperation::Send:
-				socket->OnSend(static_cast<Packet::Size>(ioSize));
+				socket->OnSend(overlappedEx);
 				break;
 			case ISocket::IOOperation::Receive:
 				socket->OnReceive(static_cast<Packet::Size>(ioSize));

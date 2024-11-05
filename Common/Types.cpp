@@ -99,9 +99,11 @@ FLOAT2 operator/(const FLOAT2& lhs, FLOAT rhs)
 }
 
 RECTI::RECTI(int32_t left, int32_t top, int32_t right, int32_t bottom) :
-	left{ left }, top{ top }, right{ right }, bottom{ bottom }
+	left{ left },
+	top{ top },
+	right{ right },
+	bottom{ bottom }
 {
-
 }
 
 RECTI& RECTI::Offset(const INT2& offset)

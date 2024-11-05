@@ -17,7 +17,7 @@ public:
 		IOOperation op{ IOOperation::Connect };
 	};
 
-protected:
+private:
 	struct SendBuffer
 	{
 		SendBuffer();
@@ -28,8 +28,8 @@ protected:
 		SendBuffer& operator=(SendBuffer&& other) noexcept;
 
 		OverlappedEx overlappedEx;
-		std::unique_ptr<char[]> buffer;
 		Packet::Size size;
+		std::unique_ptr<char[]> buffer;
 	};
 
 	struct ReceiveBuffer
@@ -41,14 +41,15 @@ protected:
 	};
 
 public:
-	ISocket();
+	ISocket(SOCKET socket = INVALID_SOCKET);
 	virtual ~ISocket();
 
 	operator SOCKET();
 
-	virtual void OnDisconnect();
-	virtual void OnSend(Packet::Size ioSize);
+	virtual void OnSend(OverlappedEx* overlappedEx);
 	virtual void OnReceive(Packet::Size ioSize);
+	virtual void OnPacket(Packet& packet);
+	virtual void OnDisconnect();
 
 	bool Connect(std::wstring_view ip, unsigned short port);
 	void Disconnect();
@@ -56,11 +57,10 @@ public:
 	void Receive();
 
 	bool IsConnected() const;
-	
-protected:
-	SOCKET m_socket;
 
 private:
-	std::vector<SendBuffer> m_sendBuffers;
+	std::recursive_mutex m_mutex;
+	SOCKET m_socket;
+	std::list<SendBuffer> m_sendBuffers;
 	ReceiveBuffer m_receiveBuffer;
 };

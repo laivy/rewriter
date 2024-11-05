@@ -17,4 +17,6 @@ public:
 
 private:
 	void OnPacket(Packet& packet);
+	void OnLoginButtonClicked();
+	void OnRegisterButtonClicked();
 };
