@@ -3,7 +3,7 @@
 class Packet
 {
 public:
-	using Size = uint16_t; // 패킷 타입 크기
+	using Size = uint16_t; // 패킷 크기 타입
 	enum class Type : Size
 	{
 		None,
@@ -21,7 +21,7 @@ public:
 
 public:
 	Packet(Type type);
-	Packet(const char* buffer, Size size);
+	Packet(std::span<char> buffer);
 	~Packet() = default;
 
 	template<class T, class... Args>
@@ -47,7 +47,7 @@ public:
 		return data;
 	}
 
-	void EncodeBuffer(const char* buffer, Size size);
+	void EncodeBuffer(std::span<const char> buffer);
 
 	char* Detach();
 
@@ -62,8 +62,8 @@ private:
 	template<class T>
 	void _Encode(const T& data)
 	{
-		if (m_encodedSize + sizeof(T) > m_bufferSize)
-			ReAlloc(sizeof(T));
+		if (m_offset + sizeof(T) > m_bufferSize)
+			ReAlloc(m_offset + sizeof(T) - m_bufferSize);
 
 		std::memcpy(m_buffer.get() + m_offset, &data, sizeof(T));
 		m_offset += sizeof(T);
@@ -79,7 +79,7 @@ private:
 	void _Encode(T (&data)[N])
 	{
 		_Encode(static_cast<unsigned int>(N));
-		EncodeBuffer(data, N * sizeof(T));
+		EncodeBuffer(std::span{ data, N * sizeof(T) });
 	}
 
 	// 문자열은 글자 개수 + 데이터를 씀
@@ -88,7 +88,7 @@ private:
 	void _Encode(const T& data)
 	{
 		_Encode(static_cast<unsigned int>(data.size()));
-		EncodeBuffer(reinterpret_cast<const char*>(data.data()), static_cast<Packet::Size>(data.size() * sizeof(T::value_type)));
+		EncodeBuffer(std::span{ reinterpret_cast<const char*>(data.data()), data.size() * sizeof(T::value_type) });
 	}
 
 	template<class T>

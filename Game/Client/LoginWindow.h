@@ -1,13 +1,13 @@
 #pragma once
 #include "Window.h"
 
-class DebugWindow : 
+class LoginWindow : 
 	public IWindow,
 	public IObserver
 {
 public:
-	DebugWindow(std::wstring_view path);
-	~DebugWindow() = default;
+	LoginWindow();
+	~LoginWindow() = default;
 
 	virtual void OnMouseEvent(UINT message, int x, int y) override final;
 	virtual void OnKeyboardEvent(UINT message, WPARAM wParam, LPARAM lParam) override final;

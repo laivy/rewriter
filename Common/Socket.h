@@ -48,7 +48,7 @@ public:
 
 	virtual void OnSend(OverlappedEx* overlappedEx);
 	virtual void OnReceive(Packet::Size ioSize);
-	virtual void OnPacket(Packet& packet);
+	virtual void OnComplete(Packet& packet);
 	virtual void OnDisconnect();
 
 	bool Connect(std::wstring_view ip, unsigned short port);

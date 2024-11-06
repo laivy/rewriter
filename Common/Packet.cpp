@@ -12,28 +12,31 @@ Packet::Packet(Packet::Type type) :
 	Encode<Type>(type);
 }
 
-Packet::Packet(const char* buffer, Size size) :
+// 서버를 통해 수신한 데이터로부터 패킷을 조립하는 생성자
+Packet::Packet(std::span<char> buffer) :
+	m_encodedSize{ 0 },
 	m_offset{ 0 }
 {
-	// 패킷 사이즈만큼 버퍼를 생성
-	std::memcpy(&m_encodedSize, buffer, sizeof(m_encodedSize));
-	m_buffer.reset(new char[m_encodedSize]{});
-	m_bufferSize = m_encodedSize;
+	// 패킷 크기만큼 버퍼 생성
+	Size packetSize{};
+	std::memcpy(&packetSize, buffer.data(), sizeof(packetSize));
 
-	// 타입
-	std::memcpy(&m_type, buffer + sizeof(m_bufferSize), sizeof(m_type));
+	m_buffer = std::make_unique<char[]>(packetSize);
+	m_bufferSize = packetSize;
 
-	// 데이터 복사
-	EncodeBuffer(buffer + sizeof(m_bufferSize) + sizeof(m_type), size - sizeof(m_bufferSize) - sizeof(m_type));
+	EncodeBuffer(buffer);
+
+	// 버퍼 데이터로부터 타입 세팅해줌
+	std::memcpy(&m_type, m_buffer.get() + sizeof(m_encodedSize), sizeof(m_type));
 }
 
-void Packet::EncodeBuffer(const char* buffer, Size size)
+void Packet::EncodeBuffer(std::span<const char> buffer)
 {
-	if (m_encodedSize + size > m_bufferSize)
-		ReAlloc(size);
+	if (m_offset + buffer.size() > m_bufferSize)
+		ReAlloc(static_cast<Size>(m_offset + buffer.size() - m_bufferSize));
 
-	std::memcpy(m_buffer.get() + m_offset, buffer, size);
-	m_offset += size;
+	std::memcpy(m_buffer.get() + m_offset, buffer.data(), buffer.size());
+	m_offset += static_cast<Size>(buffer.size());
 	m_encodedSize = std::max<Size>(m_encodedSize, m_offset);
 
 	// 패킷 크기 갱신
@@ -76,7 +79,7 @@ void Packet::ReAlloc(Size requireSize)
 	{
 		bufferSize *= 2;
 	}
-	while (bufferSize < m_encodedSize + requireSize);
+	while (bufferSize < m_bufferSize + requireSize);
 
 	std::unique_ptr<char[]> buffer{ new char[bufferSize]{} };
 	std::memcpy(buffer.get(), m_buffer.get(), m_bufferSize);

@@ -1,13 +1,13 @@
 #include "Stdafx.h"
 #include "App.h"
-#include "DebugWindow.h"
 #include "LoginScene.h"
+#include "LoginWindow.h"
 #include "WindowManager.h"
 
 LoginScene::LoginScene()
 {
 #ifdef _DEBUG
-	auto window{ std::make_shared<DebugWindow>(L"UI.dat/Debug")};
+	auto window{ std::make_shared<LoginWindow>()};
 	WindowManager::GetInstance()->Register(window);
 #endif // _DEBUG
 }

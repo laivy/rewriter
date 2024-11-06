@@ -157,7 +157,7 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Use</PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="Control.cpp" />
-    <ClCompile Include="DebugWindow.cpp" />
+    <ClCompile Include="LoginWindow.cpp" />
     <ClCompile Include="LoginScene.cpp" />
     <ClCompile Include="LoginServer.cpp" />
     <ClCompile Include="Modal.cpp" />
@@ -234,7 +234,7 @@
     <ClInclude Include="Camera.h" />
     <ClInclude Include="ConstantBuffer.h" />
     <ClInclude Include="Control.h" />
-    <ClInclude Include="DebugWindow.h" />
+    <ClInclude Include="LoginWindow.h" />
     <ClInclude Include="DXUtil.h" />
     <ClInclude Include="LoginScene.h" />
     <ClInclude Include="LoginServer.h" />

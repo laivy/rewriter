@@ -20,13 +20,9 @@ LoginServer::LoginServer()
 	SocketManager::GetInstance()->Register(this);
 }
 
-void LoginServer::OnPacket(Packet& packet)
+void LoginServer::OnComplete(Packet& packet)
 {
-	switch (packet.GetType())
-	{
-	default:
-		break;
-	}
+	OnPacket.Notify(packet);
 }
 
 void LoginServer::OnDisconnect()

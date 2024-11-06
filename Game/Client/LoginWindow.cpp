@@ -2,8 +2,8 @@
 #include "App.h"
 #include "Button.h"
 #include "Control.h"
-#include "DebugWindow.h"
 #include "LoginServer.h"
+#include "LoginWindow.h"
 #include "Modal.h"
 #include "SocketManager.h"
 #include "TextBlock.h"
@@ -55,42 +55,52 @@ private:
 	}
 };
 
-DebugWindow::DebugWindow(std::wstring_view path) :
-	IWindow{ path }
+LoginWindow::LoginWindow() :
+	IWindow{ L"UI.dat/Login" }
 {
 	SetPosition(App::size / 2, Pivot::Center);
 	if (auto button{ GetControl<Button>(L"Login") })
 		button->OnButtonClick.Register([this]() { OnLoginButtonClicked(); });
 	if (auto button{ GetControl<Button>(L"Register") })
 		button->OnButtonClick.Register([this]() { OnRegisterButtonClicked(); });
-	//App::OnPacket.Register(this, std::bind_front(&DebugWindow::OnPacket, this));
+	LoginServer::GetInstance()->OnPacket.Register(this, std::bind_front(&LoginWindow::OnPacket, this));
 }
 
-void DebugWindow::OnMouseEvent(UINT message, int x, int y)
+void LoginWindow::OnMouseEvent(UINT message, int x, int y)
 {
 	IWindow::OnMouseEvent(message, x, y);
 }
 
-void DebugWindow::OnKeyboardEvent(UINT message, WPARAM wParam, LPARAM lParam)
+void LoginWindow::OnKeyboardEvent(UINT message, WPARAM wParam, LPARAM lParam)
 {
 	IWindow::OnKeyboardEvent(message, wParam, lParam);
 }
 
-void DebugWindow::Update(float deltaTime)
+void LoginWindow::Update(float deltaTime)
 {
 	IWindow::Update(deltaTime);
 }
 
-void DebugWindow::Render() const
+void LoginWindow::Render() const
 {
 	IWindow::Render();
 }
 
-void DebugWindow::OnPacket(Packet& packet)
+void LoginWindow::OnPacket(Packet& packet)
 {
+	switch (packet.GetType())
+	{
+	case Packet::Type::LoginResult:
+	{
+		bool isSuccess{ packet.Decode<bool>() };
+		break;
+	}
+	default:
+		break;
+	}
 }
 
-void DebugWindow::OnLoginButtonClicked()
+void LoginWindow::OnLoginButtonClicked()
 {
 	Packet packet{ Packet::Type::RequestLogin };
 	if (auto textBox{ GetControl<TextBox>(L"ID") })
@@ -104,6 +114,6 @@ void DebugWindow::OnLoginButtonClicked()
 	LoginServer::GetInstance()->Send(packet);
 }
 
-void DebugWindow::OnRegisterButtonClicked()
+void LoginWindow::OnRegisterButtonClicked()
 {
 }

@@ -116,7 +116,7 @@
     <ClCompile Include="WindowManager.cpp">
       <Filter>소스 파일\UI</Filter>
     </ClCompile>
-    <ClCompile Include="DebugWindow.cpp">
+    <ClCompile Include="LoginWindow.cpp">
       <Filter>소스 파일\UI</Filter>
     </ClCompile>
     <ClCompile Include="Modal.cpp">
@@ -241,7 +241,7 @@
     <ClInclude Include="WindowManager.h">
       <Filter>헤더 파일\UI</Filter>
     </ClInclude>
-    <ClInclude Include="DebugWindow.h">
+    <ClInclude Include="LoginWindow.h">
       <Filter>헤더 파일\UI</Filter>
     </ClInclude>
     <ClInclude Include="Modal.h">

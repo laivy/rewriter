@@ -9,6 +9,9 @@ public:
 	LoginServer();
 	~LoginServer() = default;
 
-	virtual void OnPacket(Packet& packet) override final;
+	virtual void OnComplete(Packet& packet) override final;
 	virtual void OnDisconnect() override final;
+
+public:
+	Delegate<Packet&> OnPacket;
 };

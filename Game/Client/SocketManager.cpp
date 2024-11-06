@@ -35,6 +35,7 @@ void SocketManager::Register(ISocket* socket) const
 	HANDLE iocp{ ::CreateIoCompletionPort(reinterpret_cast<HANDLE>(static_cast<SOCKET>(*socket)), m_iocp, reinterpret_cast<unsigned long long>(socket), 0) };
 	if (iocp != m_iocp)
 		assert(false && "REGISTER SOCKET TO IOCP FAIL");
+	socket->Receive();
 }
 
 void SocketManager::Run(std::stop_token stoken)

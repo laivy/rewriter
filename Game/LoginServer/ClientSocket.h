@@ -9,7 +9,7 @@ public:
 	ClientSocket(SOCKET socket);
 	~ClientSocket();
 
-	virtual void OnPacket(Packet& packet) override final;
+	virtual void OnComplete(Packet& packet) override final;
 
 private:
 	void OnRegisterRequest(Packet& packet);

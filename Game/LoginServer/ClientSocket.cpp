@@ -18,7 +18,7 @@ ClientSocket::~ClientSocket()
 	}
 }
 
-void ClientSocket::OnPacket(Packet& packet)
+void ClientSocket::OnComplete(Packet& packet)
 {
 	// 유저 객체가 있는 상태면 패킷 전달
 	if (m_user)
@@ -43,13 +43,15 @@ void ClientSocket::OnRegisterRequest(Packet& packet)
 	if (auto center{ CenterServer::GetInstance() })
 	{
 		Packet response{ Packet::Type::RequestRegisterToCenter };
-		response.EncodeBuffer(packet.GetBuffer(), packet.GetSize());
+		response.EncodeBuffer(std::span{ packet.GetBuffer(), packet.GetSize() });
 		center->Send(response);
 	}
 }
 
 void ClientSocket::OnLoginRequest(Packet& packet)
 {
+	auto [id, pw] { packet.Decode<std::wstring, std::wstring>() };
+
 	Packet outPacket{ Packet::Type::LoginResult };
 	outPacket.Encode(false);
 	Send(outPacket);

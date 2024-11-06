@@ -62,7 +62,7 @@ void ISocket::OnReceive(Packet::Size ioSize)
 	// 조립 중인 패킷이 있는 경우는 버퍼 뒤에 붙임
 	if (m_receiveBuffer.packet && m_receiveBuffer.remainPacketSize > 0)
 	{
-		m_receiveBuffer.packet->EncodeBuffer(m_receiveBuffer.buffer.data(), ioSize);
+		m_receiveBuffer.packet->EncodeBuffer(std::span{ m_receiveBuffer.buffer.data(), ioSize });
 		m_receiveBuffer.remainPacketSize -= ioSize;
 		if (m_receiveBuffer.remainPacketSize < 0)
 		{
@@ -72,8 +72,7 @@ void ISocket::OnReceive(Packet::Size ioSize)
 	}
 	else
 	{
-		m_receiveBuffer.packet = std::make_unique<Packet>(m_receiveBuffer.buffer.data(), ioSize);
-
+		m_receiveBuffer.packet = std::make_unique<Packet>(std::span{ m_receiveBuffer.buffer.data(), ioSize });
 		auto size{ m_receiveBuffer.packet->GetSize() };
 		if (size > ioSize)
 			m_receiveBuffer.remainPacketSize = size - ioSize;
@@ -82,15 +81,15 @@ void ISocket::OnReceive(Packet::Size ioSize)
 	// 패킷 완성
 	if (m_receiveBuffer.packet && m_receiveBuffer.remainPacketSize == 0)
 	{
-		m_receiveBuffer.packet->SetOffset(0);
-		OnPacket(*m_receiveBuffer.packet);
+		m_receiveBuffer.packet->SetOffset(sizeof(Packet::Size) + sizeof(Packet::Type));
+		OnComplete(*m_receiveBuffer.packet);
 		m_receiveBuffer.packet.reset();
 	}
 
 	Receive();
 }
 
-void ISocket::OnPacket(Packet& packet)
+void ISocket::OnComplete(Packet& packet)
 {
 }
 
