@@ -172,7 +172,7 @@ namespace
 #ifdef _TOOL
 		std::ifstream file{ filePath.data(), std::ios::binary };
 #else
-		std::ifstream file{ Stringtable::DATA_FOLDER_PATH + std::wstring{ filePath }, std::ios::binary };
+		std::ifstream file{ std::format(L"{}{}", Stringtable::DATA_FOLDER_PATH, filePath), std::ios::binary };
 #endif
 		if (!file)
 		{
@@ -235,11 +235,10 @@ namespace Resource
 		size_t pos{ path.find(Stringtable::DATA_FILE_EXT) };
 		if (pos != std::wstring_view::npos)
 		{
-			constexpr std::wstring_view EXTENSION{ Stringtable::DATA_FILE_EXT };
-
-			filePath = path.substr(0, pos + EXTENSION.size());
-			if (path.size() > pos + EXTENSION.size() + 1)
-				subPath = path.substr(pos + EXTENSION.size() + 1);
+			constexpr auto EXT_SIZE{ Stringtable::DATA_FILE_EXT.size() };
+			filePath = path.substr(0, pos + EXT_SIZE);
+			if (path.size() > pos + EXT_SIZE + 1)
+				subPath = path.substr(pos + EXT_SIZE + 1);
 		}
 
 #ifdef _DEBUG

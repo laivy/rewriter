@@ -2,9 +2,7 @@
 
 namespace Stringtable
 {
-	constexpr auto DATA_FOLDER_PATH = L"Data/";
-	constexpr auto DATA_FILE_EXT = L".dat";
-	constexpr auto DATA_PATH_SEPERATOR = L"/";
-	constexpr auto ROOT = L"Root";
-	constexpr auto INTERVAL = L"Interval";
+	constexpr std::wstring_view DATA_FOLDER_PATH = L"Data/";
+	constexpr std::wstring_view DATA_FILE_EXT = L".dat";
+	constexpr std::wstring_view DATA_PATH_SEPERATOR = L"/";
 }
