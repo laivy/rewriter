@@ -111,10 +111,13 @@
     <ClInclude Include="..\..\Common\Util.h">
       <Filter>헤더 파일\Common</Filter>
     </ClInclude>
-    <ClInclude Include="ServerSocket.h">
-      <Filter>헤더 파일\Server</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\Common\Socket.h">
+      <Filter>헤더 파일\Common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Common\Time.h">
+      <Filter>헤더 파일\Common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Common\ServerSocket.h">
       <Filter>헤더 파일\Common</Filter>
     </ClInclude>
   </ItemGroup>
@@ -173,11 +176,14 @@
     <ClCompile Include="..\..\Common\Util.cpp">
       <Filter>소스 파일\Common</Filter>
     </ClCompile>
-    <ClCompile Include="ServerSocket.cpp">
-      <Filter>소스 파일\Server</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\Common\Socket.cpp">
       <Filter>소스 파일\Common</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Common\Time.cpp">
+      <Filter>소스 파일\Common</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Common\ServerSocket.cpp">
+      <Filter>소스 파일\Server</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

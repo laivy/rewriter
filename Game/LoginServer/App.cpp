@@ -17,8 +17,9 @@ App::App()
 
 App::~App()
 {
-	SocketManager::Destroy(); // 유저 접속 차단
 	UserManager::Destroy(); // 접속 중인 유저 정보 저장
+	CenterServer::Destroy(); // 센터 서버 연결 종료
+	SocketManager::Destroy(); // 유저 접속 차단
 #ifdef _IMGUI
 	ImGui::CleanUp();
 #endif
@@ -119,7 +120,7 @@ void App::InitImgui()
 	OnResize.Register(&ImGui::OnResize);
 
 	auto& io{ ImGui::GetIO() };
-	io.IniFilename = "Data/imgui.ini";
+	io.IniFilename = "Data/imgui_login.ini";
 	io.Fonts->AddFontFromFileTTF("Data/Galmuri11.ttf", 14.0f, nullptr, io.Fonts->GetGlyphRangesKorean());
 
 	auto& style{ ImGui::GetStyle() };

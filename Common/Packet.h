@@ -7,6 +7,7 @@ public:
 	enum class Type : Size
 	{
 		None,
+		NoticeServerType,
 
 		// 회원가입
 		RequestRegister,
@@ -16,7 +17,9 @@ public:
 
 		// 로그인
 		RequestLogin,
-		LoginResult,
+		RequestLoginToCenter,
+		LoginResultToLogin,
+		LoginResult
 	};
 
 public:

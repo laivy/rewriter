@@ -1,5 +1,6 @@
 #include "Stdafx.h"
 #include "Socket.h"
+#include "Util.h"
 
 ISocket::SendBuffer::SendBuffer() :
 	overlappedEx{},
@@ -28,8 +29,17 @@ ISocket::SendBuffer& ISocket::SendBuffer::operator=(SendBuffer&& other) noexcept
 }
 
 ISocket::ISocket(SOCKET socket) :
-	m_socket{ socket }
+	m_socket{ socket },
+	m_ip(INET_ADDRSTRLEN, '\0')
 {
+	// 소켓 아이피 주소 가져옴
+	SOCKADDR_IN sockAddr{};
+	int addrLen{ sizeof(sockAddr) };
+	if (::getpeername(m_socket, reinterpret_cast<SOCKADDR*>(&sockAddr), &addrLen) != SOCKET_ERROR)
+	{
+		::inet_ntop(sockAddr.sin_family, &sockAddr.sin_addr, m_ip.data(), m_ip.size());
+		std::erase(m_ip, '\0');
+	}
 }
 
 ISocket::~ISocket()
@@ -111,12 +121,14 @@ bool ISocket::Connect(std::wstring_view ip, unsigned short port)
 	addr.sin_family = AF_INET;
 	addr.sin_port = ::htons(port);
 	::InetPtonW(AF_INET, ip.data(), &(addr.sin_addr.s_addr));
-	if (::WSAConnect(m_socket, reinterpret_cast<sockaddr*>(&addr), sizeof(addr), nullptr, nullptr, nullptr, nullptr) == SOCKET_ERROR)
+	if (::WSAConnect(m_socket, reinterpret_cast<SOCKADDR*>(&addr), sizeof(addr), nullptr, nullptr, nullptr, nullptr) == SOCKET_ERROR)
 	{
 		assert(false && "CONNECT FAIL");
 		Disconnect();
 		return false;
 	}
+
+	m_ip = Util::wstombs(ip);
 	return true;
 }
 
@@ -175,4 +187,9 @@ void ISocket::Receive()
 bool ISocket::IsConnected() const
 {
 	return m_socket != INVALID_SOCKET;
+}
+
+std::string ISocket::GetIP() const
+{
+	return m_ip;
 }

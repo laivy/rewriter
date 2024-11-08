@@ -3,7 +3,6 @@
 #include "SocketManager.h"
 #include "User.h"
 #include "UserManager.h"
-#include "Common/Socket.h"
 #ifdef _IMGUI
 #include "Common/ImguiEx.h"
 #include "Common/Time.h"
@@ -30,11 +29,18 @@ SocketManager::SocketManager() :
 		return;
 	}
 
+	auto prop{ Resource::Get(L"Server.dat/LoginServer") };
+	if (!prop)
+	{
+		assert(false && "CAN NOT FIND SERVER CONFIG");
+		return;
+	}
+
 	SOCKADDR_IN addr{};
 	addr.sin_family = AF_INET;
-	addr.sin_port = ::htons(9000);
+	addr.sin_port = ::htons(prop->GetInt(L"Port"));
 	addr.sin_addr.s_addr = ::htonl(INADDR_ANY);
-	if (::bind(m_listenSocket, reinterpret_cast<sockaddr*>(&addr), sizeof(addr)) == SOCKET_ERROR)
+	if (::bind(m_listenSocket, reinterpret_cast<SOCKADDR*>(&addr), sizeof(addr)) == SOCKET_ERROR)
 	{
 		assert(false && "LISTEN SOCKET BIND FAIL");
 		return;
@@ -92,6 +98,25 @@ void SocketManager::Render()
 #endif
 }
 
+void SocketManager::Register(ISocket* socket) const
+{
+	HANDLE iocp{ ::CreateIoCompletionPort(reinterpret_cast<HANDLE>(static_cast<SOCKET>(*socket)), m_iocp, reinterpret_cast<ULONG_PTR>(socket), 0) };
+	if (iocp != m_iocp)
+		assert(false && "REGISTER SOCKET TO IOCP FAIL");
+}
+
+void SocketManager::Disconnect(ISocket* socket)
+{
+	if (!socket)
+		return;
+
+#ifdef _IMGUI
+	Logging(std::format("Client Disconnected | {}", socket->GetIP()));
+#endif
+	socket->OnDisconnect();
+	std::erase_if(m_sockets, [socket](const auto& s) { return s.get() == socket; });
+}
+
 void SocketManager::Run(std::stop_token stoken)
 {
 	DWORD ioSize{};
@@ -101,9 +126,9 @@ void SocketManager::Run(std::stop_token stoken)
 	{
 		if (::GetQueuedCompletionStatus(m_iocp, &ioSize, reinterpret_cast<PULONG_PTR>(&socket), reinterpret_cast<OVERLAPPED**>(&overlappedEx), INFINITE))
 		{
-			if (ioSize == 0 && overlappedEx && overlappedEx->op == ISocket::IOOperation::Connect)
+			if (ioSize == 0 && overlappedEx && overlappedEx->op == ISocket::IOOperation::Accept)
 			{
-				OnConnect();
+				OnAccept();
 				continue;
 			}
 
@@ -161,7 +186,7 @@ void SocketManager::Run(std::stop_token stoken)
 	}
 }
 
-void SocketManager::OnConnect()
+void SocketManager::OnAccept()
 {
 	std::lock_guard lock{ m_acceptMutex };
 
@@ -172,30 +197,13 @@ void SocketManager::OnConnect()
 		return;
 	}
 
+	// 소켓 추가
 	auto& clientSocket{ m_sockets.emplace_back(std::make_shared<ClientSocket>(m_acceptSocket)) };
 	Register(clientSocket.get());
 	clientSocket->Receive();
 
 #ifdef _IMGUI
-	SOCKADDR_IN* localAddr{};
-	SOCKADDR_IN* remoteAddr{};
-	int localAddrLen{};
-	int remoteAddrLen{};
-	::GetAcceptExSockaddrs(
-		&m_acceptBuffer,
-		0,
-		sizeof(SOCKADDR_IN) + 16,
-		sizeof(SOCKADDR_IN) + 16,
-		reinterpret_cast<sockaddr**>(&localAddr),
-		&localAddrLen,
-		reinterpret_cast<sockaddr**>(&remoteAddr),
-		&remoteAddrLen
-	);
-
-	std::string ip(INET_ADDRSTRLEN, '\0');
-	::inet_ntop(AF_INET, &remoteAddr->sin_addr, ip.data(), ip.size());
-	std::erase(ip, '\0');
-	Logging(std::format("Accept Client {}:{}", ip, remoteAddr->sin_port));
+	Logging(std::format("Client Connected | {}", clientSocket->GetIP()));
 #endif
 
 	Accept();
@@ -221,22 +229,6 @@ void SocketManager::Accept()
 			assert(false && "ACCEPT FAIL");
 			return;
 		}
-	}
-}
-
-void SocketManager::Register(ISocket* socket) const
-{
-	HANDLE iocp{ ::CreateIoCompletionPort(reinterpret_cast<HANDLE>(static_cast<SOCKET>(*socket)), m_iocp, reinterpret_cast<ULONG_PTR>(socket), 0) };
-	if (iocp != m_iocp)
-		assert(false && "REGISTER SOCKET TO IOCP FAIL");
-}
-
-void SocketManager::Disconnect(ISocket* socket)
-{
-	if (socket)
-	{
-		socket->OnDisconnect();
-		std::erase_if(m_sockets, [socket](const auto& s) { return s.get() == socket; });
 	}
 }
 

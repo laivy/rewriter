@@ -13,6 +13,11 @@ App::App()
 	m_timer.Tick();
 }
 
+App::~App()
+{
+	SocketManager::Destroy();
+}
+
 void App::Run()
 {
 	MSG msg{};
@@ -108,8 +113,8 @@ void App::InitImgui()
 	OnResize.Register(&ImGui::OnResize);
 
 	auto& io{ ImGui::GetIO() };
-	io.IniFilename = "Data/imgui.ini";
-	io.Fonts->AddFontFromFileTTF("Data/NEXON Lv2 Gothic.ttf", 16.0f, nullptr, io.Fonts->GetGlyphRangesKorean());
+	io.IniFilename = "Data/imgui_center.ini";
+	io.Fonts->AddFontFromFileTTF("Data/Galmuri11.ttf", 14.0f, nullptr, io.Fonts->GetGlyphRangesKorean());
 
 	auto& style{ ImGui::GetStyle() };
 	style.WindowMenuButtonPosition = ImGuiDir_None;
@@ -134,7 +139,6 @@ void App::Render()
 	{
 		if (auto sm{ SocketManager::GetInstance() })
 			sm->Render();
-		ImGui::ShowDemoWindow();
 	}
 	ImGui::EndRender();
 #endif

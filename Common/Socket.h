@@ -7,14 +7,14 @@ class ISocket abstract
 public:
 	enum class IOOperation : uint8_t
 	{
-		Connect,
+		Accept,
 		Send,
 		Receive
 	};
 
 	struct OverlappedEx : OVERLAPPED
 	{
-		IOOperation op{ IOOperation::Connect };
+		IOOperation op{ IOOperation::Accept };
 	};
 
 private:
@@ -57,10 +57,12 @@ public:
 	void Receive();
 
 	bool IsConnected() const;
+	std::string GetIP() const;
 
 private:
 	std::recursive_mutex m_mutex;
 	SOCKET m_socket;
+	std::string m_ip;
 	std::list<SendBuffer> m_sendBuffers;
 	ReceiveBuffer m_receiveBuffer;
 };
