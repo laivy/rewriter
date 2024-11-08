@@ -165,6 +165,10 @@ void ISocket::Send(Packet& packet)
 			return;
 		}
 	}
+	else
+	{
+		OnSend(&sendBuffer.overlappedEx);
+	}
 }
 
 void ISocket::Receive()
@@ -174,13 +178,18 @@ void ISocket::Receive()
 	m_receiveBuffer.overlappedEx.op = IOOperation::Receive;
 	WSABUF wsaBuf{ static_cast<unsigned long>(m_receiveBuffer.buffer.size()), m_receiveBuffer.buffer.data() };
 	DWORD flag{};
-	if (::WSARecv(m_socket, &wsaBuf, 1, nullptr, &flag, &m_receiveBuffer.overlappedEx, nullptr) == SOCKET_ERROR)
+	DWORD ioSize{};
+	if (::WSARecv(m_socket, &wsaBuf, 1, &ioSize, &flag, &m_receiveBuffer.overlappedEx, nullptr) == SOCKET_ERROR)
 	{
 		if (::WSAGetLastError() != WSA_IO_PENDING)
 		{
 			Disconnect();
 			return;
 		}
+	}
+	else
+	{
+		OnReceive(static_cast<Packet::Size>(ioSize));
 	}
 }
 
