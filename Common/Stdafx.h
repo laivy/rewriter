@@ -25,6 +25,11 @@ using namespace std::chrono_literals;
 #define WIN32_LEAN_AND_MEAN
 #include <Windows.h>
 #include <windowsx.h>
+#if defined _CLIENT || defined _SERVER
+#include <WinSock2.h> // MSWSock.h 보다 위에 있어야함
+#include <MSWSock.h>
+#include <WS2tcpip.h>
+#endif
 #include <wrl.h>
 using Microsoft::WRL::ComPtr;
 

@@ -78,11 +78,10 @@ private:
 
 	// 배열은 원소 개수 + 데이터를 씀
 	template<class T, size_t N>
-	requires std::is_array_v<T>
-	void _Encode(T (&data)[N])
+	void _Encode(const T (&data)[N])
 	{
 		_Encode(static_cast<unsigned int>(N));
-		EncodeBuffer(std::span{ data, N * sizeof(T) });
+		EncodeBuffer(std::span{ reinterpret_cast<const char*>(&data), N * sizeof(T) });
 	}
 
 	// 문자열은 글자 개수 + 데이터를 씀

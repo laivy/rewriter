@@ -7,6 +7,7 @@ class ISocket abstract
 public:
 	enum class IOOperation : uint8_t
 	{
+		Connect,
 		Accept,
 		Send,
 		Receive
@@ -41,15 +42,17 @@ private:
 	};
 
 public:
-	ISocket(SOCKET socket = INVALID_SOCKET);
+	ISocket();
+	ISocket(SOCKET socket);
 	virtual ~ISocket();
 
 	operator SOCKET();
 
+	virtual void OnConnect(bool success);
+	virtual void OnDisconnect();
 	virtual void OnSend(OverlappedEx* overlappedEx);
 	virtual void OnReceive(Packet::Size ioSize);
 	virtual void OnComplete(Packet& packet);
-	virtual void OnDisconnect();
 
 	bool Connect(std::wstring_view ip, unsigned short port);
 	void Disconnect();
@@ -60,9 +63,11 @@ public:
 	bool IsConnected() const;
 	std::string GetIP() const;
 
-private:
+protected:
 	std::recursive_mutex m_mutex;
 	SOCKET m_socket;
+
+private:
 	std::string m_ip;
 	std::list<SendBuffer> m_sendBuffers;
 	ReceiveBuffer m_receiveBuffer;

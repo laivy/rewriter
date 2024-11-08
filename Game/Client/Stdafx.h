@@ -6,8 +6,6 @@
 #pragma comment(lib, "ws2_32.lib")
 #include <SDKDDKVer.h>
 #include <wincodec.h>
-#include <WinSock2.h>
-#include <WS2tcpip.h>
 
 // DirectX
 #include <DirectXMath.h>

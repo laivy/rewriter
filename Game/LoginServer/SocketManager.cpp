@@ -38,7 +38,7 @@ SocketManager::SocketManager() :
 
 	SOCKADDR_IN addr{};
 	addr.sin_family = AF_INET;
-	addr.sin_port = ::htons(prop->GetInt(L"Port"));
+	addr.sin_port = ::htons(prop->GetInt(L"Info/Port"));
 	addr.sin_addr.s_addr = ::htonl(INADDR_ANY);
 	if (::bind(m_listenSocket, reinterpret_cast<SOCKADDR*>(&addr), sizeof(addr)) == SOCKET_ERROR)
 	{
@@ -66,7 +66,7 @@ SocketManager::SocketManager() :
 		return;
 	}
 
-	if (::CreateIoCompletionPort(reinterpret_cast<HANDLE>(m_listenSocket), m_iocp, 0, 0) != m_iocp)
+	if (m_iocp != ::CreateIoCompletionPort(reinterpret_cast<HANDLE>(m_listenSocket), m_iocp, 0, 0))
 	{
 		assert(false && "REGISTER IOCP FAIL");
 		return;
@@ -100,16 +100,12 @@ void SocketManager::Render()
 
 void SocketManager::Register(ISocket* socket) const
 {
-	HANDLE iocp{ ::CreateIoCompletionPort(reinterpret_cast<HANDLE>(static_cast<SOCKET>(*socket)), m_iocp, reinterpret_cast<ULONG_PTR>(socket), 0) };
-	if (iocp != m_iocp)
+	if (m_iocp != ::CreateIoCompletionPort(reinterpret_cast<HANDLE>(static_cast<SOCKET>(*socket)), m_iocp, reinterpret_cast<ULONG_PTR>(socket), 0))
 		assert(false && "REGISTER SOCKET TO IOCP FAIL");
 }
 
 void SocketManager::Disconnect(ISocket* socket)
 {
-	if (!socket)
-		return;
-
 #ifdef _IMGUI
 	Logging(std::format("Client Disconnected | {}", socket->GetIP()));
 #endif
@@ -126,20 +122,39 @@ void SocketManager::Run(std::stop_token stoken)
 	{
 		if (::GetQueuedCompletionStatus(m_iocp, &ioSize, reinterpret_cast<PULONG_PTR>(&socket), reinterpret_cast<OVERLAPPED**>(&overlappedEx), INFINITE))
 		{
-			if (ioSize == 0 && overlappedEx && overlappedEx->op == ISocket::IOOperation::Accept)
+			if (!overlappedEx)
+				continue;
+
+			if (ioSize == 0)
 			{
-				OnAccept();
+				switch (overlappedEx->op)
+				{
+				case ISocket::IOOperation::Connect:
+				{
+					if (socket)
+						socket->OnConnect(true);
+					break;
+				}
+				case ISocket::IOOperation::Accept:
+				{
+					OnAccept();
+					break;
+				}
+				case ISocket::IOOperation::Send:
+				case ISocket::IOOperation::Receive:
+				{
+					if (socket)
+						Disconnect(socket);
+					break;
+				}
+				default:
+					break;
+				}
 				continue;
 			}
 
 			if (!socket)
 				continue;
-
-			if (ioSize == 0)
-			{
-				Disconnect(socket);
-				continue;
-			}
 
 			switch (overlappedEx->op)
 			{
@@ -154,11 +169,8 @@ void SocketManager::Run(std::stop_token stoken)
 				break;
 			}
 			default:
-			{
 				assert(false && "INVALID SOCKET STATE");
-				Disconnect(socket);
 				continue;
-			}
 			}
 			continue;
 		}
@@ -168,7 +180,8 @@ void SocketManager::Run(std::stop_token stoken)
 		{
 		case ERROR_NETNAME_DELETED: // 클라이언트에서 강제로 연결 끊음
 		{
-			Disconnect(socket);
+			if (socket)
+				Disconnect(socket);
 			continue;
 		}
 		case ERROR_ABANDONED_WAIT_0: // IOCP 핸들 닫힘
@@ -176,12 +189,15 @@ void SocketManager::Run(std::stop_token stoken)
 		{
 			continue;
 		}
-		default:
+		case ERROR_CONNECTION_REFUSED: // 연결 실패
 		{
-			assert(false && "IOCP ERROR");
-			Disconnect(socket);
+			if (socket)
+				socket->OnConnect(false);
 			continue;
 		}
+		default:
+			assert(false && "IOCP ERROR");
+			continue;
 		}
 	}
 }

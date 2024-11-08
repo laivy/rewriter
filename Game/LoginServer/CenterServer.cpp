@@ -2,38 +2,59 @@
 #include "CenterServer.h"
 #include "SocketManager.h"
 
-CenterServer::CenterServer() :
-	m_config{ Resource::Get(L"Server.dat/LoginServer/CenterServer") }
+CenterServer::CenterServer()
 {
-	if (!m_config)
+	SocketManager::GetInstance()->Register(this);
+	if (auto prop{ Resource::Get(L"Server.dat/LoginServer/CenterServer") })
+	{
+		auto ip{ prop->GetString(L"IP") };
+		auto port{ prop->GetInt(L"Port") };
+		Connect(ip, port);
+	}
+	else
 	{
 		assert(false && "CAN NOT FIND SERVER CONFIG");
 		::PostQuitMessage(0);
-		return;
 	}
-	Connect(m_config->GetString(L"IP"), m_config->GetInt(L"Port"));
-	SocketManager::GetInstance()->Register(this);
-
-	Packet outPacket{ Packet::Type::ServerBasicInfo };
-	outPacket.Encode(123);
-	Send(outPacket);
 }
 
-//void CenterServer::OnConnect()
-//{
-//	SocketManager::GetInstance()->Register(this);
-//
-//	Packet outPacket{ Packet::Type::NoticeServerType };
-//	outPacket.Encode(ServerSocket::Type::Login);
-//	Send(outPacket);
-//}
+void CenterServer::OnConnect(bool success)
+{
+	ISocket::OnConnect(success);
+	if (success)
+	{
+		Packet outPacket{ Packet::Type::ServerBasicInfo };
+		outPacket.Encode(1);
+		outPacket.Encode(L"Login");
+		Send(outPacket);
+		return;
+	}
+
+	// 다시 연결
+	if (auto prop{ Resource::Get(L"Server.dat/LoginServer/CenterServer") })
+	{
+		auto ip{ prop->GetString(L"IP") };
+		auto port{ prop->GetInt(L"Port") };
+		Connect(ip, port);
+	}
+}
 
 void CenterServer::OnDisconnect()
 {
 	ISocket::OnDisconnect();
 
 	// 다시 연결
-	Connect(m_config->GetString(L"IP"), m_config->GetInt(L"Port"));
+	if (auto prop{ Resource::Get(L"Server.dat/LoginServer/CenterServer") })
+	{
+		auto ip{ prop->GetString(L"IP") };
+		auto port{ prop->GetInt(L"Port") };
+		Connect(ip, port);
+	}
+	else
+	{
+		assert(false && "CAN NOT FIND SERVER CONFIG");
+		::PostQuitMessage(0);
+	}
 }
 
 void CenterServer::OnComplete(Packet& packet)

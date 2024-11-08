@@ -28,6 +28,13 @@ ISocket::SendBuffer& ISocket::SendBuffer::operator=(SendBuffer&& other) noexcept
 	return *this;
 }
 
+ISocket::ISocket() :
+	m_socket{ INVALID_SOCKET }
+{
+	m_socket = ::WSASocket(AF_INET, SOCK_STREAM, IPPROTO_TCP, NULL, NULL, WSA_FLAG_OVERLAPPED);
+	assert(m_socket != INVALID_SOCKET);
+}
+
 ISocket::ISocket(SOCKET socket) :
 	m_socket{ socket },
 	m_ip(INET_ADDRSTRLEN, '\0')
@@ -55,6 +62,17 @@ ISocket::~ISocket()
 ISocket::operator SOCKET()
 {
 	return m_socket;
+}
+
+void ISocket::OnConnect(bool success)
+{
+	if (success)
+		Receive();
+}
+
+void ISocket::OnDisconnect()
+{
+	Disconnect();
 }
 
 void ISocket::OnSend(OverlappedEx* overlappedEx)
@@ -103,29 +121,40 @@ void ISocket::OnComplete(Packet& packet)
 {
 }
 
-void ISocket::OnDisconnect()
-{
-	Disconnect();
-}
-
 bool ISocket::Connect(std::wstring_view ip, unsigned short port)
 {
-	m_socket = ::WSASocket(AF_INET, SOCK_STREAM, IPPROTO_TCP, NULL, NULL, WSA_FLAG_OVERLAPPED);
-	if (m_socket == INVALID_SOCKET)
+	SOCKADDR_IN addr{};
+	addr.sin_family = AF_INET;
+	if (::bind(m_socket, reinterpret_cast<SOCKADDR*>(&addr), sizeof(addr)) == SOCKET_ERROR)
 	{
-		assert(false && "CREATE SOCKET FAIL");
+		// 이미 바인드 되어 있는 경우는 예외
+		if (::WSAGetLastError() != WSAEINVAL)
+		{
+			Disconnect();
+			return false;
+		}
+	}
+
+	GUID guid{ GUID WSAID_CONNECTEX };
+	LPFN_CONNECTEX ConnectEx{ nullptr };
+	DWORD bytes{};
+	addr.sin_port = ::htons(port);
+	::InetPtonW(AF_INET, ip.data(), &(addr.sin_addr.s_addr));
+	if (::WSAIoctl(m_socket, SIO_GET_EXTENSION_FUNCTION_POINTER, &guid, sizeof(guid), &ConnectEx, sizeof(ConnectEx), &bytes, nullptr, nullptr) == SOCKET_ERROR)
+	{
+		Disconnect();
 		return false;
 	}
 
-	SOCKADDR_IN addr{};
-	addr.sin_family = AF_INET;
-	addr.sin_port = ::htons(port);
-	::InetPtonW(AF_INET, ip.data(), &(addr.sin_addr.s_addr));
-	if (::WSAConnect(m_socket, reinterpret_cast<SOCKADDR*>(&addr), sizeof(addr), nullptr, nullptr, nullptr, nullptr) == SOCKET_ERROR)
+	// 연결 할 때 수신 버퍼를 사용함
+	m_receiveBuffer.overlappedEx = OverlappedEx{ .op = IOOperation::Connect };
+	if (!ConnectEx(m_socket, reinterpret_cast<SOCKADDR*>(&addr), sizeof(addr), nullptr, 0, nullptr, &m_receiveBuffer.overlappedEx))
 	{
-		assert(false && "CONNECT FAIL");
-		Disconnect();
-		return false;
+		if (::WSAGetLastError() != ERROR_IO_PENDING)
+		{
+			assert(false && "CONNECTEX FAIL");
+			return false;
+		}
 	}
 
 	m_ip = Util::wstombs(ip);

@@ -64,7 +64,7 @@ SocketManager::SocketManager() :
 		return;
 	}
 
-	if (::CreateIoCompletionPort(reinterpret_cast<HANDLE>(m_listenSocket), m_iocp, 0, 0) != m_iocp)
+	if (m_iocp != ::CreateIoCompletionPort(reinterpret_cast<HANDLE>(m_listenSocket), m_iocp, 0, 0))
 	{
 		assert(false && "REGISTER IOCP FAIL");
 		return;
@@ -98,8 +98,7 @@ void SocketManager::Render()
 
 void SocketManager::Register(std::unique_ptr<ISocket> socket)
 {
-	HANDLE iocp{ ::CreateIoCompletionPort(reinterpret_cast<HANDLE>(static_cast<SOCKET>(*socket)), m_iocp, reinterpret_cast<ULONG_PTR>(socket.get()), 0) };
-	if (iocp != m_iocp)
+	if (m_iocp != ::CreateIoCompletionPort(reinterpret_cast<HANDLE>(static_cast<SOCKET>(*socket)), m_iocp, reinterpret_cast<ULONG_PTR>(socket.get()), 0))
 	{
 		assert(false && "REGISTER SOCKET TO IOCP FAIL");
 		return;
@@ -126,20 +125,33 @@ void SocketManager::Run(std::stop_token stoken)
 	{
 		if (::GetQueuedCompletionStatus(m_iocp, &ioSize, reinterpret_cast<PULONG_PTR>(&socket), reinterpret_cast<OVERLAPPED**>(&overlappedEx), INFINITE))
 		{
-			if (ioSize == 0 && overlappedEx && overlappedEx->op == ISocket::IOOperation::Accept)
+			if (!overlappedEx)
+				continue;
+
+			if (ioSize == 0)
 			{
-				OnAccept();
+				switch (overlappedEx->op)
+				{
+				case ISocket::IOOperation::Accept:
+				{
+					OnAccept();
+					break;
+				}
+				case ISocket::IOOperation::Send:
+				case ISocket::IOOperation::Receive:
+				{
+					if (socket)
+						Disconnect(socket);
+					break;
+				}
+				default:
+					break;
+				}
 				continue;
 			}
 
 			if (socket)
 				continue;
-
-			if (ioSize == 0)
-			{
-				Disconnect(socket);
-				continue;
-			}
 
 			switch (overlappedEx->op)
 			{
@@ -154,11 +166,8 @@ void SocketManager::Run(std::stop_token stoken)
 				break;
 			}
 			default:
-			{
 				assert(false && "INVALID SOCKET STATE");
-				Disconnect(socket);
 				continue;
-			}
 			}
 			continue;
 		}
@@ -168,21 +177,24 @@ void SocketManager::Run(std::stop_token stoken)
 		{
 		case ERROR_NETNAME_DELETED: // 클라이언트에서 강제로 연결 끊음
 		{
-			Disconnect(socket);
+			if (socket)
+				Disconnect(socket);
 			continue;
 		}
 		case ERROR_ABANDONED_WAIT_0: // IOCP 핸들 닫힘
 		case ERROR_OPERATION_ABORTED: // IO 작업 취소됨
-		case ERROR_CONNECTION_ABORTED:
 		{
+			continue;
+		}
+		case ERROR_CONNECTION_ABORTED: // 연결 실패
+		{
+			if (socket)
+				socket->OnConnect(false);
 			continue;
 		}
 		default:
-		{
 			assert(false && "IOCP ERROR");
-			Disconnect(socket);
 			continue;
-		}
 		}
 	}
 }
@@ -193,7 +205,7 @@ void SocketManager::OnAccept()
 	do
 	{
 		// 소켓 옵션 설정
-		if (::setsockopt(m_acceptSocket, SOL_SOCKET, SO_UPDATE_ACCEPT_CONTEXT, reinterpret_cast<char*>(&m_listenSocket), sizeof(m_listenSocket)))
+		if (::setsockopt(m_acceptSocket, SOL_SOCKET, SO_UPDATE_ACCEPT_CONTEXT, reinterpret_cast<char*>(&m_listenSocket), sizeof(m_listenSocket)) == SOCKET_ERROR)
 		{
 			assert(false && "UPDATE ACCEPT CONTEXT FAIL");
 			break;
@@ -210,7 +222,7 @@ void SocketManager::OnAccept()
 				static std::array<char, 64> buffer{};
 				buffer.fill(0);
 
-				if (::recv(socket, buffer.data(), buffer.size(), 0) == SOCKET_ERROR)
+				if (::recv(socket, buffer.data(), static_cast<int>(buffer.size()), 0) == SOCKET_ERROR)
 					return;
 
 				Packet::Size size{};
@@ -222,20 +234,22 @@ void SocketManager::OnAccept()
 				if (packet.GetType() != Packet::Type::ServerBasicInfo)
 					return;
 
-				int temp{ packet.Decode<int>() };
-				switch (temp)
-				{
-				case 123:
-				{
-					auto serverSocket{ std::make_unique<LoginServer>(socket) };
-					if (auto socketManager{ SocketManager::GetInstance() })
-						socketManager->Register(std::move(serverSocket));
-					break;
-				}
-				default:
-					assert(false && "INVALID SERVER TYPE");
-					break;
-				}
+				auto serverType{ packet.Decode<int>() };
+				auto name{ packet.Decode<std::wstring>() };
+				int i = 0;
+				//switch (temp)
+				//{
+				//case 123:
+				//{
+				//	auto serverSocket{ std::make_unique<LoginServer>(socket) };
+				//	if (auto socketManager{ SocketManager::GetInstance() })
+				//		socketManager->Register(std::move(serverSocket));
+				//	break;
+				//}
+				//default:
+				//	assert(false && "INVALID SERVER TYPE");
+				//	break;
+				//}
 			}
 		}.detach();
 	} while (false);
