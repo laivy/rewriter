@@ -4,10 +4,10 @@ class Packet
 {
 public:
 	using Size = uint16_t; // 패킷 크기 타입
-	enum class Type : Size
+	enum class Type : uint16_t
 	{
 		None,
-		NoticeServerType,
+		ServerBasicInfo,
 
 		// 회원가입
 		RequestRegister,

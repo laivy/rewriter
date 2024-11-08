@@ -1,15 +1,14 @@
 #pragma once
-#include "Common/ServerSocket.h"
+#include "Common/Socket.h"
 
 class CenterServer final :
-	public ServerSocket,
+	public ISocket,
 	public TSingleton<CenterServer>
 {
 public:
 	CenterServer();
 	~CenterServer() = default;
 
-	virtual void OnConnect() override;
 	virtual void OnDisconnect() override;
 	virtual void OnComplete(Packet& packet) override;
 

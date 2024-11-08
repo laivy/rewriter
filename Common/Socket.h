@@ -28,8 +28,8 @@ private:
 		SendBuffer& operator=(SendBuffer&& other) noexcept;
 
 		OverlappedEx overlappedEx;
-		Packet::Size size;
 		std::unique_ptr<char[]> buffer;
+		Packet::Size size;
 	};
 
 	struct ReceiveBuffer
@@ -55,6 +55,7 @@ public:
 	void Disconnect();
 	void Send(Packet& packet);
 	void Receive();
+	SOCKET Detach();
 
 	bool IsConnected() const;
 	std::string GetIP() const;

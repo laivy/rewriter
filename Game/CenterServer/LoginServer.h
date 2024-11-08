@@ -4,6 +4,6 @@
 class LoginServer final : public ISocket
 {
 public:
-	LoginServer() = default;
+	LoginServer(SOCKET socket);
 	~LoginServer() = default;
 };

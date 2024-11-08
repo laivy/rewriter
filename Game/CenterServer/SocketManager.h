@@ -9,8 +9,8 @@ public:
 
 	void Render();
 
-	void Register(ISocket* socket) const;
-	void Disconnect(ISocket* server);
+	void Register(std::unique_ptr<ISocket> socket);
+	void Disconnect(ISocket* socket);
 
 private:
 	void Run(std::stop_token stoken);

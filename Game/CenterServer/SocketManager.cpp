@@ -1,6 +1,6 @@
 #include "Stdafx.h"
+#include "LoginServer.h"
 #include "SocketManager.h"
-#include "Common/ServerSocket.h"
 #ifdef _IMGUI
 #include "Common/ImguiEx.h"
 #include "Common/Time.h"
@@ -96,11 +96,16 @@ void SocketManager::Render()
 #endif
 }
 
-void SocketManager::Register(ISocket* socket) const
+void SocketManager::Register(std::unique_ptr<ISocket> socket)
 {
-	HANDLE iocp{ ::CreateIoCompletionPort(reinterpret_cast<HANDLE>(static_cast<SOCKET>(*socket)), m_iocp, reinterpret_cast<ULONG_PTR>(socket), 0) };
+	HANDLE iocp{ ::CreateIoCompletionPort(reinterpret_cast<HANDLE>(static_cast<SOCKET>(*socket)), m_iocp, reinterpret_cast<ULONG_PTR>(socket.get()), 0) };
 	if (iocp != m_iocp)
+	{
 		assert(false && "REGISTER SOCKET TO IOCP FAIL");
+		return;
+	}
+	socket->Receive();
+	m_sockets.push_back(std::move(socket));
 }
 
 void SocketManager::Disconnect(ISocket* socket)
@@ -108,9 +113,6 @@ void SocketManager::Disconnect(ISocket* socket)
 	if (!socket)
 		return;
 
-#ifdef _IMGUI
-	Logging(std::format("Server Disconnected | {}", socket->GetIP()));
-#endif
 	socket->OnDisconnect();
 	std::erase_if(m_sockets, [socket](const auto& s) { return s.get() == socket; });
 }
@@ -202,13 +204,40 @@ void SocketManager::OnAccept()
 			break;
 
 		// 소켓 추가
-		auto& serverSocket{ m_sockets.emplace_back(std::make_unique<ServerSocket>(m_acceptSocket)) };
-		Register(serverSocket.get());
-		serverSocket->Receive();
+		std::thread{
+			[socket = m_acceptSocket]()
+			{
+				static std::array<char, 64> buffer{};
+				buffer.fill(0);
 
-#ifdef _IMGUI
-		Logging(std::format("Server Connected | {}", serverSocket->GetIP()));
-#endif
+				if (::recv(socket, buffer.data(), buffer.size(), 0) == SOCKET_ERROR)
+					return;
+
+				Packet::Size size{};
+				std::memcpy(&size, buffer.data(), sizeof(size));
+
+				Packet packet{ std::span{ buffer.data(), size } };
+				packet.SetOffset(sizeof(Packet::Size) + sizeof(Packet::Type));
+
+				if (packet.GetType() != Packet::Type::ServerBasicInfo)
+					return;
+
+				int temp{ packet.Decode<int>() };
+				switch (temp)
+				{
+				case 123:
+				{
+					auto serverSocket{ std::make_unique<LoginServer>(socket) };
+					if (auto socketManager{ SocketManager::GetInstance() })
+						socketManager->Register(std::move(serverSocket));
+					break;
+				}
+				default:
+					assert(false && "INVALID SERVER TYPE");
+					break;
+				}
+			}
+		}.detach();
 	} while (false);
 
 	Accept();
@@ -248,13 +277,11 @@ bool SocketManager::IsInWhitelist(SOCKET socket) const
 	::InetNtopW(sockAddr.sin_family, &sockAddr.sin_addr, ip.data(), ip.size());
 	std::erase(ip, '\0');
 
-	bool isInWhitelist{ false };
 	for (const auto& [_, white] : *m_config->Get(L"Whitelist"))
 	{
 		if (ip == white->GetString())
 			return true;
 	}
-
 	return false;
 }
 

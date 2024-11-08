@@ -12,12 +12,21 @@ CenterServer::CenterServer() :
 		return;
 	}
 	Connect(m_config->GetString(L"IP"), m_config->GetInt(L"Port"));
+	SocketManager::GetInstance()->Register(this);
+
+	Packet outPacket{ Packet::Type::ServerBasicInfo };
+	outPacket.Encode(123);
+	Send(outPacket);
 }
 
-void CenterServer::OnConnect()
-{
-	SocketManager::GetInstance()->Register(this);
-}
+//void CenterServer::OnConnect()
+//{
+//	SocketManager::GetInstance()->Register(this);
+//
+//	Packet outPacket{ Packet::Type::NoticeServerType };
+//	outPacket.Encode(ServerSocket::Type::Login);
+//	Send(outPacket);
+//}
 
 void CenterServer::OnDisconnect()
 {

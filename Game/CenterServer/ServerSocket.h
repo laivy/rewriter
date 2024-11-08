@@ -1,5 +1,5 @@
 #pragma once
-#include "Socket.h"
+#include "Common/Socket.h"
 
 class ServerSocket : public ISocket
 {
@@ -13,18 +13,12 @@ public:
 
 public:
 	ServerSocket(SOCKET socket = INVALID_SOCKET);
-	virtual ~ServerSocket();
+	virtual ~ServerSocket() = default;
 
-	virtual void OnConnect();
+	virtual void OnComplete(Packet& packet) override;
 
 	Type GetType() const;
 
-protected:
-	void Connect(const std::wstring& ip, unsigned short port);
-
-protected:
-	Type m_type;
-
 private:
-	std::jthread m_connectThread;
+	Type m_type;
 };
