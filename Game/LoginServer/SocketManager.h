@@ -34,7 +34,7 @@ private:
 	SOCKET m_acceptSocket;
 	std::array<char, 64> m_acceptBuffer;
 	ISocket::OverlappedEx m_acceptOverlappedEx;
-	std::vector<std::shared_ptr<ISocket>> m_sockets;
+	std::list<std::shared_ptr<ISocket>> m_sockets;
 
 #ifdef _IMGUI
 	std::vector<std::string> m_logs;

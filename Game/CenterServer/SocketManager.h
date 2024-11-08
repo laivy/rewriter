@@ -36,7 +36,7 @@ private:
 	SOCKET m_acceptSocket;
 	std::array<char, 64> m_acceptBuffer;
 	ISocket::OverlappedEx m_acceptOverlappedEx;
-	std::vector<std::unique_ptr<ISocket>> m_sockets;
+	std::list<std::unique_ptr<ISocket>> m_sockets;
 
 	// 서버 설정
 	std::shared_ptr<Resource::Property> m_config;
