@@ -2,32 +2,6 @@
 #include "Socket.h"
 #include "Util.h"
 
-ISocket::SendBuffer::SendBuffer() :
-	overlappedEx{},
-	size{}
-{
-}
-
-ISocket::SendBuffer::SendBuffer(SendBuffer&& other) noexcept :
-	overlappedEx{ other.overlappedEx },
-	buffer{ std::move(other.buffer) },
-	size{ other.size }
-{
-	other.size = 0;
-}
-
-ISocket::SendBuffer& ISocket::SendBuffer::operator=(SendBuffer&& other) noexcept
-{
-	if (this != &other)
-	{
-		overlappedEx = other.overlappedEx;
-		buffer = std::move(other.buffer);
-		size = other.size;
-		other.size = 0;
-	}
-	return *this;
-}
-
 ISocket::ISocket() :
 	m_socket{ INVALID_SOCKET }
 {
@@ -90,7 +64,7 @@ void ISocket::OnReceive(Packet::Size ioSize)
 	// 조립 중인 패킷이 있는 경우는 버퍼 뒤에 붙임
 	if (m_receiveBuffer.packet && m_receiveBuffer.remainPacketSize > 0)
 	{
-		m_receiveBuffer.packet->EncodeBuffer(std::span{ m_receiveBuffer.buffer.data(), ioSize });
+		m_receiveBuffer.packet->Encode(std::span{ m_receiveBuffer.buffer.data(), ioSize });
 		m_receiveBuffer.remainPacketSize -= ioSize;
 		if (m_receiveBuffer.remainPacketSize < 0)
 		{
@@ -182,10 +156,9 @@ void ISocket::Send(Packet& packet)
 
 	auto& sendBuffer{ m_sendBuffers.emplace_back() };
 	sendBuffer.overlappedEx.op = IOOperation::Send;
-	sendBuffer.size = packet.GetSize();
-	sendBuffer.buffer.reset(packet.Detach());
+	sendBuffer.packet = std::move(packet);
 
-	WSABUF wsaBuf{ sendBuffer.size, sendBuffer.buffer.get() };
+	WSABUF wsaBuf{ sendBuffer.packet.GetSize(), sendBuffer.packet.GetBuffer() };
 	if (::WSASend(m_socket, &wsaBuf, 1, nullptr, 0, &sendBuffer.overlappedEx, nullptr) == SOCKET_ERROR)
 	{
 		if (::WSAGetLastError() != WSA_IO_PENDING)

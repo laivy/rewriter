@@ -21,16 +21,8 @@ public:
 private:
 	struct SendBuffer
 	{
-		SendBuffer();
-		SendBuffer(const SendBuffer&) = delete;
-		SendBuffer(SendBuffer&& other) noexcept;
-		~SendBuffer() = default;
-		SendBuffer& operator=(const SendBuffer&) = delete;
-		SendBuffer& operator=(SendBuffer&& other) noexcept;
-
-		OverlappedEx overlappedEx;
-		std::unique_ptr<char[]> buffer;
-		Packet::Size size;
+		OverlappedEx overlappedEx{};
+		Packet packet{ Packet::Type::None };
 	};
 
 	struct ReceiveBuffer

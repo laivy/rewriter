@@ -45,7 +45,7 @@ void ClientSocket::OnRegisterRequest(Packet& packet)
 	if (auto center{ CenterServer::GetInstance() })
 	{
 		Packet response{ Packet::Type::RequestRegisterToCenter };
-		response.EncodeBuffer(std::span{ packet.GetBuffer(), packet.GetSize() });
+		response.Encode(std::span{ packet.GetBuffer(), packet.GetSize() });
 		center->Send(response);
 	}
 }
@@ -53,7 +53,6 @@ void ClientSocket::OnRegisterRequest(Packet& packet)
 void ClientSocket::OnLoginRequest(Packet& packet)
 {
 	auto [id, pw] { packet.Decode<std::wstring, std::wstring>() };
-
 	if (auto center{ CenterServer::GetInstance() })
 	{
 		Packet outPacket{ Packet::Type::RequestLoginToCenter };
