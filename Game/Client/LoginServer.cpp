@@ -14,6 +14,7 @@ LoginServer::LoginServer()
 
 void LoginServer::OnConnect(bool success)
 {
+	ISocket::OnConnect(success);
 }
 
 void LoginServer::OnComplete(Packet& packet)

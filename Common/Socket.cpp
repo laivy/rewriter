@@ -194,10 +194,6 @@ void ISocket::Send(Packet& packet)
 			return;
 		}
 	}
-	else
-	{
-		OnSend(&sendBuffer.overlappedEx);
-	}
 }
 
 void ISocket::Receive()
@@ -220,14 +216,6 @@ void ISocket::Receive()
 	{
 		OnReceive(static_cast<Packet::Size>(ioSize));
 	}
-}
-
-SOCKET ISocket::Detach()
-{
-	std::lock_guard lock{ m_mutex };
-	SOCKET socket{ m_socket };
-	m_socket = INVALID_SOCKET;
-	return socket;
 }
 
 bool ISocket::IsConnected() const

@@ -35,6 +35,8 @@ void ClientSocket::OnComplete(Packet& packet)
 	case Packet::Type::RequestLogin:
 		OnLoginRequest(packet);
 		break;
+	default:
+		break;
 	}
 }
 
@@ -52,7 +54,10 @@ void ClientSocket::OnLoginRequest(Packet& packet)
 {
 	auto [id, pw] { packet.Decode<std::wstring, std::wstring>() };
 
-	Packet outPacket{ Packet::Type::LoginResult };
-	outPacket.Encode(false);
-	Send(outPacket);
+	if (auto center{ CenterServer::GetInstance() })
+	{
+		Packet outPacket{ Packet::Type::RequestLoginToCenter };
+		outPacket.Encode(id, pw);
+		center->Send(outPacket);
+	}
 }

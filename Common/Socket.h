@@ -1,5 +1,4 @@
 #pragma once
-#include <WinSock2.h>
 #include "Packet.h"
 
 class ISocket abstract
@@ -7,6 +6,7 @@ class ISocket abstract
 public:
 	enum class IOOperation : uint8_t
 	{
+		None,
 		Connect,
 		Accept,
 		Send,
@@ -15,7 +15,7 @@ public:
 
 	struct OverlappedEx : OVERLAPPED
 	{
-		IOOperation op{ IOOperation::Accept };
+		IOOperation op{ IOOperation::None };
 	};
 
 private:
@@ -58,16 +58,13 @@ public:
 	void Disconnect();
 	void Send(Packet& packet);
 	void Receive();
-	SOCKET Detach();
 
 	bool IsConnected() const;
 	std::string GetIP() const;
 
-protected:
+private:
 	std::recursive_mutex m_mutex;
 	SOCKET m_socket;
-
-private:
 	std::string m_ip;
 	std::list<SendBuffer> m_sendBuffers;
 	ReceiveBuffer m_receiveBuffer;

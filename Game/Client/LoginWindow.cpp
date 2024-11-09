@@ -66,26 +66,6 @@ LoginWindow::LoginWindow() :
 	LoginServer::GetInstance()->OnPacket.Register(this, std::bind_front(&LoginWindow::OnPacket, this));
 }
 
-void LoginWindow::OnMouseEvent(UINT message, int x, int y)
-{
-	IWindow::OnMouseEvent(message, x, y);
-}
-
-void LoginWindow::OnKeyboardEvent(UINT message, WPARAM wParam, LPARAM lParam)
-{
-	IWindow::OnKeyboardEvent(message, wParam, lParam);
-}
-
-void LoginWindow::Update(float deltaTime)
-{
-	IWindow::Update(deltaTime);
-}
-
-void LoginWindow::Render() const
-{
-	IWindow::Render();
-}
-
 void LoginWindow::OnPacket(Packet& packet)
 {
 	switch (packet.GetType())

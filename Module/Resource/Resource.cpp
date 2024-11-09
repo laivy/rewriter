@@ -209,7 +209,7 @@ namespace Resource
 	DLL_API bool Save(const std::shared_ptr<Property>& prop, std::wstring_view path)
 	{
 		auto name{ prop->GetName() };
-		prop->SetName(Stringtable::ROOT);
+		prop->SetName(Stringtable::DATA_ROOT_NAME);
 
 		std::ofstream file{ path.data(), std::ios::binary };
 		if (!file)

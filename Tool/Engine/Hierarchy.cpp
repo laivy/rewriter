@@ -125,7 +125,7 @@ void Hierarchy::OnMenuFileSave()
 		ofn.lStructSize = sizeof(OPENFILENAME);
 		ofn.lpstrFilter = L"Data File(*.dat)\0*.dat\0";
 		ofn.lpstrFile = filePath.data();
-		ofn.lpstrDefExt = Stringtable::DATA_FILE_EXT;
+		ofn.lpstrDefExt = Stringtable::DATA_FILE_EXT.data();
 		ofn.nMaxFile = MAX_PATH;
 		if (!::GetSaveFileName(&ofn))
 			return;

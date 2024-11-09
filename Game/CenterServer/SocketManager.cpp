@@ -109,9 +109,6 @@ void SocketManager::Register(std::unique_ptr<ISocket> socket)
 
 void SocketManager::Disconnect(ISocket* socket)
 {
-	if (!socket)
-		return;
-
 	socket->OnDisconnect();
 	std::erase_if(m_sockets, [socket](const auto& s) { return s.get() == socket; });
 }
@@ -262,7 +259,7 @@ void SocketManager::Accept()
 	std::lock_guard lock{ m_acceptMutex };
 
 	m_acceptBuffer.fill(0);
-	m_acceptOverlappedEx = {};
+	m_acceptOverlappedEx = { .op = ISocket::IOOperation::Accept };
 	m_acceptSocket = ::WSASocket(AF_INET, SOCK_STREAM, IPPROTO_TCP, 0, 0, WSA_FLAG_OVERLAPPED);
 	if (m_acceptSocket == INVALID_SOCKET)
 	{

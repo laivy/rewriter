@@ -6,4 +6,6 @@ class LoginServer final : public ISocket
 public:
 	LoginServer(SOCKET socket);
 	~LoginServer() = default;
+
+	void OnComplete(Packet& packet) override;
 };

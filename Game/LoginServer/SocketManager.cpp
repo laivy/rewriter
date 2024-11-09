@@ -230,7 +230,7 @@ void SocketManager::Accept()
 	std::lock_guard lock{ m_acceptMutex };
 
 	m_acceptBuffer.fill(0);
-	m_acceptOverlappedEx = {};
+	m_acceptOverlappedEx = { .op = ISocket::IOOperation::Accept };
 	m_acceptSocket = ::WSASocket(AF_INET, SOCK_STREAM, IPPROTO_TCP, 0, 0, WSA_FLAG_OVERLAPPED);
 	if (m_acceptSocket == INVALID_SOCKET)
 	{
