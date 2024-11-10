@@ -23,10 +23,9 @@ void CenterServer::OnConnect(bool success)
 	ISocket::OnConnect(success);
 	if (success)
 	{
-		Packet outPacket{ Packet::Type::ServerBasicInfo };
-		outPacket.Encode(1);
-		outPacket.Encode(L"Login");
-		Send(outPacket);
+		Packet packet{ Packet::Type::ServerBasicInfo };
+		packet.Encode(ISocket::Type::Login);
+		Send(packet);
 		return;
 	}
 

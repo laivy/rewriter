@@ -11,7 +11,6 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Client", "Game\Client\Clien
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "LoginServer", "Game\LoginServer\LoginServer.vcxproj", "{7C4AE94D-8E6B-43FB-8B96-E5AA7A82FF95}"
 	ProjectSection(ProjectDependencies) = postProject
-		{3A60F38B-6BF8-4CFF-B6C3-DBFE015F9860} = {3A60F38B-6BF8-4CFF-B6C3-DBFE015F9860}
 		{ECE58EE1-CBF9-4731-9CA5-C89FA63034E8} = {ECE58EE1-CBF9-4731-9CA5-C89FA63034E8}
 	EndProjectSection
 EndProject
@@ -22,6 +21,9 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Module", "Module", "{88EEA67C-E4BF-44CC-AEE1-1B3B2AB83767}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Database", "Module\Database\Database.vcxproj", "{3A60F38B-6BF8-4CFF-B6C3-DBFE015F9860}"
+	ProjectSection(ProjectDependencies) = postProject
+		{ECE58EE1-CBF9-4731-9CA5-C89FA63034E8} = {ECE58EE1-CBF9-4731-9CA5-C89FA63034E8}
+	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Engine", "Tool\Engine\Engine.vcxproj", "{6C1500F3-A088-4B6E-9236-BCB3CBB17B26}"
 	ProjectSection(ProjectDependencies) = postProject
@@ -32,6 +34,10 @@ EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Resource", "Module\Resource\Resource.vcxproj", "{ECE58EE1-CBF9-4731-9CA5-C89FA63034E8}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "CenterServer", "Game\CenterServer\CenterServer.vcxproj", "{D971D8A9-926E-4919-BF2E-2BF282CACCBC}"
+	ProjectSection(ProjectDependencies) = postProject
+		{3A60F38B-6BF8-4CFF-B6C3-DBFE015F9860} = {3A60F38B-6BF8-4CFF-B6C3-DBFE015F9860}
+		{ECE58EE1-CBF9-4731-9CA5-C89FA63034E8} = {ECE58EE1-CBF9-4731-9CA5-C89FA63034E8}
+	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Etc", "Etc", "{BAF5740A-288E-44F4-9810-A0627B6B60A9}"
 	ProjectSection(SolutionItems) = preProject

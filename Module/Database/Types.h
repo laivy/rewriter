@@ -2,6 +2,8 @@
 
 namespace Database
 {
+	using SPRESULT = SQLINTEGER;
+
 	enum class DBRESULT
 	{
 		SUCCESS,
@@ -11,5 +13,10 @@ namespace Database
 		ERR_UNKNOWN
 	};
 
-	using SPRESULT = SQLINTEGER;
+	enum class Database
+	{
+		None,
+		Game,
+		World
+	};
 }

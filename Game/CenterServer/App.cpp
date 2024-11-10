@@ -125,6 +125,7 @@ void App::InitImgui()
 
 void App::InitApp()
 {
+	Database::Initialize(Resource::Get(L"Server.dat/CenterServer/Info/Database"));
 	SocketManager::Instantiate();
 }
 

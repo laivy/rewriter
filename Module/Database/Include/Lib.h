@@ -1,4 +1,10 @@
 #pragma once
-#include "../Connection.h"
-#include "../Login.h"
-#include "../Types.h"
+#include <sql.h>
+#include <sqlext.h>
+#include <sqltypes.h>
+
+#ifdef DLL_API
+#undef DLL_API
+#endif
+#define DLL_API __declspec(dllimport)
+#include "../Database.h"

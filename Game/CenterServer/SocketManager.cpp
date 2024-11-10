@@ -1,5 +1,5 @@
 #include "Stdafx.h"
-#include "LoginServer.h"
+#include "ServerSocket.h"
 #include "SocketManager.h"
 #ifdef _IMGUI
 #include "Common/ImguiEx.h"
@@ -147,7 +147,7 @@ void SocketManager::Run(std::stop_token stoken)
 				continue;
 			}
 
-			if (socket)
+			if (!socket)
 				continue;
 
 			switch (overlappedEx->op)
@@ -213,42 +213,8 @@ void SocketManager::OnAccept()
 			break;
 
 		// 소켓 추가
-		std::thread{
-			[socket = m_acceptSocket]()
-			{
-				static std::array<char, 64> buffer{};
-				buffer.fill(0);
-
-				if (::recv(socket, buffer.data(), static_cast<int>(buffer.size()), 0) == SOCKET_ERROR)
-					return;
-
-				Packet::Size size{};
-				std::memcpy(&size, buffer.data(), sizeof(size));
-
-				Packet packet{ std::span{ buffer.data(), size } };
-				packet.SetOffset(sizeof(Packet::Size) + sizeof(Packet::Type));
-
-				if (packet.GetType() != Packet::Type::ServerBasicInfo)
-					return;
-
-				auto serverType{ packet.Decode<int>() };
-				auto name{ packet.Decode<std::wstring>() };
-				int i = 0;
-				//switch (temp)
-				//{
-				//case 123:
-				//{
-				//	auto serverSocket{ std::make_unique<LoginServer>(socket) };
-				//	if (auto socketManager{ SocketManager::GetInstance() })
-				//		socketManager->Register(std::move(serverSocket));
-				//	break;
-				//}
-				//default:
-				//	assert(false && "INVALID SERVER TYPE");
-				//	break;
-				//}
-			}
-		}.detach();
+		auto socket{ std::make_unique<ServerSocket>(m_acceptSocket) };
+		Register(std::move(socket));
 	} while (false);
 
 	Accept();

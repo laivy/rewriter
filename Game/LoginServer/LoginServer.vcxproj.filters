@@ -166,15 +166,6 @@
     <ClInclude Include="..\..\Common\Types.h">
       <Filter>헤더 파일\Common</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\Module\Resource\Include\Image.h">
-      <Filter>모듈 파일\Resource</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Module\Resource\Include\Manager.h">
-      <Filter>모듈 파일\Resource</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Module\Resource\Include\Property.h">
-      <Filter>모듈 파일\Resource</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\Common\ImguiEx.h">
       <Filter>헤더 파일\Common</Filter>
     </ClInclude>
@@ -210,6 +201,9 @@
     </ClInclude>
     <ClInclude Include="..\..\Common\ServerSocket.h">
       <Filter>헤더 파일\Common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Module\Resource\Include\Lib.h">
+      <Filter>모듈 파일\Resource</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

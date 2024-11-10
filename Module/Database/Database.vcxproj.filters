@@ -12,6 +12,12 @@
     <Filter Include="헤더 파일\Include">
       <UniqueIdentifier>{7529b114-4b0b-4940-847d-ba0c1765c3e9}</UniqueIdentifier>
     </Filter>
+    <Filter Include="모듈 파일">
+      <UniqueIdentifier>{0b74cbf0-9180-45cb-89f4-2e98d5a25e9d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="모듈 파일\Resource">
+      <UniqueIdentifier>{bdff4e94-47c1-4e38-aed3-de0c846c7f89}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Stdafx.h">
@@ -29,6 +35,12 @@
     <ClInclude Include="Include\Lib.h">
       <Filter>헤더 파일\Include</Filter>
     </ClInclude>
+    <ClInclude Include="Database.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Resource\Include\Lib.h">
+      <Filter>모듈 파일\Resource</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="DllMain.cpp">
@@ -41,6 +53,9 @@
       <Filter>소스 파일</Filter>
     </ClCompile>
     <ClCompile Include="Login.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="Database.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
   </ItemGroup>

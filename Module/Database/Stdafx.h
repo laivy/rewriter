@@ -3,14 +3,19 @@
 
 // C/C++
 #include <format>
-#include <memory>
-#include <string>
 
 // SQL
 #include <sql.h>
 #include <sqlext.h>
 #include <sqltypes.h>
 
+// Module
+#include "Module/Resource/Include/Lib.h"
+
 // Project
 #include "Types.h"
-#include "Connection.h"
+
+#ifdef DLL_API
+#undef DLL_API
+#endif
+#define DLL_API __declspec(dllexport)

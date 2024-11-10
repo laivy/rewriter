@@ -4,6 +4,7 @@
 
 namespace Database
 {
+	/*
 	__declspec(dllexport) std::pair<DBRESULT, SPRESULT> Register(const std::wstring& id, const std::wstring& password)
 	{
 		auto conn{ Connection::GetInstance() };
@@ -43,4 +44,5 @@ namespace Database
 		rc = SQLExecDirect(hStmt, const_cast<SQLWCHAR*>(TEXT("{ ? = CALL Login(?, ?) }")), SQL_NTS);
 		return { DBRESULT::SUCCESS, spResult };
 	}
+	*/
 }

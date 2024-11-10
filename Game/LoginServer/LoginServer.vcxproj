@@ -184,9 +184,7 @@
     <ClInclude Include="..\..\External\Imgui\imstb_rectpack.h" />
     <ClInclude Include="..\..\External\Imgui\imstb_textedit.h" />
     <ClInclude Include="..\..\External\Imgui\imstb_truetype.h" />
-    <ClInclude Include="..\..\Module\Resource\Include\Image.h" />
-    <ClInclude Include="..\..\Module\Resource\Include\Manager.h" />
-    <ClInclude Include="..\..\Module\Resource\Include\Property.h" />
+    <ClInclude Include="..\..\Module\Resource\Include\Lib.h" />
     <ClInclude Include="App.h" />
     <ClInclude Include="CenterServer.h" />
     <ClInclude Include="ClientSocket.h" />
