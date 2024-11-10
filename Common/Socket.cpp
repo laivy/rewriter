@@ -3,7 +3,8 @@
 #include "Util.h"
 
 ISocket::ISocket() :
-	m_socket{ INVALID_SOCKET }
+	m_socket{ INVALID_SOCKET },
+	m_type{ Type::None }
 {
 	m_socket = ::WSASocket(AF_INET, SOCK_STREAM, IPPROTO_TCP, NULL, NULL, WSA_FLAG_OVERLAPPED);
 	assert(m_socket != INVALID_SOCKET);
@@ -11,6 +12,7 @@ ISocket::ISocket() :
 
 ISocket::ISocket(SOCKET socket) :
 	m_socket{ socket },
+	m_type{ Type::None },
 	m_ip(INET_ADDRSTRLEN, '\0')
 {
 	// 소켓 아이피 주소 가져옴
@@ -62,9 +64,9 @@ void ISocket::OnReceive(Packet::Size ioSize)
 	std::lock_guard lock{ m_mutex };
 
 	// 조립 중인 패킷이 있는 경우는 버퍼 뒤에 붙임
-	if (m_receiveBuffer.packet && m_receiveBuffer.remainPacketSize > 0)
+	if (m_receiveBuffer.remainPacketSize > 0)
 	{
-		m_receiveBuffer.packet->Encode(std::span{ m_receiveBuffer.buffer.data(), ioSize });
+		m_receiveBuffer.packet.Encode(std::span{ m_receiveBuffer.buffer.data(), ioSize });
 		m_receiveBuffer.remainPacketSize -= ioSize;
 		if (m_receiveBuffer.remainPacketSize < 0)
 		{
@@ -74,18 +76,18 @@ void ISocket::OnReceive(Packet::Size ioSize)
 	}
 	else
 	{
-		m_receiveBuffer.packet = std::make_unique<Packet>(std::span{ m_receiveBuffer.buffer.data(), ioSize });
-		auto size{ m_receiveBuffer.packet->GetSize() };
+		m_receiveBuffer.packet = Packet{ std::span{ m_receiveBuffer.buffer.data(), ioSize } };
+		auto size{ m_receiveBuffer.packet.GetSize() };
 		if (size > ioSize)
 			m_receiveBuffer.remainPacketSize = size - ioSize;
 	}
 
 	// 패킷 완성
-	if (m_receiveBuffer.packet && m_receiveBuffer.remainPacketSize == 0)
+	if (m_receiveBuffer.remainPacketSize == 0)
 	{
-		m_receiveBuffer.packet->SetOffset(sizeof(Packet::Size) + sizeof(Packet::Type));
-		OnComplete(*m_receiveBuffer.packet);
-		m_receiveBuffer.packet.reset();
+		m_receiveBuffer.packet.SetOffset(sizeof(Packet::Size) + sizeof(Packet::Type));
+		OnComplete(m_receiveBuffer.packet);
+		m_receiveBuffer.packet.Reset();
 	}
 
 	Receive();
@@ -157,7 +159,6 @@ void ISocket::Send(Packet& packet)
 	auto& sendBuffer{ m_sendBuffers.emplace_back() };
 	sendBuffer.overlappedEx.op = IOOperation::Send;
 	sendBuffer.packet = std::move(packet);
-
 	WSABUF wsaBuf{ sendBuffer.packet.GetSize(), sendBuffer.packet.GetBuffer() };
 	if (::WSASend(m_socket, &wsaBuf, 1, nullptr, 0, &sendBuffer.overlappedEx, nullptr) == SOCKET_ERROR)
 	{
@@ -185,10 +186,11 @@ void ISocket::Receive()
 			return;
 		}
 	}
-	else
-	{
-		OnReceive(static_cast<Packet::Size>(ioSize));
-	}
+}
+
+void ISocket::SetType(Type type)
+{
+	m_type = type;
 }
 
 bool ISocket::IsConnected() const
@@ -199,4 +201,9 @@ bool ISocket::IsConnected() const
 std::string ISocket::GetIP() const
 {
 	return m_ip;
+}
+
+ISocket::Type ISocket::GetType() const
+{
+	return m_type;
 }

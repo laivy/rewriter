@@ -4,6 +4,14 @@
 class ISocket abstract
 {
 public:
+	enum class Type
+	{
+		None,
+		Client,
+		Login,
+		Center
+	};
+
 	enum class IOOperation : uint8_t
 	{
 		None,
@@ -28,8 +36,8 @@ private:
 	struct ReceiveBuffer
 	{
 		OverlappedEx overlappedEx{};
-		std::array<char, 1024> buffer{};
-		std::unique_ptr<Packet> packet;
+		Packet packet{ Packet::Type::None };
+		std::array<char, 512> buffer{};
 		int remainPacketSize{};
 	};
 
@@ -50,12 +58,15 @@ public:
 	void Disconnect();
 	void Send(Packet& packet);
 	void Receive();
+	void SetType(Type type);
 
 	bool IsConnected() const;
 	std::string GetIP() const;
+	Type GetType() const;
 
 private:
 	std::recursive_mutex m_mutex;
+	Type m_type;
 	SOCKET m_socket;
 	std::string m_ip;
 	std::list<SendBuffer> m_sendBuffers;

@@ -53,6 +53,7 @@ public:
 	}
 
 	void SetOffset(Size offset);
+	void Reset();
 
 	Type GetType() const;
 	char* GetBuffer();
@@ -151,7 +152,7 @@ private:
 	template<class... Args, size_t... Indices>
 	void _Decode(std::tuple<Args...>& data, std::index_sequence<Indices...>)
 	{
-		((std::get<Indices>(data) = _Decode<std::remove_reference_t<decltype(std::get<Indices>(data))>>()), ...);
+		((std::get<Indices>(data) = _Decode<std::tuple_element_t<Indices, std::tuple<Args...>>>()), ...);
 	}
 
 	void ReAlloc(Size requireSize);

@@ -7,7 +7,7 @@ Packet::Packet(Packet::Type type) :
 	m_offset{ 0 }
 {
 	m_buffer.resize(DEFAULT_BUFFER_SIZE);
-	Encode<Size>(-1);
+	Encode<Size>(0);
 	Encode<Type>(type);
 }
 
@@ -43,6 +43,14 @@ Packet& Packet::operator=(Packet&& rhs) noexcept
 void Packet::SetOffset(Size offset)
 {
 	m_offset = offset;
+}
+
+void Packet::Reset()
+{
+	m_type = Type::None;
+	std::vector<char>(DEFAULT_BUFFER_SIZE).swap(m_buffer);
+	m_encodedSize = 0;
+	m_offset = 0;
 }
 
 Packet::Type Packet::GetType() const
