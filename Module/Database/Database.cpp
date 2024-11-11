@@ -1,11 +1,10 @@
 #include "Stdafx.h"
-#include "Connection.h"
 #include "Database.h"
+#include "Query.h"
+#include "Session.h"
 
 namespace Database
 {
-	std::map<Database, Connection> g_connections;
-
 	DLL_API void Initialize(const std::shared_ptr<Resource::Property>& prop)
 	{
 		if (!prop)
@@ -16,13 +15,13 @@ namespace Database
 
 		for (const auto& [k, v] : *prop)
 		{
-			auto database{ Database::None };
+			auto database{ Type::None };
 			if (k == L"Game")
-				database = Database::Game;
+				database = Type::Game;
 			else if (k == L"World")
-				database = Database::World;
+				database = Type::World;
 
-			if (database == Database::None)
+			if (database == Type::None)
 			{
 				assert(false);
 				continue;
@@ -32,7 +31,7 @@ namespace Database
 			auto name{ v->GetString(L"Name") };
 			auto id{ v->GetString(L"ID") };
 			auto pw{ v->GetString(L"PW") };
-			g_connections.emplace(database, Connection{ server, name, id, pw });
+			Connect(database, server, name, id, pw);
 		}
 	}
 }

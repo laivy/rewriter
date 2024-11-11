@@ -3,6 +3,8 @@
 #include <sqlext.h>
 #include <sqltypes.h>
 
+#include "../Query.h"
+
 #ifdef DLL_API
 #undef DLL_API
 #endif

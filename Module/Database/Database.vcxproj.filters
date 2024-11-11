@@ -23,7 +23,7 @@
     <ClInclude Include="Stdafx.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
-    <ClInclude Include="Connection.h">
+    <ClInclude Include="Session.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
     <ClInclude Include="Login.h">
@@ -41,6 +41,9 @@
     <ClInclude Include="..\Resource\Include\Lib.h">
       <Filter>모듈 파일\Resource</Filter>
     </ClInclude>
+    <ClInclude Include="Query.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="DllMain.cpp">
@@ -49,13 +52,16 @@
     <ClCompile Include="Stdafx.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
-    <ClCompile Include="Connection.cpp">
+    <ClCompile Include="Session.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
     <ClCompile Include="Login.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
     <ClCompile Include="Database.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="Query.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
   </ItemGroup>

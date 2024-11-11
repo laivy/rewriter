@@ -95,20 +95,22 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="..\Resource\Include\Lib.h" />
-    <ClInclude Include="Connection.h" />
+    <ClInclude Include="Session.h" />
     <ClInclude Include="Database.h" />
     <ClInclude Include="Include\Lib.h" />
     <ClInclude Include="Login.h" />
+    <ClInclude Include="Query.h" />
     <ClInclude Include="Stdafx.h" />
     <ClInclude Include="Types.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="Connection.cpp" />
+    <ClCompile Include="Session.cpp" />
     <ClCompile Include="Database.cpp" />
     <ClCompile Include="DllMain.cpp">
       <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Stdafx.h</PrecompiledHeaderFile>
     </ClCompile>
     <ClCompile Include="Login.cpp" />
+    <ClCompile Include="Query.cpp" />
     <ClCompile Include="Stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
