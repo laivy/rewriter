@@ -26,9 +26,6 @@
     <ClInclude Include="Session.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
-    <ClInclude Include="Login.h">
-      <Filter>헤더 파일</Filter>
-    </ClInclude>
     <ClInclude Include="Types.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
@@ -53,9 +50,6 @@
       <Filter>소스 파일</Filter>
     </ClCompile>
     <ClCompile Include="Session.cpp">
-      <Filter>소스 파일</Filter>
-    </ClCompile>
-    <ClCompile Include="Login.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
     <ClCompile Include="Database.cpp">
