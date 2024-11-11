@@ -24,6 +24,6 @@ namespace Database
 
 	private:
 		Session* m_session;
-		SQLHSTMT m_stmt;
+		void* m_stmt;
 	};
 }
