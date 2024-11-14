@@ -128,21 +128,21 @@ void App::InitApp()
 	Database::Initialize(Resource::Get(L"Server.dat/CenterServer/Info/Database"));
 
 	// Database 샘플
-	Database::Query query = Database::Query{ Database::Type::Game };
-	query.Statement(L"SELECT * FROM [dbo].[account] WHERE [name] = ?")
-		.Param(1, L"laivy2")
-		.Execute();
+	auto result{ Database::Select{ Database::Type::Game }
+		.Statement(L"SELECT * FROM [dbo].[account] WHERE [name] = ?")
+		.Param(1, L"laivy")
+		.Execute()
+	};
 
 	int64_t id{};
 	std::wstring name(16, L'\0');
 	std::wstring password(16, L'\0');
-
-	query.Bind(1, &id)
+	result.Bind(1, &id)
 		.Bind(2, &name)
 		.Bind(3, &password);
-	while (query.Fetch())
+	while (result.Fetch())
 	{
-		// ...
+		::OutputDebugString(L"FETCH\n");
 	}
 	
 	SocketManager::Instantiate();

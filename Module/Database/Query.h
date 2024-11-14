@@ -5,25 +5,40 @@ namespace Database
 {
 	class Session;
 
-	class Query
+	using unique_stmt = std::unique_ptr<void*, std::function<void(void**)>>;
+
+	class Select
 	{
 	public:
-		DLL_API Query(Type type);
-		DLL_API ~Query();
+		class Result
+		{
+		public:
+			Result(const Select* select, unique_stmt stmt);
+			~Result() = default;
 
-		DLL_API Query& Statement(std::wstring statement);
-		DLL_API Query& Param(size_t number, int32_t param);
-		DLL_API Query& Param(size_t number, int64_t param);
-		DLL_API Query& Param(size_t number, const std::wstring& param);
-		DLL_API bool Execute() const;
+			DLL_API Result& Bind(unsigned short number, int32_t* param);
+			DLL_API Result& Bind(unsigned short number, int64_t* param);
+			DLL_API Result& Bind(unsigned short number, std::wstring* param);
+			DLL_API bool Fetch() const;
 
-		DLL_API Query& Bind(size_t number, int32_t* param);
-		DLL_API Query& Bind(size_t number, int64_t* param);
-		DLL_API Query& Bind(size_t number, std::wstring* param);
-		DLL_API bool Fetch() const;
+		private:
+			const Select* m_select;
+			unique_stmt m_stmt;
+		};
+
+	public:
+		DLL_API Select(Type type);
+		DLL_API Select(Select& select);
+		~Select() = default;
+
+		DLL_API Select& Statement(std::wstring_view statement);
+		DLL_API Select& Param(unsigned short number, int32_t param);
+		DLL_API Select& Param(unsigned short number, int64_t param);
+		DLL_API Select& Param(unsigned short number, std::wstring_view param);
+		DLL_API Result Execute();
 
 	private:
 		Session* m_session;
-		void* m_stmt;
+		unique_stmt m_stmt;
 	};
 }

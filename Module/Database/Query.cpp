@@ -2,25 +2,31 @@
 #include "Query.h"
 #include "Session.h"
 
-static void Debug(SQLHANDLE handle, SQLSMALLINT handleType)
+namespace
 {
-	SQLWCHAR sqlState[6]{};
-	SQLINTEGER nativeError{};
-	SQLWCHAR messageText[256]{};
-	SQLSMALLINT textLength{};
-
-	int i{ 1 };
-	while (::SQLGetDiagRec(handleType, handle, i, sqlState, &nativeError, messageText, sizeof(messageText), &textLength) != SQL_NO_DATA)
+	void Debug(SQLHANDLE handle, SQLSMALLINT handleType)
 	{
-		++i;
+		SQLWCHAR sqlState[6]{};
+		SQLINTEGER nativeError{};
+		SQLWCHAR messageText[256]{};
+		SQLSMALLINT textLength{};
+
+		int i{ 1 };
+		while (::SQLGetDiagRec(handleType, handle, i, sqlState, &nativeError, messageText, sizeof(messageText), &textLength) != SQL_NO_DATA)
+		{
+			++i;
+		}
+	};
+
+	void FreeHandle(void** ptr)
+	{
+		::SQLFreeHandle(SQL_HANDLE_STMT, *ptr);
 	}
-};
+}
 
 namespace Database
 {
-	DLL_API Query::Query(Type type) :
-		m_session{ nullptr },
-		m_stmt{ SQL_NULL_HANDLE }
+	DLL_API Select::Select(Type type)
 	{
 		m_session = GetSession(type);
 		if (!m_session)
@@ -29,131 +35,97 @@ namespace Database
 			return;
 		}
 
-		if (!SQL_SUCCEEDED(::SQLAllocHandle(SQL_HANDLE_STMT, m_session->m_dbc, &m_stmt)))
+		SQLHSTMT stmt{};
+		if (!SQL_SUCCEEDED(::SQLAllocHandle(SQL_HANDLE_STMT, m_session->m_dbc, &stmt)))
 		{
 			assert(false);
 			return;
 		}
+		m_stmt = unique_stmt{ new SQLHSTMT{ stmt }, FreeHandle };
 	}
 
-	DLL_API Query::~Query()
+	DLL_API Select::Select(Select& select) :
+		m_session{ select.m_session },
+		m_stmt{ std::move(select.m_stmt) }
 	{
-		if (m_stmt)
-			::SQLFreeHandle(SQL_HANDLE_STMT, m_stmt);
 	}
 
-	DLL_API Query& Query::Statement(std::wstring statement)
+	DLL_API Select& Select::Statement(std::wstring_view statement)
+	{
+		if (!SQL_SUCCEEDED(::SQLPrepare(*m_stmt, const_cast<wchar_t*>(statement.data()), SQL_NTS)))
+			assert(false);
+		return *this;
+	}
+
+	DLL_API Select& Select::Param(unsigned short number, int32_t param)
+	{
+		if (!SQL_SUCCEEDED(::SQLBindParameter(*m_stmt, static_cast<SQLUSMALLINT>(number), SQL_PARAM_INPUT, SQL_C_LONG, SQL_INTEGER, 0, 0, &param, 0, nullptr)))
+			assert(false);
+		return *this;
+	}
+
+	DLL_API Select& Select::Param(unsigned short number, int64_t param)
+	{
+		if (!SQL_SUCCEEDED(::SQLBindParameter(*m_stmt, static_cast<SQLUSMALLINT>(number), SQL_PARAM_INPUT, SQL_C_SBIGINT, SQL_BIGINT, 0, 0, &param, 0, nullptr)))
+			assert(false);
+		return *this;
+	}
+
+	DLL_API Select& Select::Param(unsigned short number, std::wstring_view param)
+	{
+		if (!SQL_SUCCEEDED(::SQLBindParameter(*m_stmt, static_cast<SQLUSMALLINT>(number), SQL_PARAM_INPUT, SQL_C_WCHAR, SQL_WCHAR, param.size(), 0, const_cast<wchar_t*>(param.data()), param.size(), nullptr)))
+			assert(false);
+		return *this;
+	}
+
+	DLL_API Select::Result Select::Execute()
 	{
 		if (!m_stmt)
 		{
 			assert(false);
-			return *this;
+			return Result{ nullptr, nullptr };
 		}
 
-		if (!SQL_SUCCEEDED(::SQLPrepare(m_stmt, statement.data(), SQL_NTS)))
+		auto ret = ::SQLExecute(*m_stmt);
+		if (!SQL_SUCCEEDED(ret))
 		{
 			assert(false);
-			return *this;
+			return Result{ nullptr, nullptr };
 		}
 
+		return Result{ this, std::move(m_stmt) };
+	}
+
+	Select::Result::Result(const Select* select, unique_stmt stmt) :
+		m_select{ select }
+	{
+		m_stmt.swap(stmt);
+	}
+
+	DLL_API Select::Result& Select::Result::Bind(unsigned short number, int32_t* param)
+	{
+		::SQLBindCol(*m_stmt, static_cast<SQLUSMALLINT>(number), SQL_C_LONG, param, 0, nullptr);
 		return *this;
 	}
 
-	DLL_API Query& Query::Param(size_t number, int32_t param)
+	DLL_API Select::Result& Select::Result::Bind(unsigned short number, int64_t* param)
 	{
-		if (!SQL_SUCCEEDED(::SQLBindParameter(m_stmt, static_cast<SQLUSMALLINT>(number), SQL_PARAM_INPUT, SQL_C_LONG, SQL_INTEGER, 0, 0, &param, 0, nullptr)))
-		{
-			assert(false);
-			return *this;
-		}
+		::SQLBindCol(*m_stmt, static_cast<SQLUSMALLINT>(number), SQL_C_SBIGINT, param, 0, nullptr);
 		return *this;
 	}
 
-	DLL_API Query& Query::Param(size_t number, int64_t param)
+	DLL_API Select::Result& Select::Result::Bind(unsigned short number, std::wstring* param)
 	{
-		if (!SQL_SUCCEEDED(::SQLBindParameter(m_stmt, static_cast<SQLUSMALLINT>(number), SQL_PARAM_INPUT, SQL_C_SBIGINT, SQL_BIGINT, 0, 0, &param, 0, nullptr)))
-		{
-			assert(false);
-			return *this;
-		}
+		::SQLBindCol(*m_stmt, static_cast<SQLUSMALLINT>(number), SQL_C_WCHAR, param->data(), param->size(), nullptr);
 		return *this;
 	}
 
-	DLL_API Query& Query::Param(size_t number, const std::wstring& param)
+	DLL_API bool Select::Result::Fetch() const
 	{
-		if (!m_stmt)
-		{
-			assert(false);
-			return *this;
-		}
-
-		if (number < 1)
-		{
-			assert(false);
-			return *this;
-		}
-
-		if (!SQL_SUCCEEDED(::SQLBindParameter(m_stmt, static_cast<SQLUSMALLINT>(number), SQL_PARAM_INPUT, SQL_C_WCHAR, SQL_WCHAR, param.size(), 0, const_cast<wchar_t*>(param.data()), param.size(), nullptr)))
-		{
-			Debug(m_stmt, SQL_HANDLE_STMT);
-			assert(false);
-			return *this;
-		}
-
-		return *this;
-	}
-
-	DLL_API bool Query::Execute() const
-	{
-		if (!m_stmt)
-		{
-			assert(false);
+		if (!m_select)
 			return false;
-		}
 
-		if (!SQL_SUCCEEDED(::SQLExecute(m_stmt)))
-		{
-			Debug(m_stmt, SQL_HANDLE_STMT);
-			return false;
-		}
-
-		return true;
-	}
-
-	DLL_API Query& Query::Bind(size_t number, int32_t* param)
-	{
-		if (!SQL_SUCCEEDED(::SQLBindCol(m_stmt, static_cast<SQLUSMALLINT>(number), SQL_C_LONG, param, 0, nullptr)))
-		{
-			assert(false);
-			return *this;
-		}
-		return *this;
-	}
-
-	DLL_API Query& Query::Bind(size_t number, int64_t* param)
-	{
-		if (!SQL_SUCCEEDED(::SQLBindCol(m_stmt, static_cast<SQLUSMALLINT>(number), SQL_C_SBIGINT, param, 0, nullptr)))
-		{
-			assert(false);
-			return *this;
-		}
-		return *this;
-	}
-
-	DLL_API Query& Query::Bind(size_t number, std::wstring* param)
-	{
-		if (!SQL_SUCCEEDED(::SQLBindCol(m_stmt, static_cast<SQLUSMALLINT>(number), SQL_C_WCHAR, param->data(), param->size(), nullptr)))
-		{
-			assert(false);
-			return *this;
-		}
-		return *this;
-	}
-
-	DLL_API bool Query::Fetch() const
-	{
-		auto ret{ ::SQLFetch(m_stmt) };
-		Debug(m_stmt, SQL_HANDLE_STMT);
+		auto ret = ::SQLFetch(*m_stmt);
 		return SQL_SUCCEEDED(ret);
 	}
 }
