@@ -1,26 +1,25 @@
 #include "Time.h"
 
-using namespace std::chrono;
-using namespace std::chrono_literals;
-
-Time::Time(int year, int month, int day, int hour, int min, int sec) : m_time{ 0 }
+Time::Time(int year, int month, int day, int hour, int min, int sec) :
+	m_ymd{ static_cast<std::chrono::year>(year), static_cast<std::chrono::month>(month), static_cast<std::chrono::day>(day) },
+	m_hms{ std::chrono::hours{ hour } + std::chrono::minutes{ min } + std::chrono::seconds{ sec } }
 {
-	std::time(&m_time);
-
-	std::tm tm{};
-	localtime_s(&tm, &m_time);
-	tm.tm_year = year - 1900;
-	tm.tm_mon = month - 1;
-	tm.tm_mday = day;
-	tm.tm_hour = hour;
-	tm.tm_min = min;
-	tm.tm_sec = sec;
-	m_time = std::mktime(&tm);
+	auto days{ std::chrono::local_days{ m_ymd }.time_since_epoch() };
+	m_time = std::chrono::local_time{ days + m_hms.to_duration() };
 }
 
 Time Time::Now()
 {
-	return Time{ system_clock::to_time_t(system_clock::now()) };
+	auto now{ std::chrono::current_zone()->to_local(std::chrono::system_clock::now()) };
+	auto days{ std::chrono::floor<std::chrono::days>(now) };
+	std::chrono::year_month_day ymd{ days };
+	std::chrono::hh_mm_ss hms{ now - days };
+
+	Time time{};
+	time.m_time = now;
+	time.m_ymd = ymd;
+	time.m_hms = hms;
+	return time;
 }
 
 bool Time::operator<(const Time& rhs)
@@ -50,60 +49,37 @@ bool Time::operator==(const Time& rhs)
 
 int Time::Year() const
 {
-	return static_cast<int>(GetYMD().year());
+	return static_cast<int>(m_ymd.year());
 }
 
-unsigned int Time::Month() const
+int Time::Month() const
 {
-	return static_cast<unsigned int>(GetYMD().month());
+	return static_cast<int>(static_cast<unsigned int>(m_ymd.month()));
 }
 
-unsigned int Time::Day() const
+int Time::Day() const
 {
-	return static_cast<unsigned int>(GetYMD().day());
+	return static_cast<int>(static_cast<unsigned int>(m_ymd.day()));
 }
 
 int Time::Hour() const
 {
-	return GetHMS().hours().count();
+	return m_hms.hours().count();
 }
 
 int Time::Min() const
 {
-	return GetHMS().minutes().count();
+	return m_hms.minutes().count();
 }
 
 int Time::Sec() const
 {
-	return static_cast<int>(GetHMS().seconds().count());
+	return static_cast<int>(m_hms.seconds().count());
 }
 
-std::tuple<int, int, int> Time::YMD() const
+void Time::CalcDateTime()
 {
-	return std::make_tuple(Year(), Month(), Day());
-}
-
-std::tuple<int, int, int> Time::HMS() const
-{
-	return std::make_tuple(Hour(), Min(), Sec());
-}
-
-Time::Time(std::time_t time) : m_time{ time }
-{
-}
-
-local_time<system_clock::duration> Time::GetLocalTime() const
-{
-	return zoned_time{ current_zone(), system_clock::from_time_t(m_time) }.get_local_time();
-}
-
-year_month_day Time::GetYMD() const
-{
-	return year_month_day{ floor<days>(GetLocalTime()) };
-}
-
-hh_mm_ss<milliseconds> Time::GetHMS() const
-{
-	auto localTime{ GetLocalTime() };
-	return hh_mm_ss{ floor<milliseconds>(localTime - floor<days>(localTime)) };
+	auto days{ std::chrono::floor<std::chrono::days>(m_time) };
+	m_ymd = std::chrono::year_month_day{ days };
+	m_hms = std::chrono::hh_mm_ss{ m_time - days };
 }
