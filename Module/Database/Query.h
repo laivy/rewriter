@@ -6,6 +6,7 @@ namespace Database
 	class Session;
 
 	using unique_stmt = std::unique_ptr<void*, std::function<void(void**)>>;
+	using datetime = std::array<char, 16>; // sizeof(SQL_TIMESTAMP_STRUCT)
 
 	class Select
 	{
@@ -13,17 +14,18 @@ namespace Database
 		class Result
 		{
 		public:
-			Result(const Select* select, unique_stmt stmt);
+			Result(unique_stmt stmt);
 			~Result() = default;
 
 			DLL_API Result& Bind(unsigned short number, int32_t* param);
 			DLL_API Result& Bind(unsigned short number, int64_t* param);
 			DLL_API Result& Bind(unsigned short number, std::wstring* param);
-			DLL_API bool Fetch() const;
+			DLL_API Result& Bind(unsigned short number, Time* param);
+			DLL_API bool Fetch();
 
 		private:
-			const Select* m_select;
 			unique_stmt m_stmt;
+			std::map<Time*, datetime> m_datetimes;
 		};
 
 	public:

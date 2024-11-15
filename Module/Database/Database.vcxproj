@@ -94,6 +94,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="..\..\Common\Time.h" />
     <ClInclude Include="..\Resource\Include\Lib.h" />
     <ClInclude Include="Session.h" />
     <ClInclude Include="Database.h" />
@@ -103,6 +104,10 @@
     <ClInclude Include="Types.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="..\..\Common\Time.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
+    </ClCompile>
     <ClCompile Include="Session.cpp" />
     <ClCompile Include="Database.cpp" />
     <ClCompile Include="DllMain.cpp">

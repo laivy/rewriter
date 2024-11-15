@@ -83,21 +83,20 @@ namespace Database
 		if (!m_stmt)
 		{
 			assert(false);
-			return Result{ nullptr, nullptr };
+			return Result{ nullptr };
 		}
 
 		auto ret = ::SQLExecute(*m_stmt);
 		if (!SQL_SUCCEEDED(ret))
 		{
 			assert(false);
-			return Result{ nullptr, nullptr };
+			return Result{ nullptr };
 		}
 
-		return Result{ this, std::move(m_stmt) };
+		return Result{ std::move(m_stmt) };
 	}
 
-	Select::Result::Result(const Select* select, unique_stmt stmt) :
-		m_select{ select }
+	Select::Result::Result(unique_stmt stmt)
 	{
 		m_stmt.swap(stmt);
 	}
@@ -120,12 +119,28 @@ namespace Database
 		return *this;
 	}
 
-	DLL_API bool Select::Result::Fetch() const
+	DLL_API Select::Result& Select::Result::Bind(unsigned short number, Time* param)
 	{
-		if (!m_select)
-			return false;
+		m_datetimes.emplace(param, datetime{});
+		::SQLBindCol(*m_stmt, number, SQL_C_TIMESTAMP, &m_datetimes[param], 0, nullptr);
+		return *this;
+	}
 
-		auto ret = ::SQLFetch(*m_stmt);
-		return SQL_SUCCEEDED(ret);
+	DLL_API bool Select::Result::Fetch()
+	{
+		auto result{ ::SQLFetch(*m_stmt) };
+		for (auto& [time, datetime] : m_datetimes)
+		{
+			auto timestamp{ *reinterpret_cast<SQL_TIMESTAMP_STRUCT*>(&datetime) };
+			*time = Time{
+				timestamp.year,
+				timestamp.month,
+				timestamp.day,
+				timestamp.hour,
+				timestamp.minute,
+				timestamp.second,
+			};
+		}
+		return SQL_SUCCEEDED(result);
 	}
 }

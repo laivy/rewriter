@@ -50,4 +50,5 @@ EXTERN_C IMAGE_DOS_HEADER __ImageBase;
 #include "Delegate.h"
 #include "Singleton.h"
 #include "StringTable.h"
+#include "Time.h"
 #include "Types.h"
