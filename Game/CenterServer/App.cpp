@@ -127,28 +127,35 @@ void App::InitApp()
 {
 	Database::Initialize(Resource::Get(L"Server.dat/CenterServer/Info/Database"));
 
-	Time now{ 2024, 11, 14, 22, 57, 0 };
-
 	// Database 샘플
-	auto result{ Database::Select{ Database::Type::Game }
-		.Statement(L"SELECT * FROM [dbo].[account] WHERE [name] = ?")
-		.Param(1, L"laivy")
-		.Execute()
-	};
-
-	int64_t id{};
-	std::wstring name(16, L'\0');
-	std::wstring password(16, L'\0');
-	Time registerDate{};
-	result.Bind(1, &id)
-		.Bind(2, &name)
-		.Bind(3, &password)
-		.Bind(4, &registerDate);
-	while (result.Fetch())
 	{
-		auto [year, month, day] { registerDate.YMD() };
-		auto [hour, min, sec] { registerDate.HMS() };
-		::OutputDebugString(L"FETCH\n");
+		//auto result{ Database::Select{ Database::Type::Game }
+		//	.Statement(L"SELECT * FROM [dbo].[account] WHERE [register_date] > ?")
+		//	.Param(1, Time{ 2024, 11, 1, 0, 0, 0 })
+		//	.Execute()
+		//};
+
+		//int64_t id{};
+		//std::wstring name(16, L'\0');
+		//std::wstring password(16, L'\0');
+		//Time registerDate{};
+		//result.Bind(1, &id)
+		//	.Bind(2, &name)
+		//	.Bind(3, &password)
+		//	.Bind(4, &registerDate);
+		//while (result.Fetch())
+		//{
+		//	::OutputDebugString(L"FETCH\n");
+		//}
+
+		int32_t ret{ -1 };
+		Database::StoredProcedure{ Database::Type::Game }
+			.Statement(L"{ CALL [get_account_id] (?, ?) }")
+			.Out(1, &ret)
+			.In(2, L"laivy3")
+			.Execute();
+
+		int i = 0;
 	}
 	
 	SocketManager::Instantiate();

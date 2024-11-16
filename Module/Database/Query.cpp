@@ -44,9 +44,9 @@ namespace Database
 		m_stmt = unique_stmt{ new SQLHSTMT{ stmt }, FreeHandle };
 	}
 
-	DLL_API Query::Query(Query& select) :
-		m_session{ select.m_session },
-		m_stmt{ std::move(select.m_stmt) }
+	DLL_API Query::Query(Query& query) :
+		m_session{ query.m_session },
+		m_stmt{ std::move(query.m_stmt) }
 	{
 	}
 
@@ -164,5 +164,80 @@ namespace Database
 			};
 		}
 		return SQL_SUCCEEDED(result);
+	}
+
+	DLL_API StoredProcedure::StoredProcedure(Type type)
+	{
+		m_session = GetSession(type);
+		if (!m_session)
+		{
+			assert(false);
+			return;
+		}
+
+		SQLHSTMT stmt{};
+		if (!SQL_SUCCEEDED(::SQLAllocHandle(SQL_HANDLE_STMT, m_session->m_dbc, &stmt)))
+		{
+			assert(false);
+			return;
+		}
+		m_stmt = unique_stmt{ new SQLHSTMT{ stmt }, FreeHandle };
+	}
+
+	DLL_API StoredProcedure::StoredProcedure(StoredProcedure& sp) :
+		m_session{ sp.m_session },
+		m_stmt{ std::move(sp.m_stmt) }
+	{
+	}
+
+	DLL_API StoredProcedure& StoredProcedure::Statement(std::wstring_view statement)
+	{
+		if (!SQL_SUCCEEDED(::SQLPrepare(*m_stmt, const_cast<wchar_t*>(statement.data()), SQL_NTS)))
+			assert(false);
+		return *this;
+	}
+
+	DLL_API StoredProcedure& StoredProcedure::In(unsigned short number, int64_t param)
+	{
+		if (!SQL_SUCCEEDED(::SQLBindParameter(*m_stmt, static_cast<SQLUSMALLINT>(number), SQL_PARAM_INPUT, SQL_C_SBIGINT, SQL_BIGINT, 0, 0, &param, 0, nullptr)))
+			assert(false);
+		return *this;
+	}
+
+	DLL_API StoredProcedure& StoredProcedure::In(unsigned short number, std::wstring_view param)
+	{
+		if (!SQL_SUCCEEDED(::SQLBindParameter(*m_stmt, static_cast<SQLUSMALLINT>(number), SQL_PARAM_INPUT, SQL_C_WCHAR, SQL_WCHAR, param.size(), 0, const_cast<wchar_t*>(param.data()), param.size(), nullptr)))
+			assert(false);
+		return *this;
+	}
+
+	DLL_API StoredProcedure& StoredProcedure::Out(unsigned short number, int32_t* param)
+	{
+		if (!SQL_SUCCEEDED(::SQLBindParameter(*m_stmt, static_cast<SQLUSMALLINT>(number), SQL_PARAM_OUTPUT, SQL_C_LONG, SQL_INTEGER, 0, 0, param, 0, nullptr)))
+			assert(false);
+		return *this;
+	}
+
+	DLL_API StoredProcedure::Result StoredProcedure::Execute()
+	{
+		if (!m_stmt)
+		{
+			assert(false);
+			return Result{ nullptr };
+		}
+
+		if (!SQL_SUCCEEDED(::SQLExecute(*m_stmt)))
+		{
+			Debug(*m_stmt, SQL_HANDLE_STMT);
+			assert(false);
+			return Result{ nullptr };
+		}
+
+		return Result{ std::move(m_stmt) };
+	}
+
+	StoredProcedure::Result::Result(unique_stmt stmt)
+	{
+		m_stmt.swap(stmt);
 	}
 }

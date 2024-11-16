@@ -31,7 +31,7 @@ namespace Database
 
 	public:
 		DLL_API Query(Type type);
-		DLL_API Query(Query& select);
+		DLL_API Query(Query& query);
 		~Query() = default;
 
 		DLL_API Query& Statement(std::wstring_view statement);
@@ -39,6 +39,35 @@ namespace Database
 		DLL_API Query& Param(unsigned short number, int64_t param);
 		DLL_API Query& Param(unsigned short number, std::wstring_view param);
 		DLL_API Query& Param(unsigned short number, const Time& param);
+		DLL_API Result Execute();
+
+	private:
+		Session* m_session;
+		unique_stmt m_stmt;
+	};
+
+	class StoredProcedure
+	{
+	public:
+		class Result
+		{
+		public:
+			Result(unique_stmt stmt);
+			~Result() = default;
+
+		private:
+			unique_stmt m_stmt;
+		};
+
+	public:
+		DLL_API StoredProcedure(Type type);
+		DLL_API StoredProcedure(StoredProcedure& sp);
+		~StoredProcedure() = default;
+
+		DLL_API StoredProcedure& Statement(std::wstring_view statement);
+		DLL_API StoredProcedure& In(unsigned short number, int64_t param);
+		DLL_API StoredProcedure& In(unsigned short number, std::wstring_view param);
+		DLL_API StoredProcedure& Out(unsigned short number, int32_t* param);
 		DLL_API Result Execute();
 
 	private:
