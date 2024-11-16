@@ -37,6 +37,7 @@ namespace Database
 		DLL_API Select& Param(unsigned short number, int32_t param);
 		DLL_API Select& Param(unsigned short number, int64_t param);
 		DLL_API Select& Param(unsigned short number, std::wstring_view param);
+		DLL_API Select& Param(unsigned short number, const Time& param);
 		DLL_API Result Execute();
 
 	private:

@@ -78,6 +78,20 @@ namespace Database
 		return *this;
 	}
 
+	DLL_API Select& Select::Param(unsigned short number, const Time& param)
+	{
+		SQL_TIMESTAMP_STRUCT timeStamp{};
+		timeStamp.year = param.Year();
+		timeStamp.month = param.Month();
+		timeStamp.day = param.Day();
+		timeStamp.hour = param.Hour();
+		timeStamp.minute = param.Min();
+		timeStamp.second = param.Sec();
+		if (!SQL_SUCCEEDED(::SQLBindParameter(*m_stmt, static_cast<SQLUSMALLINT>(number), SQL_PARAM_INPUT, SQL_C_TYPE_TIMESTAMP, SQL_TYPE_TIMESTAMP, sizeof(timeStamp), 0, &timeStamp, 0, nullptr)))
+			assert(false);
+		return *this;
+	}
+
 	DLL_API Select::Result Select::Execute()
 	{
 		if (!m_stmt)
