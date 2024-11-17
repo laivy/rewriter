@@ -228,7 +228,13 @@ namespace Database
 
 		if (!SQL_SUCCEEDED(::SQLExecute(*m_stmt)))
 		{
-			Debug(*m_stmt, SQL_HANDLE_STMT);
+			assert(false);
+			return Result{ nullptr };
+		}
+
+		// SP 반환값
+		if (!SQL_SUCCEEDED(::SQLMoreResults(*m_stmt)))
+		{
 			assert(false);
 			return Result{ nullptr };
 		}
@@ -239,5 +245,42 @@ namespace Database
 	StoredProcedure::Result::Result(unique_stmt stmt)
 	{
 		m_stmt.swap(stmt);
+	}
+
+	DLL_API StoredProcedure::Result& StoredProcedure::Result::Bind(unsigned short number, int64_t* param)
+	{
+		::SQLBindCol(*m_stmt, static_cast<SQLUSMALLINT>(number), SQL_C_SBIGINT, param, 0, nullptr);
+		return *this;
+	}
+
+	DLL_API StoredProcedure::Result& StoredProcedure::Result::Bind(unsigned short number, std::wstring* param)
+	{
+		::SQLBindCol(*m_stmt, static_cast<SQLUSMALLINT>(number), SQL_C_WCHAR, param->data(), param->size(), nullptr);
+		return *this;
+	}
+
+	DLL_API StoredProcedure::Result& StoredProcedure::Result::Bind(unsigned short number, Time* param)
+	{
+		m_datetimes.emplace(param, datetime2{});
+		::SQLBindCol(*m_stmt, number, SQL_C_TIMESTAMP, &m_datetimes[param], 0, nullptr);
+		return *this;
+	}
+
+	DLL_API bool StoredProcedure::Result::Fetch()
+	{
+		auto result{ ::SQLFetch(*m_stmt) };
+		for (auto& [time, datetime] : m_datetimes)
+		{
+			auto timestamp{ *reinterpret_cast<SQL_TIMESTAMP_STRUCT*>(&datetime) };
+			*time = Time{
+				timestamp.year,
+				timestamp.month,
+				timestamp.day,
+				timestamp.hour,
+				timestamp.minute,
+				timestamp.second,
+			};
+		}
+		return SQL_SUCCEEDED(result);
 	}
 }

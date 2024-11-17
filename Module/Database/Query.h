@@ -55,8 +55,14 @@ namespace Database
 			Result(unique_stmt stmt);
 			~Result() = default;
 
+			DLL_API Result& Bind(unsigned short number, int64_t* param);
+			DLL_API Result& Bind(unsigned short number, std::wstring* param);
+			DLL_API Result& Bind(unsigned short number, Time* param);
+			DLL_API bool Fetch();
+
 		private:
 			unique_stmt m_stmt;
+			std::map<Time*, datetime2> m_datetimes;
 		};
 
 	public:
