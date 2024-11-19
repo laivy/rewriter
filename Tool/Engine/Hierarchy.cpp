@@ -151,9 +151,11 @@ void Hierarchy::OnCut()
 		}
 	}
 
-	auto clipboard{ Clipboard::GetInstance() };
-	clipboard->Clear();
-	clipboard->Copy(targets);
+	if (auto clipboard{ Clipboard::GetInstance() })
+	{
+		clipboard->Clear();
+		clipboard->Copy(targets);
+	}
 }
 
 void Hierarchy::OnCopy()
@@ -165,9 +167,11 @@ void Hierarchy::OnCopy()
 			targets.push_back(prop);
 	}
 
-	auto clipboard{ Clipboard::GetInstance() };
-	clipboard->Clear();
-	clipboard->Copy(targets);
+	if (auto clipboard{ Clipboard::GetInstance() })
+	{
+		clipboard->Clear();
+		clipboard->Copy(targets);
+	}
 }
 
 void Hierarchy::OnPaste()
@@ -179,8 +183,8 @@ void Hierarchy::OnPaste()
 	if (!select)
 		return;
 
-	auto clipboard{ Clipboard::GetInstance() };
-	clipboard->Paste(select);
+	if (auto clipboard{ Clipboard::GetInstance() })
+		clipboard->Paste(select);
 }
 
 void Hierarchy::Shortcut()
@@ -320,7 +324,7 @@ void Hierarchy::RenderMenuBar()
 void Hierarchy::RenderTreeNode()
 {
 	ImGui::PushID("PROPERTY");
-	for (const auto& [root, _] : m_roots)
+	for (const auto& root : m_roots | std::views::keys)
 		RenderNode(root);
 	ImGui::PopID();
 }
@@ -330,63 +334,57 @@ void Hierarchy::RenderNode(const std::shared_ptr<Resource::Property>& prop)
 	ImGui::PushID(prop.get());
 
 	bool isRoot{ m_roots.contains(prop) };
-	auto selected{ std::ranges::find_if(m_selects, [&prop](const auto& select) { return select.lock() == prop; }) != m_selects.end() };
+	bool isSelected{ std::ranges::find_if(m_selects, [&prop](const auto& select) { return select.lock() == prop; }) != m_selects.end() };
+	auto name{ Util::wstou8s(prop->GetName()) };
 
+	// 루트가 아닌 말단 노드는 Selectable
 	if (!isRoot && prop->GetChildren().empty())
 	{
-		// 루트가 아닌 말단 노드는 Selectable
-		auto name{ Util::wstou8s(prop->GetName()) };
-		if (ImGui::Selectable(name.c_str(), selected))
+		if (ImGui::Selectable(name.c_str(), isSelected))
 			App::OnPropertySelect.Notify(prop);
+
 		if (ImGui::BeginDragDropSource())
 		{
 			ImGui::SetDragDropPayload("PROPERTY", &prop, sizeof(prop));
 			ImGui::Text(name.c_str());
 			ImGui::EndDragDropSource();
 		}
+
 		RenderNodeContextMenu(prop);
+		ImGui::PopID();
+		return;
 	}
-	else
+
+	// 나머지 경우는 TreeNode
+	ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, isRoot ? ImVec2{ 0.0f, 5.0f } : ImVec2{ 0.0f, 2.0f });
+
+	ImGuiTreeNodeFlags flag{ ImGuiTreeNodeFlags_OpenOnDoubleClick | ImGuiTreeNodeFlags_FramePadding | ImGuiTreeNodeFlags_SpanFullWidth };
+	if (isSelected)
+		flag |= ImGuiTreeNodeFlags_Selected;
+
+	bool isTreeNodeOpen{ ImGui::TreeNodeEx(name.c_str(), flag) };
+	if (ImGui::BeginDragDropSource())
 	{
-		// 나머지 경우는 TreeNode
-		ImVec2 padding{};
-		if (isRoot)
-			padding = { 0.0f, 5.0f };
-		else
-			padding = { 0.0f, 2.0f };
-		ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, padding);
-
-		ImGuiTreeNodeFlags flag{
-			ImGuiTreeNodeFlags_DefaultOpen | ImGuiTreeNodeFlags_OpenOnDoubleClick |
-			ImGuiTreeNodeFlags_FramePadding | ImGuiTreeNodeFlags_SpanFullWidth
-		};
-
-		if (selected)
-			flag |= ImGuiTreeNodeFlags_Selected;
-
-		auto name{ Util::wstou8s(prop->GetName()) };
-		if (ImGui::TreeNodeEx(name.c_str(), flag))
-		{
-			if (ImGui::IsItemClicked())
-			{
-				if (isRoot)
-					OnPropertySelect(prop);
-				else
-					App::OnPropertySelect.Notify(prop);
-			}
-			if (ImGui::BeginDragDropSource())
-			{
-				ImGui::SetDragDropPayload("PROPERTY", &prop, sizeof(prop));
-				ImGui::Text(name.c_str());
-				ImGui::EndDragDropSource();
-			}
-			RenderNodeContextMenu(prop);
-			for (const auto& [_, child] : *prop)
-				RenderNode(child);
-			ImGui::TreePop();
-		}
-		ImGui::PopStyleVar();
+		ImGui::SetDragDropPayload("PROPERTY", &prop, sizeof(prop));
+		ImGui::Text(name.c_str());
+		ImGui::EndDragDropSource();
 	}
+	if (ImGui::IsItemClicked())
+	{
+		if (isRoot)
+			OnPropertySelect(prop);
+		else
+			App::OnPropertySelect.Notify(prop);
+	}
+	RenderNodeContextMenu(prop);
+	if (isTreeNodeOpen)
+	{
+		for (const auto& [_, child] : *prop)
+			RenderNode(child);
+		ImGui::TreePop();
+	}
+
+	ImGui::PopStyleVar();
 	ImGui::PopID();
 }
 
