@@ -19,7 +19,7 @@ void Hierarchy::Update(float deltaTime)
 		if (m_roots.erase(invalid) > 0)
 			continue;
 
-		for (const auto& [root, _] : m_roots)
+		for (const auto& root : m_roots | std::views::keys)
 			Recurse(root, [&invalid](const auto& prop) { prop->Delete(invalid); });
 	}
 	m_invalids.clear();
@@ -37,6 +37,11 @@ void Hierarchy::Render()
 	}
 	ImGui::End();
 	ImGui::PopID();
+}
+
+void Hierarchy::OpenTree(const std::shared_ptr<Resource::Property>& prop)
+{
+	m_opens.emplace_back(prop);
 }
 
 void Hierarchy::OnPropertySelect(std::shared_ptr<Resource::Property> prop)
@@ -334,7 +339,8 @@ void Hierarchy::RenderNode(const std::shared_ptr<Resource::Property>& prop)
 	ImGui::PushID(prop.get());
 
 	bool isRoot{ m_roots.contains(prop) };
-	bool isSelected{ std::ranges::find_if(m_selects, [&prop](const auto& select) { return select.lock() == prop; }) != m_selects.end() };
+	bool isSelected{ std::ranges::find_if(m_selects, [&prop](const auto& p) { return p.lock() == prop; }) != m_selects.end() };
+	bool open{ std::erase_if(m_opens, [&prop](const auto& p) { return p.lock() == prop; }) > 0 };
 	auto name{ Util::wstou8s(prop->GetName()) };
 
 	// 루트가 아닌 말단 노드는 Selectable
@@ -361,7 +367,8 @@ void Hierarchy::RenderNode(const std::shared_ptr<Resource::Property>& prop)
 	ImGuiTreeNodeFlags flag{ ImGuiTreeNodeFlags_OpenOnDoubleClick | ImGuiTreeNodeFlags_FramePadding | ImGuiTreeNodeFlags_SpanFullWidth };
 	if (isSelected)
 		flag |= ImGuiTreeNodeFlags_Selected;
-
+	if (open)
+		ImGui::SetNextItemOpen(true);
 	bool isTreeNodeOpen{ ImGui::TreeNodeEx(name.c_str(), flag) };
 	if (ImGui::BeginDragDropSource())
 	{
@@ -412,6 +419,7 @@ void Hierarchy::RenderNodeContextMenu(const std::shared_ptr<Resource::Property>&
 		auto child{ std::make_shared<Resource::Property>() };
 		child->SetName(name);
 		prop->Add(child);
+		OpenTree(prop);
 		App::OnPropertyAdd.Notify(child);
 	}
 

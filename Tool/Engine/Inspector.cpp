@@ -70,9 +70,12 @@ void Inspector::RenderNodeName(const std::shared_ptr<Resource::Property>& prop)
 	{
 		auto newName{ Util::u8stows(name) };
 		auto parent{ prop->GetParent() };
-		auto child{ parent ? parent->Get(newName) : nullptr };
-		if (!child)
+		if (!parent || !parent->Get(newName))
+		{
 			prop->SetName(newName);
+			if (auto hierarchy{ Hierarchy::GetInstance() })
+				hierarchy->OpenTree(prop);
+		}
 	}
 }
 

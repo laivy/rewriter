@@ -11,6 +11,8 @@ public:
 	void Update(float deltaTime);
 	void Render();
 
+	void OpenTree(const std::shared_ptr<Resource::Property>& prop);
+
 private:
 	void OnPropertySelect(std::shared_ptr<Resource::Property> prop);
 	void OnMenuFileNew();
@@ -48,4 +50,5 @@ private:
 	std::map<std::shared_ptr<Resource::Property>, std::filesystem::path> m_roots;
 	std::set<std::shared_ptr<Resource::Property>> m_invalids;
 	std::vector<std::weak_ptr<Resource::Property>> m_selects;
+	std::vector<std::weak_ptr<Resource::Property>> m_opens;
 };

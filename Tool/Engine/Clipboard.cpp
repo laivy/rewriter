@@ -1,5 +1,6 @@
 #include "Stdafx.h"
 #include "Clipboard.h"
+#include "Hierarchy.h"
 
 namespace
 {
@@ -67,6 +68,8 @@ void Clipboard::Paste(const std::shared_ptr<Resource::Property>& prop) const
 			prop->Delete(child);
 		prop->Add(copy);
 	}
+	if (auto hierarchy{ Hierarchy::GetInstance() })
+		hierarchy->OpenTree(prop);
 	ImGui::PopID();
 }
 
