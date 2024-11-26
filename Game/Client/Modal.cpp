@@ -2,14 +2,14 @@
 #include "Control.h"
 #include "Modal.h"
 
-IModal::IModal(const Callback& callback) : 
-	m_return{ Return::NONE },
-	m_callback{ callback }
+IModal::IModal(std::wstring_view path) :
+	IWindow{ path }
 {
 }
 
-IModal::~IModal()
+void IModal::Return(IModal::Result ret)
 {
-	if (m_callback)
-		m_callback(m_return);
+	if (OnReturn)
+		OnReturn(ret);
+	Destroy();
 }

@@ -3,17 +3,24 @@
 class IObject abstract
 {
 public:
-	IObject() = default;
+	IObject();
 	virtual ~IObject() = default;
 
 	virtual void Update(float deltaTime) = 0;
 	virtual void Render() const = 0;
+
+	void Destroy();
+
+	bool IsValid() const;
+
+private:
+	bool m_isValid;
 };
 
 class IObject2D abstract : public IObject
 {
 public:
-	IObject2D() = default;
+	IObject2D();
 	virtual ~IObject2D() = default;
 
 	void SetZ(int z);

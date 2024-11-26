@@ -1,29 +1,13 @@
 #pragma once
+#include "Protocol.h"
 
 class Packet
 {
 public:
 	using Size = uint16_t; // 패킷 크기 타입
-	enum class Type : uint16_t
-	{
-		None,
-		ServerBasicInfo,
-
-		// 회원가입
-		RequestRegister,
-		RequestRegisterToCenter,
-		RegisterResultToLogin,
-		RegisterResult,
-
-		// 로그인
-		RequestLogin,
-		RequestLoginToCenter,
-		LoginResultToLogin,
-		LoginResult
-	};
 
 public:
-	Packet(Type type);
+	Packet(Protocol type);
 	Packet(std::span<char> buffer);
 	~Packet() = default;
 
@@ -55,7 +39,7 @@ public:
 	void SetOffset(Size offset);
 	void Reset();
 
-	Type GetType() const;
+	Protocol GetType() const;
 	char* GetBuffer();
 	Size GetSize() const;
 
@@ -160,7 +144,7 @@ private:
 private:
 	static constexpr Size DEFAULT_BUFFER_SIZE{ 128 };
 
-	Type m_type;
+	Protocol m_type;
 	std::vector<char> m_buffer;
 	Size m_encodedSize;
 	Size m_offset;

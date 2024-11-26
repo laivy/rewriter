@@ -85,7 +85,7 @@ void ISocket::OnReceive(Packet::Size ioSize)
 	// 패킷 완성
 	if (m_receiveBuffer.remainPacketSize == 0)
 	{
-		m_receiveBuffer.packet.SetOffset(sizeof(Packet::Size) + sizeof(Packet::Type));
+		m_receiveBuffer.packet.SetOffset(sizeof(Packet::Size) + sizeof(Protocol));
 		OnComplete(m_receiveBuffer.packet);
 		m_receiveBuffer.packet.Reset();
 	}

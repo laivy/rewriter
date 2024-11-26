@@ -6,7 +6,6 @@ namespace Resource
 	{
 #if defined _CLIENT || defined _TOOL
 	public:
-		DLL_API Sprite();
 		DLL_API Sprite(std::span<std::byte> binary);
 		~Sprite() = default;
 

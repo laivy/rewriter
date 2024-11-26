@@ -10,48 +10,58 @@
 #include "TextBox.h"
 #include "WindowManager.h"
 
-class RegisterAccountModal :
+class RegisterAccountModal final :
 	public IModal,
 	public IObserver
 {
-private:
-	enum class ButtonID
-	{
-		OK, CANCLE
-	};
-
 public:
-	RegisterAccountModal(const Callback& callback) :
-		IModal{ callback }
+	RegisterAccountModal() :
+		IModal{ L"UI.dat/Register" }
 	{
-		m_size = { 500, 300 };
-		SetPosition({ App::size.x / 2, App::size.y / 2 }, Pivot::Center);
-
-		auto okButton{ std::make_shared<Button>(this) };
-		okButton->OnButtonClick.Register(this, std::bind(&RegisterAccountModal::OnButtonClicked, this, ButtonID::OK));
-		okButton->SetSize({ 80, 20 });
-		okButton->SetPosition({ m_size.x / 2 - 50, m_size.y / 2 + 120 }, Pivot::Center);
-		Register(okButton);
-
-		auto cancleButton{ std::make_shared<Button>(this) };
-		cancleButton->OnButtonClick.Register(this, std::bind(&RegisterAccountModal::OnButtonClicked, this, ButtonID::CANCLE));
-		cancleButton->SetSize({ 80, 20 });
-		cancleButton->SetPosition({ m_size.x / 2 + 50, m_size.y / 2 + 120 }, Pivot::Center);
-		Register(cancleButton);
-	}
-
-	virtual void Render() const override final
-	{
-		RECTI rect{ 0, 0, m_size.x, m_size.y };
-		Graphics::D2D::DrawRect(rect, Graphics::D2D::Color::White);
-		IWindow::Render();
+		SetPosition(App::size / 2, Pivot::Center);
+		if (auto button{ GetControl<Button>(L"CheckID") })
+			button->OnButtonClick.Register([this]() { OnCheckIDButtonClicked(); });
+		if (auto button{ GetControl<Button>(L"Ok") })
+			button->OnButtonClick.Register([this]() { OnOKButtonClicked(); });
+		if (auto button{ GetControl<Button>(L"Cancle") })
+			button->OnButtonClick.Register([this]() { OnCancleButtonClicked(); });
+		LoginServer::GetInstance()->OnPacket.Register(this, std::bind_front(&RegisterAccountModal::OnPacket, this));
 	}
 
 private:
-	void OnButtonClicked(ButtonID id)
+	void OnPacket(Packet& packet)
 	{
-		if (id == ButtonID::CANCLE)
-			Destroy();
+
+	}
+
+	void OnCheckIDButtonClicked()
+	{
+		std::wstring id;
+		if (auto textBox{ GetControl<TextBox>(L"ID") })
+			id = textBox->GetText();
+
+		Packet packet{ Protocol::AccountRegisterRequest };
+		packet.Encode(AccountRegisterRequest::CheckID, id);
+		LoginServer::GetInstance()->Send(packet);
+	}
+
+	void OnOKButtonClicked()
+	{
+		std::wstring id;
+		std::wstring pw;
+		if (auto textBox{ GetControl<TextBox>(L"ID") })
+			id = textBox->GetText();
+		if (auto textBox{ GetControl<TextBox>(L"Password") })
+			pw = textBox->GetText();
+
+		Packet packet{ Protocol::AccountRegisterRequest };
+		packet.Encode(AccountRegisterRequest::Request, id, pw);
+		LoginServer::GetInstance()->Send(packet);
+	}
+
+	void OnCancleButtonClicked()
+	{
+		Return(IModal::Result::Cancle);
 	}
 };
 
@@ -68,32 +78,14 @@ LoginWindow::LoginWindow() :
 
 void LoginWindow::OnPacket(Packet& packet)
 {
-	switch (packet.GetType())
-	{
-	case Packet::Type::LoginResult:
-	{
-		bool isSuccess{ packet.Decode<bool>() };
-		break;
-	}
-	default:
-		break;
-	}
 }
 
 void LoginWindow::OnLoginButtonClicked()
 {
-	Packet packet{ Packet::Type::RequestLogin };
-	if (auto textBox{ GetControl<TextBox>(L"ID") })
-		packet.Encode(textBox->GetText());
-	else
-		packet.Encode(L"");
-	if (auto textBox{ GetControl<TextBox>(L"Password") })
-		packet.Encode(textBox->GetText());
-	else
-		packet.Encode(L"");
-	LoginServer::GetInstance()->Send(packet);
 }
 
 void LoginWindow::OnRegisterButtonClicked()
 {
+	auto modal{ std::make_shared<RegisterAccountModal>() };
+	WindowManager::GetInstance()->Register(std::static_pointer_cast<IModal>(modal));
 }

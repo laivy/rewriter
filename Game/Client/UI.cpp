@@ -3,10 +3,17 @@
 #include "Window.h"
 
 IUserInterface::IUserInterface() :
-	m_isValid{ true },
 	m_isFocus{ false },
 	m_size{ 0, 0 },
 	m_position{ 0, 0 }
+{
+}
+
+void IUserInterface::Update(float deltaTime)
+{
+}
+
+void IUserInterface::Render() const
 {
 }
 
@@ -24,19 +31,6 @@ void IUserInterface::OnMouseEvent(UINT message, int x, int y)
 
 void IUserInterface::OnKeyboardEvent(UINT message, WPARAM wParam, LPARAM lParam)
 {
-}
-
-void IUserInterface::Update(float deltaTime)
-{
-}
-
-void IUserInterface::Render() const
-{
-}
-
-void IUserInterface::Destroy()
-{
-	m_isValid = false;
 }
 
 void IUserInterface::SetFocus(bool focus)
@@ -89,22 +83,9 @@ void IUserInterface::SetSize(const INT2& size)
 	m_size = size;
 }
 
-bool IUserInterface::IsValid() const
-{
-	return m_isValid;
-}
-
 bool IUserInterface::IsFocus() const
 {
 	return m_isFocus;
-}
-
-bool IUserInterface::Contains(const INT2& point) const
-{
-	// point는 부모 좌표계 기준의 좌표
-	RECTI rect{ 0, 0, m_size.x, m_size.y };
-	rect.Offset(m_position);
-	return rect.Contains(point);
 }
 
 INT2 IUserInterface::GetPosition(Pivot pivot) const
@@ -149,4 +130,12 @@ INT2 IUserInterface::GetPosition(Pivot pivot) const
 INT2 IUserInterface::GetSize() const
 {
 	return m_size;
+}
+
+bool IUserInterface::Contains(const INT2& point) const
+{
+	// point는 부모 좌표계 기준의 좌표
+	RECTI rect{ 0, 0, m_size.x, m_size.y };
+	rect.Offset(m_position);
+	return rect.Contains(point);
 }

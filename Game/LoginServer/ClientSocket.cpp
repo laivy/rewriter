@@ -29,34 +29,38 @@ void ClientSocket::OnComplete(Packet& packet)
 
 	switch (packet.GetType())
 	{
-	case Packet::Type::RequestRegister:
-		OnRegisterRequest(packet);
+	case Protocol::AccountRegisterRequest:
+	{
+		OnAccountRegisterRequest(packet);
 		break;
-	case Packet::Type::RequestLogin:
-		OnLoginRequest(packet);
-		break;
+	}
 	default:
+		assert(false);
 		break;
 	}
 }
 
-void ClientSocket::OnRegisterRequest(Packet& packet)
+void ClientSocket::OnAccountRegisterRequest(Packet& packet)
 {
-	if (auto center{ CenterServer::GetInstance() })
+	auto subType{ packet.Decode<AccountRegisterRequest>() };
+	switch (subType)
 	{
-		Packet response{ Packet::Type::RequestRegisterToCenter };
-		response.Encode(std::span{ packet.GetBuffer(), packet.GetSize() });
-		center->Send(response);
+	case AccountRegisterRequest::CheckID:
+	{
+		auto id{ packet.Decode<std::wstring>() };
+		Packet outPacket{ Protocol::AccountRegisterRequest };
+		outPacket.Encode(subType, id);
+		CenterServer::GetInstance()->Send(outPacket);
+		break;
+	}
+	case AccountRegisterRequest::Request:
+		break;
+	default:
+		assert(false);
+		break;
 	}
 }
 
 void ClientSocket::OnLoginRequest(Packet& packet)
 {
-	auto [id, pw] { packet.Decode<std::wstring, std::wstring>() };
-	if (auto center{ CenterServer::GetInstance() })
-	{
-		Packet outPacket{ Packet::Type::RequestLoginToCenter };
-		outPacket.Encode(id, pw);
-		center->Send(outPacket);
-	}
 }

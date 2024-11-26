@@ -23,7 +23,7 @@ void CenterServer::OnConnect(bool success)
 	ISocket::OnConnect(success);
 	if (success)
 	{
-		Packet packet{ Packet::Type::ServerBasicInfo };
+		Packet packet{ Protocol::ServerBasicInfo };
 		packet.Encode(ISocket::Type::Login);
 		Send(packet);
 		return;
@@ -58,11 +58,4 @@ void CenterServer::OnDisconnect()
 
 void CenterServer::OnComplete(Packet& packet)
 {
-	switch (packet.GetType())
-	{
-	case Packet::Type::LoginResultToLogin:
-		break;
-	default:
-		break;
-	}
 }

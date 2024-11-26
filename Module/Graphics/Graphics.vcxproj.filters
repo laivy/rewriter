@@ -30,6 +30,9 @@
     <Filter Include="모듈 파일\Resource">
       <UniqueIdentifier>{aaa2fbea-0d05-4136-bd86-0528fcf3fb33}</UniqueIdentifier>
     </Filter>
+    <Filter Include="외부 파일\DirectX">
+      <UniqueIdentifier>{42edbb19-e699-40e6-becd-557caaf541c4}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="DllMain.cpp">
@@ -85,6 +88,9 @@
     </ClCompile>
     <ClCompile Include="..\..\Common\Util.cpp">
       <Filter>소스 파일\Common</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\External\DirectX\DDSTextureLoader12.cpp">
+      <Filter>외부 파일\DirectX</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -147,6 +153,12 @@
     </ClInclude>
     <ClInclude Include="..\Resource\Include\Lib.h">
       <Filter>모듈 파일\Resource</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\External\DirectX\d3dx12.h">
+      <Filter>외부 파일\DirectX</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\External\DirectX\DDSTextureLoader12.h">
+      <Filter>외부 파일\DirectX</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

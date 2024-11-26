@@ -55,6 +55,7 @@ void WindowManager::Render() const
 
 void WindowManager::Register(const std::shared_ptr<IModal>& modal)
 {
+	modal->SetFocus(true);
 	m_focusWindow = modal;
 	m_modals.push_back(modal);
 }

@@ -30,13 +30,13 @@ private:
 	struct SendBuffer
 	{
 		OverlappedEx overlappedEx{};
-		Packet packet{ Packet::Type::None };
+		Packet packet{ Protocol::None };
 	};
 
 	struct ReceiveBuffer
 	{
 		OverlappedEx overlappedEx{};
-		Packet packet{ Packet::Type::None };
+		Packet packet{ Protocol::None };
 		std::array<char, 512> buffer{};
 		int remainPacketSize{};
 	};

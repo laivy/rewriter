@@ -1,7 +1,7 @@
 #pragma once
 #include "Control.h"
 
-class TextBox : public IControl
+class TextBox final : public IControl
 {
 private:
 	using Visual = std::variant<std::shared_ptr<Resource::Sprite>, std::tuple<INT2, int32_t, int32_t>>;
@@ -10,13 +10,14 @@ public:
 	TextBox(IWindow* owner, const std::shared_ptr<Resource::Property>& prop = nullptr);
 	~TextBox() = default;
 
-	virtual void OnKeyboardEvent(UINT message, WPARAM wParam, LPARAM lParam) override final;
+	void Update(float deltaTime) override final;
+	void Render() const override final;
 
-	virtual void Update(float deltaTime) override final;
-	virtual void Render() const override final;
+	void OnKeyboardEvent(UINT message, WPARAM wParam, LPARAM lParam) override final;
 
-	virtual void SetFocus(bool focus) override final;
-	virtual bool IsFocus() const override final;
+	void SetFocus(bool focus) override final;
+
+	bool IsFocus() const override final;
 
 	std::wstring GetText() const;
 

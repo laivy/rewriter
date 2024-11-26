@@ -4,20 +4,23 @@
 class IModal : public IWindow
 {
 public:
-	enum class Return
+	enum class Result
 	{
-		NONE, OK, CANCLE, YES, NO
+		None,
+		Ok,
+		Cancle,
+		Yes,
+		No
 	};
 
-	using Callback = std::function<void(Return)>;
+	using Callback = std::function<void(Result)>;
 
 public:
-	IModal(const Callback& callback);
-	~IModal();
+	IModal(std::wstring_view path);
+	~IModal() = default;
 
-protected:
-	Return m_return;
+	void Return(Result ret);
 
-private:
-	Callback m_callback;
+public:
+	Callback OnReturn;
 };

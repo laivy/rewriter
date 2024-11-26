@@ -310,6 +310,9 @@
     <ClInclude Include="..\..\Module\Graphics\Include\Lib.h">
       <Filter>모듈 파일\Graphics</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\Common\Protocol.h">
+      <Filter>헤더 파일\Common</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="Common.hlsli">

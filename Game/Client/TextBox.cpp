@@ -19,6 +19,26 @@ TextBox::TextBox(IWindow* owner, const std::shared_ptr<Resource::Property>& prop
 	Build(prop);
 }
 
+void TextBox::Update(float deltaTime)
+{
+	if (IsFocus())
+	{
+		m_caretTimer += deltaTime;
+		if (m_caretTimer > 1.0f)
+		{
+			m_caretTimer -= 1.0f;
+			m_isCaretVisible = !m_isCaretVisible;
+		}
+	}
+}
+
+void TextBox::Render() const
+{
+	RenderBackground();
+	RenderText();
+	RenderCaret();
+}
+
 void TextBox::OnKeyboardEvent(UINT message, WPARAM wParam, LPARAM lParam)
 {
 	switch (message)
@@ -117,26 +137,6 @@ void TextBox::OnKeyboardEvent(UINT message, WPARAM wParam, LPARAM lParam)
 	default:
 		break;
 	}
-}
-
-void TextBox::Update(float deltaTime)
-{
-	if (IsFocus())
-	{
-		m_caretTimer += deltaTime;
-		if (m_caretTimer > 1.0f)
-		{
-			m_caretTimer -= 1.0f;
-			m_isCaretVisible = !m_isCaretVisible;
-		}
-	}
-}
-
-void TextBox::Render() const
-{
-	RenderBackground();
-	RenderText();
-	RenderCaret();
 }
 
 void TextBox::SetFocus(bool focus)

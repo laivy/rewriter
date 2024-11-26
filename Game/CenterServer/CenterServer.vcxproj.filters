@@ -25,9 +25,6 @@
     <Filter Include="외부 파일\Imgui">
       <UniqueIdentifier>{313ea8f7-b530-4093-a8eb-933827866ac0}</UniqueIdentifier>
     </Filter>
-    <Filter Include="외부 파일\DirectX">
-      <UniqueIdentifier>{6a745c7b-b237-4ec5-a691-d2efcffd0841}</UniqueIdentifier>
-    </Filter>
     <Filter Include="소스 파일\Server">
       <UniqueIdentifier>{11111cd8-10ad-4a20-91d4-05659f76e0eb}</UniqueIdentifier>
     </Filter>
@@ -62,9 +59,6 @@
     </ClInclude>
     <ClInclude Include="Stdafx.h">
       <Filter>헤더 파일</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\External\DirectX\d3dx12.h">
-      <Filter>외부 파일\DirectX</Filter>
     </ClInclude>
     <ClInclude Include="..\..\External\Imgui\imconfig.h">
       <Filter>외부 파일\Imgui</Filter>

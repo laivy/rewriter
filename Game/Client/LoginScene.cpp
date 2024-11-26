@@ -6,10 +6,8 @@
 
 LoginScene::LoginScene()
 {
-#ifdef _DEBUG
 	auto window{ std::make_shared<LoginWindow>()};
 	WindowManager::GetInstance()->Register(window);
-#endif // _DEBUG
 }
 
 void LoginScene::Update(float deltaTime)

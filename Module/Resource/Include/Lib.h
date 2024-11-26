@@ -7,3 +7,4 @@
 #include "../Property.h"
 #include "../Resource.h"
 #include "../Sprite.h"
+#include "../Texture.h"

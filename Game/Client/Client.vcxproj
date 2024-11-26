@@ -209,6 +209,7 @@
   <ItemGroup>
     <ClInclude Include="..\..\Common\Delegate.h" />
     <ClInclude Include="..\..\Common\Packet.h" />
+    <ClInclude Include="..\..\Common\Protocol.h" />
     <ClInclude Include="..\..\Common\Singleton.h" />
     <ClInclude Include="..\..\Common\Socket.h" />
     <ClInclude Include="..\..\Common\Stringtable.h" />

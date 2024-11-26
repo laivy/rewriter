@@ -1,6 +1,7 @@
 #include "Stdafx.h"
 #include "Global.h"
 #include "Graphics3D.h"
+#include "External/DirectX/DDSTextureLoader12.h"
 
 namespace Graphics::D3D
 {
@@ -34,5 +35,9 @@ namespace Graphics::D3D
 		ID3D12CommandList* ppCommandList[]{ commandList.Get() };
 		commandQueue->ExecuteCommandLists(_countof(ppCommandList), ppCommandList);
 		return true;
+	}
+
+	void CreateResourceFromTexture(const std::shared_ptr<Resource::Texture>& texture)
+	{
 	}
 }

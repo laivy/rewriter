@@ -6,12 +6,8 @@
 
 namespace Resource
 {
-	DLL_API Sprite::Sprite() :
+	DLL_API Sprite::Sprite(std::span<std::byte> binary) :
 		m_size{}
-	{
-	}
-
-	DLL_API Sprite::Sprite(std::span<std::byte> binary)
 	{
 		ComPtr<IWICImagingFactory> factory;
 		ComPtr<IWICStream> stream;

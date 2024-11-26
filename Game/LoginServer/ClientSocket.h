@@ -12,7 +12,7 @@ public:
 	virtual void OnComplete(Packet& packet) override final;
 
 private:
-	void OnRegisterRequest(Packet& packet);
+	void OnAccountRegisterRequest(Packet& packet);
 	void OnLoginRequest(Packet& packet);
 
 private:

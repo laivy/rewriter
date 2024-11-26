@@ -10,7 +10,7 @@ void ServerSocket::OnComplete(Packet& packet)
 {
 	switch (packet.GetType())
 	{
-	case Packet::Type::ServerBasicInfo:
+	case Protocol::ServerBasicInfo:
 	{
 		auto type{ packet.Decode<ISocket::Type>() };
 		SetType(type);
@@ -37,9 +37,8 @@ void ServerSocket::OnLoginPacket(Packet& packet)
 {
 	switch (packet.GetType())
 	{
-	case Packet::Type::RequestLoginToCenter:
+	case Protocol::AccountRegisterRequest:
 	{
-		auto [id, pw] { packet.Decode<std::wstring, std::wstring>() };
 		break;
 	}
 	default:
