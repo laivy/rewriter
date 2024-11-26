@@ -159,7 +159,9 @@ void Inspector::RenderNodeValue(const std::shared_ptr<Resource::Property>& prop)
 		std::unique_ptr<std::byte[]> buffer{ new std::byte[size]{} };
 		file.read(reinterpret_cast<char*>(buffer.get()), size);
 
-		auto sprite{ std::make_shared<Resource::Sprite>(std::span{ buffer.release(), size }) };
+		std::span<std::byte> binary{ buffer.release(), size };
+		auto sprite{ Graphics::D2D::LoadSprite(binary) };
+		sprite->SetBinary(binary);
 		prop->Set(sprite);
 		break;
 	}

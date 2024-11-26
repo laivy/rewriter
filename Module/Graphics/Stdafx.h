@@ -1,6 +1,9 @@
 #pragma once
 #include "Common/Stdafx.h"
 
+// Windows
+#include <wincodec.h>
+
 // DirectX
 #include <d2d1_3.h>
 #include <d3d11on12.h>

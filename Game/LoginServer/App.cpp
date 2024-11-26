@@ -10,7 +10,6 @@
 App::App()
 {
 	InitWindow();
-	InitImgui();
 	InitApp();
 	m_timer.Tick();
 }
@@ -20,9 +19,6 @@ App::~App()
 	UserManager::Destroy(); // 접속 중인 유저 정보 저장
 	CenterServer::Destroy(); // 센터 서버 연결 종료
 	SocketManager::Destroy(); // 유저 접속 차단
-#ifdef _IMGUI
-	ImGui::CleanUp();
-#endif
 }
 
 void App::Run()
@@ -113,11 +109,13 @@ void App::InitWindow()
 	::UpdateWindow(hWnd);
 }
 
-void App::InitImgui()
+void App::InitApp()
 {
 #ifdef _IMGUI
-	ImGui::Init(hWnd, ImGuiConfigFlags_NavEnableKeyboard | ImGuiConfigFlags_DockingEnable);
-	OnResize.Register(&ImGui::OnResize);
+	Graphics::Initialize(hWnd);
+	OnResize.Register(&Graphics::OnResize);
+
+	ImGui::SetCurrentContext(Graphics::ImGui::GetContext());
 
 	auto& io{ ImGui::GetIO() };
 	io.IniFilename = "Data/imgui_login.ini";
@@ -128,10 +126,7 @@ void App::InitImgui()
 	style.DockingSeparatorSize = 1.0f;
 	ImGui::StyleColorsDark();
 #endif
-}
 
-void App::InitApp()
-{
 	UserManager::Instantiate();
 	SocketManager::Instantiate();
 	CenterServer::Instantiate(); // 센터 서버 연결
@@ -147,11 +142,15 @@ void App::Update()
 void App::Render()
 {
 #if defined _IMGUI
-	ImGui::BeginRender();
+	Graphics::D3D::Begin();
 	{
-		if (auto sm{ SocketManager::GetInstance() })
-			sm->Render();
+		Graphics::ImGui::Begin();
+		{
+			if (auto sm{ SocketManager::GetInstance() })
+				sm->Render();
+		}
+		Graphics::ImGui::End();
 	}
-	ImGui::EndRender();
+	Graphics::D3D::End();
 #endif
 }

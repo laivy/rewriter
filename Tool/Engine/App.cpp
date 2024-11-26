@@ -117,7 +117,7 @@ void App::InitApp()
 {
 	// 모듈 초기화
 	Graphics::Initialize(hWnd);
-	Resource::Initialize(Graphics::D2D::GetContext());
+	Resource::Initialize(Graphics::D2D::LoadSprite);
 	OnResize.Register(&Graphics::OnResize);
 
 	// ImGui 초기화

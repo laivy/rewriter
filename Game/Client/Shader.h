@@ -1,5 +1,6 @@
 #pragma once
 
+/*
 class Shader
 {
 public:
@@ -25,3 +26,4 @@ public:
 	LineShader();
 	~LineShader() = default;
 };
+*/

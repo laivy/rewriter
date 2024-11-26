@@ -6,43 +6,18 @@
 
 namespace Resource
 {
-	DLL_API Sprite::Sprite(std::span<std::byte> binary) :
+	DLL_API Sprite::Sprite() :
 		m_size{}
 	{
-		ComPtr<IWICImagingFactory> factory;
-		ComPtr<IWICStream> stream;
-		ComPtr<IWICBitmapDecoder> decoder;
-		ComPtr<IWICFormatConverter> converter;
-		ComPtr<IWICBitmapFrameDecode> frameDecode;
-
-		if (FAILED(::CoCreateInstance(CLSID_WICImagingFactory, nullptr, CLSCTX_INPROC_SERVER, IID_PPV_ARGS(&factory))))
-			return;
-		if (FAILED(factory->CreateStream(&stream)))
-			return;
-		if (FAILED(stream->InitializeFromMemory(reinterpret_cast<WICInProcPointer>(binary.data()), static_cast<DWORD>(binary.size()))))
-			return;
-		if (FAILED(factory->CreateDecoderFromStream(stream.Get(), nullptr, WICDecodeMetadataCacheOnLoad, &decoder)))
-			return;
-		if (FAILED(factory->CreateFormatConverter(&converter)))
-			return;
-		if (FAILED(decoder->GetFrame(0, &frameDecode)))
-			return;
-		if (FAILED(converter->Initialize(frameDecode.Get(), GUID_WICPixelFormat32bppPBGRA, WICBitmapDitherTypeNone, nullptr, 0.0f, WICBitmapPaletteTypeMedianCut)))
-			return;
-
-		g_d2dContext->CreateBitmapFromWicBitmap(converter.Get(), m_bitmap.GetAddressOf());
-
-		auto size{ m_bitmap->GetSize() };
-		m_size = Float2{ size.width, size.height };
-
-#ifdef _TOOL
-		// 나중에 저장하기 위해 바이너리 데이터 복사
-		m_binary.reserve(binary.size());
-		std::ranges::copy(binary, std::back_inserter(m_binary));
-#endif
 	}
 
-	DLL_API ID2D1Bitmap* Sprite::Get() const
+	DLL_API void Sprite::Set(const ComPtr<IUnknown>& bitmap, const Float2& size)
+	{
+		m_bitmap = bitmap;
+		m_size = size;
+	}
+
+	DLL_API IUnknown* Sprite::Get() const
 	{
 		return m_bitmap.Get();
 	}
@@ -53,6 +28,12 @@ namespace Resource
 	}
 
 #ifdef _TOOL
+	DLL_API void Sprite::SetBinary(std::span<std::byte> binary)
+	{
+		m_binary.reserve(binary.size());
+		std::ranges::copy(binary, std::back_inserter(m_binary));
+	}
+
 	DLL_API std::span<const std::byte> Sprite::GetBinary() const
 	{
 		return std::span{ m_binary.data(), m_binary.size() };

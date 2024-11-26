@@ -39,6 +39,9 @@
     <Filter Include="소스 파일\User">
       <UniqueIdentifier>{aa2c693f-0871-47a3-b89f-834a1a59b197}</UniqueIdentifier>
     </Filter>
+    <Filter Include="모듈 파일\Graphics">
+      <UniqueIdentifier>{c8173bd4-4e49-43f3-9d0f-fe4c593d6c50}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Main.cpp">
@@ -78,9 +81,6 @@
       <Filter>소스 파일\Common</Filter>
     </ClCompile>
     <ClCompile Include="..\..\Common\Types.cpp">
-      <Filter>소스 파일\Common</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\Common\ImguiEx.cpp">
       <Filter>소스 파일\Common</Filter>
     </ClCompile>
     <ClCompile Include="..\..\Common\Timer.cpp">
@@ -198,6 +198,9 @@
     </ClInclude>
     <ClInclude Include="..\..\Module\Resource\Include\Lib.h">
       <Filter>모듈 파일\Resource</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Module\Graphics\Include\Lib.h">
+      <Filter>모듈 파일\Graphics</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

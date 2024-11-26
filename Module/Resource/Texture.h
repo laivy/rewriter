@@ -1,5 +1,7 @@
 #pragma once
 
+struct IUnknown;
+
 namespace Resource
 {
 	class Texture
@@ -10,7 +12,7 @@ namespace Resource
 		~Texture() = default;
 
 	private:
-		ComPtr<ID3D12Resource> m_resource;
+		ComPtr<IUnknown> m_resource;
 #endif
 	};
 }

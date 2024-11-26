@@ -81,6 +81,9 @@ namespace
 	}
 #endif
 
+	std::function<std::shared_ptr<Sprite>(std::span<std::byte>)> LoadSprite;
+	std::function<std::shared_ptr<Sprite>(std::span<std::byte>)> LoadTexture;
+
 	std::shared_ptr<Property> _Load(std::ifstream& file, std::wstring_view subPath)
 	{
 		auto prop{ std::make_shared<Property>() };
@@ -146,7 +149,7 @@ namespace
 			std::unique_ptr<std::byte[]> binary{ new std::byte[length]{} };
 			file.read(reinterpret_cast<char*>(binary.get()), length);
 
-			auto data{ std::make_shared<Sprite>(std::span{ binary.get(), length }) };
+			auto data{ LoadSprite(std::span{ binary.get(), length }) };
 			prop->Set(data);
 #endif
 			break;
@@ -188,21 +191,15 @@ namespace
 namespace Resource
 {
 #if defined _CLIENT || defined _TOOL
-	DLL_API void Initialize(const ComPtr<ID2D1DeviceContext2>& d2dContext)
+	DLL_API void Initialize(const std::function<std::shared_ptr<Sprite>(std::span<std::byte>)>& _LoadSprite)
 	{
-		g_d2dContext = d2dContext;
-		if (FAILED(::CoInitializeEx(nullptr, COINIT_MULTITHREADED)))
-			assert(false && "COINITIALIZE FAIL");
+		LoadSprite = _LoadSprite;
 	}
 #endif
 
 	DLL_API void CleanUp()
 	{
 		g_resources.clear();
-#if defined _CLIENT || defined _TOOL
-		g_d2dContext.Reset();
-		::CoUninitialize();
-#endif
 	}
 
 #ifdef _TOOL

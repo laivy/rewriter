@@ -41,6 +41,7 @@ namespace Graphics::D2D
 	DLL_API void Begin();
 	DLL_API bool End();
 
+	DLL_API std::shared_ptr<Resource::Sprite> LoadSprite(std::span<std::byte> binary);
 	DLL_API ComPtr<ID2D1DeviceContext2> GetContext();
 	DLL_API std::shared_ptr<Layer> CreateLayer(const Float2& size);
 

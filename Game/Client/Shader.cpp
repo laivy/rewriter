@@ -1,6 +1,7 @@
 #include "Stdafx.h"
 #include "Shader.h"
 
+/*
 Shader::Shader()
 {
 	// 레이아웃 설정
@@ -121,3 +122,4 @@ LineShader::LineShader()
 	psoDesc.SampleDesc.Count = 1;
 	//DX::ThrowIfFailed(Renderer::d3dDevice->CreateGraphicsPipelineState(&psoDesc, IID_PPV_ARGS(&m_pipelineState)));
 }
+*/

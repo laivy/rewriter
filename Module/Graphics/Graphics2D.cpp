@@ -132,6 +132,38 @@ namespace Graphics::D2D
 		return true;
 	}
 
+	DLL_API std::shared_ptr<Resource::Sprite> LoadSprite(std::span<std::byte> binary)
+	{
+		ComPtr<IWICImagingFactory> factory;
+		ComPtr<IWICStream> stream;
+		ComPtr<IWICBitmapDecoder> decoder;
+		ComPtr<IWICFormatConverter> converter;
+		ComPtr<IWICBitmapFrameDecode> frameDecode;
+
+		if (FAILED(::CoCreateInstance(CLSID_WICImagingFactory, nullptr, CLSCTX_INPROC_SERVER, IID_PPV_ARGS(&factory))))
+			return nullptr;
+		if (FAILED(factory->CreateStream(&stream)))
+			return nullptr;
+		if (FAILED(stream->InitializeFromMemory(reinterpret_cast<WICInProcPointer>(binary.data()), static_cast<DWORD>(binary.size()))))
+			return nullptr;
+		if (FAILED(factory->CreateDecoderFromStream(stream.Get(), nullptr, WICDecodeMetadataCacheOnLoad, &decoder)))
+			return nullptr;
+		if (FAILED(factory->CreateFormatConverter(&converter)))
+			return nullptr;
+		if (FAILED(decoder->GetFrame(0, &frameDecode)))
+			return nullptr;
+		if (FAILED(converter->Initialize(frameDecode.Get(), GUID_WICPixelFormat32bppPBGRA, WICBitmapDitherTypeNone, nullptr, 0.0f, WICBitmapPaletteTypeMedianCut)))
+			return nullptr;
+
+		ComPtr<ID2D1Bitmap> bitmap;
+		d2dContext->CreateBitmapFromWicBitmap(converter.Get(), bitmap.GetAddressOf());
+
+		auto size{ bitmap->GetSize() };
+		auto sprite{ std::make_shared<Resource::Sprite>() };
+		sprite->Set(bitmap, Float2{ size.width, size.height });
+		return sprite;
+	}
+
 	DLL_API ComPtr<ID2D1DeviceContext2> GetContext()
 	{
 		return d2dContext;
@@ -234,7 +266,7 @@ namespace Graphics::D2D
 
 	DLL_API void DrawSprite(const std::shared_ptr<Resource::Sprite>& sprite, const RectF& rect, float opacity)
 	{
-		g_d2dCurrentRenderTarget->DrawBitmap(sprite->Get(), D2D1_RECT_F{ rect.left, rect.top, rect.right, rect.bottom }, opacity);
+		g_d2dCurrentRenderTarget->DrawBitmap(static_cast<ID2D1Bitmap*>(sprite->Get()), D2D1_RECT_F{ rect.left, rect.top, rect.right, rect.bottom }, opacity);
 	}
 
 	DLL_API TextMetrics GetTextMetrics(std::wstring_view text, const Font& font)

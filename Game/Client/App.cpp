@@ -20,8 +20,8 @@ App::~App()
 {
 	SceneManager::Destroy();
 	SocketManager::Destroy();
-	Graphics::CleanUp();
 	Resource::CleanUp();
+	Graphics::CleanUp();
 }
 
 void App::Run()
@@ -133,7 +133,7 @@ void App::InitApp()
 {
 	// 모듈 초기화
 	Graphics::Initialize(hWnd);
-	Resource::Initialize(Graphics::D2D::GetContext());
+	Resource::Initialize(Graphics::D2D::LoadSprite);
 	OnResize.Register(&Graphics::OnResize);
 
 #ifdef _IMGUI

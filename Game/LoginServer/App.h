@@ -13,7 +13,6 @@ private:
 	static LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);
 
 	void InitWindow();
-	void InitImgui();
 	void InitApp();
 
 	void Update();

@@ -441,6 +441,8 @@ namespace Graphics
 			return false;
 		if (!CreateD2DRenderTarget(hWnd))
 			return false;
+		if (FAILED(::CoInitializeEx(nullptr, COINIT_MULTITHREADED)))
+			return false;
 
 		// DWRITE
 		if (!CreateDWriteFactory())
@@ -478,6 +480,7 @@ namespace Graphics
 			return false;
 		if (!::CloseHandle(fenceEvent))
 			return false;
+		::CoUninitialize();
 #ifdef _DEBUG
 		ComPtr<IDXGIDebug1> dxgiDebug;
 		if (SUCCEEDED(::DXGIGetDebugInterface1(0, IID_PPV_ARGS(&dxgiDebug))))

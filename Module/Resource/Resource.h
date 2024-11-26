@@ -3,9 +3,10 @@
 namespace Resource
 {
 	class Property;
+	class Sprite;
 
 #if defined _CLIENT || defined _TOOL
-	DLL_API void Initialize(const ComPtr<ID2D1DeviceContext2>& d2dContext);
+	DLL_API void Initialize(const std::function<std::shared_ptr<Sprite>(std::span<std::byte>)>& LoadSprite);
 #endif
 	DLL_API void CleanUp();
 
