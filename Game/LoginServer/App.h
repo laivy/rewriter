@@ -23,7 +23,7 @@ public:
 	static constexpr auto WINDOW_TITLE_NAME{ L"LOGIN SERVER" };
 	static inline Delegate<int, int> OnResize;
 	static inline HWND hWnd{ NULL };
-	static inline INT2 size{ 600, 400 };
+	static inline Int2 size{ 600, 400 };
 
 private:
 	Timer m_timer;

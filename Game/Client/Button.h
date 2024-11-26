@@ -4,7 +4,7 @@
 class Button : public IControl
 {
 private:
-	using Visual = std::variant<std::shared_ptr<Resource::Sprite>, std::tuple<INT2, FLOAT2, int32_t>>;
+	using Visual = std::variant<std::shared_ptr<Resource::Sprite>, std::tuple<Int2, Float2, int32_t>>;
 
 	enum class State
 	{

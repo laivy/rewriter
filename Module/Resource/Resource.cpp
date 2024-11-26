@@ -114,7 +114,7 @@ namespace
 		}
 		case Property::Type::Int2:
 		{
-			INT2 data{};
+			Int2 data{};
 			file.read(reinterpret_cast<char*>(&data), sizeof(data));
 			prop->Set(data);
 			break;

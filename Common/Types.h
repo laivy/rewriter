@@ -2,7 +2,7 @@
 #include <cstdint>
 #include <d2d1.h>
 
-class FLOAT2;
+class Float2;
 
 enum class Pivot
 {
@@ -17,47 +17,49 @@ enum class Pivot
 	RightBot
 };
 
-class INT2
+class Int2
 {
 public:
-	INT2(int32_t x = 0, int32_t y = 0);
-	INT2(float x, float y);
-	INT2(const FLOAT2& float2);
+	Int2(int32_t x = 0, int32_t y = 0);
+	Int2(float x, float y);
+	Int2(const Float2& float2);
 
-private:
-	friend INT2 operator+(const INT2& lhs, const INT2& rhs);
-	friend INT2 operator-(const INT2& lhs, const INT2& rhs);
-	friend void operator+=(INT2& lhs, const INT2& rhs);
-	friend void operator-=(INT2& lhs, const INT2& rhs);
+	friend Int2 operator+(const Int2& lhs, const Int2& rhs);
+	friend Int2 operator-(const Int2& lhs, const Int2& rhs);
+	friend void operator+=(Int2& lhs, const Int2& rhs);
+	friend void operator-=(Int2& lhs, const Int2& rhs);
 
 public:
 	int32_t x;
 	int32_t y;
 };
 
-class FLOAT2 : public D2D1_POINT_2F
+class Float2
 {
 public:
-	FLOAT2(FLOAT x = 0.0f, FLOAT y = 0.0f);
-	FLOAT2(int32_t x, int32_t y);
-	FLOAT2(const INT2& int2);
+	Float2(float x = 0.0f, float y = 0.0f);
+	Float2(int32_t x, int32_t y);
+	Float2(const Int2& int2);
 
-private:
-	friend FLOAT2 operator+(const FLOAT2& lhs, const FLOAT2& rhs);
-	friend FLOAT2 operator-(const FLOAT2& lhs, const FLOAT2& rhs);
-	friend void operator+=(FLOAT2& lhs, const FLOAT2& rhs);
-	friend void operator-=(FLOAT2& lhs, const FLOAT2& rhs);
-	friend FLOAT2 operator*(const FLOAT2& lhs, FLOAT rhs);
-	friend FLOAT2 operator/(const FLOAT2& lhs, FLOAT rhs);
+	friend Float2 operator+(const Float2& lhs, const Float2& rhs);
+	friend Float2 operator-(const Float2& lhs, const Float2& rhs);
+	friend void operator+=(Float2& lhs, const Float2& rhs);
+	friend void operator-=(Float2& lhs, const Float2& rhs);
+	friend Float2 operator*(const Float2& lhs, float rhs);
+	friend Float2 operator/(const Float2& lhs, float rhs);
+
+public:
+	float x;
+	float y;
 };
 
-class RECTI
+class Rect
 {
 public:
-	RECTI(int32_t left = 0, int32_t top = 0, int32_t right = 0, int32_t bottom = 0);
+	Rect(int32_t left = 0, int32_t top = 0, int32_t right = 0, int32_t bottom = 0);
 
-	RECTI& Offset(const INT2& offset);
-	bool Contains(const INT2& point) const;
+	Rect& Offset(const Int2& offset);
+	bool Contains(const Int2& point) const;
 
 public:
 	int32_t left;
@@ -66,12 +68,18 @@ public:
 	int32_t bottom;
 };
 
-class RECTF : public D2D1_RECT_F
+class RectF
 {
 public:
-	RECTF(float left = 0.0f, float top = 0.0f, float right = 0.0f, float bottom = 0.0f);
-	RECTF(const RECTI& rect);
+	RectF(float left = 0.0f, float top = 0.0f, float right = 0.0f, float bottom = 0.0f);
+	RectF(const Rect& rect);
 
-	RECTF& Offset(const FLOAT2& offset);
-	bool Contains(const FLOAT2& point) const;
+	RectF& Offset(const Float2& offset);
+	bool Contains(const Float2& point) const;
+
+public:
+	float left;
+	float top;
+	float right;
+	float bottom;
 };

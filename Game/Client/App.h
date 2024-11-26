@@ -25,7 +25,7 @@ public:
 
 	static constexpr auto WINDOW_TITLE_NAME{ L"REWRITER" };
 	static inline HWND hWnd{ NULL };
-	static inline INT2 size{ 1920, 1080 };
+	static inline Int2 size{ 1920, 1080 };
 
 private:
 	Timer m_timer;

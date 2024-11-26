@@ -46,12 +46,12 @@ void Button::Render() const
 	if (std::holds_alternative<std::shared_ptr<Resource::Sprite>>(visual))
 	{
 		auto sprite{ std::get<std::shared_ptr<Resource::Sprite>>(visual) };
-		Graphics::D2D::DrawSprite(sprite, FLOAT2{ m_position });
+		Graphics::D2D::DrawSprite(sprite, Float2{ m_position });
 	}
 	else
 	{
 		const auto& [size, radius, color] { std::get<1>(visual) };
-		RECTF rect{ 0.0f, 0.0f, static_cast<float>(size.x), static_cast<float>(size.y) };
+		RectF rect{ 0.0f, 0.0f, static_cast<float>(size.x), static_cast<float>(size.y) };
 		Graphics::D2D::DrawRoundRect(rect.Offset(m_position), radius, color);
 	}
 }
@@ -93,8 +93,8 @@ void Button::Build(const std::shared_ptr<Resource::Property>& prop)
 		{
 		case Resource::Property::Type::Folder:
 		{
-			INT2 size{ p->GetInt2(L"Size") };
-			FLOAT2 radius{ p->GetInt2(L"Radius") };
+			Int2 size{ p->GetInt2(L"Size") };
+			Float2 radius{ p->GetInt2(L"Radius") };
 			int32_t color{ p->GetInt(L"Color") };
 			visual = std::make_tuple(size, radius, color);
 			break;

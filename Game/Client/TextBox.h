@@ -4,7 +4,7 @@
 class TextBox final : public IControl
 {
 private:
-	using Visual = std::variant<std::shared_ptr<Resource::Sprite>, std::tuple<INT2, int32_t, int32_t>>;
+	using Visual = std::variant<std::shared_ptr<Resource::Sprite>, std::tuple<Int2, int32_t, int32_t>>;
 
 public:
 	TextBox(IWindow* owner, const std::shared_ptr<Resource::Property>& prop = nullptr);
@@ -53,5 +53,5 @@ private:
 	bool m_isCaretVisible;
 	float m_caretTimer;
 	int m_caretPosition;
-	INT2 m_scrollOffset;
+	Int2 m_scrollOffset;
 };

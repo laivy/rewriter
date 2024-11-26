@@ -10,7 +10,7 @@ namespace Resource
 template<class T>
 concept is_property_data_type_v = 
 	std::is_same_v<T, int32_t> ||
-	std::is_same_v<T, INT2> ||
+	std::is_same_v<T, Int2> ||
 	std::is_same_v<T, float> ||
 	std::is_same_v<T, std::wstring> ||
 	std::is_same_v<T, std::shared_ptr<Resource::Sprite>>;
@@ -60,7 +60,7 @@ namespace Resource
 		DLL_API void SetType(Type type);
 		DLL_API void SetName(std::wstring_view name);
 		DLL_API void Set(int32_t value);
-		DLL_API void Set(const INT2& value);
+		DLL_API void Set(const Int2& value);
 		DLL_API void Set(float value);
 		DLL_API void Set(std::wstring_view value);
 		DLL_API void Set(const std::shared_ptr<Sprite>& value);
@@ -68,7 +68,7 @@ namespace Resource
 		DLL_API Type GetType() const;
 		DLL_API std::wstring GetName() const;
 		DLL_API int32_t GetInt(std::wstring_view path = L"") const;
-		DLL_API INT2 GetInt2(std::wstring_view path = L"") const;
+		DLL_API Int2 GetInt2(std::wstring_view path = L"") const;
 		DLL_API float GetFloat(std::wstring_view path = L"") const;
 		DLL_API std::wstring GetString(std::wstring_view path = L"") const;
 		DLL_API std::shared_ptr<Sprite> GetSprite(std::wstring_view path = L"") const;
@@ -85,7 +85,7 @@ namespace Resource
 		Type m_type;
 		std::variant<
 			int32_t,
-			INT2,
+			Int2,
 			float,
 			std::wstring,
 			std::shared_ptr<Sprite>

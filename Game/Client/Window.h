@@ -42,9 +42,9 @@ private:
 	void RenderNinePatch() const;
 
 private:
-	RECTI m_titleBarRect;
+	Rect m_titleBarRect;
 	bool m_isPicked;
-	INT2 m_pickPos;
+	Int2 m_pickPos;
 
 	std::array<std::shared_ptr<Resource::Sprite>, 9> m_ninePatch;
 	std::map<int, std::shared_ptr<Graphics::D2D::Layer>> m_layers;

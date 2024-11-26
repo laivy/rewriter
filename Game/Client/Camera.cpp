@@ -28,7 +28,7 @@ void Camera::SetShaderVariable()
 	m_cbCamera.SetShaderVariable();
 }
 
-void Camera::SetScale(const FLOAT2& scale)
+void Camera::SetScale(const Float2& scale)
 {
 	m_scale = scale;
 

@@ -207,7 +207,7 @@ void TextBox::Build(const std::shared_ptr<Resource::Property>& prop)
 		{
 		case Resource::Property::Type::Folder:
 		{
-			INT2 size{ p->GetInt2(L"Size") };
+			Int2 size{ p->GetInt2(L"Size") };
 			int32_t backgroundColor{ p->GetInt(L"BackgroundColor") };
 			int32_t outlineColor{ p->GetInt(L"OutlineColor") };
 			visual = std::make_tuple(size, backgroundColor, outlineColor);
@@ -250,10 +250,10 @@ void TextBox::RenderBackground() const
 	{
 		auto [size, backgroundColor, outlineColor] { std::get<1>(visual) };
 
-		RECTF rect{ 0, 0, static_cast<float>(size.x), static_cast<float>(size.y) };
+		RectF rect{ 0, 0, static_cast<float>(size.x), static_cast<float>(size.y) };
 		rect.Offset(m_position);
 
-		RECTF outlineRect{ rect };
+		RectF outlineRect{ rect };
 		outlineRect.Offset({ 0, 3 });
 
 		Graphics::D2D::DrawRoundRect(outlineRect, { 7.0f, 7.0f }, outlineColor);
@@ -264,7 +264,7 @@ void TextBox::RenderBackground() const
 void TextBox::RenderText() const
 {
 	Graphics::D2D::PushClipRect(
-		RECTF{
+		RectF{
 			PADDING_LEFT,
 			PADDING_TOP,
 			static_cast<float>(m_size.x - PADDING_RIGHT),
@@ -277,7 +277,7 @@ void TextBox::RenderText() const
 		text.assign(m_text.size(), L'*');
 	else
 		text = m_text;
-	Graphics::D2D::DrawText(text, m_font, Graphics::D2D::Color::Black, m_position + INT2{ PADDING_LEFT, PADDING_TOP } + m_scrollOffset, Pivot::LeftTop);
+	Graphics::D2D::DrawText(text, m_font, Graphics::D2D::Color::Black, m_position + Int2{ PADDING_LEFT, PADDING_TOP } + m_scrollOffset, Pivot::LeftTop);
 	Graphics::D2D::PopClipRect();
 }
 
@@ -287,11 +287,11 @@ void TextBox::RenderCaret() const
 		return;
 
 	constexpr auto CARET_WIDTH{ 2 };
-	RECTI caret{ 0, 0, CARET_WIDTH, static_cast<int>(m_font.size) };
+	Rect caret{ 0, 0, CARET_WIDTH, static_cast<int>(m_font.size) };
 	caret.Offset(m_position);
-	caret.Offset(INT2{ m_metrics.left, m_metrics.top });
-	caret.Offset(INT2{ m_scrollOffset.x, m_scrollOffset.y });
-	caret.Offset(INT2{ PADDING_LEFT, static_cast<int>(m_metrics.height - m_font.size) });
+	caret.Offset(Int2{ m_metrics.left, m_metrics.top });
+	caret.Offset(Int2{ m_scrollOffset.x, m_scrollOffset.y });
+	caret.Offset(Int2{ PADDING_LEFT, static_cast<int>(m_metrics.height - m_font.size) });
 	Graphics::D2D::DrawRect(caret, Graphics::D2D::Color::Black);
 }
 

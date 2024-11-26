@@ -41,7 +41,7 @@ void IWindow::OnMouseEvent(UINT message, int x, int y)
 	case WM_LBUTTONDOWN:
 	{
 		// 피킹 됐는지 확인
-		if (m_titleBarRect.Contains(INT2{ x, y }))
+		if (m_titleBarRect.Contains(Int2{ x, y }))
 		{
 			m_isPicked = true;
 			m_pickPos = { x, y };
@@ -247,13 +247,13 @@ void IWindow::UpdateFocusControl(int x, int y)
 void IWindow::RenderNinePatch() const
 {
 	const auto& [lt, t, rt, l, c, r, lb, b, rb] { m_ninePatch };
-	Graphics::D2D::DrawSprite(lt, FLOAT2{});
-	Graphics::D2D::DrawSprite(rt, FLOAT2{ m_size.x - rt->GetSize().x, 0.0f });
-	Graphics::D2D::DrawSprite(t, RECTF{ lt->GetSize().x, 0.0f, m_size.x - rt->GetSize().x, t->GetSize().y });
-	Graphics::D2D::DrawSprite(lb, FLOAT2{ 0.0f, m_size.y - lb->GetSize().y });
-	Graphics::D2D::DrawSprite(rb, FLOAT2{ m_size.x - rb->GetSize().x, m_size.y - rb->GetSize().y });
-	Graphics::D2D::DrawSprite(b, RECTF{ lb->GetSize().x, m_size.y - b->GetSize().y, m_size.x - b->GetSize().x, static_cast<float>(m_size.y) });
-	Graphics::D2D::DrawSprite(l, RECTF{ 0.0f, lt->GetSize().y, l->GetSize().x, m_size.y - lb->GetSize().y });
-	Graphics::D2D::DrawSprite(l, RECTF{ m_size.x - r->GetSize().x, rt->GetSize().y, static_cast<float>(m_size.x), m_size.y - rb->GetSize().y });
-	Graphics::D2D::DrawSprite(c, RECTF{ lt->GetSize().x, lt->GetSize().y, m_size.x - rb->GetSize().x, m_size.y - rb->GetSize().y });
+	Graphics::D2D::DrawSprite(lt, Float2{});
+	Graphics::D2D::DrawSprite(rt, Float2{ m_size.x - rt->GetSize().x, 0.0f });
+	Graphics::D2D::DrawSprite(t, RectF{ lt->GetSize().x, 0.0f, m_size.x - rt->GetSize().x, t->GetSize().y });
+	Graphics::D2D::DrawSprite(lb, Float2{ 0.0f, m_size.y - lb->GetSize().y });
+	Graphics::D2D::DrawSprite(rb, Float2{ m_size.x - rb->GetSize().x, m_size.y - rb->GetSize().y });
+	Graphics::D2D::DrawSprite(b, RectF{ lb->GetSize().x, m_size.y - b->GetSize().y, m_size.x - b->GetSize().x, static_cast<float>(m_size.y) });
+	Graphics::D2D::DrawSprite(l, RectF{ 0.0f, lt->GetSize().y, l->GetSize().x, m_size.y - lb->GetSize().y });
+	Graphics::D2D::DrawSprite(l, RectF{ m_size.x - r->GetSize().x, rt->GetSize().y, static_cast<float>(m_size.x), m_size.y - rb->GetSize().y });
+	Graphics::D2D::DrawSprite(c, RectF{ lt->GetSize().x, lt->GetSize().y, m_size.x - rb->GetSize().x, m_size.y - rb->GetSize().y });
 }

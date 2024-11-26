@@ -16,17 +16,17 @@ public:
 	virtual void OnKeyboardEvent(UINT message, WPARAM wParam, LPARAM lParam);
 
 	virtual void SetFocus(bool focus);
-	virtual void SetPosition(const INT2& position, Pivot pivot = Pivot::LeftTop);
-	virtual void SetSize(const INT2& size);
+	virtual void SetPosition(const Int2& position, Pivot pivot = Pivot::LeftTop);
+	virtual void SetSize(const Int2& size);
 
 	virtual bool IsFocus() const;
 
-	INT2 GetPosition(Pivot pivot = Pivot::LeftTop) const;
-	INT2 GetSize() const;
-	bool Contains(const INT2& point) const;
+	Int2 GetPosition(Pivot pivot = Pivot::LeftTop) const;
+	Int2 GetSize() const;
+	bool Contains(const Int2& point) const;
 
 protected:
 	bool m_isFocus;
-	INT2 m_position; // 좌측 상단 좌표
-	INT2 m_size;
+	Int2 m_position; // 좌측 상단 좌표
+	Int2 m_size;
 };

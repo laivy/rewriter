@@ -35,11 +35,11 @@ void UIEditor::Render2D()
 
 	Graphics::D2D::PushClipRect(m_clipRect);
 
-	RECTF rect{ 0.0f, 0.0f, static_cast<float>(m_window.size.x), static_cast<float>(m_window.size.y) };
-	FLOAT2 radius{ m_window.backgroundRectRadius };
+	RectF rect{ 0.0f, 0.0f, static_cast<float>(m_window.size.x), static_cast<float>(m_window.size.y) };
+	Float2 radius{ m_window.backgroundRectRadius };
 	Graphics::D2D::DrawRoundRect(rect.Offset({ m_clipRect.left, m_clipRect.top }), radius, m_window.backgroundColor);
 
-	//Graphics::D2D::DrawRect(RECTF{ 0.0f, 0.0f, 9999.0f, 9999.0f }, Graphics::D2D::Color::Blue);
+	//Graphics::D2D::DrawRect(RectF{ 0.0f, 0.0f, 9999.0f, 9999.0f }, Graphics::D2D::Color::Blue);
 	//Graphics::D2D::DrawRect(contentRegion, Graphics::D2D::Color::Red);
 	Graphics::D2D::PopClipRect();
 }
@@ -85,5 +85,5 @@ void UIEditor::CalcClipRect()
 	POINT rb{ static_cast<long>(pos.x + size.x), static_cast<long>(pos.y + size.y) };
 	::ScreenToClient(App::hWnd, &lt);
 	::ScreenToClient(App::hWnd, &rb);
-	m_clipRect = RECTF{ static_cast<float>(lt.x), static_cast<float>(lt.y), static_cast<float>(rb.x), static_cast<float>(rb.y) };
+	m_clipRect = RectF{ static_cast<float>(lt.x), static_cast<float>(lt.y), static_cast<float>(rb.x), static_cast<float>(rb.y) };
 }

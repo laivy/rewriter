@@ -18,7 +18,7 @@ namespace Graphics::D2D
 
 		DLL_API void Begin();
 		DLL_API bool End();
-		DLL_API void Draw(const FLOAT2& position = {});
+		DLL_API void Draw(const Float2& position = {});
 		DLL_API void Clear();
 
 		ComPtr<ID2D1BitmapRenderTarget> GetTarget() const;
@@ -42,17 +42,17 @@ namespace Graphics::D2D
 	DLL_API bool End();
 
 	DLL_API ComPtr<ID2D1DeviceContext2> GetContext();
-	DLL_API std::shared_ptr<Layer> CreateLayer(const FLOAT2& size);
+	DLL_API std::shared_ptr<Layer> CreateLayer(const Float2& size);
 
 	DLL_API void SetTransform(const Matrix& transform);
-	DLL_API void PushClipRect(const RECTF& rect);
+	DLL_API void PushClipRect(const RectF& rect);
 	DLL_API void PopClipRect();
 
-	DLL_API void DrawRect(const RECTF& rect, const Color& color);
-	DLL_API void DrawRoundRect(const RECTF& rect, const FLOAT2& radius, const Color& color);
-	DLL_API void DrawText(std::wstring_view text, const Font& font, const Color& color, const FLOAT2& position, Pivot pivot = Pivot::LeftTop);
-	DLL_API void DrawSprite(const std::shared_ptr<Resource::Sprite>& sprite, const FLOAT2& position, float opacity = 1.0f);
-	DLL_API void DrawSprite(const std::shared_ptr<Resource::Sprite>& sprite, const RECTF& rect, float opacity = 1.0f);
+	DLL_API void DrawRect(const RectF& rect, const Color& color);
+	DLL_API void DrawRoundRect(const RectF& rect, const Float2& radius, const Color& color);
+	DLL_API void DrawText(std::wstring_view text, const Font& font, const Color& color, const Float2& position, Pivot pivot = Pivot::LeftTop);
+	DLL_API void DrawSprite(const std::shared_ptr<Resource::Sprite>& sprite, const Float2& position, float opacity = 1.0f);
+	DLL_API void DrawSprite(const std::shared_ptr<Resource::Sprite>& sprite, const RectF& rect, float opacity = 1.0f);
 
 	DLL_API TextMetrics GetTextMetrics(std::wstring_view text, const Font& font);
 }

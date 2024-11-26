@@ -7,9 +7,9 @@ private:
 	{
 		std::string fullPath;
 
-		INT2 size;
+		Int2 size;
 		int32_t backgroundColor;
-		INT2 backgroundRectRadius;
+		Int2 backgroundRectRadius;
 	};
 
 public:
@@ -27,7 +27,7 @@ private:
 private:
 	static constexpr auto WINDOW_NAME{ "UI Editor" };
 	bool m_isVisible;
-	RECTF m_clipRect;
+	RectF m_clipRect;
 
 	std::shared_ptr<Resource::Property> m_prop;
 	Window m_window;

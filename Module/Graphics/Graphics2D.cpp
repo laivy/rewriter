@@ -92,7 +92,7 @@ namespace Graphics::D2D
 		return true;
 	}
 
-	DLL_API void Layer::Draw(const FLOAT2& position)
+	DLL_API void Layer::Draw(const Float2& position)
 	{
 		if (!m_target)
 			return;
@@ -102,7 +102,7 @@ namespace Graphics::D2D
 			return;
 
 		auto size{ target->GetSize() };
-		d2dContext->DrawBitmap(target, RECTF{ position.x, position.y, position.x + size.width, position.y + size.height });
+		d2dContext->DrawBitmap(target, D2D1_RECT_F{ position.x, position.y, position.x + size.width, position.y + size.height });
 	}
 
 	DLL_API void Layer::Clear()
@@ -137,7 +137,7 @@ namespace Graphics::D2D
 		return d2dContext;
 	}
 
-	DLL_API std::shared_ptr<Layer> CreateLayer(const FLOAT2& size)
+	DLL_API std::shared_ptr<Layer> CreateLayer(const Float2& size)
 	{
 		ComPtr<ID2D1BitmapRenderTarget> target;
 		if (FAILED(d2dContext->CreateCompatibleRenderTarget(D2D1_SIZE_F{ size.x, size.y }, &target)))
@@ -150,9 +150,9 @@ namespace Graphics::D2D
 		g_d2dCurrentRenderTarget->SetTransform(transform);
 	}
 
-	DLL_API void PushClipRect(const RECTF& rect)
+	DLL_API void PushClipRect(const RectF& rect)
 	{
-		g_d2dCurrentRenderTarget->PushAxisAlignedClip(rect, D2D1_ANTIALIAS_MODE_ALIASED);
+		g_d2dCurrentRenderTarget->PushAxisAlignedClip(D2D1_RECT_F{ rect.left, rect.top, rect.right, rect.bottom }, D2D1_ANTIALIAS_MODE_ALIASED);
 	}
 
 	DLL_API void PopClipRect()
@@ -160,21 +160,21 @@ namespace Graphics::D2D
 		g_d2dCurrentRenderTarget->PopAxisAlignedClip();
 	}
 
-	DLL_API void DrawRect(const RECTF& rect, const Color& color)
+	DLL_API void DrawRect(const RectF& rect, const Color& color)
 	{
-		g_d2dCurrentRenderTarget->FillRectangle(rect, GetColorBrush(color).Get());
+		g_d2dCurrentRenderTarget->FillRectangle(D2D1_RECT_F{ rect.left, rect.top, rect.right, rect.bottom }, GetColorBrush(color).Get());
 	}
 
-	DLL_API void DrawRoundRect(const RECTF& rect, const FLOAT2& radius, const Color& color)
+	DLL_API void DrawRoundRect(const RectF& rect, const Float2& radius, const Color& color)
 	{
 		D2D1_ROUNDED_RECT roundRect{};
-		roundRect.rect = rect;
+		roundRect.rect = D2D1_RECT_F{ rect.left, rect.top, rect.right, rect.bottom };
 		roundRect.radiusX = radius.x;
 		roundRect.radiusY = radius.y;
 		g_d2dCurrentRenderTarget->FillRoundedRectangle(roundRect, GetColorBrush(color).Get());
 	}
 
-	DLL_API void DrawText(std::wstring_view text, const Font& font, const Color& color, const FLOAT2& position, Pivot pivot)
+	DLL_API void DrawText(std::wstring_view text, const Font& font, const Color& color, const Float2& position, Pivot pivot)
 	{
 		auto textFormat{ GetTextFormat(font) };
 		auto colorBrush{ GetColorBrush(color) };
@@ -184,7 +184,7 @@ namespace Graphics::D2D
 
 		DWRITE_TEXT_METRICS metrics{};
 		textLayout->GetMetrics(&metrics);
-		FLOAT2 offset{};
+		Float2 offset{};
 		switch (pivot)
 		{
 		case Pivot::LeftTop:
@@ -220,18 +220,21 @@ namespace Graphics::D2D
 		default:
 			break;
 		}
-		g_d2dCurrentRenderTarget->DrawTextLayout(position + offset, textLayout.Get(), colorBrush.Get());
+		D2D1_POINT_2F origin{};
+		origin.x = position.x + offset.x;
+		origin.y = position.y + offset.y;
+		g_d2dCurrentRenderTarget->DrawTextLayout(origin, textLayout.Get(), colorBrush.Get());
 	}
 
-	DLL_API void DrawSprite(const std::shared_ptr<Resource::Sprite>& sprite, const FLOAT2& position, float opacity)
+	DLL_API void DrawSprite(const std::shared_ptr<Resource::Sprite>& sprite, const Float2& position, float opacity)
 	{
 		auto size{ sprite->GetSize() };
-		DrawSprite(sprite, RECTF{ 0.0f, 0.0f, size.x, size.y }.Offset(position), opacity);
+		DrawSprite(sprite, RectF{ 0.0f, 0.0f, size.x, size.y }.Offset(position), opacity);
 	}
 
-	DLL_API void DrawSprite(const std::shared_ptr<Resource::Sprite>& sprite, const RECTF& rect, float opacity)
+	DLL_API void DrawSprite(const std::shared_ptr<Resource::Sprite>& sprite, const RectF& rect, float opacity)
 	{
-		g_d2dCurrentRenderTarget->DrawBitmap(sprite->Get(), rect, opacity);
+		g_d2dCurrentRenderTarget->DrawBitmap(sprite->Get(), D2D1_RECT_F{ rect.left, rect.top, rect.right, rect.bottom }, opacity);
 	}
 
 	DLL_API TextMetrics GetTextMetrics(std::wstring_view text, const Font& font)
@@ -241,7 +244,7 @@ namespace Graphics::D2D
 		ComPtr<IDWriteTextLayout> textLayout;
 		dwriteFactory->CreateTextLayout(text.data(), static_cast<UINT32>(text.size()), textFormat.Get(), std::numeric_limits<float>::max(), std::numeric_limits<float>::max(), &textLayout);
 
-		FLOAT2 pos{};
+		Float2 pos{};
 		DWRITE_HIT_TEST_METRICS metrics{};
 		textLayout->HitTestTextPosition(
 			static_cast<UINT32>(text.size()),

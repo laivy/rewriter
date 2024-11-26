@@ -78,7 +78,7 @@ namespace Resource
 			m_data = 0;
 			break;
 		case Type::Int2:
-			m_data = INT2{ 0, 0 };
+			m_data = Int2{ 0, 0 };
 			break;
 		case Type::Float:
 			m_data = 0.0f;
@@ -108,7 +108,7 @@ namespace Resource
 		m_data = value;
 	}
 
-	DLL_API void Property::Set(const INT2& value)
+	DLL_API void Property::Set(const Int2& value)
 	{
 		m_data = value;
 	}
@@ -162,12 +162,12 @@ namespace Resource
 		return 0;
 	}
 
-	DLL_API INT2 Property::GetInt2(std::wstring_view path) const
+	DLL_API Int2 Property::GetInt2(std::wstring_view path) const
 	{
 		if (path.empty())
 		{
 			assert(m_type == Type::Int2);
-			return std::get<INT2>(m_data);
+			return std::get<Int2>(m_data);
 		}
 
 		std::wstring_view name{ path };
@@ -183,7 +183,7 @@ namespace Resource
 		if (const auto& child{ Get(name) })
 			return child->GetInt2(remain);
 
-		return INT2{};
+		return Int2{};
 	}
 
 	DLL_API float Property::GetFloat(std::wstring_view path) const

@@ -1,104 +1,104 @@
 #include "Types.h"
 
-INT2::INT2(int32_t x, int32_t y) :
+Int2::Int2(int32_t x, int32_t y) :
 	x{ x },
 	y{ y }
 {
 }
 
-INT2::INT2(float x, float y) :
+Int2::Int2(float x, float y) :
 	x{ static_cast<int32_t>(x) },
 	y{ static_cast<int32_t>(y) }
 {
 }
 
-INT2::INT2(const FLOAT2& float2) :
+Int2::Int2(const Float2& float2) :
 	x{ static_cast<int32_t>(float2.x) },
 	y{ static_cast<int32_t>(float2.y) }
 {
 }
 
-INT2 operator+(const INT2& lhs, const INT2& rhs)
+Int2 operator+(const Int2& lhs, const Int2& rhs)
 {
-	INT2 value{ lhs };
+	Int2 value{ lhs };
 	value.x += rhs.x;
 	value.y += rhs.y;
 	return value;
 }
 
-INT2 operator-(const INT2& lhs, const INT2& rhs)
+Int2 operator-(const Int2& lhs, const Int2& rhs)
 {
-	INT2 value{ lhs };
+	Int2 value{ lhs };
 	value.x -= rhs.x;
 	value.y -= rhs.y;
 	return value;
 }
 
-void operator+=(INT2& lhs, const INT2& rhs)
+void operator+=(Int2& lhs, const Int2& rhs)
 {
 	lhs = lhs + rhs;
 }
 
-void operator-=(INT2& lhs, const INT2& rhs)
+void operator-=(Int2& lhs, const Int2& rhs)
 {
 	lhs = lhs - rhs;
 }
 
-FLOAT2::FLOAT2(FLOAT x, FLOAT y)
+Float2::Float2(float x, float y) :
+	x{ x },
+	y{ y }
 {
-	this->x = x;
-	this->y = y;
 }
 
-FLOAT2::FLOAT2(int32_t x, int32_t y)
+Float2::Float2(int32_t x, int32_t y)
 {
 	this->x = static_cast<float>(x);
 	this->y = static_cast<float>(y);
 }
 
-FLOAT2::FLOAT2(const INT2& int2)
+Float2::Float2(const Int2& int2) :
+	x{ static_cast<float>(int2.x) },
+	y{ static_cast<float>(int2.y) }
 {
-	this->x = static_cast<float>(int2.x);
-	this->y = static_cast<float>(int2.y);
 }
 
-FLOAT2 operator+(const FLOAT2& lhs, const FLOAT2& rhs)
+Float2 operator+(const Float2& lhs, const Float2& rhs)
 {
-	FLOAT2 value{ lhs };
+	Float2 value{ lhs };
 	value.x += rhs.x;
 	value.y += rhs.y;
 	return value;
 }
 
-FLOAT2 operator-(const FLOAT2& lhs, const FLOAT2& rhs)
+Float2 operator-(const Float2& lhs, const Float2& rhs)
 {
-	FLOAT2 value{ lhs };
+	Float2 value{ lhs };
 	value.x -= rhs.x;
 	value.y -= rhs.y;
 	return value;
 }
 
-void operator+=(FLOAT2& lhs, const FLOAT2& rhs)
+void operator+=(Float2& lhs, const Float2& rhs)
 {
 	lhs = lhs + rhs;
 }
 
-void operator-=(FLOAT2& lhs, const FLOAT2& rhs)
+void operator-=(Float2& lhs, const Float2& rhs)
 {
 	lhs = lhs - rhs;
 }
 
-FLOAT2 operator*(const FLOAT2& lhs, FLOAT rhs)
+Float2 operator*(const Float2& lhs, float rhs)
 {
 	return { lhs.x * rhs, lhs.y * rhs };
 }
 
-FLOAT2 operator/(const FLOAT2& lhs, FLOAT rhs)
+Float2 operator/(const Float2& lhs, float rhs)
 {
 	return { lhs.x / rhs, lhs.y / rhs };
 }
 
-RECTI::RECTI(int32_t left, int32_t top, int32_t right, int32_t bottom) :
+Rect::Rect(int32_t left, int32_t top, int32_t right, int32_t bottom) :
 	left{ left },
 	top{ top },
 	right{ right },
@@ -106,7 +106,7 @@ RECTI::RECTI(int32_t left, int32_t top, int32_t right, int32_t bottom) :
 {
 }
 
-RECTI& RECTI::Offset(const INT2& offset)
+Rect& Rect::Offset(const Int2& offset)
 {
 	left += offset.x;
 	top += offset.y;
@@ -115,7 +115,7 @@ RECTI& RECTI::Offset(const INT2& offset)
 	return *this;
 }
 
-bool RECTI::Contains(const INT2& point) const
+bool Rect::Contains(const Int2& point) const
 {
 	if (left <= point.x && point.x <= right &&
 		top <= point.y && point.y <= bottom)
@@ -123,23 +123,23 @@ bool RECTI::Contains(const INT2& point) const
 	return false;
 }
 
-RECTF::RECTF(float left, float top, float right, float bottom)
+RectF::RectF(float left, float top, float right, float bottom) :
+	left{ left },
+	top{ top },
+	right{ right },
+	bottom{ bottom }
 {
-	this->left = left;
-	this->top = top;
-	this->right = right;
-	this->bottom = bottom;
 }
 
-RECTF::RECTF(const RECTI& rect)
+RectF::RectF(const Rect& rect) :
+	left{ static_cast<float>(rect.left) },
+	top{ static_cast<float>(rect.top) },
+	right{ static_cast<float>(rect.right) },
+	bottom{ static_cast<float>(rect.bottom) }
 {
-	left = static_cast<float>(rect.left);
-	top = static_cast<float>(rect.top);
-	right = static_cast<float>(rect.right);
-	bottom = static_cast<float>(rect.bottom);
 }
 
-RECTF& RECTF::Offset(const FLOAT2& offset)
+RectF& RectF::Offset(const Float2& offset)
 {
 	left += offset.x;
 	top += offset.y;
@@ -148,7 +148,7 @@ RECTF& RECTF::Offset(const FLOAT2& offset)
 	return *this;
 }
 
-bool RECTF::Contains(const FLOAT2& point) const
+bool RectF::Contains(const Float2& point) const
 {
 	if (left <= point.x && point.x <= right &&
 		top <= point.y && point.y <= bottom)

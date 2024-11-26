@@ -38,7 +38,7 @@ void IUserInterface::SetFocus(bool focus)
 	m_isFocus = focus;
 }
 
-void IUserInterface::SetPosition(const INT2& position, Pivot pivot)
+void IUserInterface::SetPosition(const Int2& position, Pivot pivot)
 {
 	m_position = position;
 
@@ -78,7 +78,7 @@ void IUserInterface::SetPosition(const INT2& position, Pivot pivot)
 	}
 }
 
-void IUserInterface::SetSize(const INT2& size)
+void IUserInterface::SetSize(const Int2& size)
 {
 	m_size = size;
 }
@@ -88,9 +88,9 @@ bool IUserInterface::IsFocus() const
 	return m_isFocus;
 }
 
-INT2 IUserInterface::GetPosition(Pivot pivot) const
+Int2 IUserInterface::GetPosition(Pivot pivot) const
 {
-	INT2 position{ m_position };
+	Int2 position{ m_position };
 	switch (pivot)
 	{
 	case Pivot::LeftTop:
@@ -127,15 +127,15 @@ INT2 IUserInterface::GetPosition(Pivot pivot) const
 	return position;
 }
 
-INT2 IUserInterface::GetSize() const
+Int2 IUserInterface::GetSize() const
 {
 	return m_size;
 }
 
-bool IUserInterface::Contains(const INT2& point) const
+bool IUserInterface::Contains(const Int2& point) const
 {
 	// point는 부모 좌표계 기준의 좌표
-	RECTI rect{ 0, 0, m_size.x, m_size.y };
+	Rect rect{ 0, 0, m_size.x, m_size.y };
 	rect.Offset(m_position);
 	return rect.Contains(point);
 }

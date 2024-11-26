@@ -33,7 +33,7 @@ namespace Resource
 		g_d2dContext->CreateBitmapFromWicBitmap(converter.Get(), m_bitmap.GetAddressOf());
 
 		auto size{ m_bitmap->GetSize() };
-		m_size = FLOAT2{ size.width, size.height };
+		m_size = Float2{ size.width, size.height };
 
 #ifdef _TOOL
 		// 나중에 저장하기 위해 바이너리 데이터 복사
@@ -47,7 +47,7 @@ namespace Resource
 		return m_bitmap.Get();
 	}
 
-	DLL_API FLOAT2 Sprite::GetSize() const
+	DLL_API Float2 Sprite::GetSize() const
 	{
 		return m_size;
 	}
