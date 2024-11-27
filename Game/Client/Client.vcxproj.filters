@@ -77,12 +77,6 @@
     <ClCompile Include="..\..\External\Imgui\imgui_draw.cpp">
       <Filter>외부 파일\Imgui</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\External\Imgui\imgui_impl_dx12.cpp">
-      <Filter>외부 파일\Imgui</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\External\Imgui\imgui_impl_win32.cpp">
-      <Filter>외부 파일\Imgui</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\External\Imgui\imgui_tables.cpp">
       <Filter>외부 파일\Imgui</Filter>
     </ClCompile>
@@ -176,12 +170,6 @@
       <Filter>외부 파일\Imgui</Filter>
     </ClInclude>
     <ClInclude Include="..\..\External\Imgui\imgui.h">
-      <Filter>외부 파일\Imgui</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\External\Imgui\imgui_impl_dx12.h">
-      <Filter>외부 파일\Imgui</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\External\Imgui\imgui_impl_win32.h">
       <Filter>외부 파일\Imgui</Filter>
     </ClInclude>
     <ClInclude Include="..\..\External\Imgui\imgui_internal.h">

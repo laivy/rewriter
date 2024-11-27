@@ -1,9 +1,13 @@
 #pragma once
 #include "Common/Stdafx.h"
 
+// ImGui
+#include "External/Imgui/imgui.h"
+
 // Module
-#include "Module/Resource/Include/Lib.h" // 모듈 중 가장 먼저 포함되어야 함
 #include "Module/Database/Include/Lib.h"
+#include "Module/Graphics/Include/Lib.h"
+#include "Module/Resource/Include/Lib.h"
 
 // Project
 #include "Common/Packet.h"

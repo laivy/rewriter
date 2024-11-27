@@ -7,6 +7,7 @@ namespace Graphics::ImGui
 	DLL_API void End();
 
 	DLL_API ImGuiContext* GetContext();
+	DLL_API LRESULT WndProcHandler(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
 
 	DLL_API bool Button(std::wstring_view label, const ImVec2& size = ImVec2{ 0, 0 });
 }

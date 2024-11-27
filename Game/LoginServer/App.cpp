@@ -3,9 +3,6 @@
 #include "CenterServer.h"
 #include "SocketManager.h"
 #include "UserManager.h"
-#ifdef _IMGUI
-#include "Common/ImguiEx.h"
-#endif
 
 App::App()
 {
@@ -46,7 +43,7 @@ void App::Run()
 LRESULT App::WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
 #ifdef _IMGUI
-	if (ImGui_ImplWin32_WndProcHandler(hWnd, message, wParam, lParam))
+	if (Graphics::ImGui::WndProcHandler(hWnd, message, wParam, lParam))
 		return 1;
 #endif
 

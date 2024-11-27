@@ -24,7 +24,8 @@
 #include "External/Imgui/imgui.h"
 #include "External/Imgui/imgui_impl_dx12.h"
 #include "External/Imgui/imgui_impl_win32.h"
-#endif // _IMGUI
+extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
+#endif
 
 // Module
 #include "Module/Resource/Include/Lib.h"

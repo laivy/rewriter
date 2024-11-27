@@ -9,10 +9,6 @@
       <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
       <Extensions>h;hh;hpp;hxx;h++;hm;inl;inc;ipp;xsd</Extensions>
     </Filter>
-    <Filter Include="리소스 파일">
-      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
-      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
-    </Filter>
     <Filter Include="헤더 파일\Common">
       <UniqueIdentifier>{e3fef7e2-babd-4f03-b826-e574f97bf324}</UniqueIdentifier>
     </Filter>
@@ -40,6 +36,9 @@
     <Filter Include="모듈 파일\Database">
       <UniqueIdentifier>{441167b6-4643-41e6-9364-8214ec4814be}</UniqueIdentifier>
     </Filter>
+    <Filter Include="모듈 파일\Graphics">
+      <UniqueIdentifier>{5f8ea9a8-c6c4-4773-b4d0-041b9ef3cfe0}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\Common\Singleton.h">
@@ -66,12 +65,6 @@
     <ClInclude Include="..\..\External\Imgui\imgui.h">
       <Filter>외부 파일\Imgui</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\External\Imgui\imgui_impl_dx12.h">
-      <Filter>외부 파일\Imgui</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\External\Imgui\imgui_impl_win32.h">
-      <Filter>외부 파일\Imgui</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\External\Imgui\imgui_internal.h">
       <Filter>외부 파일\Imgui</Filter>
     </ClInclude>
@@ -86,9 +79,6 @@
     </ClInclude>
     <ClInclude Include="..\..\External\Imgui\imstb_truetype.h">
       <Filter>외부 파일\Imgui</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Common\ImguiEx.h">
-      <Filter>헤더 파일\Common</Filter>
     </ClInclude>
     <ClInclude Include="..\..\Common\Types.h">
       <Filter>헤더 파일\Common</Filter>
@@ -113,6 +103,9 @@
     </ClInclude>
     <ClInclude Include="..\..\Module\Database\Include\Lib.h">
       <Filter>모듈 파일\Database</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Module\Graphics\Include\Lib.h">
+      <Filter>모듈 파일\Graphics</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -140,12 +133,6 @@
     <ClCompile Include="..\..\External\Imgui\imgui_draw.cpp">
       <Filter>외부 파일\Imgui</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\External\Imgui\imgui_impl_dx12.cpp">
-      <Filter>외부 파일\Imgui</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\External\Imgui\imgui_impl_win32.cpp">
-      <Filter>외부 파일\Imgui</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\External\Imgui\imgui_stdlib.cpp">
       <Filter>외부 파일\Imgui</Filter>
     </ClCompile>
@@ -154,9 +141,6 @@
     </ClCompile>
     <ClCompile Include="..\..\External\Imgui\imgui_widgets.cpp">
       <Filter>외부 파일\Imgui</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\Common\ImguiEx.cpp">
-      <Filter>소스 파일\Common</Filter>
     </ClCompile>
     <ClCompile Include="..\..\Common\Types.cpp">
       <Filter>소스 파일\Common</Filter>

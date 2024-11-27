@@ -1,14 +1,10 @@
 #include "Stdafx.h"
 #include "App.h"
 #include "SocketManager.h"
-#ifdef _IMGUI
-#include "Common/ImguiEx.h"
-#endif
 
 App::App()
 {
 	InitWindow();
-	InitImgui();
 	InitApp();
 	m_timer.Tick();
 }
@@ -16,6 +12,8 @@ App::App()
 App::~App()
 {
 	SocketManager::Destroy();
+	Resource::CleanUp();
+	Graphics::CleanUp();
 }
 
 void App::Run()
@@ -41,7 +39,7 @@ void App::Run()
 LRESULT App::WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
 #ifdef _IMGUI
-	if (ImGui_ImplWin32_WndProcHandler(hWnd, message, wParam, lParam))
+	if (Graphics::ImGui::WndProcHandler(hWnd, message, wParam, lParam))
 		return 1;
 #endif
 
@@ -106,11 +104,13 @@ void App::InitWindow()
 	::UpdateWindow(hWnd);
 }
 
-void App::InitImgui()
+void App::InitApp()
 {
 #ifdef _IMGUI
-	ImGui::Init(hWnd, ImGuiConfigFlags_NavEnableKeyboard | ImGuiConfigFlags_DockingEnable);
-	OnResize.Register(&ImGui::OnResize);
+	Graphics::Initialize(hWnd);
+	OnResize.Register(&Graphics::OnResize);
+
+	ImGui::SetCurrentContext(Graphics::ImGui::GetContext());
 
 	auto& io{ ImGui::GetIO() };
 	io.IniFilename = "Data/imgui_center.ini";
@@ -121,10 +121,7 @@ void App::InitImgui()
 	style.DockingSeparatorSize = 1.0f;
 	ImGui::StyleColorsDark();
 #endif
-}
 
-void App::InitApp()
-{
 	Database::Initialize(Resource::Get(L"Server.dat/CenterServer/Info/Database"));	
 	SocketManager::Instantiate();
 }
@@ -136,11 +133,16 @@ void App::Update()
 void App::Render()
 {
 #ifdef _IMGUI
-	ImGui::BeginRender();
+	Graphics::D3D::Begin();
 	{
-		if (auto sm{ SocketManager::GetInstance() })
-			sm->Render();
+		Graphics::ImGui::Begin();
+		{
+			if (auto sm{ SocketManager::GetInstance() })
+				sm->Render();
+		}
+		Graphics::ImGui::End();
 	}
-	ImGui::EndRender();
+	Graphics::D3D::End();
+	Graphics::Present();
 #endif
 }
