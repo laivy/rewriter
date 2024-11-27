@@ -326,7 +326,12 @@ namespace Graphics
 
 		IMGUI_CHECKVERSION();
 		::ImGui::CreateContext();
-		::ImGui::GetIO().ConfigFlags |= (ImGuiConfigFlags_NavEnableKeyboard | ImGuiConfigFlags_DockingEnable | ImGuiConfigFlags_ViewportsEnable);
+
+		ImGuiConfigFlags flags{ ImGuiConfigFlags_NavEnableKeyboard | ImGuiConfigFlags_DockingEnable };
+#ifdef _CLIENT
+		flags |= ImGuiConfigFlags_ViewportsEnable;
+#endif
+		::ImGui::GetIO().ConfigFlags |= flags;
 
 		if (!::ImGui_ImplWin32_Init(hWnd))
 			return false;
@@ -451,7 +456,7 @@ namespace Graphics
 #ifdef _IMGUI
 		if (!InitializeImGui())
 			return false;
-#endif // _IMGUI
+#endif
 
 		if (!ResetCommandList())
 			return false;
@@ -473,11 +478,11 @@ namespace Graphics
 
 	DLL_API bool CleanUp()
 	{
-#ifdef _IMGUI
-		CleanUpImGui();
-#endif // _IMGUI
 		if (!WaitForGPU())
 			return false;
+#ifdef _IMGUI
+		CleanUpImGui();
+#endif
 		if (!::CloseHandle(fenceEvent))
 			return false;
 		::CoUninitialize();
@@ -485,7 +490,7 @@ namespace Graphics
 		ComPtr<IDXGIDebug1> dxgiDebug;
 		if (SUCCEEDED(::DXGIGetDebugInterface1(0, IID_PPV_ARGS(&dxgiDebug))))
 			dxgiDebug->ReportLiveObjects(DXGI_DEBUG_ALL, DXGI_DEBUG_RLO_FLAGS::DXGI_DEBUG_RLO_ALL);
-#endif // _DEBUG
+#endif
 		return true;
 	}
 

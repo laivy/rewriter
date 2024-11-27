@@ -19,6 +19,8 @@ App::~App()
 	UserManager::Destroy(); // 접속 중인 유저 정보 저장
 	CenterServer::Destroy(); // 센터 서버 연결 종료
 	SocketManager::Destroy(); // 유저 접속 차단
+	Resource::CleanUp();
+	Graphics::CleanUp();
 }
 
 void App::Run()
@@ -152,5 +154,6 @@ void App::Render()
 		Graphics::ImGui::End();
 	}
 	Graphics::D3D::End();
+	Graphics::Present();
 #endif
 }

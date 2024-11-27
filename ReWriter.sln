@@ -11,6 +11,7 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Client", "Game\Client\Clien
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "LoginServer", "Game\LoginServer\LoginServer.vcxproj", "{7C4AE94D-8E6B-43FB-8B96-E5AA7A82FF95}"
 	ProjectSection(ProjectDependencies) = postProject
+		{46B7BA29-B491-4871-BFBD-3AF71FA89B0A} = {46B7BA29-B491-4871-BFBD-3AF71FA89B0A}
 		{ECE58EE1-CBF9-4731-9CA5-C89FA63034E8} = {ECE58EE1-CBF9-4731-9CA5-C89FA63034E8}
 	EndProjectSection
 EndProject
@@ -36,6 +37,7 @@ EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "CenterServer", "Game\CenterServer\CenterServer.vcxproj", "{D971D8A9-926E-4919-BF2E-2BF282CACCBC}"
 	ProjectSection(ProjectDependencies) = postProject
 		{3A60F38B-6BF8-4CFF-B6C3-DBFE015F9860} = {3A60F38B-6BF8-4CFF-B6C3-DBFE015F9860}
+		{46B7BA29-B491-4871-BFBD-3AF71FA89B0A} = {46B7BA29-B491-4871-BFBD-3AF71FA89B0A}
 		{ECE58EE1-CBF9-4731-9CA5-C89FA63034E8} = {ECE58EE1-CBF9-4731-9CA5-C89FA63034E8}
 	EndProjectSection
 EndProject
@@ -115,12 +117,14 @@ Global
 		{D971D8A9-926E-4919-BF2E-2BF282CACCBC}.Release_Tool|x64.ActiveCfg = Release|x64
 		{46B7BA29-B491-4871-BFBD-3AF71FA89B0A}.Debug_Client|x64.ActiveCfg = Debug_Client|x64
 		{46B7BA29-B491-4871-BFBD-3AF71FA89B0A}.Debug_Client|x64.Build.0 = Debug_Client|x64
-		{46B7BA29-B491-4871-BFBD-3AF71FA89B0A}.Debug_Server|x64.ActiveCfg = Debug_Client|x64
+		{46B7BA29-B491-4871-BFBD-3AF71FA89B0A}.Debug_Server|x64.ActiveCfg = Debug_Server|x64
+		{46B7BA29-B491-4871-BFBD-3AF71FA89B0A}.Debug_Server|x64.Build.0 = Debug_Server|x64
 		{46B7BA29-B491-4871-BFBD-3AF71FA89B0A}.Debug_Tool|x64.ActiveCfg = Debug_Tool|x64
 		{46B7BA29-B491-4871-BFBD-3AF71FA89B0A}.Debug_Tool|x64.Build.0 = Debug_Tool|x64
 		{46B7BA29-B491-4871-BFBD-3AF71FA89B0A}.Release_Client|x64.ActiveCfg = Release_Client|x64
 		{46B7BA29-B491-4871-BFBD-3AF71FA89B0A}.Release_Client|x64.Build.0 = Release_Client|x64
-		{46B7BA29-B491-4871-BFBD-3AF71FA89B0A}.Release_Server|x64.ActiveCfg = Release_Client|x64
+		{46B7BA29-B491-4871-BFBD-3AF71FA89B0A}.Release_Server|x64.ActiveCfg = Release_Server|x64
+		{46B7BA29-B491-4871-BFBD-3AF71FA89B0A}.Release_Server|x64.Build.0 = Release_Server|x64
 		{46B7BA29-B491-4871-BFBD-3AF71FA89B0A}.Release_Tool|x64.ActiveCfg = Release_Tool|x64
 		{46B7BA29-B491-4871-BFBD-3AF71FA89B0A}.Release_Tool|x64.Build.0 = Release_Tool|x64
 	EndGlobalSection

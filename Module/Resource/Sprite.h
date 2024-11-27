@@ -6,7 +6,6 @@ namespace Resource
 {
 	class Sprite
 	{
-#if defined _CLIENT || defined _TOOL
 	public:
 		DLL_API Sprite();
 		~Sprite() = default;
@@ -26,7 +25,6 @@ namespace Resource
 
 	private:
 		std::vector<std::byte> m_binary;
-#endif
 #endif
 	};
 }

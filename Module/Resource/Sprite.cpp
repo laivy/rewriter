@@ -1,5 +1,4 @@
 #include "Stdafx.h"
-#if defined _CLIENT || defined _TOOL
 #include "Global.h"
 #include "Resource.h"
 #include "Sprite.h"
@@ -40,4 +39,3 @@ namespace Resource
 	}
 #endif
 }
-#endif

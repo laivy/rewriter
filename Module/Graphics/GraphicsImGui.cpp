@@ -12,6 +12,19 @@ namespace Graphics::ImGui
 		::ImGui_ImplDX12_NewFrame();
 		::ImGui_ImplWin32_NewFrame();
 		::ImGui::NewFrame();
+
+#ifdef _SERVER
+		auto viewport{ ::ImGui::GetMainViewport() };
+		::ImGui::SetNextWindowPos(viewport->WorkPos);
+		::ImGui::SetNextWindowSize(viewport->WorkSize);
+		::ImGui::SetNextWindowViewport(viewport->ID);
+		::ImGui::Begin("DOCKSPACE", nullptr,
+			ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoSavedSettings |
+			ImGuiWindowFlags_NoFocusOnAppearing | ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_NoDocking
+		);
+		::ImGui::DockSpace(::ImGui::GetID("DOCKSPACE"), ImVec2{}, ImGuiDockNodeFlags_PassthruCentralNode);
+		::ImGui::End();
+#endif
 	}
 
 	DLL_API void End()
