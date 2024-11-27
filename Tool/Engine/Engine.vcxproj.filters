@@ -9,10 +9,6 @@
       <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
       <Extensions>h;hh;hpp;hxx;h++;hm;inl;inc;ipp;xsd</Extensions>
     </Filter>
-    <Filter Include="리소스 파일">
-      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
-      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
-    </Filter>
     <Filter Include="헤더 파일\Common">
       <UniqueIdentifier>{a5643d21-8cf7-4896-97ab-377ce81da1f2}</UniqueIdentifier>
     </Filter>
@@ -52,12 +48,6 @@
       <Filter>외부 파일\Imgui</Filter>
     </ClInclude>
     <ClInclude Include="..\..\External\Imgui\imgui.h">
-      <Filter>외부 파일\Imgui</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\External\Imgui\imgui_impl_dx12.h">
-      <Filter>외부 파일\Imgui</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\External\Imgui\imgui_impl_win32.h">
       <Filter>외부 파일\Imgui</Filter>
     </ClInclude>
     <ClInclude Include="..\..\External\Imgui\imgui_internal.h">
@@ -135,12 +125,6 @@
       <Filter>외부 파일\Imgui</Filter>
     </ClCompile>
     <ClCompile Include="..\..\External\Imgui\imgui_draw.cpp">
-      <Filter>외부 파일\Imgui</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\External\Imgui\imgui_impl_dx12.cpp">
-      <Filter>외부 파일\Imgui</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\External\Imgui\imgui_impl_win32.cpp">
       <Filter>외부 파일\Imgui</Filter>
     </ClCompile>
     <ClCompile Include="..\..\External\Imgui\imgui_tables.cpp">

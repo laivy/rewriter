@@ -18,11 +18,11 @@ App::App() :
 
 App::~App()
 {
-	Graphics::CleanUp();
-	Resource::CleanUp();
 	Explorer::Destroy();
 	Hierarchy::Destroy();
 	Inspector::Destroy();
+	Resource::CleanUp();
+	Graphics::CleanUp();
 }
 
 void App::Run()
@@ -47,7 +47,7 @@ void App::Run()
 
 LRESULT App::WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
-	if (::ImGui_ImplWin32_WndProcHandler(hWnd, message, wParam, lParam))
+	if (Graphics::ImGui::WndProcHandler(hWnd, message, wParam, lParam))
 		return 1;
 
 	App* app{ reinterpret_cast<App*>(::GetWindowLongPtr(hWnd, GWLP_USERDATA)) };
