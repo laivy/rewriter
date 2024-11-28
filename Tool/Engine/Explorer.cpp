@@ -2,7 +2,8 @@
 #include "Explorer.h"
 #include "Common/Util.h"
 
-Explorer::Explorer()
+Explorer::Explorer() :
+	m_scrollAddressBarToRight{ false }
 {
 	SetPath(std::filesystem::current_path());
 }
@@ -16,13 +17,14 @@ void Explorer::Render()
 	ImGui::PushID(WINDOW_NAME);
 	if (ImGui::Begin(WINDOW_NAME))
 	{
-		RenderAddressBar();
-		ImGui::Spacing();
+		if ( ImGui::BeginChild("ADDRESS_BAR", ImVec2{ 0, 23 }))
+			RenderAddressBar();
+		ImGui::EndChild();
+
 		ImGui::Separator();
-		if (ImGui::BeginChild(CHILD_WINDOW_NAME, {}, false, ImGuiWindowFlags_HorizontalScrollbar))
-		{
-			RenderFileView();
-		}
+
+		if (ImGui::BeginChild("FILE_VIEWER", ImVec2{}, false, ImGuiWindowFlags_HorizontalScrollbar) )
+			RenderFileViewer();
 		ImGui::EndChild();
 	}
 	ImGui::End();
@@ -32,73 +34,103 @@ void Explorer::Render()
 void Explorer::SetPath(const std::filesystem::path& path)
 {
 	m_path = path;
-	m_folders.clear();
-	for (const auto& p : m_path)
-	{
-		if (p.has_root_directory())
-			continue;
-		if (p.has_root_name())
-			m_folders.push_back(p.wstring() + L"/");
-		else
-			m_folders.push_back(p.wstring());
-	}
+	m_scrollAddressBarToRight = true;
 }
 
 void Explorer::RenderAddressBar()
 {
-	ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2{});
-
-	std::wstring path{};
-	for (const auto& folder : m_folders)
+	ImGui::SetNextItemWidth(50.0f);
+	if (ImGui::BeginCombo("##DISKDRIVE", reinterpret_cast<const char*>(m_path.root_name().u8string().c_str())))
 	{
-		if (path.empty())
-			path += folder;
-		else
-			path += L"/" + folder;
+		DWORD bufferSize{ ::GetLogicalDriveStrings(0, nullptr) };
+		std::wstring buffer(bufferSize, L'\0');
+		::GetLogicalDriveStrings(bufferSize, buffer.data());
 
-		ImVec2 val{ 0, 3 };
-		if (folder == m_folders.front() || folder == m_folders.back())
-			val.x = 4;
-		ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, val);
+		std::vector<std::filesystem::path> drives;
+		while (true)
+		{
+			size_t pos{ buffer.find(L'\0') };
+			if (pos == 0 || pos == std::wstring::npos)
+				break;
 
-		if (Graphics::ImGui::Button(folder + L"/"))
-			SetPath(path);
+			drives.push_back(buffer.substr(0, pos));
+			buffer.erase(0, pos + 1);
+		}
 
-		ImGui::PopStyleVar();
-		ImGui::SameLine();
+		for (const auto& drive : drives)
+		{
+			if (ImGui::Selectable(reinterpret_cast<const char*>(drive.root_name().u8string().c_str())))
+			{
+				SetPath(drive);
+				break;
+			}
+		}
+		ImGui::EndCombo();
 	}
 
-	ImGui::NewLine();
+	ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2{ 3, 0 });
+	std::filesystem::path newPath;
+	std::filesystem::path temp{ m_path.root_path() };
+	for (const auto& p : m_path)
+	{
+		if (p.has_root_name() || p.has_root_directory())
+			continue;
+
+		temp /= p;
+
+		ImGui::SameLine();
+		if (Graphics::ImGui::Button(p.wstring()))
+		{
+			newPath = temp;
+			break;
+		}
+	}
+	if (!newPath.empty())
+		SetPath(newPath);
 	ImGui::PopStyleVar();
+
+	if (m_scrollAddressBarToRight)
+	{
+		ImGui::SetScrollHereX(1.0f);
+		m_scrollAddressBarToRight = false;
+	}
 }
 
-void Explorer::RenderFileView()
+void Explorer::RenderFileViewer()
 {
-	// 현재 디렉토리에 있는 것들
-	// 뒤로가기, 폴더, 파일 순서
+	// 뒤로가기
 	if (m_path.compare(m_path.root_path()) != 0)
 	{
 		if (ImGui::Button(".."))
 			SetPath(std::filesystem::canonical(m_path / L".."));
 	}
 
-	for (const auto& d : std::filesystem::directory_iterator{ m_path }
-					   | std::views::filter([](const auto& d) { return d.is_directory(); }))
+	// 폴더
+	for (const auto& entry : std::filesystem::directory_iterator{ m_path })
 	{
-		std::wstring name{ d.path().filename().wstring() };
+		if (!entry.is_directory())
+			continue;
+
+		std::wstring name{ entry.path().filename() };
 		if (Graphics::ImGui::Button(name))
+		{
 			SetPath(std::filesystem::canonical(m_path / name));
+		}
 	}
 
-	for (const auto& d : std::filesystem::directory_iterator{ m_path }
-					   | std::views::filter([](const auto& d) { return d.is_regular_file() && d.path().extension() == Stringtable::DATA_FILE_EXT; }))
+	// 파일
+	for (const auto& entry : std::filesystem::directory_iterator{ m_path })
 	{
-		std::string name{ Util::u8stou8s(d.path().filename().u8string()) };
+		if (!entry.is_regular_file() || entry.path().extension() != Stringtable::DATA_FILE_EXT)
+			continue;
+
+		std::string name{ Util::u8stou8s(entry.path().filename().u8string()) };
 		ImGui::Selectable(name.c_str());
 		if (ImGui::BeginDragDropSource())
 		{
-			auto fullPath{ d.path().string() };
-			ImGui::SetDragDropPayload("OPENFILE", fullPath.data(), fullPath.size() + 1);
+			std::wstring fullPath{ entry.path() };
+			fullPath.push_back(L'\0');
+			ImGui::SetDragDropPayload("EXPLORER/OPENFILE", fullPath.data(), fullPath.size() * sizeof(std::wstring::value_type));
 			ImGui::Text(name.c_str());
 			ImGui::EndDragDropSource();
 		}

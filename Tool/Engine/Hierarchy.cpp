@@ -197,13 +197,25 @@ void Hierarchy::Shortcut()
 	if (!ImGui::IsWindowFocused())
 		return;
 
-	if (ImGui::Shortcut(ImGuiMod_Ctrl | ImGuiKey_N))
+	if (ImGui::IsKeyPressed(ImGuiMod_Ctrl) || ImGui::IsKeyPressed(ImGuiKey_N))
 		OnMenuFileNew();
-	if (ImGui::Shortcut(ImGuiMod_Ctrl | ImGuiKey_O))
+	if (ImGui::IsKeyPressed(ImGuiMod_Ctrl) || ImGui::IsKeyPressed(ImGuiKey_O))
 		OnMenuFileOpen();
-	if (ImGui::Shortcut(ImGuiMod_Ctrl | ImGuiKey_S))
+	if (ImGui::IsKeyPressed(ImGuiMod_Ctrl) || ImGui::IsKeyPressed(ImGuiKey_S))
 		OnMenuFileSave();
-	if (ImGui::Shortcut(ImGuiMod_Alt | ImGuiKey_UpArrow))
+	if (ImGui::IsKeyPressed(ImGuiMod_Ctrl) || ImGui::IsKeyPressed(ImGuiKey_X))
+	{
+		OnCut();
+	}
+	if (ImGui::IsKeyPressed(ImGuiMod_Ctrl) || ImGui::IsKeyPressed(ImGuiKey_C))
+	{
+		OnCopy();
+	}
+	if (ImGui::IsKeyPressed(ImGuiMod_Ctrl) || ImGui::IsKeyPressed(ImGuiKey_V))
+	{
+		OnPaste();
+	}
+	if (ImGui::IsKeyPressed(ImGuiMod_Alt) || ImGui::IsKeyPressed(ImGuiKey_UpArrow))
 	{
 		do
 		{
@@ -226,7 +238,7 @@ void Hierarchy::Shortcut()
 			std::iter_swap(it, it - 1);
 		} while (false);
 	}
-	if (ImGui::Shortcut(ImGuiModFlags_Alt | ImGuiKey_DownArrow))
+	if (ImGui::IsKeyPressed(ImGuiMod_Alt) || ImGui::IsKeyPressed(ImGuiKey_DownArrow))
 	{
 		do
 		{
@@ -248,18 +260,6 @@ void Hierarchy::Shortcut()
 
 			std::iter_swap(it, it + 1);
 		} while (false);
-	}
-	if (ImGui::Shortcut(ImGuiModFlags_Ctrl | ImGuiKey_X))
-	{
-		OnCut();
-	}
-	if (ImGui::Shortcut(ImGuiModFlags_Ctrl | ImGuiKey_C))
-	{
-		OnCopy();
-	}
-	if (ImGui::Shortcut(ImGuiModFlags_Ctrl | ImGuiKey_V))
-	{
-		OnPaste();
 	}
 	if (ImGui::IsKeyPressed(ImGuiKey_F2, false))
 	{
@@ -285,9 +285,9 @@ void Hierarchy::DragDrop()
 	if (!ImGui::BeginDragDropTargetCustom(window->ContentRegionRect, window->ID))
 		return;
 
-	if (auto payload{ ImGui::AcceptDragDropPayload("OPENFILE") })
+	if (auto payload{ ImGui::AcceptDragDropPayload("EXPLORER/OPENFILE") })
 	{
-		std::string filePath{ static_cast<const char*>(payload->Data) };
+		std::wstring filePath{ static_cast<const wchar_t*>(payload->Data) };
 		LoadDataFile(filePath);
 	}
 
@@ -301,7 +301,7 @@ void Hierarchy::RenderMenuBar()
 
 	if (ImGui::BeginMenu(MENU_FILE))
 	{
-		if (ImGui::MenuItem(MENU_FILE_NEW, "Ctrl+N") || ImGui::Shortcut(ImGuiMod_Ctrl | ImGuiKey_N))
+		if (ImGui::MenuItem(MENU_FILE_NEW, "Ctrl+N") || (ImGui::IsKeyPressed(ImGuiMod_Ctrl) && ImGui::IsKeyPressed(ImGuiKey_N)))
 		{
 			ImGui::CloseCurrentPopup();
 			OnMenuFileNew();
