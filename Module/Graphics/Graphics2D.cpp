@@ -18,12 +18,8 @@ namespace
 	{
 		bool operator()(const Graphics::D2D::Color& lhs, const Graphics::D2D::Color& rhs) const
 		{
-			if (lhs.r != rhs.r)
-				return lhs.r < rhs.r;
-			if (lhs.g != rhs.g)
-				return lhs.g < rhs.g;
-			if (lhs.b != rhs.b)
-				return lhs.b < rhs.b;
+			if (lhs.rgb != rhs.rgb)
+				return lhs.rgb < rhs.rgb;
 			return lhs.a < rhs.a;
 		}
 	};
@@ -57,7 +53,7 @@ namespace
 		}
 		else
 		{
-			Graphics::g_d2dCurrentRenderTarget->CreateSolidColorBrush(color, &colorBrush);
+			Graphics::g_d2dCurrentRenderTarget->CreateSolidColorBrush(D2D1::ColorF{ color.rgb, color.a }, &colorBrush);
 			g_colorBrushes.emplace(color, colorBrush);
 		}
 		return colorBrush;
@@ -110,11 +106,6 @@ namespace Graphics::D2D
 		m_target->Clear();
 	}
 
-	ComPtr<ID2D1BitmapRenderTarget> Layer::GetTarget() const
-	{
-		return m_target;
-	}
-
 	DLL_API void Begin()
 	{
 		d3d11On12Device->AcquireWrappedResources(wrappedBackBuffers[frameIndex].GetAddressOf(), 1);
@@ -164,11 +155,6 @@ namespace Graphics::D2D
 		return sprite;
 	}
 
-	DLL_API ComPtr<ID2D1DeviceContext2> GetContext()
-	{
-		return d2dContext;
-	}
-
 	DLL_API std::shared_ptr<Layer> CreateLayer(const Float2& size)
 	{
 		ComPtr<ID2D1BitmapRenderTarget> target;
@@ -177,9 +163,13 @@ namespace Graphics::D2D
 		return std::make_shared<Layer>(target);
 	}
 
-	DLL_API void SetTransform(const Matrix& transform)
+	DLL_API void SetTransform(const Transform& transform)
 	{
-		g_d2dCurrentRenderTarget->SetTransform(transform);
+		g_d2dCurrentRenderTarget->SetTransform(
+			D2D1::Matrix3x2F::Scale(transform.scale.x, transform.scale.y) *
+			D2D1::Matrix3x2F::Rotation(transform.rotation) *
+			D2D1::Matrix3x2F::Translation(transform.translation.x, transform.translation.y)
+		);
 	}
 
 	DLL_API void PushClipRect(const RectF& rect)

@@ -4,7 +4,7 @@
 class TextBox final : public IControl
 {
 private:
-	using Visual = std::variant<std::shared_ptr<Resource::Sprite>, std::tuple<Int2, int32_t, int32_t>>;
+	using Visual = std::variant<std::shared_ptr<Resource::Sprite>, std::tuple<Int2, Graphics::D2D::Color, Graphics::D2D::Color>>;
 
 public:
 	TextBox(IWindow* owner, const std::shared_ptr<Resource::Property>& prop = nullptr);

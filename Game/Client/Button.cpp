@@ -95,7 +95,7 @@ void Button::Build(const std::shared_ptr<Resource::Property>& prop)
 		{
 			Int2 size{ p->GetInt2(L"Size") };
 			Float2 radius{ p->GetInt2(L"Radius") };
-			int32_t color{ p->GetInt(L"Color") };
+			Graphics::D2D::Color color{ static_cast<uint32_t>(p->GetInt(L"Color")) };
 			visual = std::make_tuple(size, radius, color);
 			break;
 		}

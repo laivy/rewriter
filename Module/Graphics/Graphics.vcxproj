@@ -332,7 +332,6 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release_Tool|x64'">NotUsing</PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="DllMain.cpp" />
-    <ClCompile Include="Font.cpp" />
     <ClCompile Include="Global.cpp" />
     <ClCompile Include="Graphics.cpp" />
     <ClCompile Include="Graphics2D.cpp" />
@@ -362,7 +361,6 @@
     <ClInclude Include="..\..\External\Imgui\imstb_textedit.h" />
     <ClInclude Include="..\..\External\Imgui\imstb_truetype.h" />
     <ClInclude Include="..\Resource\Include\Lib.h" />
-    <ClInclude Include="Font.h" />
     <ClInclude Include="Global.h" />
     <ClInclude Include="Graphics.h" />
     <ClInclude Include="Graphics2D.h" />

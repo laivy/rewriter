@@ -13,7 +13,7 @@ namespace Graphics::ImGui
 		::ImGui_ImplWin32_NewFrame();
 		::ImGui::NewFrame();
 
-#ifdef _SERVER
+#if defined _SERVER || defined _TOOL
 		auto viewport{ ::ImGui::GetMainViewport() };
 		::ImGui::SetNextWindowPos(viewport->WorkPos);
 		::ImGui::SetNextWindowSize(viewport->WorkSize);
@@ -46,11 +46,6 @@ namespace Graphics::ImGui
 	DLL_API LRESULT WndProcHandler(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 	{
 		return ::ImGui_ImplWin32_WndProcHandler(hWnd, msg, wParam, lParam);
-	}
-
-	DLL_API bool Button(std::wstring_view label, const ImVec2& size)
-	{
-		return ::ImGui::Button(Util::wstou8s(label).c_str(), size);
 	}
 }
 #endif

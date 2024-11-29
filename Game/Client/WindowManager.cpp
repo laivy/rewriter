@@ -34,7 +34,7 @@ void WindowManager::Render() const
 	{
 		auto pos{ window->GetPosition() };
 		auto size{ window->GetSize() };
-		Graphics::D2D::SetTransform(Graphics::D2D::Matrix::Translation(static_cast<float>(pos.x), static_cast<float>(pos.y)));
+		Graphics::D2D::SetTransform(Graphics::D2D::Transform{ .translation{ pos } });
 		Graphics::D2D::PushClipRect(RectF{ 0.0f, 0.0f, static_cast<float>(size.x), static_cast<float>(size.y) });
 		window->Render();
 		Graphics::D2D::PopClipRect();
@@ -44,13 +44,13 @@ void WindowManager::Render() const
 	{
 		auto pos{ modal->GetPosition() };
 		auto size{ modal->GetSize() };
-		Graphics::D2D::SetTransform(Graphics::D2D::Matrix::Translation(static_cast<float>(pos.x), static_cast<float>(pos.y)));
+		Graphics::D2D::SetTransform(Graphics::D2D::Transform{ .translation{ pos } });
 		Graphics::D2D::PushClipRect(RectF{ 0.0f, 0.0f, static_cast<float>(size.x), static_cast<float>(size.y) });
 		modal->Render();
 		Graphics::D2D::PopClipRect();
 	}
 
-	Graphics::D2D::SetTransform(Graphics::D2D::Matrix::Identity());
+	Graphics::D2D::SetTransform(Graphics::D2D::Transform{});
 }
 
 void WindowManager::Register(const std::shared_ptr<IModal>& modal)

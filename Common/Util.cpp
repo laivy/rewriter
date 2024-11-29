@@ -27,11 +27,9 @@ namespace Util
 
 	std::string u8stombs(std::u8string_view u8str)
 	{
-		// u8 -> ws
 		int length{ ::MultiByteToWideChar(CP_UTF8, NULL, reinterpret_cast<const char*>(u8str.data()), static_cast<int>(u8str.size()), NULL, NULL) };
 		std::wstring wstr(length, '\0');
 		::MultiByteToWideChar(CP_UTF8, NULL, reinterpret_cast<const char*>(u8str.data()), static_cast<int>(u8str.size()), wstr.data(), length);
-
 		return wstombs(wstr);
 	}
 
@@ -43,3 +41,38 @@ namespace Util
 		return wstr;
 	}
 }
+
+#ifdef _IMGUI
+namespace ImGui
+{
+	bool Button(const std::string& label, const ImVec2& size)
+	{
+		return Button(label.c_str(), size);
+	}
+
+	bool Button(const std::wstring& label, const ImVec2& size)
+	{
+		return Button(Util::wstou8s(label).c_str(), size);
+	}
+
+	bool Button(const std::u8string& label, const ImVec2& size)
+	{
+		return Button(reinterpret_cast<const char*>(label.c_str()), size);
+	}
+
+	bool Selectable(const std::string& label, bool selected, ImGuiSelectableFlags flags, const ImVec2& size)
+	{
+		return Selectable(label.c_str(), selected, flags, size);
+	}
+
+	bool Selectable(const std::wstring& label, bool selected, ImGuiSelectableFlags flags, const ImVec2& size)
+	{
+		return Selectable(Util::wstou8s(label).c_str(), selected, flags, size);
+	}
+
+	bool Selectable(const std::u8string& label, bool selected, ImGuiSelectableFlags flags, const ImVec2& size)
+	{
+		return Selectable(reinterpret_cast<const char*>(label.c_str()), selected, flags, size);
+	}
+}
+#endif

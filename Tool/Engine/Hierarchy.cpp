@@ -197,25 +197,19 @@ void Hierarchy::Shortcut()
 	if (!ImGui::IsWindowFocused())
 		return;
 
-	if (ImGui::IsKeyPressed(ImGuiMod_Ctrl) || ImGui::IsKeyPressed(ImGuiKey_N))
+	if (ImGui::IsKeyDown(ImGuiMod_Ctrl) && ImGui::IsKeyDown(ImGuiKey_N))
 		OnMenuFileNew();
-	if (ImGui::IsKeyPressed(ImGuiMod_Ctrl) || ImGui::IsKeyPressed(ImGuiKey_O))
+	if (ImGui::IsKeyDown(ImGuiMod_Ctrl) && ImGui::IsKeyDown(ImGuiKey_O))
 		OnMenuFileOpen();
-	if (ImGui::IsKeyPressed(ImGuiMod_Ctrl) || ImGui::IsKeyPressed(ImGuiKey_S))
+	if (ImGui::IsKeyDown(ImGuiMod_Ctrl) && ImGui::IsKeyDown(ImGuiKey_S))
 		OnMenuFileSave();
-	if (ImGui::IsKeyPressed(ImGuiMod_Ctrl) || ImGui::IsKeyPressed(ImGuiKey_X))
-	{
+	if (ImGui::IsKeyDown(ImGuiMod_Ctrl) && ImGui::IsKeyDown(ImGuiKey_X))
 		OnCut();
-	}
-	if (ImGui::IsKeyPressed(ImGuiMod_Ctrl) || ImGui::IsKeyPressed(ImGuiKey_C))
-	{
+	if (ImGui::IsKeyDown(ImGuiMod_Ctrl) && ImGui::IsKeyDown(ImGuiKey_C))
 		OnCopy();
-	}
-	if (ImGui::IsKeyPressed(ImGuiMod_Ctrl) || ImGui::IsKeyPressed(ImGuiKey_V))
-	{
+	if (ImGui::IsKeyDown(ImGuiMod_Ctrl) && ImGui::IsKeyDown(ImGuiKey_V))
 		OnPaste();
-	}
-	if (ImGui::IsKeyPressed(ImGuiMod_Alt) || ImGui::IsKeyPressed(ImGuiKey_UpArrow))
+	if (ImGui::IsKeyDown(ImGuiMod_Alt) && ImGui::IsKeyDown(ImGuiKey_UpArrow))
 	{
 		do
 		{
@@ -238,7 +232,7 @@ void Hierarchy::Shortcut()
 			std::iter_swap(it, it - 1);
 		} while (false);
 	}
-	if (ImGui::IsKeyPressed(ImGuiMod_Alt) || ImGui::IsKeyPressed(ImGuiKey_DownArrow))
+	if (ImGui::IsKeyDown(ImGuiMod_Alt) && ImGui::IsKeyDown(ImGuiKey_DownArrow))
 	{
 		do
 		{
@@ -261,20 +255,17 @@ void Hierarchy::Shortcut()
 			std::iter_swap(it, it + 1);
 		} while (false);
 	}
-	if (ImGui::IsKeyPressed(ImGuiKey_F2, false))
+	if (ImGui::IsKeyDown(ImGuiKey_F2))
 	{
 		auto window{ ImGui::FindWindowByName("Inspector") };
 		ImGui::ActivateItemByID(window->GetID("##INSPECTOR/NAME"));
 	}
-	if (ImGui::IsKeyPressed(ImGuiKey_Delete, false))
+	if (ImGui::IsKeyDown(ImGuiKey_Delete))
 	{
 		for (const auto& select : m_selects)
 		{
 			if (auto prop{ select.lock() })
-			{
 				Delete(prop);
-				App::OnPropertyDelete.Notify(prop);
-			}
 		}
 	}
 }
@@ -456,6 +447,7 @@ void Hierarchy::Recurse(const std::shared_ptr<Resource::Property>& prop, const s
 void Hierarchy::Delete(const std::shared_ptr<Resource::Property>& prop)
 {
 	m_invalids.insert(prop);
+	App::OnPropertyDelete.Notify(prop);
 }
 
 std::shared_ptr<Resource::Property> Hierarchy::GetParent(const std::shared_ptr<Resource::Property>& prop)

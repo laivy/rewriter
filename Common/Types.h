@@ -1,6 +1,5 @@
 #pragma once
 #include <cstdint>
-#include <d2d1.h>
 
 class Float2;
 

@@ -208,8 +208,8 @@ void TextBox::Build(const std::shared_ptr<Resource::Property>& prop)
 		case Resource::Property::Type::Folder:
 		{
 			Int2 size{ p->GetInt2(L"Size") };
-			int32_t backgroundColor{ p->GetInt(L"BackgroundColor") };
-			int32_t outlineColor{ p->GetInt(L"OutlineColor") };
+			Graphics::D2D::Color backgroundColor{ static_cast<uint32_t>(p->GetInt(L"BackgroundColor")) };
+			Graphics::D2D::Color outlineColor{ static_cast<uint32_t>(p->GetInt(L"OutlineColor")) };
 			visual = std::make_tuple(size, backgroundColor, outlineColor);
 			break;
 		}
@@ -277,7 +277,7 @@ void TextBox::RenderText() const
 		text.assign(m_text.size(), L'*');
 	else
 		text = m_text;
-	Graphics::D2D::DrawText(text, m_font, Graphics::D2D::Color::Black, m_position + Int2{ PADDING_LEFT, PADDING_TOP } + m_scrollOffset, Pivot::LeftTop);
+	Graphics::D2D::DrawText(text, m_font, Graphics::D2D::Color{}, m_position + Int2{ PADDING_LEFT, PADDING_TOP } + m_scrollOffset, Pivot::LeftTop);
 	Graphics::D2D::PopClipRect();
 }
 
@@ -292,7 +292,7 @@ void TextBox::RenderCaret() const
 	caret.Offset(Int2{ m_metrics.left, m_metrics.top });
 	caret.Offset(Int2{ m_scrollOffset.x, m_scrollOffset.y });
 	caret.Offset(Int2{ PADDING_LEFT, static_cast<int>(m_metrics.height - m_font.size) });
-	Graphics::D2D::DrawRect(caret, Graphics::D2D::Color::Black);
+	Graphics::D2D::DrawRect(caret, Graphics::D2D::Color{});
 }
 
 void TextBox::SetText(std::wstring_view text)

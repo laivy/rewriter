@@ -10,9 +10,10 @@ public:
 	void Render();
 
 private:
-	void SetPath(const std::filesystem::path& path);
 	void RenderAddressBar();
 	void RenderFileViewer();
+
+	void SetPath(const std::filesystem::path& path);
 
 private:
 	static constexpr auto WINDOW_NAME{ "Explorer" };

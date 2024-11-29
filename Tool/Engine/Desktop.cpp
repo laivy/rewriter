@@ -5,7 +5,6 @@
 void Desktop::Render()
 {
 	RenderMainMenuBar();
-	RenderMainDockSpace();
 }
 
 void Desktop::RenderMainMenuBar()
@@ -25,18 +24,4 @@ void Desktop::RenderMainMenuBar()
 		ImGui::EndMenu();
 	}
 	ImGui::EndMainMenuBar();
-}
-
-void Desktop::RenderMainDockSpace()
-{
-	const ImGuiViewport* viewport = ImGui::GetMainViewport();
-	ImGui::SetNextWindowPos(viewport->WorkPos);
-	ImGui::SetNextWindowSize(viewport->WorkSize);
-	ImGui::SetNextWindowViewport(viewport->ID);
-
-	ImGui::Begin("DOCKSPACE", NULL,
-		ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoSavedSettings |
-		ImGuiWindowFlags_NoFocusOnAppearing | ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_NoDocking);
-	ImGui::DockSpace(ImGui::GetID("DOCKSPACE"), {}, ImGuiDockNodeFlags_PassthruCentralNode);
-	ImGui::End();
 }

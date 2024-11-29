@@ -31,12 +31,6 @@ void Explorer::Render()
 	ImGui::PopID();
 }
 
-void Explorer::SetPath(const std::filesystem::path& path)
-{
-	m_path = path;
-	m_scrollAddressBarToRight = true;
-}
-
 void Explorer::RenderAddressBar()
 {
 	ImGui::SetNextItemWidth(50.0f);
@@ -71,15 +65,15 @@ void Explorer::RenderAddressBar()
 	ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2{ 3, 0 });
 	std::filesystem::path newPath;
 	std::filesystem::path temp{ m_path.root_path() };
-	for (const auto& p : m_path)
+	for (const auto& entry : m_path)
 	{
-		if (p.has_root_name() || p.has_root_directory())
+		if (entry.has_root_name() || entry.has_root_directory())
 			continue;
 
-		temp /= p;
+		temp /= entry;
 
 		ImGui::SameLine();
-		if (Graphics::ImGui::Button(p.wstring()))
+		if (ImGui::Button(entry))
 		{
 			newPath = temp;
 			break;
@@ -112,10 +106,8 @@ void Explorer::RenderFileViewer()
 			continue;
 
 		std::wstring name{ entry.path().filename() };
-		if (Graphics::ImGui::Button(name))
-		{
+		if (ImGui::Button(name))
 			SetPath(std::filesystem::canonical(m_path / name));
-		}
 	}
 
 	// 파일
@@ -125,7 +117,7 @@ void Explorer::RenderFileViewer()
 			continue;
 
 		std::string name{ Util::u8stou8s(entry.path().filename().u8string()) };
-		ImGui::Selectable(name.c_str());
+		ImGui::Selectable(name);
 		if (ImGui::BeginDragDropSource())
 		{
 			std::wstring fullPath{ entry.path() };
@@ -135,4 +127,10 @@ void Explorer::RenderFileViewer()
 			ImGui::EndDragDropSource();
 		}
 	}
+}
+
+void Explorer::SetPath(const std::filesystem::path& path)
+{
+	m_path = path;
+	m_scrollAddressBarToRight = true;
 }

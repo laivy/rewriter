@@ -46,6 +46,13 @@ EXTERN_C IMAGE_DOS_HEADER __ImageBase;
 #undef GetTextMetrics
 #endif
 
+// Imgui
+#ifdef _IMGUI
+#include "External/Imgui/imgui.h"
+#include "External/Imgui/imgui_internal.h"
+#include "External/Imgui/imgui_stdlib.h"
+#endif
+
 // Project
 #include "Delegate.h"
 #include "Singleton.h"

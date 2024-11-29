@@ -12,7 +12,5 @@ public:
 	void SetText(std::wstring_view text);
 
 private:
-	ComPtr<IDWriteTextFormat> m_textFormat;
-	ComPtr<IDWriteTextLayout> m_textLayout;
 	std::wstring m_text;
 };

@@ -1,7 +1,7 @@
 #pragma once
-#include "Font.h"
 
-struct ID2D1DeviceContext2;
+interface ID2D1DeviceContext2;
+interface ID2D1BitmapRenderTarget;
 
 namespace Resource
 {
@@ -21,31 +21,44 @@ namespace Graphics::D2D
 		DLL_API void Draw(const Float2& position = {});
 		DLL_API void Clear();
 
-		ComPtr<ID2D1BitmapRenderTarget> GetTarget() const;
-
 	private:
 		ComPtr<ID2D1BitmapRenderTarget> m_target;
 	};
 
-	struct TextMetrics
+	struct Transform
 	{
-		float left;
-		float top;
-		float width;
-		float height;
+		Float2 scale{ 1.0f, 1.0f };
+		float rotation{};
+		Float2 translation{};
 	};
 
-	using Color = D2D1::ColorF;
-	using Matrix = D2D1::Matrix3x2F;
+	struct TextMetrics
+	{
+		float left{};
+		float top{};
+		float width{};
+		float height{};
+	};
+
+	struct Color
+	{
+		unsigned int rgb{};
+		float a{ 1.0f };
+	};
+
+	struct Font
+	{
+		std::wstring name;
+		float size{};
+	};
 
 	DLL_API void Begin();
 	DLL_API bool End();
 
 	DLL_API std::shared_ptr<Resource::Sprite> LoadSprite(std::span<std::byte> binary);
-	DLL_API ComPtr<ID2D1DeviceContext2> GetContext();
 	DLL_API std::shared_ptr<Layer> CreateLayer(const Float2& size);
 
-	DLL_API void SetTransform(const Matrix& transform);
+	DLL_API void SetTransform(const Transform& transform);
 	DLL_API void PushClipRect(const RectF& rect);
 	DLL_API void PopClipRect();
 
