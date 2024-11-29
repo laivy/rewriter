@@ -36,7 +36,7 @@ namespace
 		}
 		else
 		{
-			Graphics::dwriteFactory->CreateTextFormat(font.name.data(), nullptr, DWRITE_FONT_WEIGHT_NORMAL, DWRITE_FONT_STYLE_NORMAL, DWRITE_FONT_STRETCH_NORMAL, font.size, L"", &textFormat);
+			Graphics::g_dwriteFactory->CreateTextFormat(font.name.data(), nullptr, DWRITE_FONT_WEIGHT_NORMAL, DWRITE_FONT_STYLE_NORMAL, DWRITE_FONT_STRETCH_NORMAL, font.size, L"", &textFormat);
 			textFormat->SetParagraphAlignment(DWRITE_PARAGRAPH_ALIGNMENT_NEAR);
 			textFormat->SetTextAlignment(DWRITE_TEXT_ALIGNMENT_LEADING);
 			g_textFormats.emplace(font, textFormat);
@@ -84,7 +84,7 @@ namespace Graphics::D2D
 		if (FAILED(m_target->EndDraw()))
 			return false;
 
-		g_d2dCurrentRenderTarget = d2dContext.Get();
+		g_d2dCurrentRenderTarget = g_d2dContext.Get();
 		return true;
 	}
 
@@ -98,7 +98,7 @@ namespace Graphics::D2D
 			return;
 
 		auto size{ target->GetSize() };
-		d2dContext->DrawBitmap(target, D2D1_RECT_F{ position.x, position.y, position.x + size.width, position.y + size.height });
+		g_d2dContext->DrawBitmap(target, D2D1_RECT_F{ position.x, position.y, position.x + size.width, position.y + size.height });
 	}
 
 	DLL_API void Layer::Clear()
@@ -108,18 +108,18 @@ namespace Graphics::D2D
 
 	DLL_API void Begin()
 	{
-		d3d11On12Device->AcquireWrappedResources(wrappedBackBuffers[frameIndex].GetAddressOf(), 1);
-		d2dContext->SetTarget(d2dRenderTargets[frameIndex].Get());
-		d2dContext->BeginDraw();
-		g_d2dCurrentRenderTarget = d2dContext.Get();
+		g_d3d11On12Device->AcquireWrappedResources(g_wrappedBackBuffers[g_frameIndex].GetAddressOf(), 1);
+		g_d2dContext->SetTarget(g_d2dRenderTargets[g_frameIndex].Get());
+		g_d2dContext->BeginDraw();
+		g_d2dCurrentRenderTarget = g_d2dContext.Get();
 	}
 
 	DLL_API bool End()
 	{
-		if (FAILED(d2dContext->EndDraw()))
+		if (FAILED(g_d2dContext->EndDraw()))
 			return false;
-		d3d11On12Device->ReleaseWrappedResources(wrappedBackBuffers[frameIndex].GetAddressOf(), 1);
-		d3d11DeviceContext->Flush();
+		g_d3d11On12Device->ReleaseWrappedResources(g_wrappedBackBuffers[g_frameIndex].GetAddressOf(), 1);
+		g_d3d11DeviceContext->Flush();
 		return true;
 	}
 
@@ -147,7 +147,7 @@ namespace Graphics::D2D
 			return nullptr;
 
 		ComPtr<ID2D1Bitmap> bitmap;
-		d2dContext->CreateBitmapFromWicBitmap(converter.Get(), bitmap.GetAddressOf());
+		g_d2dContext->CreateBitmapFromWicBitmap(converter.Get(), bitmap.GetAddressOf());
 
 		auto size{ bitmap->GetSize() };
 		auto sprite{ std::make_shared<Resource::Sprite>() };
@@ -158,7 +158,7 @@ namespace Graphics::D2D
 	DLL_API std::shared_ptr<Layer> CreateLayer(const Float2& size)
 	{
 		ComPtr<ID2D1BitmapRenderTarget> target;
-		if (FAILED(d2dContext->CreateCompatibleRenderTarget(D2D1_SIZE_F{ size.x, size.y }, &target)))
+		if (FAILED(g_d2dContext->CreateCompatibleRenderTarget(D2D1_SIZE_F{ size.x, size.y }, &target)))
 			return nullptr;
 		return std::make_shared<Layer>(target);
 	}
@@ -202,7 +202,7 @@ namespace Graphics::D2D
 		auto colorBrush{ GetColorBrush(color) };
 
 		ComPtr<IDWriteTextLayout> textLayout;
-		dwriteFactory->CreateTextLayout(text.data(), static_cast<UINT32>(text.size()), textFormat.Get(), std::numeric_limits<float>::max(), std::numeric_limits<float>::max(), &textLayout);
+		g_dwriteFactory->CreateTextLayout(text.data(), static_cast<UINT32>(text.size()), textFormat.Get(), std::numeric_limits<float>::max(), std::numeric_limits<float>::max(), &textLayout);
 
 		DWRITE_TEXT_METRICS metrics{};
 		textLayout->GetMetrics(&metrics);
@@ -264,7 +264,7 @@ namespace Graphics::D2D
 		auto textFormat{ GetTextFormat(font) };
 
 		ComPtr<IDWriteTextLayout> textLayout;
-		dwriteFactory->CreateTextLayout(text.data(), static_cast<UINT32>(text.size()), textFormat.Get(), std::numeric_limits<float>::max(), std::numeric_limits<float>::max(), &textLayout);
+		g_dwriteFactory->CreateTextLayout(text.data(), static_cast<UINT32>(text.size()), textFormat.Get(), std::numeric_limits<float>::max(), std::numeric_limits<float>::max(), &textLayout);
 
 		Float2 pos{};
 		DWRITE_HIT_TEST_METRICS metrics{};

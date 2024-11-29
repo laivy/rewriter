@@ -8,7 +8,7 @@ namespace Graphics::ImGui
 {
 	DLL_API void Begin()
 	{
-		commandList->SetDescriptorHeaps(1, imGuiSrvDescHeap.GetAddressOf());
+		g_commandList->SetDescriptorHeaps(1, g_imGuiSrvDescHeap.GetAddressOf());
 		::ImGui_ImplDX12_NewFrame();
 		::ImGui_ImplWin32_NewFrame();
 		::ImGui::NewFrame();
@@ -30,7 +30,7 @@ namespace Graphics::ImGui
 	DLL_API void End()
 	{
 		::ImGui::Render();
-		::ImGui_ImplDX12_RenderDrawData(::ImGui::GetDrawData(), commandList.Get());
+		::ImGui_ImplDX12_RenderDrawData(::ImGui::GetDrawData(), g_commandList.Get());
 		if (::ImGui::GetIO().ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
 		{
 			::ImGui::UpdatePlatformWindows();

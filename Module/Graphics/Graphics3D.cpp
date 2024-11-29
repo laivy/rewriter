@@ -7,33 +7,33 @@ namespace Graphics::D3D
 {
 	DLL_API bool Begin()
 	{
-		if (FAILED(commandAllocators[frameIndex]->Reset()))
+		if (FAILED(g_commandAllocators[g_frameIndex]->Reset()))
 			return false;
-		if (FAILED(commandList->Reset(commandAllocators[frameIndex].Get(), nullptr)))
+		if (FAILED(g_commandList->Reset(g_commandAllocators[g_frameIndex].Get(), nullptr)))
 			return false;
 
-		commandList->SetGraphicsRootSignature(rootSignature.Get());
-		commandList->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(renderTargets[frameIndex].Get(), D3D12_RESOURCE_STATE_PRESENT, D3D12_RESOURCE_STATE_RENDER_TARGET));
+		g_commandList->SetGraphicsRootSignature(g_rootSignature.Get());
+		g_commandList->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(g_renderTargets[g_frameIndex].Get(), D3D12_RESOURCE_STATE_PRESENT, D3D12_RESOURCE_STATE_RENDER_TARGET));
 
-		CD3DX12_CPU_DESCRIPTOR_HANDLE rtvHandle{ rtvDescHeap->GetCPUDescriptorHandleForHeapStart(), static_cast<int>(frameIndex), rtvDescriptorSize };
-		CD3DX12_CPU_DESCRIPTOR_HANDLE dsvHandle{ dsvDescHeap->GetCPUDescriptorHandleForHeapStart() };
-		commandList->OMSetRenderTargets(1, &rtvHandle, TRUE, &dsvHandle);
-		commandList->RSSetViewports(1, &viewport);
-		commandList->RSSetScissorRects(1, &scissorRect);
+		CD3DX12_CPU_DESCRIPTOR_HANDLE rtvHandle{ g_rtvDescHeap->GetCPUDescriptorHandleForHeapStart(), static_cast<int>(g_frameIndex), g_rtvDescriptorSize };
+		CD3DX12_CPU_DESCRIPTOR_HANDLE dsvHandle{ g_dsvDescHeap->GetCPUDescriptorHandleForHeapStart() };
+		g_commandList->OMSetRenderTargets(1, &rtvHandle, TRUE, &dsvHandle);
+		g_commandList->RSSetViewports(1, &g_viewport);
+		g_commandList->RSSetScissorRects(1, &g_scissorRect);
 
 		constexpr float clearColor[]{ 0.15625f, 0.171875f, 0.203125f, 1.0f };
-		commandList->ClearRenderTargetView(rtvHandle, clearColor, 0, NULL);
-		commandList->ClearDepthStencilView(dsvHandle, D3D12_CLEAR_FLAG_DEPTH | D3D12_CLEAR_FLAG_STENCIL, 1.0f, 0, 0, NULL);
+		g_commandList->ClearRenderTargetView(rtvHandle, clearColor, 0, NULL);
+		g_commandList->ClearDepthStencilView(dsvHandle, D3D12_CLEAR_FLAG_DEPTH | D3D12_CLEAR_FLAG_STENCIL, 1.0f, 0, 0, NULL);
 		return true;
 	}
 
 	DLL_API bool End()
 	{
-		if (FAILED(commandList->Close()))
+		if (FAILED(g_commandList->Close()))
 			return false;
 
-		ID3D12CommandList* ppCommandList[]{ commandList.Get() };
-		commandQueue->ExecuteCommandLists(_countof(ppCommandList), ppCommandList);
+		ID3D12CommandList* ppCommandList[]{ g_commandList.Get() };
+		g_commandQueue->ExecuteCommandLists(_countof(ppCommandList), ppCommandList);
 		return true;
 	}
 
