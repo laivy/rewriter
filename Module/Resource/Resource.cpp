@@ -82,7 +82,7 @@ namespace
 #endif
 
 	std::function<std::shared_ptr<Sprite>(std::span<std::byte>)> LoadSprite;
-	std::function<std::shared_ptr<Sprite>(std::span<std::byte>)> LoadTexture;
+	std::function<std::shared_ptr<Texture>(std::span<std::byte>)> LoadTexture;
 
 	std::shared_ptr<Property> _Load(std::ifstream& file, std::wstring_view subPath)
 	{
@@ -154,6 +154,21 @@ namespace
 #endif
 			break;
 		}
+		case Property::Type::Texture:
+		{
+			uint32_t length{};
+			file.read(reinterpret_cast<char*>(&length), sizeof(length));
+#ifdef _SERVER
+			file.ignore(length);
+#else
+			std::unique_ptr<std::byte[]> binary{ new std::byte[length]{} };
+			file.read(reinterpret_cast<char*>(binary.get()), length);
+
+			auto data{ LoadSprite(std::span{ binary.get(), length }) };
+			prop->Set(data);
+#endif
+			break;
+		}
 		default:
 			assert(false && "INVALID PROPERTY TYPE");
 			return nullptr;
@@ -191,9 +206,13 @@ namespace
 namespace Resource
 {
 #if defined _CLIENT || defined _TOOL
-	DLL_API void Initialize(const std::function<std::shared_ptr<Sprite>(std::span<std::byte>)>& _LoadSprite)
+	DLL_API void Initialize(
+		const std::function<std::shared_ptr<Sprite>(std::span<std::byte>)>& loadSprite,
+		const std::function<std::shared_ptr<Texture>(std::span<std::byte>)>& loadTexture
+	)
 	{
-		LoadSprite = _LoadSprite;
+		LoadSprite = loadSprite;
+		LoadTexture = loadTexture;
 	}
 #endif
 

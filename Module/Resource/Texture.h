@@ -6,13 +6,14 @@ namespace Resource
 {
 	class Texture
 	{
-#if defined _CLIENT || defined _TOOL
 	public:
-		DLL_API Texture(std::span<std::byte> binary);
+		DLL_API Texture(const ComPtr<IUnknown>& resource, const std::function<void(Texture*)> onDestroy);
 		~Texture() = default;
+
+		DLL_API IUnknown* Get() const;
 
 	private:
 		ComPtr<IUnknown> m_resource;
-#endif
+		std::function<void(Texture*)> m_callback;
 	};
 }

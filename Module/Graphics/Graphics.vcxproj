@@ -267,6 +267,14 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release_Server|x64'">NotUsing</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release_Tool|x64'">NotUsing</PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="..\..\External\DirectX\WICTextureLoader12.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug_Server|x64'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug_Tool|x64'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release_Server|x64'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug_Client|x64'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release_Client|x64'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release_Tool|x64'">NotUsing</PrecompiledHeader>
+    </ClCompile>
     <ClCompile Include="..\..\External\Imgui\imgui.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug_Client|x64'">NotUsing</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug_Server|x64'">NotUsing</PrecompiledHeader>
@@ -331,6 +339,7 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release_Server|x64'">NotUsing</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release_Tool|x64'">NotUsing</PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="DescriptorHeap.cpp" />
     <ClCompile Include="DllMain.cpp" />
     <ClCompile Include="Global.cpp" />
     <ClCompile Include="Graphics.cpp" />
@@ -351,6 +360,7 @@
     <ClInclude Include="..\..\Common\Util.h" />
     <ClInclude Include="..\..\External\DirectX\d3dx12.h" />
     <ClInclude Include="..\..\External\DirectX\DDSTextureLoader12.h" />
+    <ClInclude Include="..\..\External\DirectX\WICTextureLoader12.h" />
     <ClInclude Include="..\..\External\Imgui\imconfig.h" />
     <ClInclude Include="..\..\External\Imgui\imgui.h" />
     <ClInclude Include="..\..\External\Imgui\imgui_impl_dx12.h" />
@@ -361,6 +371,7 @@
     <ClInclude Include="..\..\External\Imgui\imstb_textedit.h" />
     <ClInclude Include="..\..\External\Imgui\imstb_truetype.h" />
     <ClInclude Include="..\Resource\Include\Lib.h" />
+    <ClInclude Include="DescriptorHeap.h" />
     <ClInclude Include="Global.h" />
     <ClInclude Include="Graphics.h" />
     <ClInclude Include="Graphics2D.h" />

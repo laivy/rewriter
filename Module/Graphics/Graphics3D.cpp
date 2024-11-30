@@ -5,6 +5,11 @@
 
 namespace Graphics::D3D
 {
+	static void OnTextureDestroy(Resource::Texture* texture)
+	{
+
+	}
+
 	DLL_API bool Begin()
 	{
 		if (FAILED(g_commandAllocators[g_frameIndex]->Reset()))
@@ -35,6 +40,17 @@ namespace Graphics::D3D
 		ID3D12CommandList* ppCommandList[]{ g_commandList.Get() };
 		g_commandQueue->ExecuteCommandLists(_countof(ppCommandList), ppCommandList);
 		return true;
+	}
+
+	DLL_API std::shared_ptr<Resource::Texture> LoadTexture(std::span<std::byte> binary)
+	{
+		ComPtr<ID3D12Resource> resource;
+		std::vector<D3D12_SUBRESOURCE_DATA> subresource{};
+		if (FAILED(DirectX::LoadDDSTextureFromMemory(g_d3dDevice.Get(), reinterpret_cast<const uint8_t*>(binary.data()), binary.size(), &resource, subresource)))
+			return nullptr;
+
+		auto texture{ std::make_shared<Resource::Texture>(resource, &OnTextureDestroy) };
+		return texture;
 	}
 
 	void CreateResourceFromTexture(const std::shared_ptr<Resource::Texture>& texture)

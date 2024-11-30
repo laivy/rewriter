@@ -33,6 +33,12 @@
     <Filter Include="외부 파일\DirectX">
       <UniqueIdentifier>{42edbb19-e699-40e6-becd-557caaf541c4}</UniqueIdentifier>
     </Filter>
+    <Filter Include="헤더 파일\D3D">
+      <UniqueIdentifier>{3cdc4177-3027-48b3-8459-9004992d8cad}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="소스 파일\D3D">
+      <UniqueIdentifier>{25fcec6e-4ad8-48e8-bf2a-82c59c45594f}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="DllMain.cpp">
@@ -74,9 +80,6 @@
     <ClCompile Include="Graphics2D.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
-    <ClCompile Include="Graphics3D.cpp">
-      <Filter>소스 파일</Filter>
-    </ClCompile>
     <ClCompile Include="GraphicsImGui.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
@@ -88,6 +91,15 @@
     </ClCompile>
     <ClCompile Include="..\..\External\DirectX\DDSTextureLoader12.cpp">
       <Filter>외부 파일\DirectX</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\External\DirectX\WICTextureLoader12.cpp">
+      <Filter>외부 파일\DirectX</Filter>
+    </ClCompile>
+    <ClCompile Include="Graphics3D.cpp">
+      <Filter>소스 파일\D3D</Filter>
+    </ClCompile>
+    <ClCompile Include="DescriptorHeap.cpp">
+      <Filter>소스 파일\D3D</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -133,9 +145,6 @@
     <ClInclude Include="Graphics2D.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
-    <ClInclude Include="Graphics3D.h">
-      <Filter>헤더 파일</Filter>
-    </ClInclude>
     <ClInclude Include="GraphicsImGui.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
@@ -153,6 +162,15 @@
     </ClInclude>
     <ClInclude Include="..\..\External\DirectX\DDSTextureLoader12.h">
       <Filter>외부 파일\DirectX</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\External\DirectX\WICTextureLoader12.h">
+      <Filter>외부 파일\DirectX</Filter>
+    </ClInclude>
+    <ClInclude Include="Graphics3D.h">
+      <Filter>헤더 파일\D3D</Filter>
+    </ClInclude>
+    <ClInclude Include="DescriptorHeap.h">
+      <Filter>헤더 파일\D3D</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

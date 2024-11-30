@@ -5,6 +5,7 @@ namespace Resource
 {
 	class Property;
 	class Sprite;
+	class Texture;
 }
 
 template<class T>
@@ -13,7 +14,8 @@ concept is_property_data_type_v =
 	std::is_same_v<T, Int2> ||
 	std::is_same_v<T, float> ||
 	std::is_same_v<T, std::wstring> ||
-	std::is_same_v<T, std::shared_ptr<Resource::Sprite>>;
+	std::is_same_v<T, std::shared_ptr<Resource::Sprite>> ||
+	std::is_same_v<T, std::shared_ptr<Resource::Texture>>;
 
 namespace Resource
 {
@@ -64,6 +66,7 @@ namespace Resource
 		DLL_API void Set(float value);
 		DLL_API void Set(std::wstring_view value);
 		DLL_API void Set(const std::shared_ptr<Sprite>& value);
+		DLL_API void Set(const std::shared_ptr<Texture>& value);
 
 		DLL_API Type GetType() const;
 		DLL_API std::wstring GetName() const;
@@ -72,6 +75,7 @@ namespace Resource
 		DLL_API float GetFloat(std::wstring_view path = L"") const;
 		DLL_API std::wstring GetString(std::wstring_view path = L"") const;
 		DLL_API std::shared_ptr<Sprite> GetSprite(std::wstring_view path = L"") const;
+		DLL_API std::shared_ptr<Texture> GetTexture(std::wstring_view path = L"") const;
 		DLL_API std::shared_ptr<Property> Get(std::wstring_view path) const;
 		DLL_API const std::vector<std::shared_ptr<Property>>& GetChildren() const;
 		DLL_API std::vector<std::shared_ptr<Property>>& GetChildren();
@@ -88,7 +92,8 @@ namespace Resource
 			Int2,
 			float,
 			std::wstring,
-			std::shared_ptr<Sprite>
+			std::shared_ptr<Sprite>,
+			std::shared_ptr<Texture>
 		> m_data;
 		std::vector<std::shared_ptr<Property>> m_children;
 #ifdef _TOOL

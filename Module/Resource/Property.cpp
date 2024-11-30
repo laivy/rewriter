@@ -128,6 +128,11 @@ namespace Resource
 		m_data = value;
 	}
 
+	DLL_API void Property::Set(const std::shared_ptr<Texture>& value)
+	{
+		m_data = value;
+	}
+
 	DLL_API Property::Type Property::GetType() const
 	{
 		return m_type;
@@ -256,6 +261,31 @@ namespace Resource
 			return child->GetSprite(remain);
 
 		assert(m_type == Type::Sprite);
+		return nullptr;
+	}
+
+	DLL_API std::shared_ptr<Texture> Property::GetTexture(std::wstring_view path) const
+	{
+		if (path.empty())
+		{
+			assert(m_type == Type::Texture);
+			return std::get<std::shared_ptr<Texture>>(m_data);
+		}
+
+		std::wstring_view name{ path };
+		std::wstring_view remain{};
+
+		size_t pos{ path.find(Stringtable::DATA_PATH_SEPERATOR) };
+		if (pos != std::wstring_view::npos)
+		{
+			name = path.substr(0, pos);
+			remain = path.substr(pos + 1);
+		}
+
+		if (const auto& child{ Get(name) })
+			return child->GetTexture(remain);
+
+		assert(m_type == Type::Texture);
 		return nullptr;
 	}
 
