@@ -89,9 +89,6 @@
     <ClCompile Include="..\..\Common\Time.cpp">
       <Filter>소스 파일\Common</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\Common\Types.cpp">
-      <Filter>소스 파일\Common</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\Common\Timer.cpp">
       <Filter>소스 파일\Common</Filter>
     </ClCompile>
@@ -149,6 +146,9 @@
     <ClCompile Include="..\..\Common\Socket.cpp">
       <Filter>소스 파일\Common</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\Common\Type.cpp">
+      <Filter>소스 파일\Common</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Stdafx.h">
@@ -185,9 +185,6 @@
       <Filter>헤더 파일\Common</Filter>
     </ClInclude>
     <ClInclude Include="..\..\Common\Time.h">
-      <Filter>헤더 파일\Common</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Common\Types.h">
       <Filter>헤더 파일\Common</Filter>
     </ClInclude>
     <ClInclude Include="..\..\Common\Timer.h">
@@ -257,6 +254,9 @@
       <Filter>모듈 파일\Graphics</Filter>
     </ClInclude>
     <ClInclude Include="..\..\Common\Protocol.h">
+      <Filter>헤더 파일\Common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Common\Type.h">
       <Filter>헤더 파일\Common</Filter>
     </ClInclude>
   </ItemGroup>

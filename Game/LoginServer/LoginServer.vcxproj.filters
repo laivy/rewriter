@@ -62,9 +62,6 @@
     <ClCompile Include="..\..\Common\Request.cpp">
       <Filter>소스 파일\Common</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\Common\Types.cpp">
-      <Filter>소스 파일\Common</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\Common\Timer.cpp">
       <Filter>소스 파일\Common</Filter>
     </ClCompile>
@@ -110,6 +107,9 @@
     <ClCompile Include="..\..\External\Imgui\imgui_widgets.cpp">
       <Filter>외부 파일\Imgui</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\Common\Type.cpp">
+      <Filter>소스 파일\Common</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Stdafx.h">
@@ -131,9 +131,6 @@
       <Filter>헤더 파일\Common</Filter>
     </ClInclude>
     <ClInclude Include="..\..\Common\StringTable.h">
-      <Filter>헤더 파일\Common</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Common\Types.h">
       <Filter>헤더 파일\Common</Filter>
     </ClInclude>
     <ClInclude Include="..\..\Common\Timer.h">
@@ -192,6 +189,9 @@
     </ClInclude>
     <ClInclude Include="..\..\External\Imgui\imstb_truetype.h">
       <Filter>외부 파일\Imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Common\Type.h">
+      <Filter>헤더 파일\Common</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

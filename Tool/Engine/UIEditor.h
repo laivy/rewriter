@@ -1,14 +1,26 @@
 #pragma once
 
-class UIEditor : public TSingleton<UIEditor>
+class UIEditor :
+	public IObserver,
+	public TSingleton<UIEditor>
 {
 private:
 	struct Window
 	{
-		std::string fullPath;
+		struct Camera
+		{
+			Float2 position;
+			Float2 scale{ 1.0f, 1.0f };
+		};
+
+		std::shared_ptr<Resource::Property> prop;
+		std::wstring path;
+
+		std::shared_ptr<Graphics::D2D::Layer> layer;
+		Camera camera;
 
 		Int2 size;
-		int32_t backgroundColor;
+		Graphics::D2D::Color backgroundColor;
 		Int2 backgroundRectRadius;
 	};
 
@@ -20,15 +32,19 @@ public:
 	void Render2D();
 
 private:
+	void OnPropertyModified(const std::shared_ptr<Resource::Property>& prop);
+
+	void RenderViewer();
+	void UpdateImguiWindowRect();
+
 	void DragDrop();
-	void BuildWindow();
-	void CalcClipRect();
+	void BuildWindow(const std::shared_ptr<Resource::Property>& prop);
 
 private:
 	static constexpr auto WINDOW_NAME{ "UI Editor" };
+	bool m_isFirstRender;
 	bool m_isVisible;
-	RectF m_clipRect;
+	RectF m_imguiWindowRect;
 
-	std::shared_ptr<Resource::Property> m_prop;
 	Window m_window;
 };

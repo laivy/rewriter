@@ -14,7 +14,8 @@ public:
 	void OpenTree(const std::shared_ptr<Resource::Property>& prop);
 
 private:
-	void OnPropertySelect(std::shared_ptr<Resource::Property> prop);
+	void OnPropertySelected(const std::shared_ptr<Resource::Property>& prop);
+	void OnPropertyModified(const std::shared_ptr<Resource::Property>& prop);
 	void OnMenuFileNew();
 	void OnMenuFileOpen();
 	void OnMenuFileSave();

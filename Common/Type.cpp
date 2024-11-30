@@ -1,4 +1,4 @@
-#include "Types.h"
+#include "Type.h"
 
 Int2::Int2(int32_t x, int32_t y) :
 	x{ x },
@@ -68,6 +68,11 @@ Float2 operator+(const Float2& lhs, const Float2& rhs)
 	value.x += rhs.x;
 	value.y += rhs.y;
 	return value;
+}
+
+Float2 operator-(const Float2& lhs)
+{
+	return Float2{ -lhs.x, -lhs.y };
 }
 
 Float2 operator-(const Float2& lhs, const Float2& rhs)

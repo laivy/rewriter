@@ -80,9 +80,6 @@
     <ClInclude Include="..\..\External\Imgui\imstb_truetype.h">
       <Filter>외부 파일\Imgui</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\Common\Types.h">
-      <Filter>헤더 파일\Common</Filter>
-    </ClInclude>
     <ClInclude Include="SocketManager.h">
       <Filter>헤더 파일\Server</Filter>
     </ClInclude>
@@ -106,6 +103,9 @@
     </ClInclude>
     <ClInclude Include="..\..\Module\Graphics\Include\Lib.h">
       <Filter>모듈 파일\Graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Common\Type.h">
+      <Filter>헤더 파일\Common</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -142,9 +142,6 @@
     <ClCompile Include="..\..\External\Imgui\imgui_widgets.cpp">
       <Filter>외부 파일\Imgui</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\Common\Types.cpp">
-      <Filter>소스 파일\Common</Filter>
-    </ClCompile>
     <ClCompile Include="SocketManager.cpp">
       <Filter>소스 파일\Server</Filter>
     </ClCompile>
@@ -159,6 +156,9 @@
     </ClCompile>
     <ClCompile Include="ServerSocket.cpp">
       <Filter>소스 파일\Server</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Common\Type.cpp">
+      <Filter>소스 파일\Common</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

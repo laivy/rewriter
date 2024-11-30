@@ -1,7 +1,5 @@
 #include "Stdafx.h"
 #include "App.h"
-#include "Global.h"
-#include "Hierarchy.h"
 #include "Inspector.h"
 #include "Common/Util.h"
 
@@ -17,7 +15,7 @@ const std::map<Resource::Property::Type, const char*> PROPERTY_TYPES
 
 Inspector::Inspector()
 {
-	App::OnPropertySelect.Register(this, std::bind_front(&Inspector::OnPropertySelect, this));
+	App::OnPropertySelected.Register(this, std::bind_front(&Inspector::OnPropertySelected, this));
 	App::OnPropertyDelete.Register(this, std::bind_front(&Inspector::OnPropertyDelete, this));
 }
 
@@ -36,13 +34,13 @@ void Inspector::Render()
 	ImGui::PopID();
 }
 
-void Inspector::OnPropertyDelete(std::shared_ptr<Resource::Property> prop)
+void Inspector::OnPropertyDelete(const std::shared_ptr<Resource::Property>& prop)
 {
 	if (m_prop.lock() == prop)
 		m_prop.reset();
 }
 
-void Inspector::OnPropertySelect(std::shared_ptr<Resource::Property> prop)
+void Inspector::OnPropertySelected(const std::shared_ptr<Resource::Property>& prop)
 {
 	m_prop = prop;
 }
@@ -73,8 +71,7 @@ void Inspector::RenderNodeName(const std::shared_ptr<Resource::Property>& prop)
 		if (!parent || !parent->Get(newName))
 		{
 			prop->SetName(newName);
-			if (auto hierarchy{ Hierarchy::GetInstance() })
-				hierarchy->OpenTree(prop);
+			App::OnPropertyModified.Notify(prop);
 		}
 	}
 }
@@ -88,7 +85,10 @@ void Inspector::RenderNodeType(const std::shared_ptr<Resource::Property>& prop)
 		for (const auto& [type, label] : PROPERTY_TYPES)
 		{
 			if (ImGui::Selectable(label))
+			{
 				prop->SetType(type);
+				App::OnPropertyModified.Notify(prop);
+			}
 		}
 		ImGui::EndCombo();
 	}
@@ -108,28 +108,40 @@ void Inspector::RenderNodeValue(const std::shared_ptr<Resource::Property>& prop)
 	{
 		auto data{ prop->GetInt() };
 		if (ImGui::InputInt("##INSPECTOR/INT", &data))
+		{
 			prop->Set(data);
+			App::OnPropertyModified.Notify(prop);
+		}
 		break;
 	}
 	case Resource::Property::Type::Int2:
 	{
 		auto data{ prop->GetInt2() };
 		if (ImGui::InputInt2("##INSPECTOR/INT2", reinterpret_cast<int*>(&data)))
+		{
 			prop->Set(data);
+			App::OnPropertyModified.Notify(prop);
+		}
 		break;
 	}
 	case Resource::Property::Type::Float:
 	{
 		auto data{ prop->GetFloat() };
 		if (ImGui::InputFloat("##INSPECTOR/FLOAT", &data))
+		{
 			prop->Set(data);
+			App::OnPropertyModified.Notify(prop);
+		}
 		break;
 	}
 	case Resource::Property::Type::String:
 	{
 		auto data{ Util::wstou8s(prop->GetString()) };
 		if (ImGui::InputTextMultiline("##INSPECTOR/STRING", &data))
+		{
 			prop->Set(Util::u8stows(data));
+			App::OnPropertyModified.Notify(prop);
+		}
 		break;
 	}
 	case Resource::Property::Type::Sprite:
@@ -163,6 +175,7 @@ void Inspector::RenderNodeValue(const std::shared_ptr<Resource::Property>& prop)
 		auto sprite{ Graphics::D2D::LoadSprite(binary) };
 		sprite->SetBinary(binary);
 		prop->Set(sprite);
+		App::OnPropertyModified.Notify(prop);
 		break;
 	}
 	default:

@@ -1,14 +1,14 @@
 #include "Stdafx.h"
 #include "App.h"
 #include "Clipboard.h"
-#include "Global.h"
 #include "Hierarchy.h"
 #include "Inspector.h"
 #include "Common/Util.h"
 
 Hierarchy::Hierarchy()
 {
-	App::OnPropertySelect.Register(this, std::bind_front(&Hierarchy::OnPropertySelect, this));
+	App::OnPropertySelected.Register(this, std::bind_front(&Hierarchy::OnPropertySelected, this));
+	App::OnPropertyModified.Register(this, std::bind_front(&Hierarchy::OnPropertyModified, this));
 }
 
 void Hierarchy::Update(float deltaTime)
@@ -44,12 +44,17 @@ void Hierarchy::OpenTree(const std::shared_ptr<Resource::Property>& prop)
 	m_opens.emplace_back(prop);
 }
 
-void Hierarchy::OnPropertySelect(std::shared_ptr<Resource::Property> prop)
+void Hierarchy::OnPropertySelected(const std::shared_ptr<Resource::Property>& prop)
 {
 	// Ctrl키를 누르고 있으면 다른 노드들 선택 해제하지 않음
 	if (!ImGui::IsKeyDown(ImGuiMod_Ctrl))
 		m_selects.clear();
 	m_selects.push_back(prop);
+}
+
+void Hierarchy::OnPropertyModified(const std::shared_ptr<Resource::Property>& prop)
+{
+	OpenTree(prop);
 }
 
 void Hierarchy::OnMenuFileNew()
@@ -338,11 +343,11 @@ void Hierarchy::RenderNode(const std::shared_ptr<Resource::Property>& prop)
 	if (!isRoot && prop->GetChildren().empty())
 	{
 		if (ImGui::Selectable(name.c_str(), isSelected))
-			App::OnPropertySelect.Notify(prop);
+			App::OnPropertySelected.Notify(prop);
 
 		if (ImGui::BeginDragDropSource())
 		{
-			ImGui::SetDragDropPayload("PROPERTY", &prop, sizeof(prop));
+			ImGui::SetDragDropPayload("HIERARCHY/PROPERTY", &prop, sizeof(prop));
 			ImGui::Text(name.c_str());
 			ImGui::EndDragDropSource();
 		}
@@ -363,16 +368,16 @@ void Hierarchy::RenderNode(const std::shared_ptr<Resource::Property>& prop)
 	bool isTreeNodeOpen{ ImGui::TreeNodeEx(name.c_str(), flag) };
 	if (ImGui::BeginDragDropSource())
 	{
-		ImGui::SetDragDropPayload("PROPERTY", &prop, sizeof(prop));
+		ImGui::SetDragDropPayload("HIERARCHY/PROPERTY", &prop, sizeof(prop));
 		ImGui::Text(name.c_str());
 		ImGui::EndDragDropSource();
 	}
 	if (ImGui::IsItemClicked())
 	{
 		if (isRoot)
-			OnPropertySelect(prop);
+			OnPropertySelected(prop);
 		else
-			App::OnPropertySelect.Notify(prop);
+			App::OnPropertySelected.Notify(prop);
 	}
 	RenderNodeContextMenu(prop);
 	if (isTreeNodeOpen)

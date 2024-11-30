@@ -41,6 +41,7 @@ public:
 	Float2(const Int2& int2);
 
 	friend Float2 operator+(const Float2& lhs, const Float2& rhs);
+	friend Float2 operator-(const Float2& lhs);
 	friend Float2 operator-(const Float2& lhs, const Float2& rhs);
 	friend void operator+=(Float2& lhs, const Float2& rhs);
 	friend void operator-=(Float2& lhs, const Float2& rhs);
