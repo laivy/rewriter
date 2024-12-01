@@ -21,6 +21,7 @@ App::~App()
 	Explorer::Destroy();
 	Hierarchy::Destroy();
 	Inspector::Destroy();
+	UIEditor::Destroy();
 	Resource::CleanUp();
 	Graphics::CleanUp();
 }

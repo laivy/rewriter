@@ -13,12 +13,21 @@ namespace
 	constexpr std::wstring_view TEXTBOX_PREFIX{ L"TextBox:" };
 }
 
-IWindow::IWindow(std::wstring_view path) :
+IWindow::IWindow() :
 	m_titleBarRect{},
 	m_isPicked{},
 	m_pickPos{}
 {
-	auto prop{ Resource::Get(path) };
+}
+
+IWindow::IWindow(std::wstring_view path) :
+	IWindow{ Resource::Get(path) }
+{
+}
+
+IWindow::IWindow(const std::shared_ptr<Resource::Property>& prop) :
+	IWindow{}
+{
 	Build(prop);
 }
 
@@ -140,6 +149,9 @@ std::shared_ptr<Graphics::D2D::Layer> IWindow::GetLayer(int z) const
 
 void IWindow::Build(const std::shared_ptr<Resource::Property>& prop, std::wstring_view path)
 {
+	if (!prop)
+		return;
+
 	for (const auto& [name, child] : *prop)
 	{
 		if (name.starts_with(INFO))
@@ -252,8 +264,8 @@ void IWindow::RenderNinePatch() const
 	Graphics::D2D::DrawSprite(t, RectF{ lt->GetSize().x, 0.0f, m_size.x - rt->GetSize().x, t->GetSize().y });
 	Graphics::D2D::DrawSprite(lb, Float2{ 0.0f, m_size.y - lb->GetSize().y });
 	Graphics::D2D::DrawSprite(rb, Float2{ m_size.x - rb->GetSize().x, m_size.y - rb->GetSize().y });
-	Graphics::D2D::DrawSprite(b, RectF{ lb->GetSize().x, m_size.y - b->GetSize().y, m_size.x - b->GetSize().x, static_cast<float>(m_size.y) });
+	Graphics::D2D::DrawSprite(b, RectF{ lb->GetSize().x, m_size.y - b->GetSize().y, m_size.x - rb->GetSize().x, static_cast<float>(m_size.y) });
 	Graphics::D2D::DrawSprite(l, RectF{ 0.0f, lt->GetSize().y, l->GetSize().x, m_size.y - lb->GetSize().y });
-	Graphics::D2D::DrawSprite(l, RectF{ m_size.x - r->GetSize().x, rt->GetSize().y, static_cast<float>(m_size.x), m_size.y - rb->GetSize().y });
+	Graphics::D2D::DrawSprite(r, RectF{ m_size.x - r->GetSize().x, rt->GetSize().y, static_cast<float>(m_size.x), m_size.y - rb->GetSize().y });
 	Graphics::D2D::DrawSprite(c, RectF{ lt->GetSize().x, lt->GetSize().y, m_size.x - rb->GetSize().x, m_size.y - rb->GetSize().y });
 }

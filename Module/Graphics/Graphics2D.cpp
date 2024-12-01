@@ -98,7 +98,7 @@ namespace Graphics::D2D
 			return;
 
 		auto size{ target->GetSize() };
-		g_d2dContext->DrawBitmap(target, D2D1_RECT_F{ position.x, position.y, position.x + size.width, position.y + size.height });
+		g_d2dCurrentRenderTarget->DrawBitmap(target, D2D1_RECT_F{ position.x, position.y, position.x + size.width, position.y + size.height });
 	}
 
 	DLL_API void Layer::Clear()
@@ -166,8 +166,8 @@ namespace Graphics::D2D
 	DLL_API void SetTransform(const Transform& transform)
 	{
 		g_d2dCurrentRenderTarget->SetTransform(
-			D2D1::Matrix3x2F::Scale(transform.scale.x, transform.scale.y) *
-			D2D1::Matrix3x2F::Rotation(transform.rotation) *
+			D2D1::Matrix3x2F::Scale(transform.scale.scale.x, transform.scale.scale.y, D2D1::Point2F(transform.scale.center.x, transform.scale.center.y)) *
+			D2D1::Matrix3x2F::Rotation(transform.rotation.angle, D2D1::Point2F(transform.rotation.center.x, transform.rotation.center.y)) *
 			D2D1::Matrix3x2F::Translation(transform.translation.x, transform.translation.y)
 		);
 	}

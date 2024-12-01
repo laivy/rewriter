@@ -25,10 +25,22 @@ namespace Graphics::D2D
 		ComPtr<ID2D1BitmapRenderTarget> m_target;
 	};
 
-	struct Transform
+	struct Scale
 	{
 		Float2 scale{ 1.0f, 1.0f };
-		float rotation{};
+		Float2 center{ 0.0f, 0.0f };
+	};
+
+	struct Rotation
+	{
+		float angle{ 0.0f };
+		Float2 center{ 0.0f, 0.0f };
+	};
+
+	struct Transform
+	{
+		Scale scale{};
+		Rotation rotation{};
 		Float2 translation{};
 	};
 

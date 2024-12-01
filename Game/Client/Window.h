@@ -6,7 +6,9 @@ class IControl;
 class IWindow abstract : public IUserInterface
 {
 public:
-	IWindow(std::wstring_view path = L"");
+	IWindow();
+	IWindow(std::wstring_view path);
+	IWindow(const std::shared_ptr<Resource::Property>& prop);
 	virtual ~IWindow() = default;
 
 	virtual void OnMouseLeave(int x, int y) override;

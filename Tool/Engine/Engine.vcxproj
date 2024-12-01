@@ -106,6 +106,12 @@
     <ClInclude Include="..\..\External\Imgui\imstb_rectpack.h" />
     <ClInclude Include="..\..\External\Imgui\imstb_textedit.h" />
     <ClInclude Include="..\..\External\Imgui\imstb_truetype.h" />
+    <ClInclude Include="..\..\Game\Client\Button.h" />
+    <ClInclude Include="..\..\Game\Client\Control.h" />
+    <ClInclude Include="..\..\Game\Client\Object.h" />
+    <ClInclude Include="..\..\Game\Client\TextBox.h" />
+    <ClInclude Include="..\..\Game\Client\UI.h" />
+    <ClInclude Include="..\..\Game\Client\Window.h" />
     <ClInclude Include="..\..\Module\Graphics\Include\Lib.h" />
     <ClInclude Include="..\..\Module\Resource\Include\Lib.h" />
     <ClInclude Include="App.h" />
@@ -151,6 +157,12 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="..\..\Game\Client\Button.cpp" />
+    <ClCompile Include="..\..\Game\Client\Control.cpp" />
+    <ClCompile Include="..\..\Game\Client\Object.cpp" />
+    <ClCompile Include="..\..\Game\Client\TextBox.cpp" />
+    <ClCompile Include="..\..\Game\Client\UI.cpp" />
+    <ClCompile Include="..\..\Game\Client\Window.cpp" />
     <ClCompile Include="App.cpp" />
     <ClCompile Include="Clipboard.cpp" />
     <ClCompile Include="Hierarchy.cpp" />

@@ -33,6 +33,12 @@
     <Filter Include="모듈 파일\Graphics">
       <UniqueIdentifier>{67818a58-8ab6-4abf-bb29-6f49e3c746ba}</UniqueIdentifier>
     </Filter>
+    <Filter Include="소스 파일\Client">
+      <UniqueIdentifier>{aaa8cdf6-16d7-4985-ac11-6dbf4b74e5c4}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="헤더 파일\Client">
+      <UniqueIdentifier>{d5822da1-6456-4764-a738-e5c082038e97}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="App.h">
@@ -107,6 +113,24 @@
     <ClInclude Include="Inspector.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\Game\Client\Object.h">
+      <Filter>헤더 파일\Client</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Game\Client\UI.h">
+      <Filter>헤더 파일\Client</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Game\Client\Window.h">
+      <Filter>헤더 파일\Client</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Game\Client\Button.h">
+      <Filter>헤더 파일\Client</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Game\Client\Control.h">
+      <Filter>헤더 파일\Client</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Game\Client\TextBox.h">
+      <Filter>헤더 파일\Client</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="App.cpp">
@@ -162,6 +186,24 @@
     </ClCompile>
     <ClCompile Include="Clipboard.cpp">
       <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Game\Client\Object.cpp">
+      <Filter>소스 파일\Client</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Game\Client\UI.cpp">
+      <Filter>소스 파일\Client</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Game\Client\Window.cpp">
+      <Filter>소스 파일\Client</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Game\Client\Button.cpp">
+      <Filter>소스 파일\Client</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Game\Client\Control.cpp">
+      <Filter>소스 파일\Client</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Game\Client\TextBox.cpp">
+      <Filter>소스 파일\Client</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

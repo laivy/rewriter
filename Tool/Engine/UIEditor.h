@@ -1,27 +1,28 @@
 #pragma once
+#include "Game/Client/Window.h"
 
 class UIEditor :
 	public IObserver,
 	public TSingleton<UIEditor>
 {
 private:
-	struct Window
+	class Window : public IWindow
 	{
+	public:
+		Window(const std::shared_ptr<Resource::Property>& prop);
+		~Window() = default;
+
+	public:
 		struct Camera
 		{
 			Float2 position;
-			Float2 scale{ 1.0f, 1.0f };
+			float scale{ 1.0f };
 		};
 
 		std::shared_ptr<Resource::Property> prop;
 		std::wstring path;
-
 		std::shared_ptr<Graphics::D2D::Layer> layer;
 		Camera camera;
-
-		Int2 size;
-		Graphics::D2D::Color backgroundColor;
-		Int2 backgroundRectRadius;
 	};
 
 public:
@@ -32,8 +33,10 @@ public:
 	void Render2D();
 
 private:
+	void OnPropertyDelete(const std::shared_ptr<Resource::Property>& prop);
 	void OnPropertyModified(const std::shared_ptr<Resource::Property>& prop);
 
+	void RenderTopBar();
 	void RenderViewer();
 	void UpdateImguiWindowRect();
 
@@ -42,9 +45,9 @@ private:
 
 private:
 	static constexpr auto WINDOW_NAME{ "UI Editor" };
-	bool m_isFirstRender;
 	bool m_isVisible;
+	bool m_moveCameraToCenter;
 	RectF m_imguiWindowRect;
 
-	Window m_window;
+	std::unique_ptr<Window> m_window;
 };
