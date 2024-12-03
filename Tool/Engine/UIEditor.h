@@ -12,17 +12,15 @@ private:
 		Window(const std::shared_ptr<Resource::Property>& prop);
 		~Window() = default;
 
-	public:
-		struct Camera
-		{
-			Float2 position;
-			float scale{ 1.0f };
-		};
-
 		std::shared_ptr<Resource::Property> prop;
 		std::wstring path;
 		std::shared_ptr<Graphics::D2D::Layer> layer;
-		Camera camera;
+	};
+
+	struct Camera
+	{
+		Float2 position;
+		float scale{ 1.0f };
 	};
 
 public:
@@ -45,9 +43,12 @@ private:
 
 private:
 	static constexpr auto WINDOW_NAME{ "UI Editor" };
+
 	bool m_isVisible;
+	RectF m_viewerRect;
+
+	Camera m_camera;
 	bool m_moveCameraToCenter;
-	RectF m_imguiWindowRect;
 
 	std::unique_ptr<Window> m_window;
 };

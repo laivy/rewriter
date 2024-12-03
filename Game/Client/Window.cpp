@@ -119,13 +119,13 @@ void IWindow::Render() const
 	for (const auto& control : m_controls)
 	{
 		const auto& layer{ GetLayer(control->GetZ()) };
-		layer->Begin();
+		Graphics::D2D::PushLayer(layer);
 		control->Render();
-		layer->End();
+		Graphics::D2D::PopLayer();
 	}
 
 	for (const auto& layer : m_layers | std::views::values)
-		layer->Draw();
+		Graphics::D2D::DrawLayer(layer);
 }
 
 void IWindow::Register(const std::shared_ptr<IControl>& control)

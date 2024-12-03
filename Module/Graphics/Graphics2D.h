@@ -16,13 +16,10 @@ namespace Graphics::D2D
 		Layer(ComPtr<ID2D1BitmapRenderTarget> target);
 		~Layer() = default;
 
-		DLL_API void Begin();
-		DLL_API bool End();
-		DLL_API void Draw(const Float2& position = {});
-		DLL_API void Clear();
+		ID2D1BitmapRenderTarget* GetRenderTarget() const;
 
 	private:
-		ComPtr<ID2D1BitmapRenderTarget> m_target;
+		ComPtr<ID2D1BitmapRenderTarget> m_renderTarget;
 	};
 
 	struct Scale
@@ -73,12 +70,15 @@ namespace Graphics::D2D
 	DLL_API void SetTransform(const Transform& transform);
 	DLL_API void PushClipRect(const RectF& rect);
 	DLL_API void PopClipRect();
+	DLL_API void PushLayer(const std::shared_ptr<Layer>& layer);
+	DLL_API void PopLayer();
 
 	DLL_API void DrawRect(const RectF& rect, const Color& color);
 	DLL_API void DrawRoundRect(const RectF& rect, const Float2& radius, const Color& color);
 	DLL_API void DrawText(std::wstring_view text, const Font& font, const Color& color, const Float2& position, Pivot pivot = Pivot::LeftTop);
 	DLL_API void DrawSprite(const std::shared_ptr<Resource::Sprite>& sprite, const Float2& position, float opacity = 1.0f);
 	DLL_API void DrawSprite(const std::shared_ptr<Resource::Sprite>& sprite, const RectF& rect, float opacity = 1.0f);
+	DLL_API void DrawLayer(const std::shared_ptr<Layer>& layer);
 
 	DLL_API TextMetrics GetTextMetrics(std::wstring_view text, const Font& font);
 }

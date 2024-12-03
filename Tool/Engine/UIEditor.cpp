@@ -4,9 +4,9 @@
 #include "Common/Util.h"
 
 UIEditor::UIEditor() :
-	m_isVisible{},
-	m_moveCameraToCenter{ true },
-	m_imguiWindowRect{}
+	m_isVisible{ false },
+	m_viewerRect{},
+	m_moveCameraToCenter{ true }
 {
 	App::OnPropertyDelete.Register(this, std::bind_front(&UIEditor::OnPropertyDelete, this));
 	App::OnPropertyModified.Register(this, std::bind_front(&UIEditor::OnPropertyModified, this));
@@ -39,20 +39,20 @@ void UIEditor::Render2D()
 	if (!m_window || !m_window->layer || !m_isVisible)
 		return;
 
-	m_window->layer->Begin();
+	Graphics::D2D::PushLayer(m_window->layer);
 	m_window->Render();
-	m_window->layer->End();
+	Graphics::D2D::PopLayer();
 
 	Graphics::D2D::Scale scale{};
-	scale.scale = Float2{ m_window->camera.scale, m_window->camera.scale };
+	scale.scale = Float2{ m_camera.scale, m_camera.scale };
 
-	Float2 translation{ m_imguiWindowRect.left, m_imguiWindowRect.top };
-	translation -= Float2{ m_window->GetSize() } * m_window->camera.scale / 2.0f;
-	translation += m_window->camera.position;
+	Float2 translation{ m_viewerRect.left, m_viewerRect.top };
+	translation -= Float2{ m_window->GetSize() } * m_camera.scale / 2.0f;
+	translation += m_camera.position;
 
-	Graphics::D2D::PushClipRect(m_imguiWindowRect);
+	Graphics::D2D::PushClipRect(m_viewerRect);
 	Graphics::D2D::SetTransform(Graphics::D2D::Transform{ .scale = scale, .translation = translation });
-	m_window->layer->Draw();
+	Graphics::D2D::DrawLayer(m_window->layer);
 	Graphics::D2D::SetTransform(Graphics::D2D::Transform{});
 	Graphics::D2D::PopClipRect();
 }
@@ -117,13 +117,13 @@ void UIEditor::RenderTopBar()
 	POINT mouse{};
 	::GetCursorPos(&mouse);
 	::ScreenToClient(App::hWnd, &mouse);
-	if (m_imguiWindowRect.Contains(Float2{ mouse.x, mouse.y }))
+	if (m_viewerRect.Contains(Float2{ mouse.x, mouse.y }))
 	{
 		ImGui::SameLine();
 		ImGui::SeparatorEx(ImGuiSeparatorFlags_Vertical);
 
 		ImGui::SameLine();
-		ImGui::TextUnformatted(std::format("{:.2f}%", m_window->camera.scale * 100.0f).c_str());
+		ImGui::TextUnformatted(std::format("{:.2f}%", m_camera.scale * 100.0f).c_str());
 
 		ImGui::SameLine();
 		ImGui::SeparatorEx(ImGuiSeparatorFlags_Vertical);
@@ -131,8 +131,8 @@ void UIEditor::RenderTopBar()
 		ImGui::SameLine();
 		ImGui::TextUnformatted(
 			std::format("x: {}, y: {}",
-				static_cast<int>((mouse.x - m_imguiWindowRect.left - m_window->camera.position.x) / m_window->camera.scale),
-				static_cast<int>((mouse.y - m_imguiWindowRect.top - m_window->camera.position.y) / m_window->camera.scale)
+				static_cast<int>((mouse.x - m_viewerRect.left - m_camera.position.x) / m_camera.scale),
+				static_cast<int>((mouse.y - m_viewerRect.top - m_camera.position.y) / m_camera.scale)
 			).c_str()
 		);
 	}
@@ -145,43 +145,33 @@ void UIEditor::RenderViewer()
 	auto imguiWindow{ ImGui::GetCurrentWindow() };
 	if (m_window && m_moveCameraToCenter)
 	{
-		m_window->camera.position = Float2{ imguiWindow->SizeFull.x, imguiWindow->SizeFull.y } / 2.0f;
+		m_camera.position = Float2{ imguiWindow->SizeFull.x, imguiWindow->SizeFull.y } / 2.0f;
 		m_moveCameraToCenter = false;
-	}
-
-	Float2 cameraPosition{};
-	if (m_window)
-	{
-		cameraPosition = m_window->camera.position;
-	}
-	else
-	{
-		cameraPosition = Float2{ imguiWindow->SizeFull.x, imguiWindow->SizeFull.y } / 2.0f;
 	}
 
 	// 배경
 	ImDrawList* drawList{ ImGui::GetWindowDrawList() };
-	drawList->AddRectFilled(ImVec2{ m_imguiWindowRect.left, m_imguiWindowRect.top }, ImVec2{ m_imguiWindowRect.right, m_imguiWindowRect.bottom }, IM_COL32(50, 50, 50, 255));
+	drawList->AddRectFilled(ImVec2{ m_viewerRect.left, m_viewerRect.top }, ImVec2{ m_viewerRect.right, m_viewerRect.bottom }, IM_COL32(50, 50, 50, 255));
 
 	// 격자
 	constexpr auto DEFAULT_GRID_STEP{ 100.0f };
-	float gridStep{ DEFAULT_GRID_STEP * (m_window ? m_window->camera.scale : 1.0f) };
-	float width{ m_imguiWindowRect.right - m_imguiWindowRect.left };
-	float height{ m_imguiWindowRect.bottom - m_imguiWindowRect.top };
-	for (float x{ std::fmodf(cameraPosition.x, gridStep) }; x < width; x += gridStep)
-		drawList->AddLine(ImVec2(m_imguiWindowRect.left + x, m_imguiWindowRect.top), ImVec2(m_imguiWindowRect.left + x, m_imguiWindowRect.bottom), IM_COL32(200, 200, 200, 40));
-	for (float y{ std::fmodf(cameraPosition.y, gridStep) }; y < height; y += gridStep)
-		drawList->AddLine(ImVec2(m_imguiWindowRect.left, m_imguiWindowRect.top + y), ImVec2(m_imguiWindowRect.right, m_imguiWindowRect.top + y), IM_COL32(200, 200, 200, 40));
+	float gridStep{ DEFAULT_GRID_STEP * (m_window ? m_camera.scale : 1.0f) };
+	float width{ m_viewerRect.right - m_viewerRect.left };
+	float height{ m_viewerRect.bottom - m_viewerRect.top };
+	for (float x{ std::fmodf(m_camera.position.x, gridStep) }; x < width; x += gridStep)
+		drawList->AddLine(ImVec2{ m_viewerRect.left + x, m_viewerRect.top }, ImVec2{ m_viewerRect.left + x, m_viewerRect.bottom }, IM_COL32(200, 200, 200, 40));
+	for (float y{ std::fmodf(m_camera.position.y, gridStep) }; y < height; y += gridStep)
+		drawList->AddLine(ImVec2{ m_viewerRect.left, m_viewerRect.top + y }, ImVec2{ m_viewerRect.right, m_viewerRect.top + y }, IM_COL32(200, 200, 200, 40));
 
 	// (0, 0) 격자
 	drawList->AddLine(
-		ImVec2{ m_imguiWindowRect.left + cameraPosition.x, m_imguiWindowRect.top },
-		ImVec2{ m_imguiWindowRect.left + cameraPosition.x, m_imguiWindowRect.bottom },
+		ImVec2{ m_viewerRect.left + m_camera.position.x, m_viewerRect.top },
+		ImVec2{ m_viewerRect.left + m_camera.position.x, m_viewerRect.bottom },
 		IM_COL32(200, 200, 200, 255)
 	);
 	drawList->AddLine(
-		ImVec2{ m_imguiWindowRect.left, m_imguiWindowRect.top + cameraPosition.y },
-		ImVec2{ m_imguiWindowRect.right, m_imguiWindowRect.top + cameraPosition.y },
+		ImVec2{ m_viewerRect.left, m_viewerRect.top + m_camera.position.y },
+		ImVec2{ m_viewerRect.right, m_viewerRect.top + m_camera.position.y },
 		IM_COL32(200, 200, 200, 255)
 	);
 }
@@ -201,13 +191,13 @@ void UIEditor::DragDrop()
 		return;
 
 	BuildWindow(prop);
+	m_moveCameraToCenter = true;
+
 	App::OnPropertySelected.Notify(prop);
 }
 
 void UIEditor::BuildWindow(const std::shared_ptr<Resource::Property>& prop)
 {
-	m_moveCameraToCenter = true;
-
 	m_window = std::make_unique<Window>(prop);
 	m_window->prop = prop;
 
@@ -225,7 +215,7 @@ void UIEditor::UpdateImguiWindowRect()
 	auto window{ ImGui::GetCurrentWindow() };
 	auto pos{ window->Pos };
 	auto size{ window->SizeFull };
-	m_imguiWindowRect = RectF{ 0.0f, 0.0f, size.x, size.y }.Offset(Float2{ pos.x, pos.y });
+	m_viewerRect = RectF{ 0.0f, 0.0f, size.x, size.y }.Offset(Float2{ pos.x, pos.y });
 
 	if (m_window)
 	{
@@ -235,12 +225,12 @@ void UIEditor::UpdateImguiWindowRect()
 		{
 			if (ImGui::IsMouseDragging(ImGuiMouseButton_Right, 0.0f))
 			{
-				m_window->camera.position += Float2{ io.MouseDelta.x, io.MouseDelta.y };
+				m_camera.position += Float2{ io.MouseDelta.x, io.MouseDelta.y };
 			}
 			if (ImGui::IsMouseClicked(ImGuiMouseButton_Middle))
 			{
-				m_window->camera.position = Float2{ size.x, size.y } / 2.0f;
-				m_window->camera.scale = 1.0f;
+				m_camera.position = Float2{ size.x, size.y } / 2.0f;
+				m_camera.scale = 1.0f;
 			}
 		}
 		if (ImGui::IsKeyDown(ImGuiKey_MouseWheelY))
@@ -248,9 +238,9 @@ void UIEditor::UpdateImguiWindowRect()
 			constexpr auto SCALE_MIN{ 0.1f };
 			constexpr auto SCALE_MAX{ 10.0f };
 			if (io.MouseWheel > 0)
-				m_window->camera.scale = std::min(SCALE_MAX, m_window->camera.scale * 1.1f);
+				m_camera.scale = std::min(SCALE_MAX, m_camera.scale * 1.1f);
 			else
-				m_window->camera.scale = std::max(SCALE_MIN, m_window->camera.scale * 0.9f);
+				m_camera.scale = std::max(SCALE_MIN, m_camera.scale * 0.9f);
 		}
 	}
 }

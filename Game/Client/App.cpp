@@ -130,7 +130,7 @@ void App::InitApp()
 {
 	// 모듈 초기화
 	Graphics::Initialize(hWnd);
-	Resource::Initialize(Graphics::D2D::LoadSprite);
+	Resource::Initialize(&Graphics::D2D::LoadSprite, &Graphics::D3D::LoadTexture);
 	OnResize.Register(&Graphics::OnResize);
 
 #ifdef _IMGUI

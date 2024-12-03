@@ -39,7 +39,7 @@ namespace Graphics
 	extern ComPtr<ID2D1Factory3> g_d2dFactory;
 	extern ComPtr<ID2D1Device2> g_d2dDevice;
 	extern std::array<ComPtr<ID2D1Bitmap1>, FRAME_COUNT> g_d2dRenderTargets;
-	extern ID2D1RenderTarget* g_d2dCurrentRenderTarget;
+	extern std::vector<ID2D1RenderTarget*> g_d2dCurrentRenderTargets;
 
 	// DWRITE
 	extern ComPtr<IDWriteFactory5> g_dwriteFactory;

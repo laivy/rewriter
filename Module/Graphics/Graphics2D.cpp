@@ -53,7 +53,7 @@ namespace
 		}
 		else
 		{
-			Graphics::g_d2dCurrentRenderTarget->CreateSolidColorBrush(D2D1::ColorF{ color.rgb, color.a }, &colorBrush);
+			Graphics::g_d2dContext->CreateSolidColorBrush(D2D1::ColorF{ color.rgb, color.a }, &colorBrush);
 			g_colorBrushes.emplace(color, colorBrush);
 		}
 		return colorBrush;
@@ -63,47 +63,13 @@ namespace
 namespace Graphics::D2D
 {
 	Layer::Layer(ComPtr<ID2D1BitmapRenderTarget> target) :
-		m_target{ target }
+		m_renderTarget{ target }
 	{
 	}
 
-	DLL_API void Layer::Begin()
+	ID2D1BitmapRenderTarget* Layer::GetRenderTarget() const
 	{
-		if (!m_target)
-			return;
-
-		m_target->BeginDraw();
-		g_d2dCurrentRenderTarget = m_target.Get();
-	}
-
-	DLL_API bool Layer::End()
-	{
-		if (!m_target)
-			return false;
-
-		if (FAILED(m_target->EndDraw()))
-			return false;
-
-		g_d2dCurrentRenderTarget = g_d2dContext.Get();
-		return true;
-	}
-
-	DLL_API void Layer::Draw(const Float2& position)
-	{
-		if (!m_target)
-			return;
-
-		ID2D1Bitmap* target{};
-		if (FAILED(m_target->GetBitmap(&target)))
-			return;
-
-		auto size{ target->GetSize() };
-		g_d2dCurrentRenderTarget->DrawBitmap(target, D2D1_RECT_F{ position.x, position.y, position.x + size.width, position.y + size.height });
-	}
-
-	DLL_API void Layer::Clear()
-	{
-		m_target->Clear();
+		return m_renderTarget.Get();
 	}
 
 	DLL_API void Begin()
@@ -111,7 +77,8 @@ namespace Graphics::D2D
 		g_d3d11On12Device->AcquireWrappedResources(g_wrappedBackBuffers[g_frameIndex].GetAddressOf(), 1);
 		g_d2dContext->SetTarget(g_d2dRenderTargets[g_frameIndex].Get());
 		g_d2dContext->BeginDraw();
-		g_d2dCurrentRenderTarget = g_d2dContext.Get();
+		g_d2dCurrentRenderTargets.clear();
+		g_d2dCurrentRenderTargets.push_back(g_d2dContext.Get());
 	}
 
 	DLL_API bool End()
@@ -165,7 +132,7 @@ namespace Graphics::D2D
 
 	DLL_API void SetTransform(const Transform& transform)
 	{
-		g_d2dCurrentRenderTarget->SetTransform(
+		g_d2dCurrentRenderTargets.back()->SetTransform(
 			D2D1::Matrix3x2F::Scale(transform.scale.scale.x, transform.scale.scale.y, D2D1::Point2F(transform.scale.center.x, transform.scale.center.y)) *
 			D2D1::Matrix3x2F::Rotation(transform.rotation.angle, D2D1::Point2F(transform.rotation.center.x, transform.rotation.center.y)) *
 			D2D1::Matrix3x2F::Translation(transform.translation.x, transform.translation.y)
@@ -174,17 +141,33 @@ namespace Graphics::D2D
 
 	DLL_API void PushClipRect(const RectF& rect)
 	{
-		g_d2dCurrentRenderTarget->PushAxisAlignedClip(D2D1_RECT_F{ rect.left, rect.top, rect.right, rect.bottom }, D2D1_ANTIALIAS_MODE_ALIASED);
+		g_d2dCurrentRenderTargets.back()->PushAxisAlignedClip(D2D1_RECT_F{ rect.left, rect.top, rect.right, rect.bottom }, D2D1_ANTIALIAS_MODE_ALIASED);
 	}
 
 	DLL_API void PopClipRect()
 	{
-		g_d2dCurrentRenderTarget->PopAxisAlignedClip();
+		g_d2dCurrentRenderTargets.back()->PopAxisAlignedClip();
+	}
+
+	DLL_API void PushLayer(const std::shared_ptr<Layer>& layer)
+	{
+		auto rt{ layer->GetRenderTarget() };
+		if (!rt)
+			return;
+
+		rt->BeginDraw();
+		g_d2dCurrentRenderTargets.push_back(rt);
+	}
+
+	DLL_API void PopLayer()
+	{
+		g_d2dCurrentRenderTargets.back()->EndDraw();
+		g_d2dCurrentRenderTargets.pop_back();
 	}
 
 	DLL_API void DrawRect(const RectF& rect, const Color& color)
 	{
-		g_d2dCurrentRenderTarget->FillRectangle(D2D1_RECT_F{ rect.left, rect.top, rect.right, rect.bottom }, GetColorBrush(color).Get());
+		g_d2dCurrentRenderTargets.back()->FillRectangle(D2D1_RECT_F{ rect.left, rect.top, rect.right, rect.bottom }, GetColorBrush(color).Get());
 	}
 
 	DLL_API void DrawRoundRect(const RectF& rect, const Float2& radius, const Color& color)
@@ -193,7 +176,7 @@ namespace Graphics::D2D
 		roundRect.rect = D2D1_RECT_F{ rect.left, rect.top, rect.right, rect.bottom };
 		roundRect.radiusX = radius.x;
 		roundRect.radiusY = radius.y;
-		g_d2dCurrentRenderTarget->FillRoundedRectangle(roundRect, GetColorBrush(color).Get());
+		g_d2dCurrentRenderTargets.back()->FillRoundedRectangle(roundRect, GetColorBrush(color).Get());
 	}
 
 	DLL_API void DrawText(std::wstring_view text, const Font& font, const Color& color, const Float2& position, Pivot pivot)
@@ -245,7 +228,7 @@ namespace Graphics::D2D
 		D2D1_POINT_2F origin{};
 		origin.x = position.x + offset.x;
 		origin.y = position.y + offset.y;
-		g_d2dCurrentRenderTarget->DrawTextLayout(origin, textLayout.Get(), colorBrush.Get());
+		g_d2dCurrentRenderTargets.back()->DrawTextLayout(origin, textLayout.Get(), colorBrush.Get());
 	}
 
 	DLL_API void DrawSprite(const std::shared_ptr<Resource::Sprite>& sprite, const Float2& position, float opacity)
@@ -256,7 +239,20 @@ namespace Graphics::D2D
 
 	DLL_API void DrawSprite(const std::shared_ptr<Resource::Sprite>& sprite, const RectF& rect, float opacity)
 	{
-		g_d2dCurrentRenderTarget->DrawBitmap(static_cast<ID2D1Bitmap*>(sprite->Get()), D2D1_RECT_F{ rect.left, rect.top, rect.right, rect.bottom }, opacity);
+		g_d2dCurrentRenderTargets.back()->DrawBitmap(static_cast<ID2D1Bitmap*>(sprite->Get()), D2D1_RECT_F{ rect.left, rect.top, rect.right, rect.bottom }, opacity);
+	}
+
+	DLL_API void DrawLayer(const std::shared_ptr<Layer>& layer)
+	{
+		auto rt{ layer->GetRenderTarget() };
+		if (!rt)
+			return;
+
+		ID2D1Bitmap* bitmap{};
+		if (FAILED(rt->GetBitmap(&bitmap)))
+			return;
+
+		g_d2dCurrentRenderTargets.back()->DrawBitmap(bitmap);
 	}
 
 	DLL_API TextMetrics GetTextMetrics(std::wstring_view text, const Font& font)
