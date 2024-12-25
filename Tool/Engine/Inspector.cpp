@@ -1,5 +1,6 @@
 #include "Stdafx.h"
 #include "App.h"
+#include "Hierarchy.h"
 #include "Inspector.h"
 #include "Common/Util.h"
 
@@ -80,6 +81,16 @@ void Inspector::RenderNodeType(const std::shared_ptr<Resource::Property>& prop)
 {
 	ImGui::Text("Type");
 	ImGui::SameLine(100);
+	if (auto hierarchy{ Hierarchy::GetInstance() }; hierarchy && hierarchy->IsRoot(prop))
+	{
+		if (ImGui::BeginCombo("##INSPECTOR/TYPE", "File"))
+		{
+			ImGui::Selectable("File");
+			ImGui::EndCombo();
+		}
+		return;
+	}
+
 	if (ImGui::BeginCombo("##INSPECTOR/TYPE", PROPERTY_TYPES.at(prop->GetType())))
 	{
 		for (const auto& [type, label] : PROPERTY_TYPES)
