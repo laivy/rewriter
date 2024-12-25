@@ -4,6 +4,13 @@ class Hierarchy :
 	public IObserver,
 	public TSingleton<Hierarchy>
 {
+private:
+	struct Root
+	{
+		std::filesystem::path path;
+		bool isModified{ false };
+	};
+
 public:
 	Hierarchy();
 	~Hierarchy() = default;
@@ -12,8 +19,10 @@ public:
 	void Render();
 
 	void OpenTree(const std::shared_ptr<Resource::Property>& prop);
+	bool IsRoot(const std::shared_ptr<Resource::Property>& prop) const;
 
 private:
+	void OnPropertyAdd(const std::shared_ptr<Resource::Property>& prop);
 	void OnPropertySelected(const std::shared_ptr<Resource::Property>& prop);
 	void OnPropertyModified(const std::shared_ptr<Resource::Property>& prop);
 	void OnMenuFileNew();
@@ -35,8 +44,9 @@ private:
 	void Recurse(const std::shared_ptr<Resource::Property>& prop, const std::function<void(const std::shared_ptr<Resource::Property>&)>& func);
 	void Delete(const std::shared_ptr<Resource::Property>& prop);
 
-	std::shared_ptr<Resource::Property> GetParent(const std::shared_ptr<Resource::Property>& prop);
 	std::shared_ptr<Resource::Property> GetAncestor(const std::shared_ptr<Resource::Property>& prop);
+	bool IsSelected(const std::shared_ptr<Resource::Property>& prop) const;
+	bool IsOpened(const std::shared_ptr<Resource::Property>& prop) const;
 
 private:
 	static constexpr auto WINDOW_NAME{ "Hierarchy" };
@@ -48,8 +58,8 @@ private:
 	static constexpr auto DEFAULT_FILE_NAME{ L"NewFile" };
 	static constexpr auto DEFAULT_NODE_NAME{ L"NewNode" };
 
-	std::map<std::shared_ptr<Resource::Property>, std::filesystem::path> m_roots;
-	std::set<std::shared_ptr<Resource::Property>> m_invalids;
+	std::map<std::shared_ptr<Resource::Property>, Root> m_roots;
+	std::vector<std::weak_ptr<Resource::Property>> m_invalids;
 	std::vector<std::weak_ptr<Resource::Property>> m_selects;
 	std::vector<std::weak_ptr<Resource::Property>> m_opens;
 };

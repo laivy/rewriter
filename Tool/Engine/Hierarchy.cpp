@@ -7,6 +7,7 @@
 
 Hierarchy::Hierarchy()
 {
+	App::OnPropertyAdd.Register(this, std::bind_front(&Hierarchy::OnPropertyAdd, this));
 	App::OnPropertySelected.Register(this, std::bind_front(&Hierarchy::OnPropertySelected, this));
 	App::OnPropertyModified.Register(this, std::bind_front(&Hierarchy::OnPropertyModified, this));
 }
@@ -16,11 +17,15 @@ void Hierarchy::Update(float deltaTime)
 	// 유효하지 않은 프로퍼티 삭제
 	for (const auto& invalid : m_invalids)
 	{
-		if (m_roots.erase(invalid) > 0)
+		auto prop{ invalid.lock() };
+		if (!prop)
+			continue;
+
+		if (m_roots.erase(prop) > 0)
 			continue;
 
 		for (const auto& root : m_roots | std::views::keys)
-			Recurse(root, [&invalid](const auto& prop) { prop->Delete(invalid); });
+			Recurse(root, [&prop](const auto& p) { p->Delete(prop); });
 	}
 	m_invalids.clear();
 }
@@ -41,7 +46,19 @@ void Hierarchy::Render()
 
 void Hierarchy::OpenTree(const std::shared_ptr<Resource::Property>& prop)
 {
-	m_opens.emplace_back(prop);
+	if (!IsOpened(prop))
+		m_opens.emplace_back(prop);
+}
+
+bool Hierarchy::IsRoot(const std::shared_ptr<Resource::Property>& prop) const
+{
+	return m_roots.contains(prop);
+}
+
+void Hierarchy::OnPropertyAdd(const std::shared_ptr<Resource::Property>& prop)
+{
+	if (auto parent{ prop->GetParent() })
+		OpenTree(parent);
 }
 
 void Hierarchy::OnPropertySelected(const std::shared_ptr<Resource::Property>& prop)
@@ -54,24 +71,27 @@ void Hierarchy::OnPropertySelected(const std::shared_ptr<Resource::Property>& pr
 
 void Hierarchy::OnPropertyModified(const std::shared_ptr<Resource::Property>& prop)
 {
-	OpenTree(prop);
+	if (auto ancestor{ GetAncestor(prop) }; IsRoot(ancestor))
+	{
+		m_roots[ancestor].isModified = true;
+	}
 }
 
 void Hierarchy::OnMenuFileNew()
 {
 	size_t index{ 0 };
-	std::wstring name{ DEFAULT_FILE_NAME };
+	auto name{ std::format(L"{}{}", DEFAULT_FILE_NAME, Stringtable::DATA_FILE_EXT) };
 	while (true)
 	{
 		auto it{ std::ranges::find_if(m_roots, [&name](const auto& root) { return root.first->GetName() == name; }) };
 		if (it == m_roots.end())
 			break;
-		name = std::format(L"{}{}", DEFAULT_FILE_NAME, ++index);
+		name = std::format(L"{}{}{}", DEFAULT_FILE_NAME, ++index, Stringtable::DATA_FILE_EXT);
 	}
 
 	auto root{ std::make_shared<Resource::Property>() };
 	root->SetName(name);
-	m_roots.emplace(root, L"");
+	m_roots.emplace(root, Root{ .isModified = true });
 }
 
 void Hierarchy::OnMenuFileOpen()
@@ -117,32 +137,38 @@ void Hierarchy::OnMenuFileSave()
 	if (m_selects.empty())
 		return;
 
-	auto prop{ m_selects.back().lock() };
-	if (!prop)
-		return;
-
-	auto root{ GetAncestor(prop) };
-	if (!m_roots.contains(root))
-		return;
-
-	auto& path{ m_roots[root] };
-	if (path.empty())
+	for (const auto& select : m_selects)
 	{
-		std::wstring filePath{ root->GetName() };
-		filePath.resize(MAX_PATH);
-
-		OPENFILENAME ofn{};
-		ofn.lStructSize = sizeof(OPENFILENAME);
-		ofn.lpstrFilter = L"Data File(*.dat)\0*.dat\0";
-		ofn.lpstrFile = filePath.data();
-		ofn.lpstrDefExt = Stringtable::DATA_FILE_EXT.data();
-		ofn.nMaxFile = MAX_PATH;
-		if (!::GetSaveFileName(&ofn))
+		auto prop{ select.lock() };
+		if (!prop)
 			return;
-		path = filePath;
+
+		auto ancestor{ GetAncestor(prop) };
+		if (!IsRoot(ancestor))
+			return;
+
+		auto& root{ m_roots.at(ancestor) };
+		root.isModified = false;
+		if (root.path.empty())
+		{
+			std::wstring filePath{ ancestor->GetName() };
+			filePath.resize(MAX_PATH);
+
+			::OPENFILENAME ofn{};
+			ofn.lStructSize = sizeof(ofn);
+			ofn.lpstrFilter = L"Data File(*.dat)\0*.dat\0";
+			ofn.lpstrFile = filePath.data();
+			ofn.lpstrDefExt = Stringtable::DATA_FILE_EXT.data();
+			ofn.nMaxFile = MAX_PATH;
+			if (!::GetSaveFileName(&ofn))
+				return;
+
+			root.path = filePath;
+			ImGui::GetIO().ClearInputKeys();
+		}
+		ancestor->SetName(root.path.filename().wstring());
+		Resource::Save(ancestor, root.path.wstring());
 	}
-	root->SetName(path.filename().wstring());
-	Resource::Save(root, path.wstring());
 }
 
 void Hierarchy::OnMenuFileSaveAs()
@@ -334,10 +360,13 @@ void Hierarchy::RenderNode(const std::shared_ptr<Resource::Property>& prop)
 {
 	ImGui::PushID(prop.get());
 
-	bool isRoot{ m_roots.contains(prop) };
-	bool isSelected{ std::ranges::find_if(m_selects, [&prop](const auto& p) { return p.lock() == prop; }) != m_selects.end() };
-	bool open{ std::erase_if(m_opens, [&prop](const auto& p) { return p.lock() == prop; }) > 0 };
+	bool isRoot{ IsRoot(prop) };
+	bool isSelected{ IsSelected(prop) };
+
+	// 수정 사항 있으면 '*' 추가
 	auto name{ Util::wstou8s(prop->GetName()) };
+	if (isRoot && m_roots[prop].isModified)
+		name.insert(0, "* ");
 
 	// 루트가 아닌 말단 노드는 Selectable
 	if (!isRoot && prop->GetChildren().empty())
@@ -348,7 +377,7 @@ void Hierarchy::RenderNode(const std::shared_ptr<Resource::Property>& prop)
 		if (ImGui::BeginDragDropSource())
 		{
 			ImGui::SetDragDropPayload("HIERARCHY/PROPERTY", &prop, sizeof(prop));
-			ImGui::Text(name.c_str());
+			ImGui::TextUnformatted(name.c_str());
 			ImGui::EndDragDropSource();
 		}
 
@@ -357,29 +386,43 @@ void Hierarchy::RenderNode(const std::shared_ptr<Resource::Property>& prop)
 		return;
 	}
 
-	// 나머지 경우는 TreeNode
-	ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, isRoot ? ImVec2{ 0.0f, 5.0f } : ImVec2{ 0.0f, 2.0f });
+	// 그 외는 TreeNode
+	bool isOpened{ IsOpened(prop) };
+	if (isOpened)
+		ImGui::SetNextItemOpen(true);
 
+	ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, isRoot ? ImVec2{ 0.0f, 5.0f } : ImVec2{ 0.0f, 2.0f });
 	ImGuiTreeNodeFlags flag{ ImGuiTreeNodeFlags_OpenOnDoubleClick | ImGuiTreeNodeFlags_FramePadding | ImGuiTreeNodeFlags_SpanFullWidth };
 	if (isSelected)
 		flag |= ImGuiTreeNodeFlags_Selected;
-	if (open)
-		ImGui::SetNextItemOpen(true);
 	bool isTreeNodeOpen{ ImGui::TreeNodeEx(name.c_str(), flag) };
+	ImGui::PopStyleVar();
+
+	// 닫혀있어도 클릭 되도록
+	if (ImGui::IsItemClicked())
+		App::OnPropertySelected.Notify(prop);
+
+	// 트리 여닫기
+	if (ImGui::IsItemToggledOpen())
+	{
+		if (isOpened)
+			std::erase_if(m_opens, [&prop](const auto& p) { return p.lock() == prop; });
+		else
+			OpenTree(prop);
+	}
+
+	// 드래그 드랍
 	if (ImGui::BeginDragDropSource())
 	{
 		ImGui::SetDragDropPayload("HIERARCHY/PROPERTY", &prop, sizeof(prop));
-		ImGui::Text(name.c_str());
+		ImGui::TextUnformatted(name.c_str());
 		ImGui::EndDragDropSource();
 	}
-	if (ImGui::IsItemClicked())
-	{
-		if (isRoot)
-			OnPropertySelected(prop);
-		else
-			App::OnPropertySelected.Notify(prop);
-	}
+
+	// 컨텍스트 메뉴
 	RenderNodeContextMenu(prop);
+
+	// 하위 트리
 	if (isTreeNodeOpen)
 	{
 		for (const auto& [_, child] : *prop)
@@ -387,7 +430,6 @@ void Hierarchy::RenderNode(const std::shared_ptr<Resource::Property>& prop)
 		ImGui::TreePop();
 	}
 
-	ImGui::PopStyleVar();
 	ImGui::PopID();
 }
 
@@ -395,6 +437,8 @@ void Hierarchy::RenderNodeContextMenu(const std::shared_ptr<Resource::Property>&
 {
 	if (!ImGui::BeginPopupContextItem("CONTEXT"))
 		return;
+
+	App::OnPropertySelected.Notify(prop);
 
 	if (ImGui::Selectable("Add (A)") || ImGui::IsKeyPressed(ImGuiKey_A))
 	{
@@ -414,9 +458,10 @@ void Hierarchy::RenderNodeContextMenu(const std::shared_ptr<Resource::Property>&
 
 		auto child{ std::make_shared<Resource::Property>() };
 		child->SetName(name);
+		child->SetParent(prop);
 		prop->Add(child);
-		OpenTree(prop);
 		App::OnPropertyAdd.Notify(child);
+		App::OnPropertyModified.Notify(prop);
 	}
 
 	if (ImGui::Selectable("Delete (D)") || ImGui::IsKeyPressed(ImGuiKey_D))
@@ -425,10 +470,7 @@ void Hierarchy::RenderNodeContextMenu(const std::shared_ptr<Resource::Property>&
 		for (const auto& select : m_selects)
 		{
 			if (auto prop{ select.lock() })
-			{
 				Delete(prop);
-				App::OnPropertyDelete.Notify(prop);
-			}
 		}
 	}
 
@@ -451,31 +493,29 @@ void Hierarchy::Recurse(const std::shared_ptr<Resource::Property>& prop, const s
 
 void Hierarchy::Delete(const std::shared_ptr<Resource::Property>& prop)
 {
-	m_invalids.insert(prop);
+	m_invalids.emplace_back(prop);
 	App::OnPropertyDelete.Notify(prop);
-}
-
-std::shared_ptr<Resource::Property> Hierarchy::GetParent(const std::shared_ptr<Resource::Property>& prop)
-{
-	std::shared_ptr<Resource::Property> parent;
-	auto name{ prop->GetName() };
-	for (const auto& [root, _] : m_roots)
-	{
-		Recurse(root,
-			[&parent, &name](const auto& p)
-			{
-				if (auto child{ p->Get(name) })
-					parent = p;
-			});
-	}
-	return parent;
+	if (auto parent{ prop->GetParent() })
+		App::OnPropertyModified.Notify(parent);
 }
 
 std::shared_ptr<Resource::Property> Hierarchy::GetAncestor(const std::shared_ptr<Resource::Property>& prop)
 {
 	auto ancestor{ prop };
 	auto parent{ prop };
-	while (parent = GetParent(parent))
+	while (parent = parent->GetParent())
 		ancestor = parent;
 	return ancestor;
+}
+
+bool Hierarchy::IsSelected(const std::shared_ptr<Resource::Property>& prop) const
+{
+	auto it{ std::ranges::find_if(m_selects, [&prop](const auto& p) { return p.lock() == prop; }) };
+	return it != m_selects.end();
+}
+
+bool Hierarchy::IsOpened(const std::shared_ptr<Resource::Property>& prop) const
+{
+	auto it{ std::ranges::find_if(m_opens, [&prop](const auto& p) { return p.lock() == prop; }) };
+	return it != m_opens.end();
 }
