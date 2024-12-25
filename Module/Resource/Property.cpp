@@ -56,9 +56,6 @@ namespace Resource
 
 	DLL_API void Property::Add(const std::shared_ptr<Property>& child)
 	{
-#ifdef _TOOL
-		child->m_parent = this;
-#endif
 		m_children.push_back(child);
 	}
 
@@ -319,7 +316,12 @@ namespace Resource
 	}
 
 #ifdef _TOOL
-	DLL_API Property* Property::GetParent() const
+	DLL_API void Property::SetParent(const std::shared_ptr<Property>& prop)
+	{
+		m_parent = prop;
+	}
+
+	DLL_API std::shared_ptr<Property> Property::GetParent() const
 	{
 		return m_parent;
 	}

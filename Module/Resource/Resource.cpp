@@ -180,6 +180,9 @@ namespace
 		for (uint16_t i{ 0 }; i < count; ++i)
 		{
 			auto child{ _Load(file, subPath) };
+#ifdef _TOOL
+			child->SetParent(prop);
+#endif
 			prop->Add(child);
 		}
 		return prop;

@@ -46,7 +46,11 @@ namespace
 			break;
 		}
 		for (const auto& [_, child] : *source)
-			copy->Add(_Copy(child));
+		{
+			auto copyChild{ _Copy(child) };
+			copyChild->SetParent(copy);
+			copy->Add(copyChild);
+		}
 		return copy;
 	}
 }
@@ -66,6 +70,7 @@ void Clipboard::Paste(const std::shared_ptr<Resource::Property>& prop) const
 		// 해당 이름의 프로퍼티가 이미 있을 경우 덮어씀
 		if (auto child{ prop->Get(copy->GetName()) })
 			prop->Delete(child);
+		copy->SetParent(prop);
 		prop->Add(copy);
 	}
 	if (auto hierarchy{ Hierarchy::GetInstance() })

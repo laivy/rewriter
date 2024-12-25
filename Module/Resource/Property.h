@@ -81,7 +81,8 @@ namespace Resource
 		DLL_API std::vector<std::shared_ptr<Property>>& GetChildren();
 
 #ifdef _TOOL
-		DLL_API Property* GetParent() const;
+		DLL_API void SetParent(const std::shared_ptr<Property>& prop);
+		DLL_API std::shared_ptr<Property> GetParent() const;
 #endif
 
 	private:
@@ -97,7 +98,7 @@ namespace Resource
 		> m_data;
 		std::vector<std::shared_ptr<Property>> m_children;
 #ifdef _TOOL
-		Property* m_parent;
+		std::shared_ptr<Property> m_parent;
 #endif
 	};
 }

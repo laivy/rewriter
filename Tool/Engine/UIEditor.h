@@ -12,8 +12,8 @@ private:
 		Window(const std::shared_ptr<Resource::Property>& prop);
 		~Window() = default;
 
-		std::shared_ptr<Resource::Property> prop;
 		std::wstring path;
+		std::shared_ptr<Resource::Property> prop;
 		std::shared_ptr<Graphics::D2D::Layer> layer;
 	};
 
@@ -34,9 +34,9 @@ private:
 	void OnPropertyDelete(const std::shared_ptr<Resource::Property>& prop);
 	void OnPropertyModified(const std::shared_ptr<Resource::Property>& prop);
 
+	void UpdateImguiWindowRect();
 	void RenderTopBar();
 	void RenderViewer();
-	void UpdateImguiWindowRect();
 
 	void DragDrop();
 	void BuildWindow(const std::shared_ptr<Resource::Property>& prop);
