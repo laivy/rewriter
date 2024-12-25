@@ -19,6 +19,7 @@ public:
 	void Render();
 
 	void OpenTree(const std::shared_ptr<Resource::Property>& prop);
+	void CloseTree(const std::shared_ptr<Resource::Property>& prop);
 	bool IsRoot(const std::shared_ptr<Resource::Property>& prop) const;
 
 private:
@@ -43,8 +44,10 @@ private:
 	void LoadDataFile(const std::filesystem::path& path);
 	void Recurse(const std::shared_ptr<Resource::Property>& prop, const std::function<void(const std::shared_ptr<Resource::Property>&)>& func);
 	void Delete(const std::shared_ptr<Resource::Property>& prop);
+	void SetModified(const std::shared_ptr<Resource::Property>& prop, bool modified);
 
-	std::shared_ptr<Resource::Property> GetAncestor(const std::shared_ptr<Resource::Property>& prop);
+	std::shared_ptr<Resource::Property> GetRoot(const std::shared_ptr<Resource::Property>& prop) const;
+	bool IsModified(const std::shared_ptr<Resource::Property>& prop) const;
 	bool IsSelected(const std::shared_ptr<Resource::Property>& prop) const;
 	bool IsOpened(const std::shared_ptr<Resource::Property>& prop) const;
 
