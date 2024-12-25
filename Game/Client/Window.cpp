@@ -258,6 +258,9 @@ void IWindow::UpdateFocusControl(int x, int y)
 
 void IWindow::RenderNinePatch() const
 {
+	if (std::ranges::any_of(m_ninePatch, [](const auto& sprite) { return !sprite; }))
+		return;
+
 	const auto& [lt, t, rt, l, c, r, lb, b, rb] { m_ninePatch };
 	Graphics::D2D::DrawSprite(lt, Float2{});
 	Graphics::D2D::DrawSprite(rt, Float2{ m_size.x - rt->GetSize().x, 0.0f });
