@@ -5,11 +5,27 @@
 #include "Inspector.h"
 #include "Common/Util.h"
 
+Hierarchy::IModal::IModal() :
+	m_isValid{ true }
+{
+}
+
+void Hierarchy::IModal::Close()
+{
+	m_isValid = false;
+}
+
+bool Hierarchy::IModal::IsValid() const
+{
+	return m_isValid;
+}
+
 Hierarchy::Hierarchy()
 {
 	App::OnPropertyAdd.Register(this, std::bind_front(&Hierarchy::OnPropertyAdd, this));
-	App::OnPropertySelected.Register(this, std::bind_front(&Hierarchy::OnPropertySelected, this));
+	App::OnPropertyDelete.Register(this, std::bind_front(&Hierarchy::OnPropertyDelete, this));
 	App::OnPropertyModified.Register(this, std::bind_front(&Hierarchy::OnPropertyModified, this));
+	App::OnPropertySelected.Register(this, std::bind_front(&Hierarchy::OnPropertySelected, this));
 }
 
 void Hierarchy::Update(float deltaTime)
@@ -28,6 +44,9 @@ void Hierarchy::Update(float deltaTime)
 			Recurse(root, [&prop](const auto& p) { p->Delete(prop); });
 	}
 	m_invalids.clear();
+
+	// 유효하지 않은 모달 삭제
+	std::erase_if(m_modals, [](const auto& m) { return !m->IsValid(); });
 }
 
 void Hierarchy::Render()
@@ -41,6 +60,7 @@ void Hierarchy::Render()
 		RenderTreeNode();
 	}
 	ImGui::End();
+	RenderModal();
 	ImGui::PopID();
 }
 
@@ -64,19 +84,31 @@ void Hierarchy::OnPropertyAdd(const std::shared_ptr<Resource::Property>& prop)
 {
 	if (auto parent{ prop->GetParent() })
 		OpenTree(parent);
+	SetModified(prop, true);
 }
 
-void Hierarchy::OnPropertySelected(const std::shared_ptr<Resource::Property>& prop)
+void Hierarchy::OnPropertyDelete(const std::shared_ptr<Resource::Property>& prop)
 {
-	// Ctrl키를 누르고 있으면 다른 노드들 선택 해제하지 않음
-	if (!ImGui::IsKeyDown(ImGuiMod_Ctrl))
-		m_selects.clear();
-	m_selects.push_back(prop);
+	SetModified(prop, true);
 }
 
 void Hierarchy::OnPropertyModified(const std::shared_ptr<Resource::Property>& prop)
 {
 	SetModified(prop, true);
+}
+
+void Hierarchy::OnPropertySelected(const std::shared_ptr<Resource::Property>& prop)
+{
+	// 이미 선택된 노드를 선택한 경우 선택 해제 안함
+	// 그리고 이미 선택된 노드이기 때문에 컨테이너에 추가 안함
+	if (IsSelected(prop))
+		return;
+
+	// Ctrl키를 누르고 있을 때는 선택 해제 안함
+	if (!ImGui::IsKeyDown(ImGuiKey_LeftCtrl))
+		m_selects.clear();
+
+	m_selects.push_back(prop);
 }
 
 void Hierarchy::OnMenuFileNew()
@@ -100,7 +132,7 @@ void Hierarchy::OnMenuFileOpen()
 {
 	std::array<wchar_t, MAX_PATH> filePath{};
 
-	OPENFILENAME ofn{};
+	::OPENFILENAME ofn{};
 	ofn.lStructSize = sizeof(ofn);
 	ofn.lpstrFilter = L"Data Files (*.dat)\0*.dat\0";
 	ofn.lpstrFile = filePath.data();
@@ -141,36 +173,8 @@ void Hierarchy::OnMenuFileSave()
 
 	for (const auto& select : m_selects)
 	{
-		auto prop{ select.lock() };
-		if (!prop)
-			return;
-
-		auto root{ GetRoot(prop) };
-		if (!IsRoot(root))
-			return;
-
-		SetModified(root, false);
-
-		auto& info{ m_roots.at(root) };
-		if (info.path.empty())
-		{
-			std::wstring filePath{ root->GetName() };
-			filePath.resize(MAX_PATH);
-
-			::OPENFILENAME ofn{};
-			ofn.lStructSize = sizeof(ofn);
-			ofn.lpstrFilter = L"Data File(*.dat)\0*.dat\0";
-			ofn.lpstrFile = filePath.data();
-			ofn.lpstrDefExt = Stringtable::DATA_FILE_EXT.data();
-			ofn.nMaxFile = MAX_PATH;
-			if (!::GetSaveFileName(&ofn))
-				return;
-
-			info.path = filePath;
-			ImGui::GetIO().ClearInputKeys();
-		}
-		root->SetName(info.path.filename().wstring());
-		Resource::Save(root, info.path.wstring());
+		if (auto prop{ select.lock() })
+			Save(prop);
 	}
 }
 
@@ -420,6 +424,9 @@ void Hierarchy::RenderNode(const std::shared_ptr<Resource::Property>& prop)
 		ImGui::TreePop();
 	}
 
+	if (isRoot)
+		ImGui::Indent();
+
 	ImGui::PopID();
 }
 
@@ -430,7 +437,102 @@ void Hierarchy::RenderNodeContextMenu(const std::shared_ptr<Resource::Property>&
 
 	App::OnPropertySelected.Notify(prop);
 
-	if (ImGui::Selectable("Add (A)") || ImGui::IsKeyPressed(ImGuiKey_A))
+	// 루트 노드 전용 메뉴
+	if (std::ranges::all_of(m_selects,
+		[this](const auto& select)
+		{
+			if (auto p{ select.lock() })
+				return IsRoot(p);
+			return false;
+		}))
+	{
+		if (ImGui::MenuItem("Save", "S") || ImGui::IsKeyPressed(ImGuiKey_S))
+		{
+			ImGui::CloseCurrentPopup();
+			OnMenuFileSave();
+		}
+		if (ImGui::MenuItem("Save As"))
+		{
+			ImGui::CloseCurrentPopup();
+			OnMenuFileSaveAs();
+		}
+		if (ImGui::MenuItem("Close", "C") || ImGui::IsKeyPressed(ImGuiKey_C))
+		{
+			ImGui::CloseCurrentPopup();
+
+			class FileCloseModal final : public IModal
+			{
+			public:
+				FileCloseModal(const std::shared_ptr<Resource::Property>& p) :
+					m_prop{ p }
+				{
+				}
+				~FileCloseModal() = default;
+
+				void Run() override
+				{
+					auto p{ m_prop.lock() };
+					if (!p)
+					{
+						Close();
+						return;
+					}
+
+					ImGui::OpenPopup("Hierarchy##FileCloseModal");
+
+					auto center{ ImGui::GetMainViewport()->GetCenter() };
+					ImGui::SetNextWindowPos(center, ImGuiCond_Appearing, ImVec2(0.5f, 0.5f));
+					if (ImGui::BeginPopupModal("Hierarchy##FileCloseModal", nullptr, ImGuiWindowFlags_AlwaysAutoResize))
+					{
+						ImGui::TextUnformatted(Util::wstou8s(std::format(L"변경 내용을 {}에 저장하시겠습니까?", p->GetName())).c_str());
+						if (ImGui::Button("저장"))
+						{
+							ImGui::CloseCurrentPopup();
+							Hierarchy::GetInstance()->Save(p);
+							Close();
+						}
+						ImGui::SetItemDefaultFocus();
+						ImGui::SameLine();
+						if (ImGui::Button("저장하지 않음"))
+						{
+							ImGui::CloseCurrentPopup();
+							Hierarchy::GetInstance()->Delete(p);
+							Close();
+						}
+						ImGui::SameLine();
+						if (ImGui::Button("취소"))
+						{
+							ImGui::CloseCurrentPopup();
+							Close();
+						}
+						ImGui::EndPopup();
+					}
+				}
+			private:
+				std::weak_ptr<Resource::Property> m_prop;
+			};
+
+			for (const auto& select : m_selects)
+			{
+				auto p{ select.lock() };
+				if (!p)
+					continue;
+
+				if (!IsModified(p))
+				{
+					Delete(p);
+					continue;
+				}
+
+				auto modal{ std::make_unique<FileCloseModal>(p) };
+				m_modals.push_back(std::move(modal));
+			}
+		}
+		ImGui::Separator();
+	}
+
+	// 공통 메뉴
+	if (ImGui::MenuItem("Add", "A") || ImGui::IsKeyPressed(ImGuiKey_A))
 	{
 		ImGui::CloseCurrentPopup();
 
@@ -448,13 +550,10 @@ void Hierarchy::RenderNodeContextMenu(const std::shared_ptr<Resource::Property>&
 
 		auto child{ std::make_shared<Resource::Property>() };
 		child->SetName(name);
-		child->SetParent(prop);
-		prop->Add(child);
-		App::OnPropertyAdd.Notify(child);
-		App::OnPropertyModified.Notify(prop);
+		Add(prop, child);
 	}
 
-	if (ImGui::Selectable("Delete (D)") || ImGui::IsKeyPressed(ImGuiKey_D))
+	if (ImGui::MenuItem("Delete", "D") || ImGui::IsKeyPressed(ImGuiKey_D))
 	{
 		ImGui::CloseCurrentPopup();
 		for (const auto& select : m_selects)
@@ -465,6 +564,12 @@ void Hierarchy::RenderNodeContextMenu(const std::shared_ptr<Resource::Property>&
 	}
 
 	ImGui::EndPopup();
+}
+
+void Hierarchy::RenderModal()
+{
+	if (!m_modals.empty())
+		m_modals.back()->Run();
 }
 
 void Hierarchy::LoadDataFile(const std::filesystem::path& path)
@@ -481,10 +586,48 @@ void Hierarchy::Recurse(const std::shared_ptr<Resource::Property>& prop, const s
 	func(prop);
 }
 
+void Hierarchy::Add(const std::shared_ptr<Resource::Property>& parent, const std::shared_ptr<Resource::Property>& child)
+{
+	child->SetParent(parent);
+	parent->Add(child);
+	App::OnPropertyAdd.Notify(child);
+	App::OnPropertySelected.Notify(child);
+}
+
 void Hierarchy::Delete(const std::shared_ptr<Resource::Property>& prop)
 {
 	m_invalids.emplace_back(prop);
 	App::OnPropertyDelete.Notify(prop);
+}
+
+void Hierarchy::Save(const std::shared_ptr<Resource::Property>& prop)
+{
+	auto root{ GetRoot(prop) };
+	if (!IsRoot(root))
+		return;
+
+	SetModified(root, false);
+
+	auto& info{ m_roots.at(root) };
+	if (info.path.empty())
+	{
+		std::wstring filePath{ root->GetName() };
+		filePath.resize(MAX_PATH);
+
+		::OPENFILENAME ofn{};
+		ofn.lStructSize = sizeof(ofn);
+		ofn.lpstrFilter = L"Data File(*.dat)\0*.dat\0";
+		ofn.lpstrFile = filePath.data();
+		ofn.lpstrDefExt = Stringtable::DATA_FILE_EXT.data();
+		ofn.nMaxFile = MAX_PATH;
+		if (!::GetSaveFileName(&ofn))
+			return;
+
+		info.path = filePath;
+		ImGui::GetIO().ClearInputKeys();
+	}
+	root->SetName(info.path.filename().wstring());
+	Resource::Save(root, info.path.wstring());
 }
 
 void Hierarchy::SetModified(const std::shared_ptr<Resource::Property>& prop, bool modified)
