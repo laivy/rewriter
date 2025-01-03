@@ -1,5 +1,4 @@
 #include "Stdafx.h"
-#include "Global.h"
 #include "Resource.h"
 #include "Sprite.h"
 

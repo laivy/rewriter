@@ -1,5 +1,4 @@
 #include "Stdafx.h"
-#include "Global.h"
 #include "Property.h"
 #include "Resource.h"
 #include "Sprite.h"
@@ -208,6 +207,8 @@ namespace
 
 namespace Resource
 {
+	std::map<std::wstring, std::shared_ptr<Property>> g_resources;
+
 #if defined _CLIENT || defined _TOOL
 	DLL_API void Initialize(
 		const std::function<std::shared_ptr<Sprite>(std::span<std::byte>)>& loadSprite,
