@@ -4,37 +4,37 @@
 
 namespace
 {
-	std::shared_ptr<Resource::Property> _Copy(const std::shared_ptr<Resource::Property>& source)
+	std::shared_ptr<Resource::Property> Clone(const std::shared_ptr<Resource::Property>& source)
 	{
-		auto copy{ std::make_shared<Resource::Property>() };
+		auto clone{ std::make_shared<Resource::Property>() };
 		auto type{ source->GetType() };
-		copy->SetType(type);
-		copy->SetName(source->GetName());
+		clone->SetType(type);
+		clone->SetName(source->GetName());
 		switch (type)
 		{
 		case Resource::Property::Type::Int:
 		{
-			copy->Set(source->GetInt());
+			clone->Set(source->GetInt());
 			break;
 		}
 		case Resource::Property::Type::Int2:
 		{
-			copy->Set(source->GetInt2());
+			clone->Set(source->GetInt2());
 			break;
 		}
 		case Resource::Property::Type::Float:
 		{
-			copy->Set(source->GetFloat());
+			clone->Set(source->GetFloat());
 			break;
 		}
 		case Resource::Property::Type::String:
 		{
-			copy->Set(source->GetString());
+			clone->Set(source->GetString());
 			break;
 		}
 		case Resource::Property::Type::Sprite:
 		{
-			copy->Set(source->GetSprite());
+			clone->Set(source->GetSprite());
 			break;
 		}
 		case Resource::Property::Type::Texture:
@@ -47,35 +47,34 @@ namespace
 		}
 		for (const auto& [_, child] : *source)
 		{
-			auto copyChild{ _Copy(child) };
-			copyChild->SetParent(copy);
-			copy->Add(copyChild);
+			auto childClone{ Clone(child) };
+			childClone->SetParent(clone);
+			clone->Add(childClone);
 		}
-		return copy;
+		return clone;
 	}
 }
 
 void Clipboard::Copy(const std::vector<std::shared_ptr<Resource::Property>>& targets)
 {
-	m_sources = targets;
+	for (const auto& target : targets)
+		m_sources.push_back(Clone(target));
 }
 
 void Clipboard::Paste(const std::shared_ptr<Resource::Property>& prop) const
 {
-	ImGui::PushID("CLIPBOARD");
 	for (const auto& source : m_sources)
 	{
-		auto copy{ _Copy(source) };
+		auto clone{ Clone(source) };
 
 		// 해당 이름의 프로퍼티가 이미 있을 경우 덮어씀
-		if (auto child{ prop->Get(copy->GetName()) })
+		if (auto child{ prop->Get(clone->GetName()) })
 			prop->Delete(child);
-		copy->SetParent(prop);
-		prop->Add(copy);
+		clone->SetParent(prop);
+		prop->Add(clone);
 	}
 	if (auto hierarchy{ Hierarchy::GetInstance() })
 		hierarchy->OpenTree(prop);
-	ImGui::PopID();
 }
 
 void Clipboard::Clear()

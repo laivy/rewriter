@@ -37,8 +37,12 @@ void Hierarchy::Update(float deltaTime)
 		if (!prop)
 			continue;
 
-		if (m_roots.erase(prop) > 0)
+		if (m_roots.contains(prop))
+		{
+			Resource::Unload(m_roots[prop].path.wstring());
+			m_roots.erase(prop);
 			continue;
+		}
 
 		for (const auto& root : m_roots | std::views::keys)
 			Recurse(root, [&prop](const auto& p) { p->Delete(prop); });
@@ -132,7 +136,7 @@ void Hierarchy::OnMenuFileOpen()
 {
 	std::array<wchar_t, MAX_PATH> filePath{};
 
-	::OPENFILENAME ofn{};
+	OPENFILENAME ofn{};
 	ofn.lStructSize = sizeof(ofn);
 	ofn.lpstrFilter = L"Data Files (*.dat)\0*.dat\0";
 	ofn.lpstrFile = filePath.data();
@@ -195,10 +199,7 @@ void Hierarchy::OnCut()
 	}
 
 	if (auto clipboard{ Clipboard::GetInstance() })
-	{
-		clipboard->Clear();
 		clipboard->Copy(targets);
-	}
 }
 
 void Hierarchy::OnCopy()
@@ -247,7 +248,7 @@ void Hierarchy::Shortcut()
 		OnCopy();
 	if (ImGui::IsKeyDown(ImGuiMod_Ctrl) && ImGui::IsKeyDown(ImGuiKey_V))
 		OnPaste();
-	if (ImGui::IsKeyDown(ImGuiMod_Alt) && ImGui::IsKeyDown(ImGuiKey_UpArrow))
+	if (ImGui::IsKeyDown(ImGuiMod_Alt) && ImGui::IsKeyPressed(ImGuiKey_UpArrow, false))
 	{
 		do
 		{
@@ -270,7 +271,7 @@ void Hierarchy::Shortcut()
 			std::iter_swap(it, it - 1);
 		} while (false);
 	}
-	if (ImGui::IsKeyDown(ImGuiMod_Alt) && ImGui::IsKeyDown(ImGuiKey_DownArrow))
+	if (ImGui::IsKeyDown(ImGuiMod_Alt) && ImGui::IsKeyPressed(ImGuiKey_DownArrow, false))
 	{
 		do
 		{
@@ -532,17 +533,25 @@ void Hierarchy::RenderNodeContextMenu(const std::shared_ptr<Resource::Property>&
 	}
 
 	// 공통 메뉴
+	if (ImGui::MenuItem("Rename", "F2") || ImGui::IsKeyPressed(ImGuiKey_F2))
+	{
+		ImGui::CloseCurrentPopup();
+
+		auto window{ ImGui::FindWindowByName("Inspector") };
+		ImGui::ActivateItemByID(window->GetID("##INSPECTOR/NAME"));
+	}
+
 	if (ImGui::MenuItem("Add", "A") || ImGui::IsKeyPressed(ImGuiKey_A))
 	{
 		ImGui::CloseCurrentPopup();
 
 		size_t index{ 0 };
-		std::wstring name{ DEFAULT_NODE_NAME };
+		std::wstring name{ DEFAULT_PROPERTY_NAME };
 		while (true)
 		{
 			if (auto child{ prop->Get(name) })
 			{
-				name = std::format(L"{}{}", DEFAULT_NODE_NAME, ++index);
+				name = std::format(L"{}{}", DEFAULT_PROPERTY_NAME, ++index);
 				continue;
 			}
 			break;
@@ -603,7 +612,7 @@ void Hierarchy::Delete(const std::shared_ptr<Resource::Property>& prop)
 void Hierarchy::Save(const std::shared_ptr<Resource::Property>& prop)
 {
 	auto root{ GetRoot(prop) };
-	if (!IsRoot(root))
+	if (!root)
 		return;
 
 	SetModified(root, false);
@@ -614,7 +623,7 @@ void Hierarchy::Save(const std::shared_ptr<Resource::Property>& prop)
 		std::wstring filePath{ root->GetName() };
 		filePath.resize(MAX_PATH);
 
-		::OPENFILENAME ofn{};
+		OPENFILENAME ofn{};
 		ofn.lStructSize = sizeof(ofn);
 		ofn.lpstrFilter = L"Data File(*.dat)\0*.dat\0";
 		ofn.lpstrFile = filePath.data();
@@ -632,14 +641,8 @@ void Hierarchy::Save(const std::shared_ptr<Resource::Property>& prop)
 
 void Hierarchy::SetModified(const std::shared_ptr<Resource::Property>& prop, bool modified)
 {
-	auto root{ GetRoot(prop) };
-	if (!root)
-		return;
-
-	if (!IsRoot(root))
-		return;
-
-	m_roots[root].isModified = modified;
+	if (auto root{ GetRoot(prop) })
+		m_roots[root].isModified = modified;
 }
 
 std::shared_ptr<Resource::Property> Hierarchy::GetRoot(const std::shared_ptr<Resource::Property>& prop) const
@@ -648,19 +651,13 @@ std::shared_ptr<Resource::Property> Hierarchy::GetRoot(const std::shared_ptr<Res
 	auto parent{ prop };
 	while (parent = parent->GetParent())
 		root = parent;
-	return root;
+	return IsRoot(root) ? root : nullptr;
 }
 
 bool Hierarchy::IsModified(const std::shared_ptr<Resource::Property>& prop) const
 {
 	auto root{ GetRoot(prop) };
-	if (!root)
-		return false;
-
-	if (!IsRoot(root))
-		return false;
-
-	return m_roots.at(root).isModified;
+	return root ? m_roots.at(root).isModified : false;
 }
 
 bool Hierarchy::IsSelected(const std::shared_ptr<Resource::Property>& prop) const

@@ -77,8 +77,8 @@ private:
 	static constexpr auto MENU_FILE_OPEN{ "Open" };
 	static constexpr auto MENU_FILE_SAVE{ "Save" };
 	static constexpr auto MENU_FILE_SAVEAS{ "Save As" };
-	static constexpr auto DEFAULT_FILE_NAME{ L"NewFile" };
-	static constexpr auto DEFAULT_NODE_NAME{ L"NewNode" };
+	static constexpr auto DEFAULT_FILE_NAME{ L"File" };
+	static constexpr auto DEFAULT_PROPERTY_NAME{ L"Property" };
 
 	std::map<std::shared_ptr<Resource::Property>, Root> m_roots;
 	std::vector<std::weak_ptr<Resource::Property>> m_invalids;
