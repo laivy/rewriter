@@ -163,7 +163,7 @@ namespace
 			std::unique_ptr<std::byte[]> binary{ new std::byte[length]{} };
 			file.read(reinterpret_cast<char*>(binary.get()), length);
 
-			auto data{ LoadSprite(std::span{ binary.get(), length }) };
+			auto data{ LoadTexture(std::span{ binary.get(), length }) };
 			prop->Set(data);
 #endif
 			break;
@@ -282,7 +282,11 @@ namespace Resource
 		if (!root)
 			return nullptr;
 
+#ifndef _TOOL
+		// 캐싱
 		g_resources.emplace(filePath, root);
+#endif
+
 		if (subPath.empty())
 			return root;
 		return root->Get(subPath);

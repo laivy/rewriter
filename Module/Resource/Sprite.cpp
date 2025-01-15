@@ -4,15 +4,10 @@
 
 namespace Resource
 {
-	DLL_API Sprite::Sprite() :
-		m_size{}
+	DLL_API Sprite::Sprite(const ComPtr<IUnknown>& bitmap, const Float2& size) :
+		m_bitmap{ bitmap },
+		m_size{ size }
 	{
-	}
-
-	DLL_API void Sprite::Set(const ComPtr<IUnknown>& bitmap, const Float2& size)
-	{
-		m_bitmap = bitmap;
-		m_size = size;
 	}
 
 	DLL_API IUnknown* Sprite::Get() const

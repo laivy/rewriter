@@ -37,12 +37,8 @@ void Hierarchy::Update(float deltaTime)
 		if (!prop)
 			continue;
 
-		if (m_roots.contains(prop))
-		{
-			Resource::Unload(m_roots[prop].path.wstring());
-			m_roots.erase(prop);
+		if (m_roots.erase(prop) > 0)
 			continue;
-		}
 
 		for (const auto& root : m_roots | std::views::keys)
 			Recurse(root, [&prop](const auto& p) { p->Delete(prop); });

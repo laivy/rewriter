@@ -7,10 +7,9 @@ namespace Resource
 	class Sprite
 	{
 	public:
-		DLL_API Sprite();
+		DLL_API Sprite(const ComPtr<IUnknown>& bitmap, const Float2& size);
 		~Sprite() = default;
 
-		DLL_API void Set(const ComPtr<IUnknown>& bitmap, const Float2& size);
 		DLL_API IUnknown* Get() const;
 		DLL_API Float2 GetSize() const;
 

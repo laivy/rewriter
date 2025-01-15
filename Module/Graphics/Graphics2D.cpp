@@ -97,6 +97,7 @@ namespace Graphics::D2D
 		ComPtr<IWICBitmapDecoder> decoder;
 		ComPtr<IWICFormatConverter> converter;
 		ComPtr<IWICBitmapFrameDecode> frameDecode;
+		ComPtr<ID2D1Bitmap> bitmap;
 
 		if (FAILED(::CoCreateInstance(CLSID_WICImagingFactory, nullptr, CLSCTX_INPROC_SERVER, IID_PPV_ARGS(&factory))))
 			return nullptr;
@@ -112,13 +113,11 @@ namespace Graphics::D2D
 			return nullptr;
 		if (FAILED(converter->Initialize(frameDecode.Get(), GUID_WICPixelFormat32bppPBGRA, WICBitmapDitherTypeNone, nullptr, 0.0f, WICBitmapPaletteTypeMedianCut)))
 			return nullptr;
-
-		ComPtr<ID2D1Bitmap> bitmap;
-		g_d2dContext->CreateBitmapFromWicBitmap(converter.Get(), bitmap.GetAddressOf());
+		if (FAILED(g_d2dContext->CreateBitmapFromWicBitmap(converter.Get(), bitmap.GetAddressOf())))
+			return nullptr;
 
 		auto size{ bitmap->GetSize() };
-		auto sprite{ std::make_shared<Resource::Sprite>() };
-		sprite->Set(bitmap, Float2{ size.width, size.height });
+		auto sprite{ std::make_shared<Resource::Sprite>(bitmap, Float2{ size.width, size.height }) };
 		return sprite;
 	}
 
