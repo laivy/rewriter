@@ -39,9 +39,6 @@ namespace Resource
 		m_type{ Property::Type::Folder },
 		m_name{ L"" }
 	{
-#ifdef _TOOL
-		m_parent = nullptr;
-#endif
 	}
 
 	DLL_API Property::Iterator Property::begin() const
@@ -323,7 +320,7 @@ namespace Resource
 
 	DLL_API std::shared_ptr<Property> Property::GetParent() const
 	{
-		return m_parent;
+		return m_parent.lock();
 	}
 #endif
 }

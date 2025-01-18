@@ -45,6 +45,10 @@ void Hierarchy::Update(float deltaTime)
 	}
 	m_invalids.clear();
 
+	// 만료된 프로퍼티 삭제
+	std::erase_if(m_selects, [](const auto& p) { return p.expired(); });
+	std::erase_if(m_opens, [](const auto& p) { return p.expired(); });
+
 	// 유효하지 않은 모달 삭제
 	std::erase_if(m_modals, [](const auto& m) { return !m->IsValid(); });
 }
@@ -208,10 +212,7 @@ void Hierarchy::OnCopy()
 	}
 
 	if (auto clipboard{ Clipboard::GetInstance() })
-	{
-		clipboard->Clear();
 		clipboard->Copy(targets);
-	}
 }
 
 void Hierarchy::OnPaste()
@@ -373,8 +374,7 @@ void Hierarchy::RenderNode(const std::shared_ptr<Resource::Property>& prop)
 		name.insert(0, "* ");
 
 	bool isOpened{ IsOpened(prop) };
-	if (isOpened)
-		ImGui::SetNextItemOpen(true);
+	ImGui::SetNextItemOpen(isOpened);
 
 	ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, isRoot ? ImVec2{ 0.0f, 5.0f } : ImVec2{ 0.0f, 2.0f });
 	ImGuiTreeNodeFlags flag{ ImGuiTreeNodeFlags_OpenOnDoubleClick | ImGuiTreeNodeFlags_FramePadding | ImGuiTreeNodeFlags_SpanFullWidth };
@@ -435,13 +435,7 @@ void Hierarchy::RenderNodeContextMenu(const std::shared_ptr<Resource::Property>&
 	App::OnPropertySelected.Notify(prop);
 
 	// 루트 노드 전용 메뉴
-	if (std::ranges::all_of(m_selects,
-		[this](const auto& select)
-		{
-			if (auto p{ select.lock() })
-				return IsRoot(p);
-			return false;
-		}))
+	if (std::ranges::all_of(m_selects, [this](const auto& select) { return IsRoot(select.lock()); }))
 	{
 		if (ImGui::MenuItem("Save", "S") || ImGui::IsKeyPressed(ImGuiKey_S))
 		{
@@ -611,7 +605,8 @@ void Hierarchy::Save(const std::shared_ptr<Resource::Property>& prop)
 	if (!root)
 		return;
 
-	SetModified(root, false);
+	if (!IsModified(root))
+		return;
 
 	auto& info{ m_roots.at(root) };
 	if (info.path.empty())
@@ -633,6 +628,7 @@ void Hierarchy::Save(const std::shared_ptr<Resource::Property>& prop)
 	}
 	root->SetName(info.path.filename().wstring());
 	Resource::Save(root, info.path.wstring());
+	SetModified(root, false);
 }
 
 void Hierarchy::SetModified(const std::shared_ptr<Resource::Property>& prop, bool modified)

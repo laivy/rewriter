@@ -13,7 +13,7 @@ private:
 		~Window() = default;
 
 		std::wstring path;
-		std::shared_ptr<Resource::Property> prop;
+		std::weak_ptr<Resource::Property> prop;
 		std::shared_ptr<Graphics::D2D::Layer> layer;
 	};
 

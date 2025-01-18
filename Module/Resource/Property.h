@@ -98,7 +98,7 @@ namespace Resource
 		> m_data;
 		std::vector<std::shared_ptr<Property>> m_children;
 #ifdef _TOOL
-		std::shared_ptr<Property> m_parent;
+		std::weak_ptr<Property> m_parent;
 #endif
 	};
 }

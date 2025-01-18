@@ -1,4 +1,5 @@
 #include "Stdafx.h"
+#include "App.h"
 #include "Clipboard.h"
 #include "Hierarchy.h"
 
@@ -7,10 +8,9 @@ namespace
 	std::shared_ptr<Resource::Property> Clone(const std::shared_ptr<Resource::Property>& source)
 	{
 		auto clone{ std::make_shared<Resource::Property>() };
-		auto type{ source->GetType() };
-		clone->SetType(type);
+		clone->SetType(source->GetType());
 		clone->SetName(source->GetName());
-		switch (type)
+		switch (clone->GetType())
 		{
 		case Resource::Property::Type::Int:
 		{
@@ -55,29 +55,28 @@ namespace
 	}
 }
 
-void Clipboard::Copy(const std::vector<std::shared_ptr<Resource::Property>>& targets)
+void Clipboard::Copy(const std::vector<std::shared_ptr<Resource::Property>>& sources)
 {
-	for (const auto& target : targets)
-		m_sources.push_back(Clone(target));
+	m_sources.clear();
+	for (const auto& source : sources)
+		m_sources.push_back(Clone(source));
 }
 
-void Clipboard::Paste(const std::shared_ptr<Resource::Property>& prop) const
+void Clipboard::Paste(const std::shared_ptr<Resource::Property>& destination) const
 {
 	for (const auto& source : m_sources)
 	{
 		auto clone{ Clone(source) };
 
-		// 해당 이름의 프로퍼티가 이미 있을 경우 덮어씀
-		if (auto child{ prop->Get(clone->GetName()) })
-			prop->Delete(child);
-		clone->SetParent(prop);
-		prop->Add(clone);
-	}
-	if (auto hierarchy{ Hierarchy::GetInstance() })
-		hierarchy->OpenTree(prop);
-}
+		// 해당 이름의 프로퍼티가 이미 있을 경우 덮어 씀
+		if (auto child{ destination->Get(clone->GetName()) })
+			destination->Delete(child);
 
-void Clipboard::Clear()
-{
-	m_sources.clear();
+		clone->SetParent(destination);
+		destination->Add(clone);
+		App::OnPropertyAdd.Notify(clone);
+	}
+
+	if (auto hierarchy{ Hierarchy::GetInstance() })
+		hierarchy->OpenTree(destination);
 }

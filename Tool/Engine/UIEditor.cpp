@@ -62,7 +62,7 @@ void UIEditor::OnPropertyDelete(const std::shared_ptr<Resource::Property>& prop)
 	if (!m_window)
 		return;
 
-	if (m_window->prop == prop)
+	if (m_window->prop.lock() == prop)
 	{
 		m_window.reset();
 		m_moveCameraToCenter = true;
@@ -72,7 +72,7 @@ void UIEditor::OnPropertyDelete(const std::shared_ptr<Resource::Property>& prop)
 	auto parent{ prop };
 	while (parent = parent->GetParent())
 	{
-		if (m_window->prop == parent)
+		if (m_window->prop.lock() == parent)
 		{
 			BuildWindow(parent);
 			return;
@@ -85,16 +85,16 @@ void UIEditor::OnPropertyModified(const std::shared_ptr<Resource::Property>& pro
 	if (!m_window)
 		return;
 
-	if (m_window->prop == prop)
+	if (m_window->prop.lock() == prop)
 	{
-		BuildWindow(m_window->prop);
+		BuildWindow(prop);
 		return;
 	}
 
 	auto parent{ prop };
 	while (parent = parent->GetParent())
 	{
-		if (m_window->prop == parent)
+		if (m_window->prop.lock() == parent)
 		{
 			BuildWindow(parent);
 			return;
@@ -140,8 +140,7 @@ void UIEditor::RenderTopBar()
 	if (!m_window)
 		return;
 
-	if (m_window->prop)
-		ImGui::Text(Util::wstou8s(m_window->path).c_str());
+	ImGui::Text(Util::wstou8s(m_window->path).c_str());
 
 	POINT mouse{};
 	::GetCursorPos(&mouse);

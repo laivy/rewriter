@@ -3,12 +3,30 @@
 #include "Resource.h"
 #include "Sprite.h"
 
-namespace
+namespace Resource
 {
-	using namespace Resource;
+	std::map<std::wstring, std::shared_ptr<Property>> g_resources;
+	std::function<std::shared_ptr<Sprite>(std::span<std::byte>)> g_loadSprite;
+	std::function<std::shared_ptr<Texture>(std::span<std::byte>)> g_loadTexture;
+
+#if defined _CLIENT || defined _TOOL
+	DLL_API void Initialize(
+		const std::function<std::shared_ptr<Sprite>(std::span<std::byte>)>& loadSprite,
+		const std::function<std::shared_ptr<Texture>(std::span<std::byte>)>& loadTexture
+	)
+	{
+		g_loadSprite = loadSprite;
+		g_loadTexture = loadTexture;
+	}
+#endif
+
+	DLL_API void CleanUp()
+	{
+		g_resources.clear();
+	}
 
 #ifdef _TOOL
-	bool _Save(std::ofstream& file, const std::shared_ptr<Property>& prop)
+	static bool SaveRecursive(std::ofstream& file, const std::shared_ptr<Property>& prop)
 	{
 		// 이름
 		auto name{ prop->GetName() };
@@ -73,17 +91,33 @@ namespace
 		file.write(reinterpret_cast<const char*>(&count), sizeof(count));
 		for (const auto& child : children)
 		{
-			if (!_Save(file, child))
+			if (!SaveRecursive(file, child))
 				return false;
 		}
 		return true;
 	}
+
+	DLL_API bool Save(const std::shared_ptr<Property>& prop, std::wstring_view path)
+	{
+		auto name{ prop->GetName() };
+		prop->SetName(Stringtable::DATA_ROOT_NAME);
+
+		std::ofstream file{ path.data(), std::ios::binary };
+		if (!file)
+		{
+			assert(false && "CAN NOT SAVE DATA FILE");
+			return false;
+		}
+
+		if (!SaveRecursive(file, prop))
+			return false;
+
+		prop->SetName(name);
+		return true;
+	}
 #endif
 
-	std::function<std::shared_ptr<Sprite>(std::span<std::byte>)> LoadSprite;
-	std::function<std::shared_ptr<Texture>(std::span<std::byte>)> LoadTexture;
-
-	std::shared_ptr<Property> _Load(std::ifstream& file, std::wstring_view subPath)
+	static std::shared_ptr<Property> LoadRecursive(std::ifstream& file, std::wstring_view path)
 	{
 		auto prop{ std::make_shared<Property>() };
 
@@ -148,7 +182,7 @@ namespace
 			std::unique_ptr<std::byte[]> binary{ new std::byte[length]{} };
 			file.read(reinterpret_cast<char*>(binary.get()), length);
 
-			auto data{ LoadSprite(std::span{ binary.get(), length }) };
+			auto data{ g_loadSprite(std::span{ binary.get(), length }) };
 			prop->Set(data);
 #endif
 			break;
@@ -163,7 +197,7 @@ namespace
 			std::unique_ptr<std::byte[]> binary{ new std::byte[length]{} };
 			file.read(reinterpret_cast<char*>(binary.get()), length);
 
-			auto data{ LoadTexture(std::span{ binary.get(), length }) };
+			auto data{ g_loadTexture(std::span{ binary.get(), length }) };
 			prop->Set(data);
 #endif
 			break;
@@ -178,7 +212,7 @@ namespace
 		file.read(reinterpret_cast<char*>(&count), sizeof(count));
 		for (uint16_t i{ 0 }; i < count; ++i)
 		{
-			auto child{ _Load(file, subPath) };
+			auto child{ LoadRecursive(file, path) };
 #ifdef _TOOL
 			child->SetParent(prop);
 #endif
@@ -187,7 +221,7 @@ namespace
 		return prop;
 	}
 
-	std::shared_ptr<Property> Load(std::wstring_view filePath, std::wstring_view subPath)
+	static std::shared_ptr<Property> Load(std::wstring_view filePath, std::wstring_view path)
 	{
 #ifdef _TOOL
 		std::ifstream file{ filePath.data(), std::ios::binary };
@@ -200,51 +234,9 @@ namespace
 			return nullptr;
 		}
 
-		auto root{ _Load(file, subPath) };
+		auto root{ LoadRecursive(file, path) };
 		return root;
 	}
-};
-
-namespace Resource
-{
-	std::map<std::wstring, std::shared_ptr<Property>> g_resources;
-
-#if defined _CLIENT || defined _TOOL
-	DLL_API void Initialize(
-		const std::function<std::shared_ptr<Sprite>(std::span<std::byte>)>& loadSprite,
-		const std::function<std::shared_ptr<Texture>(std::span<std::byte>)>& loadTexture
-	)
-	{
-		LoadSprite = loadSprite;
-		LoadTexture = loadTexture;
-	}
-#endif
-
-	DLL_API void CleanUp()
-	{
-		g_resources.clear();
-	}
-
-#ifdef _TOOL
-	DLL_API bool Save(const std::shared_ptr<Property>& prop, std::wstring_view path)
-	{
-		auto name{ prop->GetName() };
-		prop->SetName(Stringtable::DATA_ROOT_NAME);
-
-		std::ofstream file{ path.data(), std::ios::binary };
-		if (!file)
-		{
-			assert(false && "CAN NOT SAVE DATA FILE");
-			return false;
-		}
-
-		if (!_Save(file, prop))
-			return false;
-
-		prop->SetName(name);
-		return true;
-	}
-#endif
 
 	DLL_API std::shared_ptr<Property> Get(std::wstring_view path)
 	{
