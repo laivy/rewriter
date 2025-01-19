@@ -34,7 +34,14 @@ namespace
 		}
 		case Resource::Property::Type::Sprite:
 		{
-			clone->Set(source->GetSprite());
+			auto sprite{ source->GetSprite() };
+			if (!sprite)
+				break;
+
+			auto binary{ sprite->GetBinary() };
+			auto cloneSprite{ Graphics::D2D::LoadSprite(binary) };
+			cloneSprite->SetBinary(binary);
+			clone->Set(cloneSprite);
 			break;
 		}
 		case Resource::Property::Type::Texture:

@@ -27,7 +27,7 @@ namespace Resource
 		std::ranges::copy(binary, std::back_inserter(m_binary));
 	}
 
-	DLL_API std::span<const std::byte> Sprite::GetBinary() const
+	DLL_API std::span<std::byte> Sprite::GetBinary()
 	{
 		return std::span{ m_binary.data(), m_binary.size() };
 	}

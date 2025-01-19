@@ -20,7 +20,7 @@ namespace Resource
 #ifdef _TOOL
 	public:
 		DLL_API void SetBinary(std::span<std::byte> binary);
-		DLL_API std::span<const std::byte> GetBinary() const;
+		DLL_API std::span<std::byte> GetBinary();
 
 	private:
 		std::vector<std::byte> m_binary;
