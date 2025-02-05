@@ -118,6 +118,9 @@ namespace Graphics::D2D
 
 		auto size{ bitmap->GetSize() };
 		auto sprite{ std::make_shared<Resource::Sprite>(bitmap, Float2{ size.width, size.height }) };
+#ifdef _TOOL
+		sprite->SetBinary(binary);
+#endif
 		return sprite;
 	}
 

@@ -183,9 +183,6 @@ namespace Resource
 			file.read(reinterpret_cast<char*>(binary.get()), length);
 
 			auto data{ g_loadSprite(std::span{ binary.get(), length }) };
-#ifdef _TOOL
-			data->SetBinary(std::span{ binary.get(), length });
-#endif
 			prop->Set(data);
 #endif
 			break;

@@ -40,7 +40,6 @@ namespace
 
 			auto binary{ sprite->GetBinary() };
 			auto cloneSprite{ Graphics::D2D::LoadSprite(binary) };
-			cloneSprite->SetBinary(binary);
 			clone->Set(cloneSprite);
 			break;
 		}

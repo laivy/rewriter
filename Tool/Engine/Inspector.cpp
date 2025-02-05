@@ -184,7 +184,6 @@ void Inspector::RenderNodeValue(const std::shared_ptr<Resource::Property>& prop)
 
 		std::span<std::byte> binary{ buffer.release(), size };
 		auto sprite{ Graphics::D2D::LoadSprite(binary) };
-		sprite->SetBinary(binary);
 		prop->Set(sprite);
 		App::OnPropertyModified.Notify(prop);
 		break;
