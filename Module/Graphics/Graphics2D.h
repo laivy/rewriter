@@ -51,8 +51,11 @@ namespace Graphics::D2D
 
 	struct Color
 	{
-		unsigned int rgb{};
-		float a{ 1.0f };
+		DLL_API Color();
+		DLL_API Color(uint32_t argb);
+
+		uint32_t rgb;
+		float a;
 	};
 
 	struct Font

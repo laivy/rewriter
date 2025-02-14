@@ -72,6 +72,18 @@ namespace Graphics::D2D
 		return m_renderTarget.Get();
 	}
 
+	DLL_API Color::Color() :
+		rgb{ 0 },
+		a{ 1.0f }
+	{
+	}
+
+	DLL_API Color::Color(uint32_t argb)
+	{
+		rgb = 0x00FFFFFF & argb;
+		a = (0xFF000000 & argb) / static_cast<float>(0xFF);
+	}
+
 	DLL_API void Begin()
 	{
 		g_d3d11On12Device->AcquireWrappedResources(g_wrappedBackBuffers[g_frameIndex].GetAddressOf(), 1);

@@ -11,7 +11,8 @@ const std::map<Resource::Property::Type, const char*> PROPERTY_TYPES
 	{ Resource::Property::Type::Int2, "Int2" },
 	{ Resource::Property::Type::Float, "Float" },
 	{ Resource::Property::Type::String, "String" },
-	{ Resource::Property::Type::Sprite, "Sprite" }
+	{ Resource::Property::Type::Sprite, "Sprite" },
+	{ Resource::Property::Type::Texture, "Texture" }
 };
 
 Inspector::Inspector()
@@ -64,6 +65,7 @@ void Inspector::RenderNodeName(const std::shared_ptr<Resource::Property>& prop)
 {
 	ImGui::Text("Name");
 	ImGui::SameLine(100);
+	ImGui::SetNextItemWidth(-1.0f);
 	auto name{ Util::wstou8s(prop->GetName()) };
 	if (ImGui::InputText("##INSPECTOR/NAME", &name, ImGuiInputTextFlags_EnterReturnsTrue))
 	{
@@ -81,6 +83,7 @@ void Inspector::RenderNodeType(const std::shared_ptr<Resource::Property>& prop)
 {
 	ImGui::Text("Type");
 	ImGui::SameLine(100);
+	ImGui::SetNextItemWidth(-1.0f);
 	if (auto hierarchy{ Hierarchy::GetInstance() }; hierarchy && hierarchy->IsRoot(prop))
 	{
 		if (ImGui::BeginCombo("##INSPECTOR/TYPE", "File"))
@@ -117,16 +120,42 @@ void Inspector::RenderNodeValue(const std::shared_ptr<Resource::Property>& prop)
 	{
 	case Resource::Property::Type::Int:
 	{
+		ImGui::SetNextItemWidth(-1.0f);
 		auto data{ prop->GetInt() };
 		if (ImGui::InputInt("##INSPECTOR/INT", &data))
 		{
 			prop->Set(data);
 			App::OnPropertyModified.Notify(prop);
 		}
+
+		auto cursorPosition{ ImGui::GetCursorScreenPos() };
+		if (ImGui::BeginPopupContextItem("##INSPECTOR/INT/COLOR"))
+		{
+			// ImGui는 0xAABBGGRR, 데이터는 0xAARRGGBB
+			ImVec4 color{};
+			color.x = ((data & 0x00FF0000) >> 16) / static_cast<float>(0xFF);
+			color.y = ((data & 0x0000FF00) >> 8) / static_cast<float>(0xFF);
+			color.z = ((data & 0x000000FF) >> 0) / static_cast<float>(0xFF);
+			color.w = ((data & 0xFF000000) >> 24) / static_cast<float>(0xFF);
+
+			ImGui::SetWindowPos(cursorPosition);
+			if (ImGui::ColorPicker4("##NONE", reinterpret_cast<float*>(&color), ImGuiColorEditFlags_AlphaPreview | ImGuiColorEditFlags_DisplayRGB | ImGuiColorEditFlags_DisplayHex | ImGuiColorEditFlags_Uint8))
+			{
+				auto r{ static_cast<uint32_t>(color.x * 255.0f) & 0xFF };
+				auto g{ static_cast<uint32_t>(color.y * 255.0f) & 0xFF };
+				auto b{ static_cast<uint32_t>(color.z * 255.0f) & 0xFF };
+				auto a{ static_cast<uint32_t>(color.w * 255.0f) & 0xFF };
+				data = (a << 24) | (r << 16) | (g << 8) | b;
+				prop->Set(data);
+				App::OnPropertyModified.Notify(prop);
+			}
+			ImGui::EndPopup();
+		}
 		break;
 	}
 	case Resource::Property::Type::Int2:
 	{
+		ImGui::SetNextItemWidth(-1.0f);
 		auto data{ prop->GetInt2() };
 		if (ImGui::InputInt2("##INSPECTOR/INT2", reinterpret_cast<int*>(&data)))
 		{
@@ -137,6 +166,7 @@ void Inspector::RenderNodeValue(const std::shared_ptr<Resource::Property>& prop)
 	}
 	case Resource::Property::Type::Float:
 	{
+		ImGui::SetNextItemWidth(-1.0f);
 		auto data{ prop->GetFloat() };
 		if (ImGui::InputFloat("##INSPECTOR/FLOAT", &data))
 		{
@@ -147,6 +177,7 @@ void Inspector::RenderNodeValue(const std::shared_ptr<Resource::Property>& prop)
 	}
 	case Resource::Property::Type::String:
 	{
+		ImGui::SetNextItemWidth(-1.0f);
 		auto data{ Util::wstou8s(prop->GetString()) };
 		if (ImGui::InputTextMultiline("##INSPECTOR/STRING", &data))
 		{
@@ -157,6 +188,7 @@ void Inspector::RenderNodeValue(const std::shared_ptr<Resource::Property>& prop)
 	}
 	case Resource::Property::Type::Sprite:
 	{
+		ImGui::SetNextItemWidth(50.0f);
 		if (!ImGui::Button("..."))
 			break;
 
@@ -186,6 +218,10 @@ void Inspector::RenderNodeValue(const std::shared_ptr<Resource::Property>& prop)
 		auto sprite{ Graphics::D2D::LoadSprite(binary) };
 		prop->Set(sprite);
 		App::OnPropertyModified.Notify(prop);
+		break;
+	}
+	case Resource::Property::Type::Texture:
+	{
 		break;
 	}
 	default:
