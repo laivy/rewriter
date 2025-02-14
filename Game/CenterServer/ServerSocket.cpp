@@ -10,9 +10,9 @@ void ServerSocket::OnComplete(Packet& packet)
 {
 	switch (packet.GetType())
 	{
-	case Protocol::ServerBasicInfo:
+	case Protocol::Type::Initialize:
 	{
-		auto type{ packet.Decode<ISocket::Type>() };
+		auto type{ packet.Decode<Type>() };
 		SetType(type);
 		return;
 	}
@@ -22,23 +22,9 @@ void ServerSocket::OnComplete(Packet& packet)
 
 	switch (GetType())
 	{
-	case ISocket::Type::Login:
+	case Type::Login:
 	{
-		OnLoginPacket(packet);
-		break;
-	}
-	default:
-		Disconnect();
-		break;
-	}
-}
-
-void ServerSocket::OnLoginPacket(Packet& packet)
-{
-	switch (packet.GetType())
-	{
-	case Protocol::AccountRegisterRequest:
-	{
+		OnLoginServerPacket(packet);
 		break;
 	}
 	default:

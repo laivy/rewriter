@@ -2,6 +2,7 @@
 #include "App.h"
 #include "Button.h"
 #include "Control.h"
+#include "TextBlock.h"
 #include "TextBox.h"
 #include "Window.h"
 
@@ -10,6 +11,7 @@ namespace
 	constexpr std::wstring_view INFO{ L"Info" };
 	constexpr std::wstring_view NINE_PATCH{ L"NinePatch" };
 	constexpr std::wstring_view BUTTON_PREFIX{ L"Button:" };
+	constexpr std::wstring_view TEXTBLOCK_PREFIX{ L"TextBlock:" };
 	constexpr std::wstring_view TEXTBOX_PREFIX{ L"TextBox:" };
 }
 
@@ -165,16 +167,25 @@ void IWindow::Build(const std::shared_ptr<Resource::Property>& prop, std::wstrin
 		else if (name.starts_with(BUTTON_PREFIX))
 		{
 			auto button{ std::make_shared<Button>(this, child) };
-			std::wstring controlName{ name.substr(BUTTON_PREFIX.size()) };
+			auto controlName{ name.substr(BUTTON_PREFIX.size()) };
 			if (!path.empty())
 				controlName = std::format(L"{}/{}", path, controlName);
 			button->SetName(controlName);
 			Register(button);
 		}
+		else if (name.starts_with(TEXTBLOCK_PREFIX))
+		{
+			auto textBlock{ std::make_shared<TextBlock>(this, child) };
+			auto controlName{ name.substr(TEXTBLOCK_PREFIX.size()) };
+			if (!path.empty())
+				controlName = std::format(L"{}/{}", path, controlName);
+			textBlock->SetName(controlName);
+			Register(textBlock);
+		}
 		else if (name.starts_with(TEXTBOX_PREFIX))
 		{
 			auto textBox{ std::make_shared<TextBox>(this, child) };
-			std::wstring controlName{ name.substr(TEXTBOX_PREFIX.size()) };
+			auto controlName{ name.substr(TEXTBOX_PREFIX.size()) };
 			if (!path.empty())
 				controlName = std::format(L"{}/{}", path, controlName);
 			textBox->SetName(controlName);

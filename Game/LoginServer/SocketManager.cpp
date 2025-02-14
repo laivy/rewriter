@@ -28,7 +28,7 @@ SocketManager::SocketManager() :
 		return;
 	}
 
-	auto prop{ Resource::Get(L"Server.dat/LoginServer") };
+	auto prop{ Resource::Get(L"Server.dat/Login") };
 	if (!prop)
 	{
 		assert(false && "CAN NOT FIND SERVER CONFIG");
@@ -37,7 +37,7 @@ SocketManager::SocketManager() :
 
 	SOCKADDR_IN addr{};
 	addr.sin_family = AF_INET;
-	addr.sin_port = ::htons(prop->GetInt(L"Info/Port"));
+	addr.sin_port = ::htons(prop->GetInt(L"Port"));
 	addr.sin_addr.s_addr = ::htonl(INADDR_ANY);
 	if (::bind(m_listenSocket, reinterpret_cast<SOCKADDR*>(&addr), sizeof(addr)) == SOCKET_ERROR)
 	{
@@ -97,10 +97,10 @@ void SocketManager::Render()
 #endif
 }
 
-void SocketManager::Register(ISocket* socket) const
+bool SocketManager::Register(ISocket* socket) const
 {
-	if (m_iocp != ::CreateIoCompletionPort(reinterpret_cast<HANDLE>(static_cast<SOCKET>(*socket)), m_iocp, reinterpret_cast<ULONG_PTR>(socket), 0))
-		assert(false && "REGISTER SOCKET TO IOCP FAIL");
+	auto handle{ ::CreateIoCompletionPort(reinterpret_cast<HANDLE>(static_cast<SOCKET>(*socket)), m_iocp, reinterpret_cast<ULONG_PTR>(socket), 0) };
+	return m_iocp == handle;
 }
 
 void SocketManager::Disconnect(ISocket* socket)
@@ -110,6 +110,14 @@ void SocketManager::Disconnect(ISocket* socket)
 #endif
 	socket->OnDisconnect();
 	std::erase_if(m_sockets, [socket](const auto& s) { return s.get() == socket; });
+}
+
+std::shared_ptr<ISocket> SocketManager::GetSocket(ISocket::ID id) const
+{
+	auto it{ std::ranges::find_if(m_sockets, [id](const auto& s) { return s->GetID() == id; }) };
+	if (it == m_sockets.end())
+		return nullptr;
+	return *it;
 }
 
 void SocketManager::Run(std::stop_token stoken)
@@ -205,21 +213,30 @@ void SocketManager::OnAccept()
 {
 	std::lock_guard lock{ m_acceptMutex };
 
-	// 소켓 옵션 설정
-	if (::setsockopt(m_acceptSocket, SOL_SOCKET, SO_UPDATE_ACCEPT_CONTEXT, reinterpret_cast<char*>(&m_listenSocket), sizeof(m_listenSocket)))
+	do
 	{
-		assert(false && "UPDATE ACCEPT CONTEXT FAIL");
-		return;
-	}
+		// 소켓 옵션 설정
+		if (::setsockopt(m_acceptSocket, SOL_SOCKET, SO_UPDATE_ACCEPT_CONTEXT, reinterpret_cast<char*>(&m_listenSocket), sizeof(m_listenSocket)) == SOCKET_ERROR)
+		{
+			assert(false && "UPDATE ACCEPT CONTEXT FAIL");
+			break;
+		}
 
-	// 소켓 추가
-	auto& clientSocket{ m_sockets.emplace_back(std::make_shared<ClientSocket>(m_acceptSocket)) };
-	Register(clientSocket.get());
-	clientSocket->Receive();
+		// 소켓 추가
+		auto clientSocket{ std::make_shared<ClientSocket>(m_acceptSocket) };
+		if (!Register(clientSocket.get()))
+		{
+			assert(false && "REGISTER SOCKET TO IOCP FAIL");
+			break;
+		}
 
 #ifdef _IMGUI
-	Logging(std::format("Client Connected | {}", clientSocket->GetIP()));
+		Logging(std::format("Client Connected | {}", clientSocket->GetIP()));
 #endif
+
+		clientSocket->Receive();
+		m_sockets.push_back(clientSocket);
+	} while (false);
 
 	Accept();
 }

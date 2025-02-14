@@ -10,5 +10,7 @@ public:
 	void OnComplete(Packet& packet) override;
 
 private:
-	void OnLoginPacket(Packet& packet);
+	// 로그인 서버 관련
+	void OnLoginServerPacket(Packet& packet);
+	void OnRegisterAccount(Packet& packet);
 };

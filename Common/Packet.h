@@ -7,7 +7,7 @@ public:
 	using Size = uint16_t; // 패킷 크기 타입
 
 public:
-	Packet(Protocol type);
+	Packet(Protocol::Type type);
 	Packet(std::span<char> buffer);
 	~Packet() = default;
 
@@ -39,7 +39,7 @@ public:
 	void SetOffset(Size offset);
 	void Reset();
 
-	Protocol GetType() const;
+	Protocol::Type GetType() const;
 	char* GetBuffer();
 	Size GetSize() const;
 
@@ -144,7 +144,7 @@ private:
 private:
 	static constexpr Size DEFAULT_BUFFER_SIZE{ 128 };
 
-	Protocol m_type;
+	Protocol::Type m_type;
 	std::vector<char> m_buffer;
 	Size m_encodedSize;
 	Size m_offset;

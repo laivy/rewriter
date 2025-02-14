@@ -2,19 +2,19 @@
 #include "Socket.h"
 #include "Util.h"
 
-ISocket::ISocket() :
-	m_socket{ INVALID_SOCKET },
-	m_type{ Type::None }
-{
-	m_socket = ::WSASocket(AF_INET, SOCK_STREAM, IPPROTO_TCP, NULL, NULL, WSA_FLAG_OVERLAPPED);
-	assert(m_socket != INVALID_SOCKET);
-}
-
 ISocket::ISocket(SOCKET socket) :
 	m_socket{ socket },
 	m_type{ Type::None },
+	m_id{ s_id++ },
 	m_ip(INET_ADDRSTRLEN, '\0')
 {
+	if (m_socket == INVALID_SOCKET)
+	{
+		m_socket = ::WSASocket(AF_INET, SOCK_STREAM, IPPROTO_TCP, NULL, NULL, WSA_FLAG_OVERLAPPED);
+		assert(m_socket != INVALID_SOCKET);
+		return;
+	}
+
 	// 소켓 아이피 주소 가져옴
 	SOCKADDR_IN sockAddr{};
 	int addrLen{ sizeof(sockAddr) };
@@ -85,7 +85,7 @@ void ISocket::OnReceive(Packet::Size ioSize)
 	// 패킷 완성
 	if (m_receiveBuffer.remainPacketSize == 0)
 	{
-		m_receiveBuffer.packet.SetOffset(sizeof(Packet::Size) + sizeof(Protocol));
+		m_receiveBuffer.packet.SetOffset(sizeof(Packet::Size) + sizeof(Protocol::Type));
 		OnComplete(m_receiveBuffer.packet);
 		m_receiveBuffer.packet.Reset();
 	}
@@ -176,8 +176,8 @@ void ISocket::Receive()
 
 	m_receiveBuffer.overlappedEx.op = IOOperation::Receive;
 	WSABUF wsaBuf{ static_cast<unsigned long>(m_receiveBuffer.buffer.size()), m_receiveBuffer.buffer.data() };
-	DWORD flag{};
 	DWORD ioSize{};
+	DWORD flag{};
 	if (::WSARecv(m_socket, &wsaBuf, 1, &ioSize, &flag, &m_receiveBuffer.overlappedEx, nullptr) == SOCKET_ERROR)
 	{
 		if (::WSAGetLastError() != WSA_IO_PENDING)
@@ -201,6 +201,12 @@ bool ISocket::IsConnected() const
 std::string ISocket::GetIP() const
 {
 	return m_ip;
+}
+
+
+ISocket::ID ISocket::GetID() const
+{
+	return m_id;
 }
 
 ISocket::Type ISocket::GetType() const

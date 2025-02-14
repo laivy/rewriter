@@ -1,14 +1,14 @@
 #include "Stdafx.h"
 #include "Packet.h"
 
-Packet::Packet(Protocol type) :
+Packet::Packet(Protocol::Type type) :
 	m_type{ type },
 	m_encodedSize{ 0 },
 	m_offset{ 0 }
 {
 	m_buffer.resize(DEFAULT_BUFFER_SIZE);
 	Encode<Size>(0);
-	Encode<Protocol>(type);
+	Encode<Protocol::Type>(type);
 }
 
 // 서버를 통해 수신한 데이터로부터 패킷을 조립하는 생성자
@@ -33,7 +33,7 @@ Packet& Packet::operator=(Packet&& rhs) noexcept
 	m_encodedSize = rhs.m_encodedSize;
 	m_offset = rhs.m_offset;
 
-	rhs.m_type = Protocol::None;
+	rhs.m_type = Protocol::Type::None;
 	std::vector<char>{}.swap(rhs.m_buffer);
 	rhs.m_encodedSize = 0;
 	rhs.m_offset = 0;
@@ -47,13 +47,13 @@ void Packet::SetOffset(Size offset)
 
 void Packet::Reset()
 {
-	m_type = Protocol::None;
+	m_type = Protocol::Type::None;
 	std::vector<char>(DEFAULT_BUFFER_SIZE).swap(m_buffer);
 	m_encodedSize = 0;
 	m_offset = 0;
 }
 
-Protocol Packet::GetType() const
+Protocol::Type Packet::GetType() const
 {
 	return m_type;
 }

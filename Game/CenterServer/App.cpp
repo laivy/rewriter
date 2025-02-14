@@ -122,7 +122,7 @@ void App::InitApp()
 	ImGui::StyleColorsDark();
 #endif
 
-	Database::Initialize(Resource::Get(L"Server.dat/CenterServer/Info/Database"));	
+	Database::Initialize(Resource::Get(L"Server.dat/Center/Database"));	
 	SocketManager::Instantiate();
 }
 

@@ -15,8 +15,8 @@ public:
 	virtual void OnMouseEvent(UINT message, int x, int y) override;
 	virtual void OnKeyboardEvent(UINT message, WPARAM wParam, LPARAM lParam) override;
 
-	virtual void Update(float deltaTime);
-	virtual void Render() const;
+	virtual void Update(float deltaTime) override;
+	virtual void Render() const override;
 
 	void Register(const std::shared_ptr<IControl>& control);
 

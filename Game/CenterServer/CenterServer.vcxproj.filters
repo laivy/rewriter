@@ -160,5 +160,8 @@
     <ClCompile Include="..\..\Common\Type.cpp">
       <Filter>소스 파일\Common</Filter>
     </ClCompile>
+    <ClCompile Include="ServerSocket_Login.cpp">
+      <Filter>소스 파일\Server</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>

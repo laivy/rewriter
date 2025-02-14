@@ -31,8 +31,11 @@ void Button::OnMouseEvent(UINT message, int x, int y)
 	}
 	case WM_LBUTTONUP:
 	{
-		OnButtonClick.Notify();
-		m_state = State::Hover;
+		if (m_state == State::Active)
+		{
+			OnButtonClick.Notify();
+			m_state = State::Hover;
+		}
 		break;
 	}
 	default:

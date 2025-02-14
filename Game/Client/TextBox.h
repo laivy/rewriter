@@ -10,14 +10,14 @@ public:
 	TextBox(IWindow* owner, const std::shared_ptr<Resource::Property>& prop = nullptr);
 	~TextBox() = default;
 
-	void Update(float deltaTime) override final;
-	void Render() const override final;
+	void Update(float deltaTime) override;
+	void Render() const override;
 
-	void OnKeyboardEvent(UINT message, WPARAM wParam, LPARAM lParam) override final;
+	void OnKeyboardEvent(UINT message, WPARAM wParam, LPARAM lParam) override;
 
-	void SetFocus(bool focus) override final;
+	void SetFocus(bool focus) override;
 
-	bool IsFocus() const override final;
+	bool IsFocus() const override;
 
 	std::wstring GetText() const;
 

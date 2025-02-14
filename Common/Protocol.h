@@ -1,14 +1,24 @@
 #pragma once
 
-enum class Protocol : uint16_t
+namespace Protocol
 {
-	None,
-	ServerBasicInfo,
-	AccountRegisterRequest,
-};
+	enum class Type : uint8_t
+	{
+		None,
+		Initialize,
+		Login,
+		Register,
+	};
 
-enum class AccountRegisterRequest
-{
-	CheckID,
-	Request,
-};
+	enum class Login : uint8_t
+	{
+		Login,
+		Result,
+	};
+
+	enum class Register : uint8_t
+	{
+		CheckID,
+		Request,
+	};
+}

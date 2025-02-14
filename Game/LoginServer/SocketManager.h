@@ -9,8 +9,10 @@ public:
 
 	void Render();
 
-	void Register(ISocket* socket) const;
+	bool Register(ISocket* socket) const;
 	void Disconnect(ISocket* socket);
+
+	std::shared_ptr<ISocket> GetSocket(ISocket::ID id) const;
 
 private:
 	void Run(std::stop_token stoken);
@@ -29,7 +31,7 @@ private:
 	// 워커쓰레드
 	std::array<std::jthread, 3> m_threads;
 
-	// Accept 관련 락, 변수
+	// Accept 관련 변수
 	std::recursive_mutex m_acceptMutex;
 	SOCKET m_acceptSocket;
 	std::array<char, 64> m_acceptBuffer;

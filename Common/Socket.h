@@ -4,11 +4,14 @@
 class ISocket abstract
 {
 public:
+	using ID = size_t;
+
 	enum class Type
 	{
 		None,
 		Client,
 		Login,
+		Game,
 		Center
 	};
 
@@ -30,20 +33,19 @@ private:
 	struct SendBuffer
 	{
 		OverlappedEx overlappedEx{};
-		Packet packet{ Protocol::None };
+		Packet packet{ Protocol::Type::None };
 	};
 
 	struct ReceiveBuffer
 	{
 		OverlappedEx overlappedEx{};
-		Packet packet{ Protocol::None };
+		Packet packet{ Protocol::Type::None };
 		std::array<char, 512> buffer{};
 		int remainPacketSize{};
 	};
 
 public:
-	ISocket();
-	ISocket(SOCKET socket);
+	ISocket(SOCKET socket = INVALID_SOCKET);
 	virtual ~ISocket();
 
 	operator SOCKET();
@@ -61,13 +63,17 @@ public:
 	void SetType(Type type);
 
 	bool IsConnected() const;
-	std::string GetIP() const;
 	Type GetType() const;
+	ID GetID() const;
+	std::string GetIP() const;
 
 private:
+	static inline ID s_id{ 0 };
+
 	std::recursive_mutex m_mutex;
-	Type m_type;
 	SOCKET m_socket;
+	Type m_type;
+	ID m_id;
 	std::string m_ip;
 	std::list<SendBuffer> m_sendBuffers;
 	ReceiveBuffer m_receiveBuffer;

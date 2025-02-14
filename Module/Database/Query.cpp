@@ -233,9 +233,10 @@ namespace Database
 		}
 
 		// SP 반환값
-		if (!SQL_SUCCEEDED(::SQLMoreResults(*m_stmt)))
+		auto rc{ ::SQLMoreResults(*m_stmt) };
+		if (!SQL_SUCCEEDED(rc))
 		{
-			assert(false);
+			assert(rc == SQL_NO_DATA);
 			return Result{ nullptr };
 		}
 

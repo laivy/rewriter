@@ -7,6 +7,7 @@
 ClientSocket::ClientSocket(SOCKET socket) :
 	ISocket{ socket }
 {
+	SetType(Type::Client);
 }
 
 ClientSocket::~ClientSocket()
@@ -29,9 +30,13 @@ void ClientSocket::OnComplete(Packet& packet)
 
 	switch (packet.GetType())
 	{
-	case Protocol::AccountRegisterRequest:
+	case Protocol::Type::Login:
 	{
-		OnAccountRegisterRequest(packet);
+		break;
+	}
+	case Protocol::Type::Register:
+	{
+		OnAccountRegister(packet);
 		break;
 	}
 	default:
@@ -40,20 +45,20 @@ void ClientSocket::OnComplete(Packet& packet)
 	}
 }
 
-void ClientSocket::OnAccountRegisterRequest(Packet& packet)
+void ClientSocket::OnAccountRegister(Packet& packet)
 {
-	auto subType{ packet.Decode<AccountRegisterRequest>() };
+	auto subType{ packet.Decode<Protocol::Register>() };
 	switch (subType)
 	{
-	case AccountRegisterRequest::CheckID:
+	case Protocol::Register::CheckID:
 	{
 		auto id{ packet.Decode<std::wstring>() };
-		Packet outPacket{ Protocol::AccountRegisterRequest };
-		outPacket.Encode(subType, id);
+		Packet outPacket{ Protocol::Type::Register };
+		outPacket.Encode(Protocol::Register::CheckID, GetID(), id);
 		CenterServer::GetInstance()->Send(outPacket);
 		break;
 	}
-	case AccountRegisterRequest::Request:
+	case Protocol::Register::Request:
 		break;
 	default:
 		assert(false);

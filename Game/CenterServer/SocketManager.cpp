@@ -12,7 +12,7 @@ SocketManager::SocketManager() :
 	m_acceptBuffer{},
 	m_acceptOverlappedEx{}
 {
-	m_config = Resource::Get(L"Server.dat/CenterServer");
+	m_config = Resource::Get(L"Server.dat/Center");
 	if (!m_config)
 	{
 		assert(false && "CAN NOT FIND SERVER CONFIG");
@@ -35,7 +35,7 @@ SocketManager::SocketManager() :
 
 	SOCKADDR_IN addr{};
 	addr.sin_family = AF_INET;
-	addr.sin_port = ::htons(m_config->GetInt(L"Info/Port"));
+	addr.sin_port = ::htons(m_config->GetInt(L"Port"));
 	addr.sin_addr.s_addr = ::htonl(INADDR_ANY);
 	if (::bind(m_listenSocket, reinterpret_cast<SOCKADDR*>(&addr), sizeof(addr)) == SOCKET_ERROR)
 	{
@@ -207,12 +207,15 @@ void SocketManager::OnAccept()
 			break;
 		}
 
+		auto socket{ std::make_unique<ServerSocket>(m_acceptSocket) };
+
 		// 화이트리스트에 있는 아이피인지 확인
 		if (!IsInWhitelist(m_acceptSocket))
+		{
+			socket->Disconnect();
 			break;
+		}
 
-		// 소켓 추가
-		auto socket{ std::make_unique<ServerSocket>(m_acceptSocket) };
 		Register(std::move(socket));
 	} while (false);
 
