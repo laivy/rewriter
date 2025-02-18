@@ -109,6 +109,7 @@
     <ClInclude Include="..\..\Game\Client\Button.h" />
     <ClInclude Include="..\..\Game\Client\Control.h" />
     <ClInclude Include="..\..\Game\Client\Object.h" />
+    <ClInclude Include="..\..\Game\Client\TextBlock.h" />
     <ClInclude Include="..\..\Game\Client\TextBox.h" />
     <ClInclude Include="..\..\Game\Client\UI.h" />
     <ClInclude Include="..\..\Game\Client\Window.h" />
@@ -160,6 +161,7 @@
     <ClCompile Include="..\..\Game\Client\Button.cpp" />
     <ClCompile Include="..\..\Game\Client\Control.cpp" />
     <ClCompile Include="..\..\Game\Client\Object.cpp" />
+    <ClCompile Include="..\..\Game\Client\TextBlock.cpp" />
     <ClCompile Include="..\..\Game\Client\TextBox.cpp" />
     <ClCompile Include="..\..\Game\Client\UI.cpp" />
     <ClCompile Include="..\..\Game\Client\Window.cpp" />
