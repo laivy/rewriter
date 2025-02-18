@@ -34,6 +34,9 @@ namespace Graphics::D3D
 
 	DLL_API bool End()
 	{
+#if !defined _CLIENT && !defined _TOOL
+		g_commandList->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(g_renderTargets[g_frameIndex].Get(), D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PRESENT));
+#endif
 		if (FAILED(g_commandList->Close()))
 			return false;
 

@@ -234,10 +234,14 @@ namespace Graphics
 
 	static bool CreateD3D11On12Device()
 	{
+		UINT flags{ D3D11_CREATE_DEVICE_BGRA_SUPPORT };
+#ifdef _DEBUG
+		flags |= D3D11_CREATE_DEVICE_DEBUG;
+#endif
 		ComPtr<ID3D11Device> d3d11Device;
 		if (FAILED(::D3D11On12CreateDevice(
 			g_d3dDevice.Get(),
-			D3D11_CREATE_DEVICE_BGRA_SUPPORT,
+			flags,
 			nullptr,
 			0,
 			reinterpret_cast<IUnknown**>(g_commandQueue.GetAddressOf()),
@@ -433,6 +437,7 @@ namespace Graphics
 		if (!CreateFence())
 			return false;
 
+#if defined _CLIENT || defined _TOOL
 		// D3D11on12
 		if (!CreateD3D11On12Device())
 			return false;
@@ -452,6 +457,7 @@ namespace Graphics
 		// DWRITE
 		if (!CreateDWriteFactory())
 			return false;
+#endif
 
 #ifdef _IMGUI
 		if (!InitializeImGui())
@@ -480,17 +486,15 @@ namespace Graphics
 	{
 		if (!WaitForGPU())
 			return false;
+
 #ifdef _IMGUI
 		CleanUpImGui();
 #endif
+
 		if (!::CloseHandle(g_fenceEvent))
 			return false;
+
 		::CoUninitialize();
-#ifdef _DEBUG
-		ComPtr<IDXGIDebug1> dxgiDebug;
-		if (SUCCEEDED(::DXGIGetDebugInterface1(0, IID_PPV_ARGS(&dxgiDebug))))
-			dxgiDebug->ReportLiveObjects(DXGI_DEBUG_ALL, DXGI_DEBUG_RLO_FLAGS::DXGI_DEBUG_RLO_ALL);
-#endif
 		return true;
 	}
 
