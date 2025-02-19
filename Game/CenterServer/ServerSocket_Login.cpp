@@ -25,16 +25,34 @@ void ServerSocket::OnRegisterAccount(Packet& packet)
 	{
 		auto socketID{ packet.Decode<ID>() };
 
-		int32_t isAvailable{};
-		auto name{ packet.Decode<std::wstring>() };
+		int32_t ret{};
+		auto id{ packet.Decode<std::wstring>() };
 		Database::StoredProcedure{ Database::Type::Game }
 			.Statement(L"{ ? = CALL [dbo].[is_available_account_name] (?) }")
-			.Out(1, &isAvailable)
-			.In(2, name)
+			.Out(1, &ret)
+			.In(2, id)
 			.Execute();
 
 		Packet outPacket{ Protocol::Type::Register };
-		outPacket.Encode(Protocol::Register::CheckID, socketID, isAvailable == 1);
+		outPacket.Encode(Protocol::Register::CheckID, socketID, ret == 1);
+		Send(outPacket);
+		break;
+	}
+	case Protocol::Register::Request:
+	{
+		auto socketID{ packet.Decode<ID>() };
+
+		int32_t ret{};
+		auto [id, pw] { packet.Decode<std::wstring, std::wstring>() };
+		Database::StoredProcedure{ Database::Type::Game }
+			.Statement(L"{ ? = CALL [dbo].[register_account] (?, ?) }")
+			.Out(1, &ret)
+			.In(2, id)
+			.In(3, pw)
+			.Execute();
+
+		Packet outPacket{ Protocol::Type::Register };
+		outPacket.Encode(Protocol::Register::Request, socketID, ret == 1);
 		Send(outPacket);
 		break;
 	}

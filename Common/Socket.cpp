@@ -8,12 +8,8 @@ ISocket::ISocket(SOCKET socket) :
 	m_id{ s_id++ },
 	m_ip(INET_ADDRSTRLEN, '\0')
 {
-	if (m_socket == INVALID_SOCKET)
-	{
-		m_socket = ::WSASocket(AF_INET, SOCK_STREAM, IPPROTO_TCP, NULL, NULL, WSA_FLAG_OVERLAPPED);
-		assert(m_socket != INVALID_SOCKET);
-		return;
-	}
+	// 소켓 없으면 생성
+	Socket();
 
 	// 소켓 아이피 주소 가져옴
 	SOCKADDR_IN sockAddr{};
@@ -95,6 +91,15 @@ void ISocket::OnReceive(Packet::Size ioSize)
 
 void ISocket::OnComplete(Packet& packet)
 {
+}
+
+bool ISocket::Socket()
+{
+	if (m_socket != INVALID_SOCKET)
+		return true;
+
+	m_socket = ::WSASocket(AF_INET, SOCK_STREAM, IPPROTO_TCP, NULL, NULL, WSA_FLAG_OVERLAPPED);
+	return m_socket != INVALID_SOCKET;
 }
 
 bool ISocket::Connect(std::wstring_view ip, unsigned short port)

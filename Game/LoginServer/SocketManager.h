@@ -12,17 +12,16 @@ public:
 	bool Register(ISocket* socket) const;
 	void Disconnect(ISocket* socket);
 
+	void Log(const std::string& log);
+
 	std::shared_ptr<ISocket> GetSocket(ISocket::ID id) const;
 
 private:
 	void Run(std::stop_token stoken);
 
+	void OnConnect(ISocket* socket, bool success);
 	void OnAccept();
 	void Accept();
-
-#ifdef _IMGUI
-	void Logging(const std::string& log);
-#endif
 
 private:
 	HANDLE m_iocp;

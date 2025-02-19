@@ -9,6 +9,7 @@ public:
 	IControl(IWindow* owner);
 	~IControl() = default;
 
+	void SetEnable(bool enable);
 	void SetName(std::wstring_view name);
 
 	bool IsEnable() const;

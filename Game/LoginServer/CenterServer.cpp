@@ -4,6 +4,7 @@
 
 CenterServer::CenterServer()
 {
+	SetType(Type::Center);
 	SocketManager::GetInstance()->Register(this);
 	if (!Connect())
 	{
@@ -23,7 +24,7 @@ void CenterServer::OnConnect(bool success)
 		return;
 	}
 
-	// 다시 연결
+	// 재연결
 	Connect();
 }
 
@@ -31,12 +32,16 @@ void CenterServer::OnDisconnect()
 {
 	ISocket::OnDisconnect();
 
-	// 다시 연결
-	if (!Connect())
-	{
-		assert(false && "CENTER SERVER DISCONNECTED");
-		::PostQuitMessage(0);
-	}
+	auto sm{ SocketManager::GetInstance() };
+	if (!sm)
+		return;
+
+	// 소켓 재생성
+	if (Socket())
+		sm->Register(this);
+
+	// 재연결
+	Connect();
 }
 
 void CenterServer::OnComplete(Packet& packet)
@@ -84,6 +89,23 @@ void CenterServer::OnRegisterAccount(Packet& packet)
 
 		Packet outPacket{ Protocol::Type::Register };
 		outPacket.Encode(Protocol::Register::CheckID, isAvailable);
+		clientSocket->Send(outPacket);
+		break;
+	}
+	case Protocol::Register::Request:
+	{
+		auto socketID{ packet.Decode<ID>() };
+		auto sm{ SocketManager::GetInstance() };
+		if (!sm)
+			break;
+
+		auto clientSocket{ sm->GetSocket(socketID) };
+		if (!clientSocket)
+			break;
+
+		auto success{ packet.Decode<bool>() };
+		Packet outPacket{ Protocol::Type::Register };
+		outPacket.Encode(Protocol::Register::Request, success);
 		clientSocket->Send(outPacket);
 		break;
 	}

@@ -53,6 +53,22 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Graphics", "Module\Graphics
 		{ECE58EE1-CBF9-4731-9CA5-C89FA63034E8} = {ECE58EE1-CBF9-4731-9CA5-C89FA63034E8}
 	EndProjectSection
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Database", "Database", "{C8D5274F-AC00-46C7-1F8D-E88E81087A52}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Game", "Game", "{9B3ABB26-1B63-445F-B408-13CD4373BE9E}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "StoredProcedure", "StoredProcedure", "{9BB5B9FD-5A4F-4788-B70D-957E8FB0DB4A}"
+	ProjectSection(SolutionItems) = preProject
+		Database\Game\StoredProcedure\is_available_account_name.sql = Database\Game\StoredProcedure\is_available_account_name.sql
+		register_account.sql = register_account.sql
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Table", "Table", "{F14B322E-29CC-4055-AC16-22E3CB49914C}"
+	ProjectSection(SolutionItems) = preProject
+		account.sql = account.sql
+		ban_account.sql = ban_account.sql
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug_Client|x64 = Debug_Client|x64
@@ -139,6 +155,9 @@ Global
 		{ECE58EE1-CBF9-4731-9CA5-C89FA63034E8} = {88EEA67C-E4BF-44CC-AEE1-1B3B2AB83767}
 		{D971D8A9-926E-4919-BF2E-2BF282CACCBC} = {E8048ACE-7CBD-43BA-85E3-D24FE2639874}
 		{46B7BA29-B491-4871-BFBD-3AF71FA89B0A} = {88EEA67C-E4BF-44CC-AEE1-1B3B2AB83767}
+		{9B3ABB26-1B63-445F-B408-13CD4373BE9E} = {C8D5274F-AC00-46C7-1F8D-E88E81087A52}
+		{9BB5B9FD-5A4F-4788-B70D-957E8FB0DB4A} = {9B3ABB26-1B63-445F-B408-13CD4373BE9E}
+		{F14B322E-29CC-4055-AC16-22E3CB49914C} = {9B3ABB26-1B63-445F-B408-13CD4373BE9E}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {0A22C2EE-A1CE-420F-8886-35BEED50F885}

@@ -4,7 +4,7 @@
 class ISocket abstract
 {
 public:
-	using ID = size_t;
+	using ID = uint32_t;
 
 	enum class Type
 	{
@@ -56,6 +56,7 @@ public:
 	virtual void OnReceive(Packet::Size ioSize);
 	virtual void OnComplete(Packet& packet);
 
+	bool Socket();
 	bool Connect(std::wstring_view ip, unsigned short port);
 	void Disconnect();
 	void Send(Packet& packet);

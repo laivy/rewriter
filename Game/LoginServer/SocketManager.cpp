@@ -105,9 +105,8 @@ bool SocketManager::Register(ISocket* socket) const
 
 void SocketManager::Disconnect(ISocket* socket)
 {
-#ifdef _IMGUI
-	Logging(std::format("Client Disconnected | {}", socket->GetIP()));
-#endif
+	Log(std::format("Socket is disconnected | Type : {} | IP : {}", static_cast<int>(socket->GetType()), socket->GetIP()));
+
 	socket->OnDisconnect();
 	std::erase_if(m_sockets, [socket](const auto& s) { return s.get() == socket; });
 }
@@ -118,6 +117,15 @@ std::shared_ptr<ISocket> SocketManager::GetSocket(ISocket::ID id) const
 	if (it == m_sockets.end())
 		return nullptr;
 	return *it;
+}
+
+void SocketManager::Log(const std::string& log)
+{
+#ifdef _IMGUI
+	Time now{ Time::Now() };
+	std::string prefix{ std::format("[{}-{:02}-{:02} {:02}:{:02}:{:02}] ", now.Year(), now.Month(), now.Day(), now.Hour(), now.Min(), now.Sec()) };
+	m_logs.push_back(prefix + log);
+#endif
 }
 
 void SocketManager::Run(std::stop_token stoken)
@@ -139,7 +147,7 @@ void SocketManager::Run(std::stop_token stoken)
 				case ISocket::IOOperation::Connect:
 				{
 					if (socket)
-						socket->OnConnect(true);
+						OnConnect(socket, true);
 					break;
 				}
 				case ISocket::IOOperation::Accept:
@@ -199,7 +207,7 @@ void SocketManager::Run(std::stop_token stoken)
 		case ERROR_CONNECTION_REFUSED: // 연결 실패
 		{
 			if (socket)
-				socket->OnConnect(false);
+				OnConnect(socket, false);
 			continue;
 		}
 		default:
@@ -207,6 +215,13 @@ void SocketManager::Run(std::stop_token stoken)
 			continue;
 		}
 	}
+}
+
+void SocketManager::OnConnect(ISocket* socket, bool success)
+{
+	socket->OnConnect(success);
+	if (success)
+		Log(std::format("Socket is connected | Type : {} | IP : {}", static_cast<int>(socket->GetType()), socket->GetIP()));
 }
 
 void SocketManager::OnAccept()
@@ -230,12 +245,10 @@ void SocketManager::OnAccept()
 			break;
 		}
 
-#ifdef _IMGUI
-		Logging(std::format("Client Connected | {}", clientSocket->GetIP()));
-#endif
-
 		clientSocket->Receive();
 		m_sockets.push_back(clientSocket);
+
+		Log(std::format("Socket is connected | Type : {} | IP : {}", static_cast<int>(clientSocket->GetType()), clientSocket->GetIP()));
 	} while (false);
 
 	Accept();
@@ -263,12 +276,3 @@ void SocketManager::Accept()
 		}
 	}
 }
-
-#ifdef _IMGUI
-void SocketManager::Logging(const std::string& log)
-{
-	Time now{ Time::Now() };
-	std::string prefix{ std::format("[{}-{:02}-{:02} {:02}:{:02}:{:02}] ", now.Year(), now.Month(), now.Day(), now.Hour(), now.Min(), now.Sec()) };
-	m_logs.push_back(prefix + log);
-}
-#endif

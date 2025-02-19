@@ -17,12 +17,13 @@ class RegisterAccountModal final :
 {
 public:
 	RegisterAccountModal() :
-		IModal{ L"UI.dat/Register" }
+		IModal{ L"UI.dat/Register" },
+		m_isAvailableID{ false }
 	{
 		SetPosition(App::size / 2, Pivot::Center);
 		if (auto button{ GetControl<Button>(L"CheckID") })
 			button->OnButtonClick.Register([this]() { OnCheckIDButtonClicked(); });
-		if (auto button{ GetControl<Button>(L"Ok") })
+		if (auto button{ GetControl<Button>(L"OK") })
 			button->OnButtonClick.Register([this]() { OnOKButtonClicked(); });
 		if (auto button{ GetControl<Button>(L"Cancle") })
 			button->OnButtonClick.Register([this]() { OnCancleButtonClicked(); });
@@ -77,15 +78,32 @@ private:
 		{
 		case Protocol::Register::CheckID:
 		{
-			auto isAvailable{ packet.Decode<bool>() };
-			auto popup{ std::make_shared<PopupModal>(isAvailable ? L"사용 가능한 아이디입니다." : L"사용 불가능한 아이디입니다.") };
+			m_isAvailableID = packet.Decode<bool>();
+			if (m_isAvailableID)
+			{
+				if (auto textBox{ GetControl<TextBox>(L"ID") })
+					textBox->SetEnable(false);
+			}
+
+			auto popup{ std::make_shared<PopupModal>(m_isAvailableID ? L"사용 가능한 아이디입니다." : L"사용 불가능한 아이디입니다.") };
 			WindowManager::GetInstance()->Register(std::static_pointer_cast<IModal>(popup));
+			break;
+		}
+		case Protocol::Register::Request:
+		{
+			auto success{ packet.Decode<bool>() };
+			auto popup{ std::make_shared<PopupModal>(success ? L"회원가입에 성공했습니다.\n회원가입 한 아이디로 로그인 해주세요." : L"회원가입에 실패했습니다.\n다시 시도해주세요.") };
+			WindowManager::GetInstance()->Register(std::static_pointer_cast<IModal>(popup));
+			Return(Result::Ok);
 			break;
 		}
 		default:
 			break;
 		}
 	}
+
+private:
+	bool m_isAvailableID;
 };
 
 LoginWindow::LoginWindow() :

@@ -59,7 +59,13 @@ void ClientSocket::OnAccountRegister(Packet& packet)
 		break;
 	}
 	case Protocol::Register::Request:
+	{
+		auto [id, pw] { packet.Decode<std::wstring, std::wstring>() };
+		Packet outPacket{ Protocol::Type::Register };
+		outPacket.Encode(Protocol::Register::Request, GetID(), id, pw);
+		CenterServer::GetInstance()->Send(outPacket);
 		break;
+	}
 	default:
 		assert(false);
 		break;
