@@ -1,15 +1,15 @@
 USE [game]
 GO
 
-DROP PROCEDURE IF EXISTS [dbo].[register_account];
+DROP PROCEDURE IF EXISTS [dbo].[register_account]
 GO
 
 CREATE PROCEDURE [dbo].[register_account]
-	@id NVARCHAR(16),
-	@pw NVARCHAR(16)
+	@name NVARCHAR(16),
+	@password NVARCHAR(16)
 AS
 BEGIN
 	INSERT INTO [dbo].[account]
-	VALUES (@id, @pw, GETDATE())
+	VALUES (@name, HASHBYTES('SHA2_256', @password), GETDATE(), NULL)
 END
 GO

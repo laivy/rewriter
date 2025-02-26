@@ -60,7 +60,8 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "StoredProcedure", "StoredProcedure", "{9BB5B9FD-5A4F-4788-B70D-957E8FB0DB4A}"
 	ProjectSection(SolutionItems) = preProject
 		Database\Game\StoredProcedure\is_available_account_name.sql = Database\Game\StoredProcedure\is_available_account_name.sql
-		register_account.sql = register_account.sql
+		Database\Game\StoredProcedure\login.sql = Database\Game\StoredProcedure\login.sql
+		Database\Game\StoredProcedure\register_account.sql = Database\Game\StoredProcedure\register_account.sql
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Table", "Table", "{F14B322E-29CC-4055-AC16-22E3CB49914C}"

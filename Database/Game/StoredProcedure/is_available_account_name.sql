@@ -1,7 +1,7 @@
 USE [game]
 GO
 
-DROP PROCEDURE IF EXISTS [dbo].[is_available_account_name];
+DROP PROCEDURE IF EXISTS [dbo].[is_available_account_name]
 GO
 
 CREATE PROCEDURE [dbo].[is_available_account_name]
@@ -9,7 +9,7 @@ CREATE PROCEDURE [dbo].[is_available_account_name]
 AS
 BEGIN
 	IF EXISTS (SELECT 1 FROM [dbo].[account] WHERE [name] = @name)
-		RETURN 0
-	RETURN 1
+		RETURN 1
+	RETURN 0
 END
 GO
