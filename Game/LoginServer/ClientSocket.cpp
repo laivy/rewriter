@@ -32,6 +32,7 @@ void ClientSocket::OnComplete(Packet& packet)
 	{
 	case Protocol::Type::Login:
 	{
+		OnLoginRequest(packet);
 		break;
 	}
 	case Protocol::Type::Register:
@@ -45,16 +46,35 @@ void ClientSocket::OnComplete(Packet& packet)
 	}
 }
 
+void ClientSocket::OnLoginRequest(Packet& packet)
+{
+	auto subType{ packet.Decode<Protocol::Login>() };
+	switch (subType)
+	{
+	case Protocol::Login::Request:
+	{
+		auto [id, pw] { packet.Decode<std::wstring, std::wstring>() };
+		Packet outPacket{ Protocol::Type::Login };
+		outPacket.Encode(Protocol::Login::Request, GetID(), id, pw);
+		CenterServer::GetInstance()->Send(outPacket);
+		break;
+	}
+	default:
+		assert(false);
+		break;
+	}
+}
+
 void ClientSocket::OnAccountRegister(Packet& packet)
 {
 	auto subType{ packet.Decode<Protocol::Register>() };
 	switch (subType)
 	{
-	case Protocol::Register::CheckID:
+	case Protocol::Register::Check:
 	{
 		auto id{ packet.Decode<std::wstring>() };
 		Packet outPacket{ Protocol::Type::Register };
-		outPacket.Encode(Protocol::Register::CheckID, GetID(), id);
+		outPacket.Encode(Protocol::Register::Check, GetID(), id);
 		CenterServer::GetInstance()->Send(outPacket);
 		break;
 	}
@@ -70,8 +90,4 @@ void ClientSocket::OnAccountRegister(Packet& packet)
 		assert(false);
 		break;
 	}
-}
-
-void ClientSocket::OnLoginRequest(Packet& packet)
-{
 }

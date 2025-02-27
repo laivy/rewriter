@@ -5,9 +5,14 @@ void ServerSocket::OnLoginServerPacket(Packet& packet)
 {
 	switch (packet.GetType())
 	{
+	case Protocol::Type::Login:
+	{
+		OnLoginRequest(packet);
+		break;
+	}
 	case Protocol::Type::Register:
 	{
-		OnRegisterAccount(packet);
+		OnRegisterAccountRequest(packet);
 		break;
 	}
 	default:
@@ -16,12 +21,40 @@ void ServerSocket::OnLoginServerPacket(Packet& packet)
 	}
 }
 
-void ServerSocket::OnRegisterAccount(Packet& packet)
+void ServerSocket::OnLoginRequest(Packet& packet)
+{
+	auto subType{ packet.Decode<Protocol::Login>() };
+	switch (subType)
+	{
+	case Protocol::Login::Request:
+	{
+		auto socketID{ packet.Decode<ID>() };
+
+		int32_t ret{ -1 };
+		auto [id, pw] { packet.Decode<std::wstring, std::wstring>() };
+		Database::StoredProcedure{ Database::Type::Game }
+			.Statement(L"{ ? = CALL [dbo].[login] (?, ?) }")
+			.Out(1, &ret)
+			.In(2, id)
+			.In(3, pw)
+			.Execute();
+
+		Packet outPacket{ Protocol::Type::Login };
+		outPacket.Encode(Protocol::Login::Result, socketID, ret == 0);
+		Send(outPacket);
+		break;
+	}
+	default:
+		break;
+	}
+}
+
+void ServerSocket::OnRegisterAccountRequest(Packet& packet)
 {
 	auto subType{ packet.Decode<Protocol::Register>() };
 	switch (subType)
 	{
-	case Protocol::Register::CheckID:
+	case Protocol::Register::Check:
 	{
 		auto socketID{ packet.Decode<ID>() };
 
@@ -34,7 +67,7 @@ void ServerSocket::OnRegisterAccount(Packet& packet)
 			.Execute();
 
 		Packet outPacket{ Protocol::Type::Register };
-		outPacket.Encode(Protocol::Register::CheckID, socketID, ret == 0);
+		outPacket.Encode(Protocol::Register::CheckResult, socketID, ret == 0);
 		Send(outPacket);
 		break;
 	}
@@ -52,7 +85,7 @@ void ServerSocket::OnRegisterAccount(Packet& packet)
 			.Execute();
 
 		Packet outPacket{ Protocol::Type::Register };
-		outPacket.Encode(Protocol::Register::Request, socketID, ret == 0);
+		outPacket.Encode(Protocol::Register::Result, socketID, ret == 0);
 		Send(outPacket);
 		break;
 	}

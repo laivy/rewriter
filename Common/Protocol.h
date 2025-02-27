@@ -12,13 +12,15 @@ namespace Protocol
 
 	enum class Login : uint8_t
 	{
-		Login,
+		Request,
 		Result,
 	};
 
 	enum class Register : uint8_t
 	{
-		CheckID,
+		Check,
+		CheckResult,
 		Request,
+		Result,
 	};
 }

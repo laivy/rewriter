@@ -210,6 +210,10 @@ void SocketManager::Run(std::stop_token stoken)
 				OnConnect(socket, false);
 			continue;
 		}
+		case ERROR_CONNECTION_ABORTED: // 내가 연결 끊음
+		{
+			continue;
+		}
 		default:
 			assert(false && "IOCP ERROR");
 			continue;

@@ -38,7 +38,7 @@ private:
 			id = textBox->GetText();
 
 		Packet packet{ Protocol::Type::Register };
-		packet.Encode(Protocol::Register::CheckID, id);
+		packet.Encode(Protocol::Register::Check, id);
 		LoginServer::GetInstance()->Send(packet);
 	}
 
@@ -76,7 +76,7 @@ private:
 		auto subType{ packet.Decode<Protocol::Register>() };
 		switch (subType)
 		{
-		case Protocol::Register::CheckID:
+		case Protocol::Register::CheckResult:
 		{
 			m_isAvailableID = packet.Decode<bool>();
 			if (m_isAvailableID)
@@ -89,7 +89,7 @@ private:
 			WindowManager::GetInstance()->Register(std::static_pointer_cast<IModal>(popup));
 			break;
 		}
-		case Protocol::Register::Request:
+		case Protocol::Register::Result:
 		{
 			auto success{ packet.Decode<bool>() };
 			auto popup{ std::make_shared<PopupModal>(success ? L"회원가입에 성공했습니다.\n회원가입 한 아이디로 로그인 해주세요." : L"회원가입에 실패했습니다.\n다시 시도해주세요.") };
@@ -119,6 +119,21 @@ LoginWindow::LoginWindow() :
 
 void LoginWindow::OnPacket(Packet& packet)
 {
+	if (packet.GetType() != Protocol::Type::Login)
+		return;
+
+	auto subType{ packet.Decode<Protocol::Login>() };
+	switch (subType)
+	{
+	case Protocol::Login::Result:
+	{
+		auto result{ packet.Decode<bool>() };
+		int i = 0;
+		break;
+	}
+	default:
+		break;
+	}
 }
 
 void LoginWindow::OnLoginButtonClicked()
@@ -133,7 +148,7 @@ void LoginWindow::OnLoginButtonClicked()
 		return;
 
 	Packet packet{ Protocol::Type::Login };
-	packet.Encode(Protocol::Login::Login, id, pw);
+	packet.Encode(Protocol::Login::Request, id, pw);
 	LoginServer::GetInstance()->Send(packet);
 }
 

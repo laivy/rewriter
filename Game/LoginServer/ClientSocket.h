@@ -12,8 +12,8 @@ public:
 	virtual void OnComplete(Packet& packet) override final;
 
 private:
-	void OnAccountRegister(Packet& packet);
 	void OnLoginRequest(Packet& packet);
+	void OnAccountRegister(Packet& packet);
 
 private:
 	std::shared_ptr<User> m_user;

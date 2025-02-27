@@ -12,5 +12,6 @@ public:
 private:
 	// 로그인 서버 관련
 	void OnLoginServerPacket(Packet& packet);
-	void OnRegisterAccount(Packet& packet);
+	void OnLoginRequest(Packet& packet);
+	void OnRegisterAccountRequest(Packet& packet);
 };

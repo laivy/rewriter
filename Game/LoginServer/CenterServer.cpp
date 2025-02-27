@@ -48,9 +48,14 @@ void CenterServer::OnComplete(Packet& packet)
 {
 	switch (packet.GetType())
 	{
+	case Protocol::Type::Login:
+	{
+		OnLoginRequest(packet);
+		break;
+	}
 	case Protocol::Type::Register:
 	{
-		OnRegisterAccount(packet);
+		OnRegisterAccountRequest(packet);
 		break;
 	}
 	default:
@@ -69,12 +74,39 @@ bool CenterServer::Connect()
 	return ISocket::Connect(ip, port);
 }
 
-void CenterServer::OnRegisterAccount(Packet& packet)
+void CenterServer::OnLoginRequest(Packet& packet)
+{
+	auto subType{ packet.Decode<Protocol::Login>() };
+	switch (subType)
+	{
+	case Protocol::Login::Result:
+	{
+		auto socketID{ packet.Decode<ID>() };
+		auto sm{ SocketManager::GetInstance() };
+		if (!sm)
+			break;
+
+		auto clientSocket{ sm->GetSocket(socketID) };
+		if (!clientSocket)
+			break;
+
+		auto success{ packet.Decode<bool>() };
+		Packet outPacket{ Protocol::Type::Login };
+		outPacket.Encode(Protocol::Login::Result, success);
+		clientSocket->Send(outPacket);
+		break;
+	}
+	default:
+		break;
+	}
+}
+
+void CenterServer::OnRegisterAccountRequest(Packet& packet)
 {
 	auto subType{ packet.Decode<Protocol::Register>() };
 	switch (subType)
 	{
-	case Protocol::Register::CheckID:
+	case Protocol::Register::CheckResult:
 	{
 		auto socketID{ packet.Decode<ID>() };
 		auto sm{ SocketManager::GetInstance() };
@@ -88,11 +120,11 @@ void CenterServer::OnRegisterAccount(Packet& packet)
 		auto isAvailable{ packet.Decode<bool>() };
 
 		Packet outPacket{ Protocol::Type::Register };
-		outPacket.Encode(Protocol::Register::CheckID, isAvailable);
+		outPacket.Encode(Protocol::Register::CheckResult, isAvailable);
 		clientSocket->Send(outPacket);
 		break;
 	}
-	case Protocol::Register::Request:
+	case Protocol::Register::Result:
 	{
 		auto socketID{ packet.Decode<ID>() };
 		auto sm{ SocketManager::GetInstance() };
@@ -105,7 +137,7 @@ void CenterServer::OnRegisterAccount(Packet& packet)
 
 		auto success{ packet.Decode<bool>() };
 		Packet outPacket{ Protocol::Type::Register };
-		outPacket.Encode(Protocol::Register::Request, success);
+		outPacket.Encode(Protocol::Register::Result, success);
 		clientSocket->Send(outPacket);
 		break;
 	}

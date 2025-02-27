@@ -16,5 +16,6 @@ public:
 private:
 	bool Connect();
 
-	void OnRegisterAccount(Packet& packet);
+	void OnLoginRequest(Packet& packet);
+	void OnRegisterAccountRequest(Packet& packet);
 };
