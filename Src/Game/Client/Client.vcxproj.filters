@@ -1,0 +1,285 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="소스 파일">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;c++;cppm;ixx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="헤더 파일">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hh;hpp;hxx;h++;hm;inl;inc;ipp;xsd</Extensions>
+    </Filter>
+    <Filter Include="외부 파일">
+      <UniqueIdentifier>{f6ab6c27-e5e4-42de-8e87-da49e5cd6ea4}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="외부 파일\Imgui">
+      <UniqueIdentifier>{d4f20e7f-ac59-4ac6-b32a-565069b1e37a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="모듈 파일">
+      <UniqueIdentifier>{022d3334-6f57-44dc-9c0b-dac3caf4ae66}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="모듈 파일\Resource">
+      <UniqueIdentifier>{ceba596a-ee30-443a-ae81-d205b7cc9472}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="소스 파일\Renderer">
+      <UniqueIdentifier>{4dde1501-574a-4469-8aaf-d036a20d253f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="헤더 파일\Renderer">
+      <UniqueIdentifier>{152eed6e-f976-4540-be42-37f92739d1e5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="소스 파일\HLSL">
+      <UniqueIdentifier>{1f063627-bcbe-4499-811d-69fa4c202c0d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="헤더 파일\UI">
+      <UniqueIdentifier>{7e80b8f2-b893-4a4b-94d1-40074aaf5890}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="소스 파일\UI">
+      <UniqueIdentifier>{fcab709e-fc60-4702-8a32-c75cb9926518}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="헤더 파일\Server">
+      <UniqueIdentifier>{35118d5d-83d1-4734-b515-532d601023fc}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="소스 파일\Server">
+      <UniqueIdentifier>{a3278a73-73ea-44f4-b7fa-a6d740003d66}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="소스 파일\Scene">
+      <UniqueIdentifier>{2253c6f3-3099-4815-8038-54496283530f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="헤더 파일\Scene">
+      <UniqueIdentifier>{ca2e0c38-df75-41d2-a42d-c46ed38ca33c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="모듈 파일\Graphics">
+      <UniqueIdentifier>{c9664751-745f-402b-8ffe-7804686dd966}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="헤더 파일\Shared">
+      <UniqueIdentifier>{8775307d-5339-4060-a00d-ed7e0950e823}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="소스 파일\Shared">
+      <UniqueIdentifier>{7c7c8e48-65f8-4fe0-9b65-6921e1eda03a}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="Main.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="Stdafx.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="App.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="UI.cpp">
+      <Filter>소스 파일\UI</Filter>
+    </ClCompile>
+    <ClCompile Include="Window.cpp">
+      <Filter>소스 파일\UI</Filter>
+    </ClCompile>
+    <ClCompile Include="WindowManager.cpp">
+      <Filter>소스 파일\UI</Filter>
+    </ClCompile>
+    <ClCompile Include="LoginWindow.cpp">
+      <Filter>소스 파일\UI</Filter>
+    </ClCompile>
+    <ClCompile Include="Modal.cpp">
+      <Filter>소스 파일\UI</Filter>
+    </ClCompile>
+    <ClCompile Include="TextBox.cpp">
+      <Filter>소스 파일\UI</Filter>
+    </ClCompile>
+    <ClCompile Include="Control.cpp">
+      <Filter>소스 파일\UI</Filter>
+    </ClCompile>
+    <ClCompile Include="TextBlock.cpp">
+      <Filter>소스 파일\UI</Filter>
+    </ClCompile>
+    <ClCompile Include="Button.cpp">
+      <Filter>소스 파일\UI</Filter>
+    </ClCompile>
+    <ClCompile Include="Object.cpp">
+      <Filter>소스 파일\Renderer</Filter>
+    </ClCompile>
+    <ClCompile Include="SocketManager.cpp">
+      <Filter>소스 파일\Server</Filter>
+    </ClCompile>
+    <ClCompile Include="SceneManager.cpp">
+      <Filter>소스 파일\Scene</Filter>
+    </ClCompile>
+    <ClCompile Include="Scene.cpp">
+      <Filter>소스 파일\Scene</Filter>
+    </ClCompile>
+    <ClCompile Include="LoginScene.cpp">
+      <Filter>소스 파일\Scene</Filter>
+    </ClCompile>
+    <ClCompile Include="LoginServer.cpp">
+      <Filter>소스 파일\Server</Filter>
+    </ClCompile>
+    <ClCompile Include="PopupModal.cpp">
+      <Filter>소스 파일\UI</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Shared\Packet.cpp">
+      <Filter>소스 파일\Shared</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Shared\Socket.cpp">
+      <Filter>소스 파일\Shared</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Shared\Time.cpp">
+      <Filter>소스 파일\Shared</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Shared\Timer.cpp">
+      <Filter>소스 파일\Shared</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Shared\Type.cpp">
+      <Filter>소스 파일\Shared</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Shared\Util.cpp">
+      <Filter>소스 파일\Shared</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\External\Imgui\imgui.cpp">
+      <Filter>외부 파일\Imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\External\Imgui\imgui_demo.cpp">
+      <Filter>외부 파일\Imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\External\Imgui\imgui_draw.cpp">
+      <Filter>외부 파일\Imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\External\Imgui\imgui_stdlib.cpp">
+      <Filter>외부 파일\Imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\External\Imgui\imgui_tables.cpp">
+      <Filter>외부 파일\Imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\External\Imgui\imgui_widgets.cpp">
+      <Filter>외부 파일\Imgui</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="Stdafx.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="App.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="UI.h">
+      <Filter>헤더 파일\UI</Filter>
+    </ClInclude>
+    <ClInclude Include="Window.h">
+      <Filter>헤더 파일\UI</Filter>
+    </ClInclude>
+    <ClInclude Include="WindowManager.h">
+      <Filter>헤더 파일\UI</Filter>
+    </ClInclude>
+    <ClInclude Include="LoginWindow.h">
+      <Filter>헤더 파일\UI</Filter>
+    </ClInclude>
+    <ClInclude Include="Modal.h">
+      <Filter>헤더 파일\UI</Filter>
+    </ClInclude>
+    <ClInclude Include="TextBox.h">
+      <Filter>헤더 파일\UI</Filter>
+    </ClInclude>
+    <ClInclude Include="Control.h">
+      <Filter>헤더 파일\UI</Filter>
+    </ClInclude>
+    <ClInclude Include="TextBlock.h">
+      <Filter>헤더 파일\UI</Filter>
+    </ClInclude>
+    <ClInclude Include="Button.h">
+      <Filter>헤더 파일\UI</Filter>
+    </ClInclude>
+    <ClInclude Include="Object.h">
+      <Filter>헤더 파일\Renderer</Filter>
+    </ClInclude>
+    <ClInclude Include="SocketManager.h">
+      <Filter>헤더 파일\Server</Filter>
+    </ClInclude>
+    <ClInclude Include="Scene.h">
+      <Filter>헤더 파일\Scene</Filter>
+    </ClInclude>
+    <ClInclude Include="SceneManager.h">
+      <Filter>헤더 파일\Scene</Filter>
+    </ClInclude>
+    <ClInclude Include="LoginScene.h">
+      <Filter>헤더 파일\Scene</Filter>
+    </ClInclude>
+    <ClInclude Include="LoginServer.h">
+      <Filter>헤더 파일\Server</Filter>
+    </ClInclude>
+    <ClInclude Include="PopupModal.h">
+      <Filter>헤더 파일\UI</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Shared\Delegate.h">
+      <Filter>헤더 파일\Shared</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Shared\Packet.h">
+      <Filter>헤더 파일\Shared</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Shared\Protocol.h">
+      <Filter>헤더 파일\Shared</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Shared\Singleton.h">
+      <Filter>헤더 파일\Shared</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Shared\Socket.h">
+      <Filter>헤더 파일\Shared</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Shared\Stdafx.h">
+      <Filter>헤더 파일\Shared</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Shared\StringTable.h">
+      <Filter>헤더 파일\Shared</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Shared\Time.h">
+      <Filter>헤더 파일\Shared</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Shared\Timer.h">
+      <Filter>헤더 파일\Shared</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Shared\Type.h">
+      <Filter>헤더 파일\Shared</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Shared\Util.h">
+      <Filter>헤더 파일\Shared</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Modules\Graphics\Include\Lib.h">
+      <Filter>모듈 파일\Graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Modules\Resource\Include\Lib.h">
+      <Filter>모듈 파일\Resource</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\External\Imgui\imconfig.h">
+      <Filter>외부 파일\Imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\External\Imgui\imgui.h">
+      <Filter>외부 파일\Imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\External\Imgui\imgui_internal.h">
+      <Filter>외부 파일\Imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\External\Imgui\imgui_stdlib.h">
+      <Filter>외부 파일\Imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\External\Imgui\imstb_rectpack.h">
+      <Filter>외부 파일\Imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\External\Imgui\imstb_textedit.h">
+      <Filter>외부 파일\Imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\External\Imgui\imstb_truetype.h">
+      <Filter>외부 파일\Imgui</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Common.hlsli">
+      <Filter>소스 파일\HLSL</Filter>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <FxCompile Include="Default.hlsl">
+      <Filter>소스 파일\HLSL</Filter>
+    </FxCompile>
+    <FxCompile Include="Line.hlsl">
+      <Filter>소스 파일\HLSL</Filter>
+    </FxCompile>
+  </ItemGroup>
+</Project>

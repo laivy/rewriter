@@ -1,0 +1,77 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="소스 파일">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;c++;cppm;ixx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="헤더 파일">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hh;hpp;hxx;h++;hm;inl;inc;ipp;xsd</Extensions>
+    </Filter>
+    <Filter Include="헤더 파일\Include">
+      <UniqueIdentifier>{7529b114-4b0b-4940-847d-ba0c1765c3e9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="모듈 파일">
+      <UniqueIdentifier>{0b74cbf0-9180-45cb-89f4-2e98d5a25e9d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="모듈 파일\Resource">
+      <UniqueIdentifier>{bdff4e94-47c1-4e38-aed3-de0c846c7f89}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="헤더 파일\Shared">
+      <UniqueIdentifier>{9c46b12a-80eb-4854-894e-20e99fcec9a3}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="소스 파일\Shared">
+      <UniqueIdentifier>{bd4dc4e4-ac26-45e0-893d-c70afc0d4a1d}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="Stdafx.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="Session.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="Types.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="Include\Lib.h">
+      <Filter>헤더 파일\Include</Filter>
+    </ClInclude>
+    <ClInclude Include="Database.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="Query.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Shared\Time.h">
+      <Filter>헤더 파일\Shared</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Resource\Include\Lib.h">
+      <Filter>모듈 파일\Resource</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Shared\Stdafx.h">
+      <Filter>헤더 파일\Shared</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="DllMain.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="Stdafx.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="Session.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="Database.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="Query.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Shared\Time.cpp">
+      <Filter>소스 파일\Shared</Filter>
+    </ClCompile>
+  </ItemGroup>
+</Project>
