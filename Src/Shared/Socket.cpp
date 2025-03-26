@@ -116,16 +116,17 @@ bool ISocket::Connect(std::wstring_view ip, unsigned short port)
 		}
 	}
 
-	GUID guid{ GUID WSAID_CONNECTEX };
+	GUID guid(WSAID_CONNECTEX);
 	LPFN_CONNECTEX ConnectEx{ nullptr };
 	DWORD bytes{};
-	addr.sin_port = ::htons(port);
-	::InetPtonW(AF_INET, ip.data(), &(addr.sin_addr.s_addr));
 	if (::WSAIoctl(m_socket, SIO_GET_EXTENSION_FUNCTION_POINTER, &guid, sizeof(guid), &ConnectEx, sizeof(ConnectEx), &bytes, nullptr, nullptr) == SOCKET_ERROR)
 	{
 		Disconnect();
 		return false;
 	}
+
+	addr.sin_port = ::htons(port);
+	::InetPtonW(AF_INET, ip.data(), &(addr.sin_addr.s_addr));
 
 	// 연결 할 때 수신 버퍼를 사용함
 	m_receiveBuffer.overlappedEx = OverlappedEx{ .op = IOOperation::Connect };

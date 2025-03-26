@@ -95,12 +95,60 @@ void operator-=(Float2& lhs, const Float2& rhs)
 
 Float2 operator*(const Float2& lhs, float rhs)
 {
-	return { lhs.x * rhs, lhs.y * rhs };
+	return Float2{ lhs.x * rhs, lhs.y * rhs };
 }
 
 Float2 operator/(const Float2& lhs, float rhs)
 {
-	return { lhs.x / rhs, lhs.y / rhs };
+	return Float2{ lhs.x / rhs, lhs.y / rhs };
+}
+
+Float3::Float3(float x, float y, float z) :
+	x{ x },
+	y{ y },
+	z{ z }
+{
+}
+
+Float3 Float3::operator+(const Float3& rhs)
+{
+	return Float3{ x + rhs.x, y + rhs.y, z + rhs.z };
+}
+
+Float3 Float3::operator-()
+{
+	return Float3{ -x, -y, -z };
+}
+
+Float3 Float3::operator-(const Float3& rhs)
+{
+	return Float3{ x - rhs.x, y - rhs.y, z - rhs.z };
+}
+
+Float3& Float3::operator+=(const Float3& rhs)
+{
+	x += rhs.x;
+	y += rhs.y;
+	z += rhs.z;
+	return *this;
+}
+
+Float3& Float3::operator-=(const Float3& rhs)
+{
+	x -= rhs.x;
+	y -= rhs.y;
+	z -= rhs.z;
+	return *this;
+}
+
+Float3 Float3::operator*(float rhs)
+{
+	return Float3{ x * rhs, y * rhs, z * rhs };
+}
+
+Float3 Float3::operator/(float rhs)
+{
+	return Float3{ x / rhs, y / rhs, z / rhs };
 }
 
 Rect::Rect(int32_t left, int32_t top, int32_t right, int32_t bottom) :

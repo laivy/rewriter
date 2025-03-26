@@ -1,4 +1,5 @@
 #include "Stdafx.h"
+#include "Model.h"
 #include "Property.h"
 #include "Sprite.h"
 #include "External/DirectX/WICTextureLoader12.h"
@@ -86,6 +87,8 @@ namespace Resource
 		case Type::Texture:
 			// TODO
 			break;
+		case Type::Model:
+			break;
 		default:
 			assert(false && "INVALID TYPE");
 			break;
@@ -123,6 +126,11 @@ namespace Resource
 	}
 
 	DLL_API void Property::Set(const std::shared_ptr<Texture>& value)
+	{
+		m_data = value;
+	}
+
+	DLL_API void Property::Set(const std::shared_ptr<Model>& value)
 	{
 		m_data = value;
 	}
@@ -280,6 +288,31 @@ namespace Resource
 			return child->GetTexture(remain);
 
 		assert(m_type == Type::Texture);
+		return nullptr;
+	}
+
+	DLL_API std::shared_ptr<Model> Property::GetModel(std::wstring_view path) const
+	{
+		if (path.empty())
+		{
+			assert(m_type == Type::Model);
+			return std::get<std::shared_ptr<Model>>(m_data);
+		}
+
+		std::wstring_view name{ path };
+		std::wstring_view remain{};
+
+		size_t pos{ path.find(Stringtable::DATA_PATH_SEPERATOR) };
+		if (pos != std::wstring_view::npos)
+		{
+			name = path.substr(0, pos);
+			remain = path.substr(pos + 1);
+		}
+
+		if (const auto& child{ Get(name) })
+			return child->GetModel(remain);
+
+		assert(m_type == Type::Model);
 		return nullptr;
 	}
 

@@ -1,4 +1,5 @@
 #include "Stdafx.h"
+#include "Model.h"
 #include "Property.h"
 #include "Resource.h"
 #include "Sprite.h"
@@ -78,6 +79,32 @@ namespace Resource
 			auto length{ static_cast<uint32_t>(binary.size()) };
 			file.write(reinterpret_cast<const char*>(&length), sizeof(length));
 			file.write(reinterpret_cast<const char*>(binary.data()), length);
+			break;
+		}
+		case Property::Type::Texture:
+		{
+			break;
+		}
+		case Property::Type::Model:
+		{
+			auto data{ prop->GetModel() };
+			auto meshCount{ static_cast<uint32_t>(data->meshes.size()) };
+			file.write(reinterpret_cast<const char*>(&meshCount), sizeof(meshCount));
+			for (const auto& mesh : data->meshes)
+			{
+				auto vertexCount{ static_cast<uint32_t>(mesh.vertices.size()) };
+				file.write(reinterpret_cast<const char*>(&vertexCount), sizeof(vertexCount));
+				for (const auto& vertex : mesh.vertices)
+				{
+					file.write(reinterpret_cast<const char*>(&vertex.x), sizeof(vertex.x));
+					file.write(reinterpret_cast<const char*>(&vertex.y), sizeof(vertex.y));
+					file.write(reinterpret_cast<const char*>(&vertex.z), sizeof(vertex.z));
+				}
+
+				auto indexCount{ static_cast<uint32_t>(mesh.indices.size()) };
+				file.write(reinterpret_cast<const char*>(&indexCount), sizeof(indexCount));
+				file.write(reinterpret_cast<const char*>(mesh.indices.data()), sizeof(int) * indexCount);
+			}
 			break;
 		}
 		default:
@@ -200,6 +227,34 @@ namespace Resource
 			auto data{ g_loadTexture(std::span{ binary.get(), length }) };
 			prop->Set(data);
 #endif
+			break;
+		}
+		case Property::Type::Model:
+		{
+			auto model{ std::make_shared<Model>() };
+
+			uint32_t meshCount{};
+			file.read(reinterpret_cast<char*>(&meshCount), sizeof(meshCount));
+			model->meshes.resize(meshCount);
+			for (auto& mesh : model->meshes)
+			{
+				uint32_t vertexCount{};
+				file.read(reinterpret_cast<char*>(&vertexCount), sizeof(vertexCount));
+				mesh.vertices.resize(vertexCount);
+				for (auto& vertex : mesh.vertices)
+				{
+					file.read(reinterpret_cast<char*>(&vertex.x), sizeof(vertex.x));
+					file.read(reinterpret_cast<char*>(&vertex.y), sizeof(vertex.y));
+					file.read(reinterpret_cast<char*>(&vertex.z), sizeof(vertex.z));
+				}
+
+				uint32_t indexCount{};
+				file.read(reinterpret_cast<char*>(&indexCount), sizeof(indexCount));
+				mesh.indices.resize(indexCount);
+				file.read(reinterpret_cast<char*>(mesh.indices.data()), sizeof(int) * indexCount);
+			}
+
+			prop->Set(model);
 			break;
 		}
 		default:

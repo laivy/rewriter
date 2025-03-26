@@ -3,6 +3,7 @@
 #include "Clipboard.h"
 #include "Desktop.h"
 #include "Explorer.h"
+#include "FbxHandler.h"
 #include "Hierarchy.h"
 #include "Inspector.h"
 #include "UIEditor.h"
@@ -17,9 +18,12 @@ App::App() :
 
 App::~App()
 {
+	Desktop::Destroy();
 	Explorer::Destroy();
 	Hierarchy::Destroy();
 	Inspector::Destroy();
+	Clipboard::Destroy();
+	FbxHandler::Destroy();
 	UIEditor::Destroy();
 	Resource::CleanUp();
 	Graphics::CleanUp();
@@ -138,6 +142,7 @@ void App::InitApp()
 	Hierarchy::Instantiate();
 	Inspector::Instantiate();
 	Clipboard::Instantiate();
+	FbxHandler::Instantiate();
 }
 
 void App::Update()

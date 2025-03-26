@@ -6,6 +6,7 @@
 #include "LoginWindow.h"
 #include "Modal.h"
 #include "PopupModal.h"
+#include "SceneManager.h"
 #include "SocketManager.h"
 #include "TextBlock.h"
 #include "TextBox.h"
@@ -136,6 +137,7 @@ void LoginWindow::OnPacket(Packet& packet)
 	}
 }
 
+#include "Scene.h"
 void LoginWindow::OnLoginButtonClicked()
 {
 	std::wstring id;
@@ -150,6 +152,7 @@ void LoginWindow::OnLoginButtonClicked()
 	Packet packet{ Protocol::Type::Login };
 	packet.Encode(Protocol::Login::Request, id, pw);
 	LoginServer::GetInstance()->Send(packet);
+
 }
 
 void LoginWindow::OnRegisterButtonClicked()

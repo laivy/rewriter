@@ -2,6 +2,7 @@
 #include "App.h"
 #include "LoginScene.h"
 #include "LoginWindow.h"
+#include "SceneManager.h"
 #include "WindowManager.h"
 
 LoginScene::LoginScene()

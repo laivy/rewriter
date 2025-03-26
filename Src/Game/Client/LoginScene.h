@@ -9,9 +9,9 @@ public:
 	LoginScene();
 	~LoginScene() = default;
 
-	void Update(float deltaTime) override final;
-	void Render2D() const override final;
-	void Render3D() const override final;
+	void Update(float deltaTime) override;
+	void Render2D() const override;
+	void Render3D() const override;
 
 private:
 	void OnPacket(Packet& packet);

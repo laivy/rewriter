@@ -56,7 +56,7 @@
       <PreprocessorDefinitions>_DEBUG;_IMGUI;_TOOL;_WINDOW;NOMINMAX;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>false</ConformanceMode>
       <PrecompiledHeader>Use</PrecompiledHeader>
-      <AdditionalIncludeDirectories>$(SolutionDir);$(SolutionDir)Src\</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir);$(SolutionDir)Src\;$(SolutionDir)External\FBXSDK\include\</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp20</LanguageStandard>
       <PrecompiledHeaderFile>Stdafx.h</PrecompiledHeaderFile>
       <AdditionalOptions>/utf-8 %(AdditionalOptions)</AdditionalOptions>
@@ -64,8 +64,8 @@
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>$(OutDir);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>Graphics.lib;Resource.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(OutDir);$(SolutionDir)External\FBXSDK\lib\x64\debug\</AdditionalLibraryDirectories>
+      <AdditionalDependencies>Graphics.lib;Resource.lib;libfbxsdk.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -78,7 +78,7 @@
       <ConformanceMode>false</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
       <PrecompiledHeader>Use</PrecompiledHeader>
-      <AdditionalIncludeDirectories>$(SolutionDir);$(SolutionDir)Src\</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir);$(SolutionDir)Src\;$(SolutionDir)External\FBXSDK\include\</AdditionalIncludeDirectories>
       <PrecompiledHeaderFile>Stdafx.h</PrecompiledHeaderFile>
       <AdditionalOptions>/utf-8 %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
@@ -87,12 +87,13 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>Graphics.lib;Resource.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>$(OutDir);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>Graphics.lib;Resource.lib;libfbxsdk.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(OutDir);$(SolutionDir)External\FBXSDK\lib\x64\release\</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\External\DirectX\d3dx12.h" />
+    <ClInclude Include="..\..\..\External\FBXSDK\include\fbxsdk.h" />
     <ClInclude Include="..\..\..\External\Imgui\imconfig.h" />
     <ClInclude Include="..\..\..\External\Imgui\imgui.h" />
     <ClInclude Include="..\..\..\External\Imgui\imgui_internal.h" />
@@ -117,6 +118,7 @@
     <ClInclude Include="..\..\Shared\Util.h" />
     <ClInclude Include="App.h" />
     <ClInclude Include="Clipboard.h" />
+    <ClInclude Include="FbxHandler.h" />
     <ClInclude Include="Hierarchy.h" />
     <ClInclude Include="Explorer.h" />
     <ClInclude Include="Desktop.h" />
@@ -170,6 +172,7 @@
     </ClCompile>
     <ClCompile Include="App.cpp" />
     <ClCompile Include="Clipboard.cpp" />
+    <ClCompile Include="FbxHandler.cpp" />
     <ClCompile Include="Hierarchy.cpp" />
     <ClCompile Include="Inspector.cpp" />
     <ClCompile Include="Main.cpp" />

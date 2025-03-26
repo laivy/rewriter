@@ -1,5 +1,6 @@
 #include "Stdafx.h"
 #include "App.h"
+#include "FbxHandler.h"
 #include "Hierarchy.h"
 #include "Inspector.h"
 #include "Shared/Util.h"
@@ -12,7 +13,8 @@ const std::map<Resource::Property::Type, const char*> PROPERTY_TYPES
 	{ Resource::Property::Type::Float, "Float" },
 	{ Resource::Property::Type::String, "String" },
 	{ Resource::Property::Type::Sprite, "Sprite" },
-	{ Resource::Property::Type::Texture, "Texture" }
+	{ Resource::Property::Type::Texture, "Texture" },
+	{ Resource::Property::Type::Model, "Model" }
 };
 
 Inspector::Inspector()
@@ -199,7 +201,6 @@ void Inspector::RenderNodeValue(const std::shared_ptr<Resource::Property>& prop)
 		ofn.lpstrFile = filePath.data();
 		ofn.nMaxFile = MAX_PATH;
 		ofn.Flags = OFN_FILEMUSTEXIST | OFN_EXPLORER;
-		ofn.lpstrDefExt = L"dat";
 		if (!::GetOpenFileName(&ofn))
 			break;
 
@@ -222,6 +223,31 @@ void Inspector::RenderNodeValue(const std::shared_ptr<Resource::Property>& prop)
 	}
 	case Resource::Property::Type::Texture:
 	{
+		break;
+	}
+	case Resource::Property::Type::Model:
+	{
+		ImGui::SetNextItemWidth(50.0f);
+		if (!ImGui::Button("..."))
+			break;
+
+		std::array<wchar_t, MAX_PATH> filePath{};
+		OPENFILENAME ofn{};
+		ofn.lStructSize = sizeof(ofn);
+		ofn.lpstrFilter = L"FBX Files (*.fbx)\0*.fbx\0";
+		ofn.lpstrFile = filePath.data();
+		ofn.nMaxFile = MAX_PATH;
+		ofn.Flags = OFN_FILEMUSTEXIST | OFN_EXPLORER;
+		if (!::GetOpenFileName(&ofn))
+			break;
+
+		auto fbxHandler{ FbxHandler::GetInstance() };
+		if (!fbxHandler)
+			break;
+
+		auto model{ fbxHandler->Load(filePath.data()) };
+		prop->Set(model);
+		App::OnPropertyModified.Notify(prop);
 		break;
 	}
 	default:

@@ -53,6 +53,25 @@ public:
 	float y;
 };
 
+class Float3
+{
+public:
+	Float3(float x = 0.0f, float y = 0.0f, float z = 0.0f);
+
+	Float3 operator+(const Float3& rhs);
+	Float3 operator-();
+	Float3 operator-(const Float3& rhs);
+	Float3& operator+=(const Float3& rhs);
+	Float3& operator-=(const Float3& rhs);
+	Float3 operator*(float rhs);
+	Float3 operator/(float rhs);
+
+public:
+	float x;
+	float y;
+	float z;
+};
+
 class Rect
 {
 public:
