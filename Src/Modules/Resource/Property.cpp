@@ -6,34 +6,81 @@
 
 namespace Resource
 {
-	Property::Iterator::Iterator(const Property* prop, size_t index) :
-		m_property{ prop },
-		m_index{ index }
+	Property::Iterator::Iterator(std::vector<std::shared_ptr<Property>>::iterator iterator) :
+		m_iterator{ iterator }
 	{
 	}
 
-	DLL_API Property::Iterator& Property::Iterator::operator=(const Iterator& iter)
+	DLL_API Property::Iterator::reference Property::Iterator::operator*() const
 	{
-		m_property = iter.m_property;
-		m_index = iter.m_index;
-		return *this;
+		return { (*m_iterator)->GetName(), *m_iterator };
 	}
 
 	DLL_API Property::Iterator& Property::Iterator::operator++()
 	{
-		++m_index;
+		++m_iterator;
 		return *this;
 	}
 
-	DLL_API bool Property::Iterator::operator!=(const Iterator& iter) const
+	DLL_API Property::Iterator Property::Iterator::operator++(int)
 	{
-		return (m_property != iter.m_property) || (m_index != iter.m_index);
+		Iterator temp{ *this };
+		++*this;
+		return temp;
 	}
 
-	DLL_API std::pair<std::wstring, std::shared_ptr<Resource::Property>> Property::Iterator::operator*() const
+	DLL_API Property::Iterator& Property::Iterator::operator+=(const difference_type offset)
 	{
-		auto child{ m_property->m_children[m_index] };
-		return std::make_pair(child->GetName(), child);
+		m_iterator += offset;
+		return *this;
+	}
+
+	DLL_API Property::Iterator Property::Iterator::operator+(const difference_type offset)
+	{
+		Iterator temp{ *this };
+		temp += offset;
+		return temp;
+	}
+
+	DLL_API Property::Iterator& Property::Iterator::operator--()
+	{
+		--m_iterator;
+		return *this;
+	}
+
+	DLL_API Property::Iterator Property::Iterator::operator--(int)
+	{
+		Iterator temp{ *this };
+		--*this;
+		return temp;
+	}
+
+	DLL_API Property::Iterator& Property::Iterator::operator-=(const difference_type offset)
+	{
+		m_iterator -= offset;
+		return *this;
+	}
+
+	DLL_API Property::Iterator Property::Iterator::operator-(const difference_type offset)
+	{
+		Iterator temp{ *this };
+		temp -= offset;
+		return temp;
+	}
+
+	DLL_API Property::Iterator::reference Property::Iterator::operator[](const difference_type offset)
+	{
+		return *(*this + offset);
+	}
+
+	DLL_API bool Property::Iterator::operator==(const Iterator& rhs) const
+	{
+		return m_iterator == rhs.m_iterator;
+	}
+
+	DLL_API bool Property::Iterator::operator!=(const Iterator& rhs) const
+	{
+		return m_iterator != rhs.m_iterator;
 	}
 
 	DLL_API Property::Property() :
@@ -42,14 +89,14 @@ namespace Resource
 	{
 	}
 
-	DLL_API Property::Iterator Property::begin() const
+	DLL_API Property::Iterator Property::begin()
 	{
-		return Iterator{ this, 0 };
+		return Iterator{ m_children.begin() };
 	}
 
-	DLL_API Property::Iterator Property::end() const
+	DLL_API Property::Iterator Property::end()
 	{
-		return Iterator{ this, m_children.size() };
+		return Iterator{ m_children.end() };
 	}
 
 	DLL_API void Property::Add(const std::shared_ptr<Property>& child)

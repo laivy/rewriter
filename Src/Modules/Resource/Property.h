@@ -39,25 +39,41 @@ namespace Resource
 		class Iterator
 		{
 		public:
-			Iterator(const Property* prop, size_t index);
+			using iterator_concept = std::contiguous_iterator_tag;
+			using iterator_category = std::random_access_iterator_tag;
+			using value_type = std::pair<const std::wstring, std::shared_ptr<Property>>;
+			using difference_type = ptrdiff_t;
+			using pointer = value_type*;
+			using reference = std::pair<const std::wstring, std::shared_ptr<Property>&>;
+
+		public:
+			Iterator() = default;
+			Iterator(std::vector<std::shared_ptr<Property>>::iterator iterator);
 			~Iterator() = default;
 
-			DLL_API Iterator& operator=(const Iterator& iter);
+			DLL_API reference operator*() const;
 			DLL_API Iterator& operator++();
-			DLL_API bool operator!=(const Iterator& iter) const;
-			DLL_API std::pair<std::wstring, std::shared_ptr<Resource::Property>> operator*() const;
+			DLL_API Iterator operator++(int);
+			DLL_API Iterator& operator+=(const difference_type offset);
+			DLL_API Iterator operator+(const difference_type offset);
+			DLL_API Iterator& operator--();
+			DLL_API Iterator operator--(int);
+			DLL_API Iterator& operator-=(const difference_type offset);
+			DLL_API Iterator operator-(const difference_type offset);
+			DLL_API reference operator[](const difference_type offset);
+			DLL_API bool operator==(const Iterator& rhs) const;
+			DLL_API bool operator!=(const Iterator& rhs) const;
 
 		private:
-			const Property* m_property;
-			size_t m_index;
+			std::vector<std::shared_ptr<Property>>::iterator m_iterator;
 		};
 
 	public:
 		DLL_API Property();
 		~Property() = default;
 
-		DLL_API Iterator begin() const;
-		DLL_API Iterator end() const;
+		DLL_API Iterator begin();
+		DLL_API Iterator end();
 
 		DLL_API void Add(const std::shared_ptr<Property>& child);
 		DLL_API void Delete(const std::shared_ptr<Property>& child);
