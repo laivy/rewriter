@@ -2,7 +2,7 @@
 
 namespace Graphics
 {
-	constexpr auto FRAME_COUNT{ 3u };
+	constexpr auto FRAME_COUNT{ 3U };
 
 	// Windows
 	extern HWND g_hWnd;
@@ -28,6 +28,7 @@ namespace Graphics
 	extern UINT g_frameIndex;
 	extern UINT g_rtvDescriptorSize;
 	extern UINT g_cbvSrvUavDescriptorIncrementSize;
+	extern std::vector<ComPtr<ID3D12Resource>> g_uploadBuffers;
 
 	// D3D11on12
 	extern ComPtr<ID3D11On12Device> g_d3d11On12Device;

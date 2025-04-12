@@ -223,6 +223,24 @@ void Inspector::RenderNodeValue(const std::shared_ptr<Resource::Property>& prop)
 	}
 	case Resource::Property::Type::Texture:
 	{
+		ImGui::SetNextItemWidth(50.0f);
+		if (!ImGui::Button("..."))
+			break;
+
+		std::array<wchar_t, MAX_PATH> filePath{};
+		OPENFILENAME ofn{};
+		ofn.lStructSize = sizeof(ofn);
+		ofn.lpstrFilter = L"DDS Files (*.dds)\0*.dds\0";
+		ofn.lpstrFile = filePath.data();
+		ofn.nMaxFile = MAX_PATH;
+		ofn.Flags = OFN_FILEMUSTEXIST | OFN_EXPLORER;
+		if (!::GetOpenFileName(&ofn))
+			break;
+
+		std::ifstream file{ filePath.data(), std::ios::binary };
+		if (!file)
+			break;
+
 		break;
 	}
 	case Resource::Property::Type::Model:

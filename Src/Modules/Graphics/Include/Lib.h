@@ -4,6 +4,7 @@
 #endif
 #define DLL_API __declspec(dllimport)
 
+#include "../Camera.h"
 #include "../Graphics.h"
 #include "../Graphics2D.h"
 #include "../Graphics3D.h"

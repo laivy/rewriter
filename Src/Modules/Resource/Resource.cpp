@@ -9,15 +9,18 @@ namespace Resource
 	std::map<std::wstring, std::shared_ptr<Property>> g_resources;
 	std::function<std::shared_ptr<Sprite>(std::span<std::byte>)> g_loadSprite;
 	std::function<std::shared_ptr<Texture>(std::span<std::byte>)> g_loadTexture;
+	std::function<std::shared_ptr<Model>(std::span<std::byte>)> g_loadModel;
 
 #if defined _CLIENT || defined _TOOL
 	DLL_API void Initialize(
 		const std::function<std::shared_ptr<Sprite>(std::span<std::byte>)>& loadSprite,
-		const std::function<std::shared_ptr<Texture>(std::span<std::byte>)>& loadTexture
+		const std::function<std::shared_ptr<Texture>(std::span<std::byte>)>& loadTexture,
+		const std::function<std::shared_ptr<Model>(std::span<std::byte>)>& loadModel
 	)
 	{
 		g_loadSprite = loadSprite;
 		g_loadTexture = loadTexture;
+		g_loadModel = loadModel;
 	}
 #endif
 
@@ -88,23 +91,44 @@ namespace Resource
 		case Property::Type::Model:
 		{
 			auto data{ prop->GetModel() };
+
+			// 총 바이너리 크기
+			// 미리 0으로 써둬서 자리를 만들어두고 마지막에 세팅해줌
+			uint32_t totalSize{ 0 };
+			auto startPos{ file.tellp() };
+			file.write(reinterpret_cast<const char*>(&totalSize), sizeof(totalSize));
+
+			// 메쉬 개수
 			auto meshCount{ static_cast<uint32_t>(data->meshes.size()) };
 			file.write(reinterpret_cast<const char*>(&meshCount), sizeof(meshCount));
+			totalSize += sizeof(meshCount);
+
+			// 메쉬 데이터
 			for (const auto& mesh : data->meshes)
 			{
 				auto vertexCount{ static_cast<uint32_t>(mesh.vertices.size()) };
 				file.write(reinterpret_cast<const char*>(&vertexCount), sizeof(vertexCount));
+				totalSize += sizeof(vertexCount);
+
 				for (const auto& vertex : mesh.vertices)
 				{
-					file.write(reinterpret_cast<const char*>(&vertex.x), sizeof(vertex.x));
-					file.write(reinterpret_cast<const char*>(&vertex.y), sizeof(vertex.y));
-					file.write(reinterpret_cast<const char*>(&vertex.z), sizeof(vertex.z));
+					file.write(reinterpret_cast<const char*>(&vertex), sizeof(vertex));
+					totalSize += sizeof(vertex);
 				}
 
 				auto indexCount{ static_cast<uint32_t>(mesh.indices.size()) };
 				file.write(reinterpret_cast<const char*>(&indexCount), sizeof(indexCount));
+				totalSize += sizeof(indexCount);
+
 				file.write(reinterpret_cast<const char*>(mesh.indices.data()), sizeof(int) * indexCount);
+				totalSize += sizeof(int) * indexCount;
 			}
+
+			auto endPos{ file.tellp() };
+			file.seekp(startPos);
+			file.write(reinterpret_cast<const char*>(&totalSize), sizeof(totalSize));
+
+			file.seekp(endPos);
 			break;
 		}
 		default:
@@ -231,30 +255,17 @@ namespace Resource
 		}
 		case Property::Type::Model:
 		{
-			auto model{ std::make_shared<Model>() };
+			uint32_t length{};
+			file.read(reinterpret_cast<char*>(&length), sizeof(length));
+#ifdef _SERVER
+			file.ignore(length);
+#else
+			std::unique_ptr<std::byte[]> binary{ new std::byte[length]{} };
+			file.read(reinterpret_cast<char*>(binary.get()), length);
 
-			uint32_t meshCount{};
-			file.read(reinterpret_cast<char*>(&meshCount), sizeof(meshCount));
-			model->meshes.resize(meshCount);
-			for (auto& mesh : model->meshes)
-			{
-				uint32_t vertexCount{};
-				file.read(reinterpret_cast<char*>(&vertexCount), sizeof(vertexCount));
-				mesh.vertices.resize(vertexCount);
-				for (auto& vertex : mesh.vertices)
-				{
-					file.read(reinterpret_cast<char*>(&vertex.x), sizeof(vertex.x));
-					file.read(reinterpret_cast<char*>(&vertex.y), sizeof(vertex.y));
-					file.read(reinterpret_cast<char*>(&vertex.z), sizeof(vertex.z));
-				}
-
-				uint32_t indexCount{};
-				file.read(reinterpret_cast<char*>(&indexCount), sizeof(indexCount));
-				mesh.indices.resize(indexCount);
-				file.read(reinterpret_cast<char*>(mesh.indices.data()), sizeof(int) * indexCount);
-			}
-
-			prop->Set(model);
+			auto data{ g_loadModel(std::span{ binary.get(), length }) };
+			prop->Set(data);
+#endif
 			break;
 		}
 		default:

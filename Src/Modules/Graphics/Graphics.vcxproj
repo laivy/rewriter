@@ -346,12 +346,15 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release_Client|x64'">NotUsing</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release_Tool|x64'">NotUsing</PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="Camera.cpp" />
+    <ClCompile Include="ConstantBuffer.cpp" />
     <ClCompile Include="DescriptorHeap.cpp" />
     <ClCompile Include="DllMain.cpp" />
     <ClCompile Include="Global.cpp" />
     <ClCompile Include="Graphics.cpp" />
     <ClCompile Include="Graphics2D.cpp" />
     <ClCompile Include="Graphics3D.cpp" />
+    <ClCompile Include="Graphics3DUtil.cpp" />
     <ClCompile Include="GraphicsImGui.cpp" />
     <ClCompile Include="Stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug_Client|x64'">Create</PrecompiledHeader>
@@ -379,11 +382,14 @@
     <ClInclude Include="..\..\Shared\Type.h" />
     <ClInclude Include="..\..\Shared\Util.h" />
     <ClInclude Include="..\Resource\Include\Lib.h" />
+    <ClInclude Include="Camera.h" />
+    <ClInclude Include="ConstantBuffer.h" />
     <ClInclude Include="DescriptorHeap.h" />
     <ClInclude Include="Global.h" />
     <ClInclude Include="Graphics.h" />
     <ClInclude Include="Graphics2D.h" />
     <ClInclude Include="Graphics3D.h" />
+    <ClInclude Include="Graphics3DUtil.h" />
     <ClInclude Include="GraphicsImGui.h" />
     <ClInclude Include="Include\Lib.h" />
     <ClInclude Include="Stdafx.h" />

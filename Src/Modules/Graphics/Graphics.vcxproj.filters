@@ -39,6 +39,12 @@
     <Filter Include="소스 파일\Shared">
       <UniqueIdentifier>{1c10cf6a-6ec8-4a98-812e-c8e948694cb5}</UniqueIdentifier>
     </Filter>
+    <Filter Include="헤더 파일\D2D">
+      <UniqueIdentifier>{84624f8d-0e92-41bc-8385-076ab1f03d64}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="소스 파일\D2D">
+      <UniqueIdentifier>{67405b34-9d41-45a3-aa01-fcc3af9d3d9f}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="DllMain.cpp">
@@ -51,12 +57,6 @@
       <Filter>소스 파일</Filter>
     </ClCompile>
     <ClCompile Include="Global.cpp">
-      <Filter>소스 파일</Filter>
-    </ClCompile>
-    <ClCompile Include="Graphics2D.cpp">
-      <Filter>소스 파일</Filter>
-    </ClCompile>
-    <ClCompile Include="GraphicsImGui.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
     <ClCompile Include="Graphics3D.cpp">
@@ -101,6 +101,21 @@
     <ClCompile Include="..\..\..\External\Imgui\imgui_widgets.cpp">
       <Filter>외부 파일\ImGui</Filter>
     </ClCompile>
+    <ClCompile Include="Camera.cpp">
+      <Filter>소스 파일\D3D</Filter>
+    </ClCompile>
+    <ClCompile Include="GraphicsImGui.cpp">
+      <Filter>소스 파일\D3D</Filter>
+    </ClCompile>
+    <ClCompile Include="Graphics3DUtil.cpp">
+      <Filter>소스 파일\D3D</Filter>
+    </ClCompile>
+    <ClCompile Include="ConstantBuffer.cpp">
+      <Filter>소스 파일\D3D</Filter>
+    </ClCompile>
+    <ClCompile Include="Graphics2D.cpp">
+      <Filter>소스 파일\D2D</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Stdafx.h">
@@ -113,12 +128,6 @@
       <Filter>헤더 파일</Filter>
     </ClInclude>
     <ClInclude Include="Global.h">
-      <Filter>헤더 파일</Filter>
-    </ClInclude>
-    <ClInclude Include="Graphics2D.h">
-      <Filter>헤더 파일</Filter>
-    </ClInclude>
-    <ClInclude Include="GraphicsImGui.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
     <ClInclude Include="..\Resource\Include\Lib.h">
@@ -174,6 +183,21 @@
     </ClInclude>
     <ClInclude Include="..\..\Shared\Stdafx.h">
       <Filter>헤더 파일\Shared</Filter>
+    </ClInclude>
+    <ClInclude Include="Camera.h">
+      <Filter>헤더 파일\D3D</Filter>
+    </ClInclude>
+    <ClInclude Include="GraphicsImGui.h">
+      <Filter>헤더 파일\D3D</Filter>
+    </ClInclude>
+    <ClInclude Include="Graphics3DUtil.h">
+      <Filter>헤더 파일\D3D</Filter>
+    </ClInclude>
+    <ClInclude Include="ConstantBuffer.h">
+      <Filter>헤더 파일\D3D</Filter>
+    </ClInclude>
+    <ClInclude Include="Graphics2D.h">
+      <Filter>헤더 파일\D2D</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

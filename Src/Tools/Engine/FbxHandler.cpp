@@ -4,7 +4,7 @@
 
 namespace
 {
-	std::vector<Float3> LoadVertices(fbxsdk::FbxMesh* mesh)
+	std::vector<Resource::Model::Vertex> LoadVertices(fbxsdk::FbxMesh* mesh)
 	{
 		/*
 		* 제어점(Control Point)은 중복되지 않는 정점이다.
@@ -12,13 +12,13 @@ namespace
 		*/
 
 		int count{ mesh->GetControlPointsCount() };
-		std::vector<Float3> vertices(count);
+		std::vector<Resource::Model::Vertex> vertices(count);
 		for (int i{ 0 }; i < count; ++i)
 		{
 			auto point{ mesh->GetControlPointAt(i) };
-			vertices[i].x = static_cast<float>(point[0]);
-			vertices[i].y = static_cast<float>(point[1]);
-			vertices[i].z = static_cast<float>(point[2]);
+			vertices[i].position.x = static_cast<float>(point[0]);
+			vertices[i].position.y = static_cast<float>(point[1]);
+			vertices[i].position.z = static_cast<float>(point[2]);
 		}
 		return vertices;
 	}
@@ -42,7 +42,10 @@ namespace
 					auto fbxMesh{ node->GetMesh() };
 					auto vertices{ LoadVertices(fbxMesh) };
 					auto indices{ LoadIndices(fbxMesh) };
-					meshes.emplace_back(vertices, indices);
+
+					auto& mesh{ meshes.emplace_back() };
+					mesh.vertices = std::move(vertices);
+					mesh.indices = std::move(indices);
 				}
 
 				int count{ node->GetChildCount() };
@@ -91,6 +94,6 @@ std::shared_ptr<Resource::Model> FbxHandler::Load(std::filesystem::path path)
 	auto meshes{ LoadMeshes(root) };
 
 	auto model{ std::make_shared<Resource::Model>() };
-	model->meshes = meshes;
+	model->meshes = std::move(meshes);
 	return model;
 }
