@@ -66,7 +66,13 @@ LRESULT App::WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 	case WM_SIZE:
 	{
 		if (wParam != SIZE_MINIMIZED)
-			OnResize.Notify(GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam));
+		{
+			int width{ GET_X_LPARAM(lParam) };
+			int height{ GET_Y_LPARAM(lParam) };
+			if (width == 0 && height == 0)
+				assert(false);
+			OnResize.Notify(width, height);
+		}
 		break;
 	}
 	case WM_DESTROY:
@@ -183,5 +189,5 @@ void App::Render()
 			uiEditor->Render2D();
 	}
 	Graphics::D2D::End();
-	Graphics::Present();
+	Graphics::D3D::Present();
 }

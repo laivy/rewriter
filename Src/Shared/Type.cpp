@@ -1,3 +1,4 @@
+#include "Stdafx.h"
 #include "Type.h"
 
 Int2::Int2(int32_t x, int32_t y) :
@@ -207,4 +208,9 @@ bool RectF::Contains(const Float2& point) const
 		top <= point.y && point.y <= bottom)
 		return true;
 	return false;
+}
+
+Matrix::Matrix() :
+	m{}
+{
 }

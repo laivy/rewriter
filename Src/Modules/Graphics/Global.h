@@ -2,6 +2,11 @@
 
 namespace Graphics
 {
+	namespace D3D
+	{
+		class Camera;
+	}
+
 	constexpr auto FRAME_COUNT{ 3U };
 
 	// Windows
@@ -28,7 +33,6 @@ namespace Graphics
 	extern UINT g_frameIndex;
 	extern UINT g_rtvDescriptorSize;
 	extern UINT g_cbvSrvUavDescriptorIncrementSize;
-	extern std::vector<ComPtr<ID3D12Resource>> g_uploadBuffers;
 
 	// D3D11on12
 	extern ComPtr<ID3D11On12Device> g_d3d11On12Device;
@@ -41,12 +45,15 @@ namespace Graphics
 	extern ComPtr<ID2D1Device2> g_d2dDevice;
 	extern std::array<ComPtr<ID2D1Bitmap1>, FRAME_COUNT> g_d2dRenderTargets;
 	extern std::vector<ID2D1RenderTarget*> g_d2dCurrentRenderTargets;
-
-	// DWRITE
 	extern ComPtr<IDWriteFactory5> g_dwriteFactory;
 
 #ifdef _IMGUI
 	// IMGUI
 	extern ComPtr<ID3D12DescriptorHeap> g_imGuiSrvDescHeap;
 #endif
+
+	// 로직에 사용되는 변수들
+	extern std::vector<ComPtr<ID3D12Resource>> g_uploadBuffers;
+	extern std::shared_ptr<D3D::Camera> g_camera;
+	extern Int2 g_renderTargetSize;
 }

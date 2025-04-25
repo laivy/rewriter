@@ -45,6 +45,9 @@
     <Filter Include="소스 파일\D2D">
       <UniqueIdentifier>{67405b34-9d41-45a3-aa01-fcc3af9d3d9f}</UniqueIdentifier>
     </Filter>
+    <Filter Include="소스 파일\D3D\Shader">
+      <UniqueIdentifier>{eb9a55cc-f6ae-4523-abaf-d51cb9ee5989}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="DllMain.cpp">
@@ -115,6 +118,9 @@
     </ClCompile>
     <ClCompile Include="Graphics2D.cpp">
       <Filter>소스 파일\D2D</Filter>
+    </ClCompile>
+    <ClCompile Include="PipelineState.cpp">
+      <Filter>소스 파일\D3D</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -199,5 +205,21 @@
     <ClInclude Include="Graphics2D.h">
       <Filter>헤더 파일\D2D</Filter>
     </ClInclude>
+    <ClInclude Include="PipelineState.h">
+      <Filter>헤더 파일\D3D</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <FxCompile Include="Shader\model.vs">
+      <Filter>소스 파일\D3D\Shader</Filter>
+    </FxCompile>
+    <FxCompile Include="Shader\model.ps">
+      <Filter>소스 파일\D3D\Shader</Filter>
+    </FxCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Shader\Constants.hlsli">
+      <Filter>소스 파일\D3D\Shader</Filter>
+    </None>
   </ItemGroup>
 </Project>

@@ -1,7 +1,5 @@
 #pragma once
-
-interface ID2D1DeviceContext2;
-interface ID2D1BitmapRenderTarget;
+#ifdef _DIRECT2D
 
 namespace Resource
 {
@@ -10,17 +8,7 @@ namespace Resource
 
 namespace Graphics::D2D
 {
-	class Layer
-	{
-	public:
-		Layer(ComPtr<ID2D1BitmapRenderTarget> target);
-		~Layer() = default;
-
-		ID2D1BitmapRenderTarget* GetRenderTarget() const;
-
-	private:
-		ComPtr<ID2D1BitmapRenderTarget> m_renderTarget;
-	};
+	class Layer;
 
 	struct Scale
 	{
@@ -64,6 +52,11 @@ namespace Graphics::D2D
 		float size{};
 	};
 
+	bool Initialize();
+	void CleanUp();
+
+	void OnResize(int width, int height);
+
 	DLL_API void Begin();
 	DLL_API bool End();
 
@@ -85,3 +78,4 @@ namespace Graphics::D2D
 
 	DLL_API TextMetrics GetTextMetrics(std::wstring_view text, const Font& font);
 }
+#endif

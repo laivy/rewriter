@@ -1,4 +1,5 @@
 #include "Stdafx.h"
+#include "Camera.h"
 #include "Global.h"
 
 namespace Graphics
@@ -27,7 +28,6 @@ namespace Graphics
 	UINT g_frameIndex;
 	UINT g_rtvDescriptorSize;
 	UINT g_cbvSrvUavDescriptorIncrementSize;
-	std::vector<ComPtr<ID3D12Resource>> g_uploadBuffers;
 
 	// D3D11on12
 	ComPtr<ID3D11On12Device> g_d3d11On12Device;
@@ -48,4 +48,9 @@ namespace Graphics
 	// IMGUI
 	ComPtr<ID3D12DescriptorHeap> g_imGuiSrvDescHeap;
 #endif
+
+	// 로직에 사용되는 변수들
+	std::vector<ComPtr<ID3D12Resource>> g_uploadBuffers;
+	std::shared_ptr<D3D::Camera> g_camera;
+	Int2 g_renderTargetSize{};
 }

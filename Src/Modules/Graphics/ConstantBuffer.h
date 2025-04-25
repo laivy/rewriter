@@ -5,6 +5,7 @@ namespace Graphics::D3D
 {
 	enum class RootParameterIndex
 	{
+		Object,
 		Camera,
 	};
 
@@ -19,7 +20,7 @@ namespace Graphics::D3D
 			constexpr auto size{ (sizeof(T) + 255) & ~255 };
 			m_buffer = CreateResourceBuffer(D3D12_HEAP_TYPE_UPLOAD, D3D12_RESOURCE_STATE_GENERIC_READ, size);
 			m_buffer->Map(0, nullptr, reinterpret_cast<void**>(&m_data));
-			new(m_data) T{};
+			std::construct_at<T>(m_data);
 		}
 
 		T* operator->() const

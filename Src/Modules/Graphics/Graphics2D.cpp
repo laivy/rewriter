@@ -1,4 +1,5 @@
 #include "Stdafx.h"
+#ifdef _DIRECT2D
 #include "Global.h"
 #include "Graphics2D.h"
 
@@ -62,14 +63,73 @@ namespace
 
 namespace Graphics::D2D
 {
-	Layer::Layer(ComPtr<ID2D1BitmapRenderTarget> target) :
-		m_renderTarget{ target }
+	class Layer
 	{
+	public:
+		Layer(ComPtr<ID2D1BitmapRenderTarget> target) :
+			m_renderTarget{ target }
+		{
+		}
+
+		~Layer() = default;
+
+		ID2D1BitmapRenderTarget* GetRenderTarget() const
+		{
+			return m_renderTarget.Get();
+		}
+
+	private:
+		ComPtr<ID2D1BitmapRenderTarget> m_renderTarget;
+	};
+
+	static bool CreateD2DFactory()
+	{
+		if (FAILED(::D2D1CreateFactory(D2D1_FACTORY_TYPE_SINGLE_THREADED, g_d2dFactory.GetAddressOf())))
+			return false;
+		return true;
 	}
 
-	ID2D1BitmapRenderTarget* Layer::GetRenderTarget() const
+	static bool CreateD2DDevice()
 	{
-		return m_renderTarget.Get();
+		ComPtr<IDXGIDevice> dxgiDevice;
+		if (FAILED(g_d3d11On12Device.As(&dxgiDevice)))
+			return false;
+		if (FAILED(g_d2dFactory->CreateDevice(dxgiDevice.Get(), &g_d2dDevice)))
+			return false;
+		if (FAILED(g_d2dDevice->CreateDeviceContext(D2D1_DEVICE_CONTEXT_OPTIONS_NONE, &g_d2dContext)))
+			return false;
+		return true;
+	}
+
+	static bool CreateD2DRenderTarget()
+	{
+		UINT dpi{ ::GetDpiForWindow(g_hWnd) };
+		auto bitmapProperties{ D2D1::BitmapProperties1(
+			D2D1_BITMAP_OPTIONS_TARGET | D2D1_BITMAP_OPTIONS_CANNOT_DRAW,
+			D2D1::PixelFormat(DXGI_FORMAT_UNKNOWN, D2D1_ALPHA_MODE_PREMULTIPLIED),
+			static_cast<float>(dpi),
+			static_cast<float>(dpi)
+		) };
+
+		for (UINT i = 0; i < FRAME_COUNT; ++i)
+		{
+			ComPtr<IDXGISurface> surface;
+			if (FAILED(g_wrappedBackBuffers[i].As(&surface)))
+				return false;
+			if (FAILED(g_d2dContext->CreateBitmapFromDxgiSurface(surface.Get(), &bitmapProperties, &g_d2dRenderTargets[i])))
+				return false;
+		}
+
+		g_d2dContext->SetTarget(g_d2dRenderTargets.front().Get());
+		g_d2dCurrentRenderTargets.push_back(g_d2dContext.Get());
+		return true;
+	}
+
+	static bool CreateDWriteFactory()
+	{
+		if (FAILED(::DWriteCreateFactory(DWRITE_FACTORY_TYPE_SHARED, __uuidof(IDWriteFactory5), &g_dwriteFactory)))
+			return false;
+		return true;
 	}
 
 	DLL_API Color::Color() :
@@ -82,6 +142,35 @@ namespace Graphics::D2D
 	{
 		rgb = 0x00FFFFFF & argb;
 		a = (0xFF000000 & argb) / static_cast<float>(0xFF);
+	}
+
+	bool Initialize()
+	{
+		if (!CreateD2DFactory())
+			return false;
+		if (!CreateD2DDevice())
+			return false;
+		if (!CreateD2DRenderTarget())
+			return false;
+		if (!CreateDWriteFactory())
+			return false;
+		if (FAILED(::CoInitializeEx(nullptr, COINIT_MULTITHREADED))) // IWICImagingFactory
+			return false;
+		return true;
+	}
+
+	void CleanUp()
+	{
+		::CoUninitialize();
+	}
+
+	void OnResize(int width, int height)
+	{
+		/*
+		* D3D::OnResize 함수에서 이미 렌더타겟을 해제시켜 놓음
+		* 따라서 여기서는 Direct2D 렌더타겟만 새로 만듦
+		*/
+		CreateD2DRenderTarget();
 	}
 
 	DLL_API void Begin()
@@ -294,3 +383,4 @@ namespace Graphics::D2D
 		return textMetrics;
 	}
 }
+#endif
