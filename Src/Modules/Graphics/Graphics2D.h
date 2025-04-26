@@ -55,10 +55,8 @@ namespace Graphics::D2D
 	bool Initialize();
 	void CleanUp();
 
-	void OnResize(int width, int height);
-
 	DLL_API void Begin();
-	DLL_API bool End();
+	DLL_API void End();
 
 	DLL_API std::shared_ptr<Resource::Sprite> LoadSprite(std::span<std::byte> binary);
 	DLL_API std::shared_ptr<Layer> CreateLayer(const Float2& size);

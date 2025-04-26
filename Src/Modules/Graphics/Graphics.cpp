@@ -3,6 +3,7 @@
 #include "Graphics.h"
 #include "Graphics2D.h"
 #include "Graphics3D.h"
+#include "SwapChain.h"
 
 namespace Graphics
 {
@@ -24,7 +25,11 @@ namespace Graphics
 
 	DLL_API void OnResize(int width, int height)
 	{
-		D3D::OnResize(width, height);
-		D2D::OnResize(width, height);
+		g_swapChain->WaitForPreviousFrame();
+
+		g_viewport = { 0.0f, 0.0f, static_cast<float>(width), static_cast<float>(height), 0.0f, 1.0f };
+		g_scissorRect = { 0, 0, static_cast<long>(width), static_cast<long>(height) };
+		g_swapChain->Resize(width, height);
+		g_renderTargetSize = Int2{ width, height };
 	}
 }

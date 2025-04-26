@@ -13,11 +13,9 @@ namespace Graphics::D3D
 	bool Initialize();
 	void CleanUp();
 
-	void OnResize(int width, int height);
-
-	DLL_API bool Begin();
-	DLL_API bool End();
-	DLL_API bool Present();
+	DLL_API void Begin();
+	DLL_API void End();
+	DLL_API void Present();
 
 	DLL_API std::shared_ptr<Resource::Texture> LoadTexture(std::span<std::byte> binary);
 	DLL_API std::shared_ptr<Resource::Model> LoadModel(std::span<std::byte> binary);

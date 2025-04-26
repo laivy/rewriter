@@ -122,6 +122,9 @@
     <ClCompile Include="PipelineState.cpp">
       <Filter>소스 파일\D3D</Filter>
     </ClCompile>
+    <ClCompile Include="SwapChain.cpp">
+      <Filter>소스 파일\D3D</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Stdafx.h">
@@ -206,6 +209,9 @@
       <Filter>헤더 파일\D2D</Filter>
     </ClInclude>
     <ClInclude Include="PipelineState.h">
+      <Filter>헤더 파일\D3D</Filter>
+    </ClInclude>
+    <ClInclude Include="SwapChain.h">
       <Filter>헤더 파일\D3D</Filter>
     </ClInclude>
   </ItemGroup>

@@ -1,0 +1,387 @@
+#include "Stdafx.h"
+#include "Global.h"
+#include "SwapChain.h"
+
+namespace Graphics::D3D
+{
+	SwapChain::SwapChain(UINT width, UINT height) :
+		m_frameResources{},
+		m_fenceEvent{ NULL },
+		m_frameIndex{}
+	{
+		DXGI_SWAP_CHAIN_DESC1 desc{};
+		desc.Width = width;
+		desc.Height = height;
+		desc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+		desc.SampleDesc.Count = 1;
+		desc.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
+		desc.BufferCount = FRAME_COUNT;
+		desc.SwapEffect = DXGI_SWAP_EFFECT_FLIP_DISCARD;
+
+		ComPtr<IDXGISwapChain1> swapChain1;
+		if (FAILED(g_dxgiFactory->CreateSwapChainForHwnd(g_commandQueue.Get(), g_hWnd, &desc, nullptr, nullptr, &swapChain1)))
+		{
+			assert(false);
+			return;
+		}
+
+		ComPtr<IDXGISwapChain3> swapChain3;
+		if (FAILED(swapChain1.As(&swapChain3)))
+		{
+			assert(false);
+			return;
+		}
+
+		m_swapChain = swapChain3;
+		m_frameIndex = swapChain3->GetCurrentBackBufferIndex();
+
+		CreateRenderTargetView();
+#ifdef _DIRECT2D
+		CreateWrappedResource();
+		CreateDirect2DRenderTarget();
+#endif
+		CreateDepthStencil();
+		CreateCommandAllocators();
+		CreateFence();
+	}
+
+	SwapChain::~SwapChain()
+	{
+		WaitForGPU();
+		::CloseHandle(m_fenceEvent);
+	}
+
+	void SwapChain::Begin3D()
+	{
+		if (FAILED(m_frameResources[m_frameIndex].commandAllocator->Reset()))
+		{
+			assert(false);
+			return;
+		}
+
+		if (FAILED(g_commandList->Reset(m_frameResources[m_frameIndex].commandAllocator.Get(), nullptr)))
+		{
+			assert(false);
+			return;
+		}
+
+		g_commandList->SetGraphicsRootSignature(g_rootSignature.Get());
+		g_commandList->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(m_frameResources[m_frameIndex].backBuffer.Get(), D3D12_RESOURCE_STATE_PRESENT, D3D12_RESOURCE_STATE_RENDER_TARGET));
+
+		CD3DX12_CPU_DESCRIPTOR_HANDLE rtvHandle{ m_rtvDescHeap->GetCPUDescriptorHandleForHeapStart(), static_cast<INT>(m_frameIndex), s_rtvDescSize };
+		CD3DX12_CPU_DESCRIPTOR_HANDLE dsvHandle{ m_dsvDescHeap->GetCPUDescriptorHandleForHeapStart() };
+		g_commandList->OMSetRenderTargets(1, &rtvHandle, TRUE, &dsvHandle);
+		g_commandList->RSSetViewports(1, &g_viewport);
+		g_commandList->RSSetScissorRects(1, &g_scissorRect);
+
+		constexpr std::array clearColor{ 0.15625f, 0.171875f, 0.203125f, 1.0f };
+		g_commandList->ClearRenderTargetView(rtvHandle, clearColor.data(), 0, nullptr);
+		g_commandList->ClearDepthStencilView(dsvHandle, D3D12_CLEAR_FLAG_DEPTH | D3D12_CLEAR_FLAG_STENCIL, 1.0f, 0, 0, nullptr);
+	}
+
+	void SwapChain::End3D()
+	{
+#ifndef _DIRECT2D
+		UINT frameIndex{ g_swapChain->GetFrameIndex() };
+		g_commandList->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(g_swapChain->GetRenderTarget(frameIndex).Get(), D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PRESENT));
+#endif
+		if (FAILED(g_commandList->Close()))
+		{
+			assert(false);
+			return;
+		}
+
+		std::array<ID3D12CommandList*, 1> commandLists{ g_commandList.Get() };
+		g_commandQueue->ExecuteCommandLists(static_cast<UINT>(commandLists.size()), commandLists.data());
+	}
+
+	void SwapChain::Begin2D()
+	{
+		g_d3d11On12Device->AcquireWrappedResources(m_frameResources[m_frameIndex].wrappedBackBuffer.GetAddressOf(), 1);
+		g_d2dContext->SetTarget(m_frameResources[m_frameIndex].d2dRenderTarget.Get());
+		g_d2dContext->BeginDraw();
+		g_d2dCurrentRenderTargets.clear();
+		g_d2dCurrentRenderTargets.push_back(g_d2dContext.Get());
+	}
+
+	void SwapChain::End2D()
+	{
+		if (FAILED(g_d2dContext->EndDraw()))
+		{
+			assert(false);
+			return;
+		}
+
+		g_d3d11On12Device->ReleaseWrappedResources(m_frameResources[m_frameIndex].wrappedBackBuffer.GetAddressOf(), 1);
+		g_d3d11DeviceContext->Flush();
+	}
+
+	void SwapChain::Present()
+	{
+		if (FAILED(m_swapChain->Present(1, 0)))
+		{
+			assert(false);
+			return;
+		}
+
+		WaitForPreviousFrame();
+	}
+
+	void SwapChain::Resize(UINT width, UINT height)
+	{
+		for (size_t i{ 0 }; i < m_frameResources.size(); ++i)
+		{
+			m_frameResources[i].backBuffer.Reset();
+			m_frameResources[i].wrappedBackBuffer.Reset();
+			m_frameResources[i].d2dRenderTarget.Reset();
+			m_frameResources[i].fenceValue = m_frameResources[m_frameIndex].fenceValue;
+		}
+		g_d2dContext->SetTarget(nullptr);
+		g_d2dContext->Flush();
+		g_d3d11DeviceContext->OMSetRenderTargets(0, nullptr, nullptr);
+		g_d3d11DeviceContext->Flush();
+
+		DXGI_SWAP_CHAIN_DESC desc{};
+		m_swapChain->GetDesc(&desc);
+		m_swapChain->ResizeBuffers(desc.BufferCount, width, height, desc.BufferDesc.Format, desc.Flags);
+		m_frameIndex = m_swapChain->GetCurrentBackBufferIndex();
+
+		CreateRenderTargetView();
+		CreateDepthStencil();
+#ifdef _DIRECT2D
+		CreateWrappedResource();
+		CreateDirect2DRenderTarget();
+#endif
+	}
+
+	void SwapChain::WaitForGPU()
+	{
+		if (FAILED(g_commandQueue->Signal(m_fence.Get(), m_frameResources[m_frameIndex].fenceValue)))
+		{
+			assert(false);
+			return;
+		}
+		if (FAILED(m_fence->SetEventOnCompletion(m_frameResources[m_frameIndex].fenceValue, m_fenceEvent)))
+		{
+			assert(false);
+			return;
+		}
+		if (::WaitForSingleObjectEx(m_fenceEvent, INFINITE, FALSE) == WAIT_FAILED)
+		{
+			assert(false);
+			return;
+		}
+		++m_frameResources[m_frameIndex].fenceValue;
+	}
+
+	void SwapChain::WaitForPreviousFrame()
+	{
+		const UINT64 fenceValue{ m_frameResources[m_frameIndex].fenceValue };
+		if (FAILED(g_commandQueue->Signal(m_fence.Get(), fenceValue)))
+		{
+			assert(false);
+			return;
+		}
+
+		if (m_fence->GetCompletedValue() < fenceValue)
+		{
+			if (FAILED(m_fence->SetEventOnCompletion(fenceValue, m_fenceEvent)))
+			{
+				assert(false);
+				return;
+			}
+			if (::WaitForSingleObjectEx(m_fenceEvent, INFINITE, FALSE) == WAIT_FAILED)
+			{
+				assert(false);
+				return;
+			}
+		}
+
+		m_frameIndex = m_swapChain->GetCurrentBackBufferIndex();
+		m_frameResources[m_frameIndex].fenceValue = fenceValue + 1;
+	}
+
+	void SwapChain::CreateRenderTargetView()
+	{
+		// 렌더타겟뷰 서술자 힙
+		DXGI_SWAP_CHAIN_DESC swapChainDesc{};
+		m_swapChain->GetDesc(&swapChainDesc);
+
+		D3D12_DESCRIPTOR_HEAP_DESC desc{};
+		desc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_RTV;
+		desc.NumDescriptors = swapChainDesc.BufferCount;
+		desc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_NONE;
+		if (FAILED(g_d3dDevice->CreateDescriptorHeap(&desc, IID_PPV_ARGS(&m_rtvDescHeap))))
+		{
+			assert(false);
+			return;
+		}
+
+		// 렌더타겟 서술자 크기
+		if (s_rtvDescSize == 0)
+			s_rtvDescSize = g_d3dDevice->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_RTV);
+
+		// 렌더타겟뷰
+		CD3DX12_CPU_DESCRIPTOR_HANDLE handle{ m_rtvDescHeap->GetCPUDescriptorHandleForHeapStart() };
+		for (size_t i{ 0 }; i < FRAME_COUNT; ++i)
+		{
+			if (FAILED(m_swapChain->GetBuffer(static_cast<UINT>(i), IID_PPV_ARGS(&m_frameResources[i].backBuffer))))
+			{
+				assert(false);
+				return;
+			}
+			g_d3dDevice->CreateRenderTargetView(m_frameResources[i].backBuffer.Get(), nullptr, handle);
+			handle.Offset(s_rtvDescSize);
+		}
+	}
+
+#ifdef _DIRECT2D
+	void SwapChain::CreateWrappedResource()
+	{
+		for (size_t i{ 0 }; i < FRAME_COUNT; ++i)
+		{
+			D3D11_RESOURCE_FLAGS flags{ D3D11_BIND_RENDER_TARGET };
+			if (FAILED(g_d3d11On12Device->CreateWrappedResource(
+				m_frameResources[i].backBuffer.Get(),
+				&flags,
+				D3D12_RESOURCE_STATE_RENDER_TARGET,
+				D3D12_RESOURCE_STATE_PRESENT,
+				IID_PPV_ARGS(&m_frameResources[i].wrappedBackBuffer))))
+			{
+				assert(false);
+				return;
+			}
+		}
+	}
+
+	void SwapChain::CreateDirect2DRenderTarget()
+	{
+		UINT dpi{ ::GetDpiForWindow(g_hWnd) };
+		auto bitmapProperties{ D2D1::BitmapProperties1(
+			D2D1_BITMAP_OPTIONS_TARGET | D2D1_BITMAP_OPTIONS_CANNOT_DRAW,
+			D2D1::PixelFormat(DXGI_FORMAT_UNKNOWN, D2D1_ALPHA_MODE_PREMULTIPLIED),
+			static_cast<float>(dpi),
+			static_cast<float>(dpi)
+		) };
+
+		for (size_t i{ 0 }; i < FRAME_COUNT; ++i)
+		{
+			ComPtr<IDXGISurface> surface;
+			if (FAILED(m_frameResources[i].wrappedBackBuffer.As(&surface)))
+			{
+				assert(false);
+				return;
+			}
+			if (FAILED(g_d2dContext->CreateBitmapFromDxgiSurface(surface.Get(), &bitmapProperties, &m_frameResources[i].d2dRenderTarget)))
+			{
+				assert(false);
+				return;
+			}
+		}
+
+		g_d2dContext->SetTarget(m_frameResources.front().d2dRenderTarget.Get());
+		g_d2dCurrentRenderTargets.push_back(g_d2dContext.Get());
+	}
+#endif
+
+	void SwapChain::CreateDepthStencil()
+	{
+		// 깊이스텐실뷰 서술자 힙
+		D3D12_DESCRIPTOR_HEAP_DESC dsvHeapDesc{};
+		dsvHeapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_DSV;
+		dsvHeapDesc.NumDescriptors = 1;
+		dsvHeapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_NONE;
+		if (FAILED(g_d3dDevice->CreateDescriptorHeap(&dsvHeapDesc, IID_PPV_ARGS(&m_dsvDescHeap))))
+		{
+			assert(false);
+			return;
+		}
+
+		// 깊이스텐실뷰
+		DXGI_SWAP_CHAIN_DESC swapChainDesc{};
+		m_swapChain->GetDesc(&swapChainDesc);
+
+		D3D12_RESOURCE_DESC bufferDesc{};
+		bufferDesc.Dimension = D3D12_RESOURCE_DIMENSION_TEXTURE2D;
+		bufferDesc.Width = swapChainDesc.BufferDesc.Width;
+		bufferDesc.Height = swapChainDesc.BufferDesc.Height;
+		bufferDesc.DepthOrArraySize = 1;
+		bufferDesc.MipLevels = 1;
+		bufferDesc.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
+		bufferDesc.SampleDesc.Count = 1;
+		bufferDesc.Flags = D3D12_RESOURCE_FLAG_ALLOW_DEPTH_STENCIL;
+
+		D3D12_CLEAR_VALUE clearValue{};
+		clearValue.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
+		clearValue.DepthStencil.Depth = 1.0f;
+		clearValue.DepthStencil.Stencil = 0;
+
+		CD3DX12_HEAP_PROPERTIES heapProp{ D3D12_HEAP_TYPE_DEFAULT };
+		if (FAILED(g_d3dDevice->CreateCommittedResource(
+			&heapProp,
+			D3D12_HEAP_FLAG_NONE,
+			&bufferDesc,
+			D3D12_RESOURCE_STATE_DEPTH_WRITE,
+			&clearValue,
+			IID_PPV_ARGS(&m_depthStencil))))
+		{
+			assert(false);
+			return;
+		}
+
+		D3D12_DEPTH_STENCIL_VIEW_DESC dsvDesc{};
+		dsvDesc.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
+		dsvDesc.ViewDimension = D3D12_DSV_DIMENSION_TEXTURE2D;
+		dsvDesc.Flags = D3D12_DSV_FLAG_NONE;
+		g_d3dDevice->CreateDepthStencilView(m_depthStencil.Get(), &dsvDesc, m_dsvDescHeap->GetCPUDescriptorHandleForHeapStart());
+	}
+
+	void SwapChain::CreateCommandAllocators()
+	{
+		// 명령할당자
+		for (size_t i{ 0 }; i < FRAME_COUNT; ++i)
+		{
+			if (FAILED(g_d3dDevice->CreateCommandAllocator(D3D12_COMMAND_LIST_TYPE_DIRECT, IID_PPV_ARGS(&m_frameResources[i].commandAllocator))))
+			{
+				assert(false);
+				return;
+			}
+		}
+
+		// 명령리스트
+		// 0번 명령할당자를 이용하여 모든 프레임에서 공통으로 사용할 명령리스트 만듦
+		if (FAILED(g_d3dDevice->CreateCommandList(
+			0,
+			D3D12_COMMAND_LIST_TYPE_DIRECT,
+			m_frameResources.front().commandAllocator.Get(),
+			nullptr,
+			IID_PPV_ARGS(&g_commandList))))
+		{
+			assert(false);
+			return;
+		}
+		if (FAILED(g_commandList->Close()))
+		{
+			assert(false);
+			return;
+		}
+	}
+
+	void SwapChain::CreateFence()
+	{
+		if (FAILED(g_d3dDevice->CreateFence(0, D3D12_FENCE_FLAG_NONE, IID_PPV_ARGS(&m_fence))))
+		{
+			assert(false);
+			return;
+		}
+
+		m_fenceEvent = ::CreateEvent(NULL, FALSE, FALSE, NULL);
+		if (!m_fenceEvent)
+		{
+			assert(false);
+			return;
+		}
+
+		++m_frameResources[m_frameIndex].fenceValue;
+	}
+}

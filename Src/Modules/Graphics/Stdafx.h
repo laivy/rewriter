@@ -5,17 +5,22 @@
 #include <wincodec.h>
 
 // DirectX
-#include <d2d1_3.h>
-#include <d3d11on12.h>
 #include <d3d12.h>
 #include <d3dcompiler.h>
 #include <DirectXMath.h>
 #include <dwrite.h>
 #include <dwrite_3.h>
 #include <dxgi1_6.h>
+
+#ifdef _DIRECT2D
+#include <d2d1_3.h>
+#include <d3d11on12.h>
+#endif
+
 #ifdef _DEBUG
 #include <dxgidebug.h>
-#endif // _DEBUG
+#endif
+
 #include "External/DirectX/d3dx12.h"
 #include "External/DirectX/WICTextureLoader12.h"
 
