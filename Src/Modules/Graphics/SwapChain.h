@@ -22,8 +22,10 @@ namespace Graphics::D3D
 
 		void Begin3D();
 		void End3D();
+#ifdef _DIRECT2D
 		void Begin2D();
 		void End2D();
+#endif
 		void Present();
 
 		void Resize(UINT width, UINT height);

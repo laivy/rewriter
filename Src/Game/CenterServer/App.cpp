@@ -143,6 +143,6 @@ void App::Render()
 		Graphics::ImGui::End();
 	}
 	Graphics::D3D::End();
-	Graphics::Present();
+	Graphics::D3D::Present();
 #endif
 }

@@ -182,5 +182,5 @@ void App::Render()
 			sm->Render2D();
 	}
 	Graphics::D2D::End();
-	Graphics::Present();
+	Graphics::D3D::Present();
 }

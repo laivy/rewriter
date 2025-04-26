@@ -82,8 +82,7 @@ namespace Graphics::D3D
 	void SwapChain::End3D()
 	{
 #ifndef _DIRECT2D
-		UINT frameIndex{ g_swapChain->GetFrameIndex() };
-		g_commandList->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(g_swapChain->GetRenderTarget(frameIndex).Get(), D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PRESENT));
+		g_commandList->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(m_frameResources[m_frameIndex].backBuffer.Get(), D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PRESENT));
 #endif
 		if (FAILED(g_commandList->Close()))
 		{
@@ -95,6 +94,7 @@ namespace Graphics::D3D
 		g_commandQueue->ExecuteCommandLists(static_cast<UINT>(commandLists.size()), commandLists.data());
 	}
 
+#ifdef _DIRECT2D
 	void SwapChain::Begin2D()
 	{
 		g_d3d11On12Device->AcquireWrappedResources(m_frameResources[m_frameIndex].wrappedBackBuffer.GetAddressOf(), 1);
@@ -115,6 +115,7 @@ namespace Graphics::D3D
 		g_d3d11On12Device->ReleaseWrappedResources(m_frameResources[m_frameIndex].wrappedBackBuffer.GetAddressOf(), 1);
 		g_d3d11DeviceContext->Flush();
 	}
+#endif
 
 	void SwapChain::Present()
 	{
@@ -132,14 +133,18 @@ namespace Graphics::D3D
 		for (size_t i{ 0 }; i < m_frameResources.size(); ++i)
 		{
 			m_frameResources[i].backBuffer.Reset();
+#ifdef _DIRECT2D
 			m_frameResources[i].wrappedBackBuffer.Reset();
 			m_frameResources[i].d2dRenderTarget.Reset();
+#endif
 			m_frameResources[i].fenceValue = m_frameResources[m_frameIndex].fenceValue;
 		}
+#ifdef _DIRECT2D
 		g_d2dContext->SetTarget(nullptr);
 		g_d2dContext->Flush();
 		g_d3d11DeviceContext->OMSetRenderTargets(0, nullptr, nullptr);
 		g_d3d11DeviceContext->Flush();
+#endif
 
 		DXGI_SWAP_CHAIN_DESC desc{};
 		m_swapChain->GetDesc(&desc);

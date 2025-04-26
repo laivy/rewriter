@@ -20,6 +20,7 @@ namespace Graphics
 	D3D12_RECT g_scissorRect;
 	UINT g_cbvSrvUavDescriptorIncrementSize;
 
+#ifdef _DIRECT2D
 	// D3D11on12
 	ComPtr<ID3D11On12Device> g_d3d11On12Device;
 	ComPtr<ID3D11DeviceContext> g_d3d11DeviceContext;
@@ -29,9 +30,8 @@ namespace Graphics
 	ComPtr<ID2D1Device2> g_d2dDevice;
 	ComPtr<ID2D1DeviceContext2> g_d2dContext;
 	std::vector<ID2D1RenderTarget*> g_d2dCurrentRenderTargets;
-
-	// DWRITE
 	ComPtr<IDWriteFactory5> g_dwriteFactory;
+#endif
 
 #ifdef _IMGUI
 	// IMGUI
