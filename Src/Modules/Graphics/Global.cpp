@@ -18,7 +18,6 @@ namespace Graphics
 	ComPtr<ID3D12RootSignature> g_rootSignature;
 	D3D12_VIEWPORT g_viewport;
 	D3D12_RECT g_scissorRect;
-	UINT g_cbvSrvUavDescriptorIncrementSize;
 
 #ifdef _DIRECT2D
 	// D3D11on12

@@ -1,4 +1,6 @@
 #include "Stdafx.h"
+#include "Descriptor.h"
+#include "DescriptorManager.h"
 #include "Global.h"
 #include "SwapChain.h"
 
@@ -68,8 +70,8 @@ namespace Graphics::D3D
 		g_commandList->SetGraphicsRootSignature(g_rootSignature.Get());
 		g_commandList->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(m_frameResources[m_frameIndex].backBuffer.Get(), D3D12_RESOURCE_STATE_PRESENT, D3D12_RESOURCE_STATE_RENDER_TARGET));
 
-		CD3DX12_CPU_DESCRIPTOR_HANDLE rtvHandle{ m_rtvDescHeap->GetCPUDescriptorHandleForHeapStart(), static_cast<INT>(m_frameIndex), s_rtvDescSize };
-		CD3DX12_CPU_DESCRIPTOR_HANDLE dsvHandle{ m_dsvDescHeap->GetCPUDescriptorHandleForHeapStart() };
+		auto rtvHandle{ m_frameResources[m_frameIndex].rtvDesc->GetCpuHandle() };
+		auto dsvHandle{ m_dsvDesc->GetCpuHandle() };
 		g_commandList->OMSetRenderTargets(1, &rtvHandle, TRUE, &dsvHandle);
 		g_commandList->RSSetViewports(1, &g_viewport);
 		g_commandList->RSSetScissorRects(1, &g_scissorRect);
@@ -208,26 +210,6 @@ namespace Graphics::D3D
 
 	void SwapChain::CreateRenderTargetView()
 	{
-		// 렌더타겟뷰 서술자 힙
-		DXGI_SWAP_CHAIN_DESC swapChainDesc{};
-		m_swapChain->GetDesc(&swapChainDesc);
-
-		D3D12_DESCRIPTOR_HEAP_DESC desc{};
-		desc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_RTV;
-		desc.NumDescriptors = swapChainDesc.BufferCount;
-		desc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_NONE;
-		if (FAILED(g_d3dDevice->CreateDescriptorHeap(&desc, IID_PPV_ARGS(&m_rtvDescHeap))))
-		{
-			assert(false);
-			return;
-		}
-
-		// 렌더타겟 서술자 크기
-		if (s_rtvDescSize == 0)
-			s_rtvDescSize = g_d3dDevice->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_RTV);
-
-		// 렌더타겟뷰
-		CD3DX12_CPU_DESCRIPTOR_HANDLE handle{ m_rtvDescHeap->GetCPUDescriptorHandleForHeapStart() };
 		for (size_t i{ 0 }; i < FRAME_COUNT; ++i)
 		{
 			if (FAILED(m_swapChain->GetBuffer(static_cast<UINT>(i), IID_PPV_ARGS(&m_frameResources[i].backBuffer))))
@@ -235,8 +217,12 @@ namespace Graphics::D3D
 				assert(false);
 				return;
 			}
-			g_d3dDevice->CreateRenderTargetView(m_frameResources[i].backBuffer.Get(), nullptr, handle);
-			handle.Offset(s_rtvDescSize);
+
+			if (auto dm{ DescriptorManager::GetInstance() })
+			{
+				m_frameResources[i].rtvDesc = dm->Allocate(D3D12_DESCRIPTOR_HEAP_TYPE_RTV);
+				m_frameResources[i].rtvDesc->CreateRenderTargetView(m_frameResources[i].backBuffer, nullptr);
+			}
 		}
 	}
 
@@ -291,17 +277,6 @@ namespace Graphics::D3D
 
 	void SwapChain::CreateDepthStencil()
 	{
-		// 깊이스텐실뷰 서술자 힙
-		D3D12_DESCRIPTOR_HEAP_DESC dsvHeapDesc{};
-		dsvHeapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_DSV;
-		dsvHeapDesc.NumDescriptors = 1;
-		dsvHeapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_NONE;
-		if (FAILED(g_d3dDevice->CreateDescriptorHeap(&dsvHeapDesc, IID_PPV_ARGS(&m_dsvDescHeap))))
-		{
-			assert(false);
-			return;
-		}
-
 		// 깊이스텐실뷰
 		DXGI_SWAP_CHAIN_DESC swapChainDesc{};
 		m_swapChain->GetDesc(&swapChainDesc);
@@ -338,7 +313,12 @@ namespace Graphics::D3D
 		dsvDesc.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
 		dsvDesc.ViewDimension = D3D12_DSV_DIMENSION_TEXTURE2D;
 		dsvDesc.Flags = D3D12_DSV_FLAG_NONE;
-		g_d3dDevice->CreateDepthStencilView(m_depthStencil.Get(), &dsvDesc, m_dsvDescHeap->GetCPUDescriptorHandleForHeapStart());
+
+		if (auto dm{ DescriptorManager::GetInstance()})
+		{
+			m_dsvDesc = dm->Allocate(D3D12_DESCRIPTOR_HEAP_TYPE_DSV);
+			m_dsvDesc->CreateDepthStencilView(m_depthStencil, &dsvDesc);
+		}
 	}
 
 	void SwapChain::CreateCommandAllocators()

@@ -125,6 +125,7 @@
     <ClInclude Include="Inspector.h" />
     <ClInclude Include="Stdafx.h" />
     <ClInclude Include="UIEditor.h" />
+    <ClInclude Include="Viewport.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\..\External\Imgui\imgui.cpp">
@@ -183,6 +184,7 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="UIEditor.cpp" />
+    <ClCompile Include="Viewport.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

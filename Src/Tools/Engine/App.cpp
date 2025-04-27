@@ -7,6 +7,7 @@
 #include "Hierarchy.h"
 #include "Inspector.h"
 #include "UIEditor.h"
+#include "Viewport.h"
 
 App::App() :
 	m_isActive{ true }
@@ -143,12 +144,13 @@ void App::InitApp()
 	ImGui::StyleColorsDark();
 
 	// 싱글톤 생성
+	Clipboard::Instantiate();
 	Desktop::Instantiate();
 	Explorer::Instantiate();
+	FbxHandler::Instantiate();
 	Hierarchy::Instantiate();
 	Inspector::Instantiate();
-	Clipboard::Instantiate();
-	FbxHandler::Instantiate();
+	Viewport::Instantiate();
 }
 
 void App::Update()
@@ -160,6 +162,8 @@ void App::Update()
 		hierarchy->Update(deltaTime);
 	if (auto inspector{ Inspector::GetInstance() })
 		inspector->Update(deltaTime);
+	if (auto viewport{ Viewport::GetInstance() })
+		viewport->Update(deltaTime);
 }
 
 void App::Render()
@@ -178,6 +182,8 @@ void App::Render()
 				inspector->Render();
 			if (auto uiEditor{ UIEditor::GetInstance() })
 				uiEditor->Render();
+			if (auto viewport{ Viewport::GetInstance() })
+				viewport->Render();
 			ImGui::ShowDemoWindow();
 		}
 		Graphics::ImGui::End();

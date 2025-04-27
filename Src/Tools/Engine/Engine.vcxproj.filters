@@ -143,6 +143,9 @@
     <ClInclude Include="FbxHandler.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
+    <ClInclude Include="Viewport.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="App.cpp">
@@ -221,6 +224,9 @@
       <Filter>외부 파일\Imgui</Filter>
     </ClCompile>
     <ClCompile Include="FbxHandler.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="Viewport.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
   </ItemGroup>

@@ -1,5 +1,6 @@
 #include "Stdafx.h"
 #include "Camera.h"
+#include "DescriptorManager.h"
 #include "Global.h"
 #include "Graphics3D.h"
 #include "Graphics3DUtil.h"
@@ -57,7 +58,8 @@ namespace Graphics::D3D
 			if (FAILED(::D3D12CreateDevice(adapter.Get(), D3D_FEATURE_LEVEL_11_0, IID_PPV_ARGS(&g_d3dDevice))))
 				return false;
 		}
-		g_cbvSrvUavDescriptorIncrementSize = g_d3dDevice->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
+
+		DescriptorManager::Instantiate();
 		return true;
 	}
 
@@ -177,7 +179,7 @@ namespace Graphics::D3D
 
 		if (!::ImGui_ImplDX12_Init(
 			g_d3dDevice.Get(),
-			FRAME_COUNT,
+			SwapChain::FRAME_COUNT,
 			DXGI_FORMAT_R8G8B8A8_UNORM,
 			g_imGuiSrvDescHeap.Get(),
 			g_imGuiSrvDescHeap->GetCPUDescriptorHandleForHeapStart(),

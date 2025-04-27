@@ -5,10 +5,9 @@ namespace Graphics
 	namespace D3D
 	{
 		class Camera;
+		class DescriptorHeap;
 		class SwapChain;
 	}
-
-	constexpr auto FRAME_COUNT{ 3U };
 
 	// Windows
 	extern HWND g_hWnd;
@@ -22,7 +21,6 @@ namespace Graphics
 	extern ComPtr<ID3D12RootSignature> g_rootSignature;
 	extern D3D12_VIEWPORT g_viewport;
 	extern D3D12_RECT g_scissorRect;
-	extern UINT g_cbvSrvUavDescriptorIncrementSize;
 
 #ifdef _DIRECT2D
 	// D3D11on12

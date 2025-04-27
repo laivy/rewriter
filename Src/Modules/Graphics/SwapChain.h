@@ -2,6 +2,8 @@
 
 namespace Graphics::D3D
 {
+	class Descriptor;
+
 	class SwapChain
 	{
 	private:
@@ -13,6 +15,7 @@ namespace Graphics::D3D
 			ComPtr<ID2D1Bitmap1> d2dRenderTarget;
 #endif
 			ComPtr<ID3D12CommandAllocator> commandAllocator;
+			Descriptor* rtvDesc;
 			UINT64 fenceValue;
 		};
 
@@ -43,18 +46,18 @@ namespace Graphics::D3D
 		void CreateCommandAllocators();
 		void CreateFence();
 
+	public:
+		static constexpr auto FRAME_COUNT{ 2U };
+
 	private:
-		static constexpr auto FRAME_COUNT{ 2ULL };
-		static inline UINT s_rtvDescSize{ 0 };
-
 		ComPtr<IDXGISwapChain3> m_swapChain;
-		ComPtr<ID3D12DescriptorHeap> m_rtvDescHeap;
-		ComPtr<ID3D12DescriptorHeap> m_dsvDescHeap;
 		ComPtr<ID3D12Resource> m_depthStencil;
+		Descriptor* m_dsvDesc;
 
-		std::array<FrameResource, FRAME_COUNT> m_frameResources;
 		ComPtr<ID3D12Fence> m_fence;
 		HANDLE m_fenceEvent;
 		UINT m_frameIndex;
+
+		std::array<FrameResource, FRAME_COUNT> m_frameResources;
 	};
 }

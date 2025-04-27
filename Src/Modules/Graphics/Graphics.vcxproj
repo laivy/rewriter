@@ -372,7 +372,8 @@
     </ClCompile>
     <ClCompile Include="Camera.cpp" />
     <ClCompile Include="ConstantBuffer.cpp" />
-    <ClCompile Include="DescriptorHeap.cpp" />
+    <ClCompile Include="Descriptor.cpp" />
+    <ClCompile Include="DescriptorManager.cpp" />
     <ClCompile Include="DllMain.cpp" />
     <ClCompile Include="Global.cpp" />
     <ClCompile Include="Graphics.cpp" />
@@ -381,6 +382,7 @@
     <ClCompile Include="Graphics3DUtil.cpp" />
     <ClCompile Include="GraphicsImGui.cpp" />
     <ClCompile Include="PipelineState.cpp" />
+    <ClCompile Include="RenderTarget.cpp" />
     <ClCompile Include="Stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug_Client|x64'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug_Server|x64'">Create</PrecompiledHeader>
@@ -410,7 +412,8 @@
     <ClInclude Include="..\Resource\Include\Lib.h" />
     <ClInclude Include="Camera.h" />
     <ClInclude Include="ConstantBuffer.h" />
-    <ClInclude Include="DescriptorHeap.h" />
+    <ClInclude Include="Descriptor.h" />
+    <ClInclude Include="DescriptorManager.h" />
     <ClInclude Include="Global.h" />
     <ClInclude Include="Graphics.h" />
     <ClInclude Include="Graphics2D.h" />
@@ -419,6 +422,7 @@
     <ClInclude Include="GraphicsImGui.h" />
     <ClInclude Include="Include\Lib.h" />
     <ClInclude Include="PipelineState.h" />
+    <ClInclude Include="RenderTarget.h" />
     <ClInclude Include="Stdafx.h" />
     <ClInclude Include="SwapChain.h" />
   </ItemGroup>
