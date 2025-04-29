@@ -81,6 +81,9 @@ namespace Graphics::D3D
 		constexpr std::array clearColor{ 0.15625f, 0.171875f, 0.203125f, 1.0f };
 		g_commandList->ClearRenderTargetView(rtvHandle, clearColor.data(), 0, nullptr);
 		g_commandList->ClearDepthStencilView(dsvHandle, D3D12_CLEAR_FLAG_DEPTH | D3D12_CLEAR_FLAG_STENCIL, 1.0f, 0, 0, nullptr);
+
+		if (auto dm{ D3D::DescriptorManager::GetInstance() })
+			dm->SetDescriptorHeaps();
 	}
 
 	void SwapChain::End3D()

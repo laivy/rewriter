@@ -15,10 +15,13 @@ namespace Graphics::D3D
 
 			Descriptor* Allocate();
 			void Deallocate(Descriptor* descriptor);
+			void Reserve(UINT size);
 
-#ifdef _IMGUI
 			ComPtr<ID3D12DescriptorHeap> GetHeap() const;
-#endif
+			UINT GetSize() const;
+
+		private:
+			UINT GetDescriptorSize() const;
 
 		private:
 			ComPtr<ID3D12DescriptorHeap> m_heap;
@@ -30,11 +33,15 @@ namespace Graphics::D3D
 		DescriptorManager();
 		~DescriptorManager() = default;
 
+		void SetDescriptorHeaps();
+
 		Descriptor* Allocate(D3D12_DESCRIPTOR_HEAP_TYPE type);
 		void Deallocate(D3D12_DESCRIPTOR_HEAP_TYPE type, Descriptor* descriptor);
 
 #ifdef _IMGUI
-		ComPtr<ID3D12DescriptorHeap> GetSrvHeap() const;
+		ComPtr<ID3D12DescriptorHeap> GetImGuiSrvHeap() const;
+		CD3DX12_CPU_DESCRIPTOR_HANDLE GetImGuiSrvCpuHandle() const;
+		CD3DX12_GPU_DESCRIPTOR_HANDLE GetImGuiSrvGpuHandle() const;
 #endif
 
 	private:
@@ -42,8 +49,13 @@ namespace Graphics::D3D
 		static inline UINT s_rtvDescriptorSize{ 0 };
 		static inline UINT s_dsvDescriptorSize{ 0 };
 
-		Heap m_srvHeap;
+		Heap m_cpuSrvHeap;
+		Heap m_gpuSrvHeap;
 		Heap m_rtvHeap;
 		Heap m_dsvHeap;
+#ifdef _IMGUI
+		Heap m_imGuiSrvHeap;
+		Descriptor* m_imGuiDescriptor;
+#endif
 	};
 }
