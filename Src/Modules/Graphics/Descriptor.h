@@ -15,6 +15,7 @@ namespace Graphics::D3D
 		Descriptor(Descriptor&& rhs) noexcept;
 		Descriptor& operator=(Descriptor&& rhs) noexcept;
 
+		void CreateShaderResourceView(const ComPtr<ID3D12Resource>& resource, const D3D12_SHADER_RESOURCE_VIEW_DESC* desc) const;
 		void CreateRenderTargetView(const ComPtr<ID3D12Resource>& resource, const D3D12_RENDER_TARGET_VIEW_DESC* desc) const;
 		void CreateDepthStencilView(const ComPtr<ID3D12Resource>& resource, const D3D12_DEPTH_STENCIL_VIEW_DESC* desc) const;
 

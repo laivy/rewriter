@@ -33,6 +33,11 @@ namespace Graphics::D3D
 		return *this;
 	}
 
+	void Descriptor::CreateShaderResourceView(const ComPtr<ID3D12Resource>& resource, const D3D12_SHADER_RESOURCE_VIEW_DESC* desc) const
+	{
+		g_d3dDevice->CreateShaderResourceView(resource.Get(), desc, m_cpuHandle);
+	}
+
 	void Descriptor::CreateRenderTargetView(const ComPtr<ID3D12Resource>& resource, const D3D12_RENDER_TARGET_VIEW_DESC* desc) const
 	{
 		g_d3dDevice->CreateRenderTargetView(resource.Get(), desc, m_cpuHandle);

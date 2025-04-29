@@ -1,10 +1,12 @@
 #include "Stdafx.h"
 #include "Camera.h"
+#include "Descriptor.h"
 #include "DescriptorManager.h"
 #include "Global.h"
 #include "Graphics3D.h"
 #include "Graphics3DUtil.h"
 #include "PipelineState.h"
+#include "RenderTarget.h"
 #include "SwapChain.h"
 #include "External/DirectX/DDSTextureLoader12.h"
 
@@ -158,13 +160,6 @@ namespace Graphics::D3D
 #ifdef _IMGUI
 	static bool InitializeImGui()
 	{
-		D3D12_DESCRIPTOR_HEAP_DESC srvHeapDesc{};
-		srvHeapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
-		srvHeapDesc.NumDescriptors = 1;
-		srvHeapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;
-		if (FAILED(g_d3dDevice->CreateDescriptorHeap(&srvHeapDesc, IID_PPV_ARGS(&g_imGuiSrvDescHeap))))
-			return false;
-
 		IMGUI_CHECKVERSION();
 		ImGui::CreateContext();
 
@@ -177,13 +172,19 @@ namespace Graphics::D3D
 		if (!::ImGui_ImplWin32_Init(g_hWnd))
 			return false;
 
+		auto dm{ DescriptorManager::GetInstance() };
+		if (!dm)
+			return false;
+
+		auto srv{ dm->Allocate(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV) };
+
 		if (!::ImGui_ImplDX12_Init(
 			g_d3dDevice.Get(),
 			SwapChain::FRAME_COUNT,
 			DXGI_FORMAT_R8G8B8A8_UNORM,
-			g_imGuiSrvDescHeap.Get(),
-			g_imGuiSrvDescHeap->GetCPUDescriptorHandleForHeapStart(),
-			g_imGuiSrvDescHeap->GetGPUDescriptorHandleForHeapStart()
+			dm->GetSrvHeap().Get(),
+			srv->GetCpuHandle(),
+			srv->GetGpuHandle()
 		))
 			return false;
 
@@ -205,8 +206,9 @@ namespace Graphics::D3D
 
 	static std::unique_ptr<VertexBuffer> CreateVertexBuffer(const std::vector<Resource::Model::Vertex>& vertices)
 	{
-		auto buffer{ CreateResourceBuffer(D3D12_HEAP_TYPE_DEFAULT, D3D12_RESOURCE_STATE_COPY_DEST, sizeof(Resource::Model::Vertex) * vertices.size()) };
+		auto buffer{ CreateResourceBuffer(D3D12_HEAP_TYPE_DEFAULT, D3D12_RESOURCE_STATE_COMMON, sizeof(Resource::Model::Vertex) * vertices.size()) };
 		CopyResource(buffer, std::span{ reinterpret_cast<const std::byte*>(vertices.data()), sizeof(Resource::Model::Vertex) * vertices.size() });
+		g_commandList->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(buffer.Get(), D3D12_RESOURCE_STATE_COPY_DEST, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER));
 
 		D3D12_VERTEX_BUFFER_VIEW view{};
 		view.BufferLocation = buffer->GetGPUVirtualAddress();
@@ -218,8 +220,9 @@ namespace Graphics::D3D
 
 	static std::unique_ptr<IndexBuffer> CreateIndexBuffer(const std::vector<int>& indices)
 	{
-		auto buffer{ CreateResourceBuffer(D3D12_HEAP_TYPE_DEFAULT, D3D12_RESOURCE_STATE_COPY_DEST, sizeof(int) * indices.size()) };
+		auto buffer{ CreateResourceBuffer(D3D12_HEAP_TYPE_DEFAULT, D3D12_RESOURCE_STATE_COMMON, sizeof(int) * indices.size()) };
 		CopyResource(buffer, std::span{ reinterpret_cast<const std::byte*>(indices.data()), sizeof(int) * indices.size() });
+		g_commandList->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(buffer.Get(), D3D12_RESOURCE_STATE_COPY_DEST, D3D12_RESOURCE_STATE_INDEX_BUFFER));
 
 		D3D12_INDEX_BUFFER_VIEW view{};
 		view.BufferLocation = buffer->GetGPUVirtualAddress();
@@ -268,7 +271,7 @@ namespace Graphics::D3D
 
 	DLL_API void Begin()
 	{
-		g_uploadBuffers.clear(); // 이전 프레임에 복사가 완료됐을 것이므로 업로드 버퍼 해제
+		//g_uploadBuffers.clear(); // 이전 프레임에 복사가 완료됐을 것이므로 업로드 버퍼 해제
 		g_camera.reset(); // 카메라 초기화
 		g_swapChain->Begin3D();
 	}
@@ -358,6 +361,21 @@ namespace Graphics::D3D
 
 		g_camera = camera;
 		g_camera->SetShaderConstants();
+	}
+
+	std::shared_ptr<RenderTarget> CreateRenderTarget(UINT width, UINT height)
+	{
+		return std::make_shared<RenderTarget>(width, height);
+	}
+
+	DLL_API void PushRenderTarget(const std::shared_ptr<RenderTarget>& renderTarget)
+	{
+		g_swapChain->PushRenderTarget(renderTarget);
+	}
+
+	DLL_API void PopRenderTarget()
+	{
+		g_swapChain->PopRenderTarget();
 	}
 
 	DLL_API void Render(const std::shared_ptr<Resource::Model>& model)

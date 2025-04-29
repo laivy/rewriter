@@ -2,11 +2,13 @@
 #include "Descriptor.h"
 #include "DescriptorManager.h"
 #include "Global.h"
+#include "RenderTarget.h"
 #include "SwapChain.h"
 
 namespace Graphics::D3D
 {
 	SwapChain::SwapChain(UINT width, UINT height) :
+		m_dsvDesc{ nullptr },
 		m_frameResources{},
 		m_fenceEvent{ NULL },
 		m_frameIndex{}
@@ -139,7 +141,7 @@ namespace Graphics::D3D
 			m_frameResources[i].wrappedBackBuffer.Reset();
 			m_frameResources[i].d2dRenderTarget.Reset();
 #endif
-			m_frameResources[i].fenceValue = m_frameResources[m_frameIndex].fenceValue;
+			m_frameResources[i].fenceValue = m_frameResources[m_frameIndex].fenceValue;			
 		}
 #ifdef _DIRECT2D
 		g_d2dContext->SetTarget(nullptr);
@@ -159,6 +161,37 @@ namespace Graphics::D3D
 		CreateWrappedResource();
 		CreateDirect2DRenderTarget();
 #endif
+	}
+
+	static std::vector<std::shared_ptr<RenderTarget>> g_renderTargets;
+	void SwapChain::PushRenderTarget(const std::shared_ptr<RenderTarget>& renderTarget)
+	{
+		g_commandList->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(renderTarget->GetResource().Get(), D3D12_RESOURCE_STATE_COMMON, D3D12_RESOURCE_STATE_RENDER_TARGET));
+
+		auto renderTargetCpuHandle{ renderTarget->GetRenderTargetCpuHandle() };
+		auto depthStencilCpuHandle{ renderTarget->GetDepthStencilCpuHandle() };
+		g_commandList->OMSetRenderTargets(1, &renderTargetCpuHandle, TRUE, &depthStencilCpuHandle);
+
+		float clearColor[4] = { 0.5f, 0.5f, 0.5f, 1.0f };
+		g_commandList->ClearRenderTargetView(renderTargetCpuHandle, clearColor, 0, nullptr);
+
+		g_renderTargets.push_back(renderTarget);
+	}
+
+	void SwapChain::PopRenderTarget()
+	{
+		g_commandList->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(g_renderTargets.back()->GetResource().Get(), D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_COMMON));
+		g_renderTargets.pop_back();
+		if (g_renderTargets.empty())
+		{
+			auto rtvHandle{ m_frameResources[m_frameIndex].rtvDesc->GetCpuHandle() };
+			auto dsvHandle{ m_dsvDesc->GetCpuHandle() };
+			g_commandList->OMSetRenderTargets(1, &rtvHandle, TRUE, &dsvHandle);
+		}
+		else
+		{
+
+		}
 	}
 
 	void SwapChain::WaitForGPU()
@@ -220,6 +253,11 @@ namespace Graphics::D3D
 
 			if (auto dm{ DescriptorManager::GetInstance() })
 			{
+				if (m_frameResources[i].rtvDesc)
+				{
+					dm->Deallocate(D3D12_DESCRIPTOR_HEAP_TYPE_RTV, m_frameResources[i].rtvDesc);
+					m_frameResources[i].rtvDesc = nullptr;
+				}
 				m_frameResources[i].rtvDesc = dm->Allocate(D3D12_DESCRIPTOR_HEAP_TYPE_RTV);
 				m_frameResources[i].rtvDesc->CreateRenderTargetView(m_frameResources[i].backBuffer, nullptr);
 			}
@@ -309,13 +347,18 @@ namespace Graphics::D3D
 			return;
 		}
 
-		D3D12_DEPTH_STENCIL_VIEW_DESC dsvDesc{};
-		dsvDesc.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
-		dsvDesc.ViewDimension = D3D12_DSV_DIMENSION_TEXTURE2D;
-		dsvDesc.Flags = D3D12_DSV_FLAG_NONE;
-
 		if (auto dm{ DescriptorManager::GetInstance()})
 		{
+			D3D12_DEPTH_STENCIL_VIEW_DESC dsvDesc{};
+			dsvDesc.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
+			dsvDesc.ViewDimension = D3D12_DSV_DIMENSION_TEXTURE2D;
+			dsvDesc.Flags = D3D12_DSV_FLAG_NONE;
+
+			if (m_dsvDesc)
+			{
+				dm->Deallocate(D3D12_DESCRIPTOR_HEAP_TYPE_DSV, m_dsvDesc);
+				m_dsvDesc = nullptr;
+			}
 			m_dsvDesc = dm->Allocate(D3D12_DESCRIPTOR_HEAP_TYPE_DSV);
 			m_dsvDesc->CreateDepthStencilView(m_depthStencil, &dsvDesc);
 		}

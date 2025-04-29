@@ -3,7 +3,7 @@
 class Viewport : public TSingleton<Viewport>
 {
 public:
-	Viewport() = default;
+	Viewport();
 	~Viewport() = default;
 
 	void Update(float deltaTime);

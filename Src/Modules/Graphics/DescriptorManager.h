@@ -16,10 +16,14 @@ namespace Graphics::D3D
 			Descriptor* Allocate();
 			void Deallocate(Descriptor* descriptor);
 
+#ifdef _IMGUI
+			ComPtr<ID3D12DescriptorHeap> GetHeap() const;
+#endif
+
 		private:
 			ComPtr<ID3D12DescriptorHeap> m_heap;
 			D3D12_DESCRIPTOR_HEAP_DESC m_desc;
-			std::vector<Descriptor> m_descriptors;
+			std::list<Descriptor> m_descriptors;
 		};
 
 	public:
@@ -28,6 +32,10 @@ namespace Graphics::D3D
 
 		Descriptor* Allocate(D3D12_DESCRIPTOR_HEAP_TYPE type);
 		void Deallocate(D3D12_DESCRIPTOR_HEAP_TYPE type, Descriptor* descriptor);
+
+#ifdef _IMGUI
+		ComPtr<ID3D12DescriptorHeap> GetSrvHeap() const;
+#endif
 
 	private:
 		static inline UINT s_srvDescriptorSize{ 0 };

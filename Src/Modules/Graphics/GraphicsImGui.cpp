@@ -1,14 +1,23 @@
 #include "Stdafx.h"
 #ifdef _IMGUI
+#include "DescriptorManager.h"
 #include "Global.h"
 #include "GraphicsImGui.h"
+#include "RenderTarget.h"
 #include "Shared/Util.h"
 
 namespace Graphics::ImGui
 {
 	DLL_API void Begin()
 	{
-		g_commandList->SetDescriptorHeaps(1, g_imGuiSrvDescHeap.GetAddressOf());
+		auto dm{ D3D::DescriptorManager::GetInstance() };
+		if (!dm)
+		{
+			assert(false);
+			return;
+		}
+		g_commandList->SetDescriptorHeaps(1, dm->GetSrvHeap().GetAddressOf());
+
 		::ImGui_ImplDX12_NewFrame();
 		::ImGui_ImplWin32_NewFrame();
 		::ImGui::NewFrame();
@@ -46,6 +55,11 @@ namespace Graphics::ImGui
 	DLL_API LRESULT WndProcHandler(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 	{
 		return ::ImGui_ImplWin32_WndProcHandler(hWnd, msg, wParam, lParam);
+	}
+
+	void Image(const std::shared_ptr<D3D::RenderTarget>& renderTarget, const ImVec2& size, const ImVec2& uv0, const ImVec2& uv1, const ImVec4& tint_col, const ImVec4& border_col)
+	{
+		::ImGui::Image(renderTarget->GetImGuiTextureID(), size, uv0, uv1, tint_col, border_col);
 	}
 }
 #endif

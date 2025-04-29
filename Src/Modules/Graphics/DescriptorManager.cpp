@@ -8,7 +8,7 @@ namespace Graphics::D3D
 	DescriptorManager::DescriptorManager() :
 		m_srvHeap{ D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV, 10, D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE, 0 },
 		m_rtvHeap{ D3D12_DESCRIPTOR_HEAP_TYPE_RTV, 2, D3D12_DESCRIPTOR_HEAP_FLAG_NONE, 0 },
-		m_dsvHeap{ D3D12_DESCRIPTOR_HEAP_TYPE_DSV, 1, D3D12_DESCRIPTOR_HEAP_FLAG_NONE, 0 }
+		m_dsvHeap{ D3D12_DESCRIPTOR_HEAP_TYPE_DSV, 2, D3D12_DESCRIPTOR_HEAP_FLAG_NONE, 0 }
 	{
 		if (s_srvDescriptorSize == 0)
 			s_srvDescriptorSize = g_d3dDevice->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
@@ -54,6 +54,11 @@ namespace Graphics::D3D
 		}
 	}
 
+	ComPtr<ID3D12DescriptorHeap> DescriptorManager::GetSrvHeap() const
+	{
+		return m_srvHeap.GetHeap();
+	}
+
 	DescriptorManager::Heap::Heap(D3D12_DESCRIPTOR_HEAP_TYPE type, UINT numDescriptors, D3D12_DESCRIPTOR_HEAP_FLAGS flags, UINT nodeMask) :
 		m_desc{}
 	{
@@ -62,26 +67,11 @@ namespace Graphics::D3D
 		m_desc.Flags = flags;
 		m_desc.NodeMask = nodeMask;
 		g_d3dDevice->CreateDescriptorHeap(&m_desc, IID_PPV_ARGS(&m_heap));
-
-		m_descriptors.reserve(numDescriptors);
 	}
 
 	Descriptor* DescriptorManager::Heap::Allocate()
 	{
-		// 크기 확장
-		if (m_descriptors.size() >= m_desc.NumDescriptors)
-		{
-			ComPtr<ID3D12DescriptorHeap> heap;
-			D3D12_DESCRIPTOR_HEAP_DESC desc{ m_desc };
-			desc.NumDescriptors += m_desc.NumDescriptors / 2;
-			g_d3dDevice->CreateDescriptorHeap(&desc, IID_PPV_ARGS(&heap));
-			g_d3dDevice->CopyDescriptorsSimple(m_desc.NumDescriptors, heap->GetCPUDescriptorHandleForHeapStart(), m_heap->GetCPUDescriptorHandleForHeapStart(), m_desc.Type);
-
-			m_heap.Swap(heap);
-			m_descriptors.resize(desc.NumDescriptors);
-		}
-
-		INT index{ static_cast<INT>(m_descriptors.size()) };
+		// 서술자 크기
 		UINT descriptorSize{ 0 };
 		switch (m_desc.Type)
 		{
@@ -99,6 +89,28 @@ namespace Graphics::D3D
 			break;
 		}
 
+		// 힙 크기 확장
+		if (m_descriptors.size() >= m_desc.NumDescriptors)
+		{
+			D3D12_DESCRIPTOR_HEAP_DESC desc{ m_desc };
+			desc.NumDescriptors += std::max(m_desc.NumDescriptors / 2, 1U);
+
+			ComPtr<ID3D12DescriptorHeap> heap;
+			g_d3dDevice->CreateDescriptorHeap(&desc, IID_PPV_ARGS(&heap));
+			g_d3dDevice->CopyDescriptorsSimple(m_desc.NumDescriptors, heap->GetCPUDescriptorHandleForHeapStart(), m_heap->GetCPUDescriptorHandleForHeapStart(), m_desc.Type);
+			m_desc.NumDescriptors = desc.NumDescriptors;
+
+			m_heap.Swap(heap);
+			for (size_t i{ 0 }; auto& descriptor : m_descriptors)
+			{
+				CD3DX12_CPU_DESCRIPTOR_HANDLE cpuHandle{ m_heap->GetCPUDescriptorHandleForHeapStart(), static_cast<INT>(i), descriptorSize };
+				CD3DX12_GPU_DESCRIPTOR_HANDLE gpuHandle{ m_heap->GetGPUDescriptorHandleForHeapStart(), static_cast<INT>(i), descriptorSize };
+				descriptor = Descriptor{ cpuHandle, gpuHandle };
+				++i;
+			}
+		}
+
+		INT index{ static_cast<INT>(m_descriptors.size()) };
 		CD3DX12_CPU_DESCRIPTOR_HANDLE cpuHandle{ m_heap->GetCPUDescriptorHandleForHeapStart(), index, descriptorSize };
 		CD3DX12_GPU_DESCRIPTOR_HANDLE gpuHandle{ m_heap->GetGPUDescriptorHandleForHeapStart(), index, descriptorSize };
 		auto& descriptor{ m_descriptors.emplace_back(cpuHandle, gpuHandle) };
@@ -108,5 +120,10 @@ namespace Graphics::D3D
 	void DescriptorManager::Heap::Deallocate(Descriptor* descriptor)
 	{
 		std::erase_if(m_descriptors, [descriptor](const auto& desc) { return &desc == descriptor; });
+	}
+
+	ComPtr<ID3D12DescriptorHeap> DescriptorManager::Heap::GetHeap() const
+	{
+		return m_heap;
 	}
 }

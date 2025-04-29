@@ -35,11 +35,6 @@ namespace Graphics
 	extern ComPtr<IDWriteFactory5> g_dwriteFactory;
 #endif
 
-#ifdef _IMGUI
-	// IMGUI
-	extern ComPtr<ID3D12DescriptorHeap> g_imGuiSrvDescHeap;
-#endif
-
 	// 로직에 사용되는 변수들
 	extern std::vector<ComPtr<ID3D12Resource>> g_uploadBuffers;
 	extern std::shared_ptr<D3D::Camera> g_camera;

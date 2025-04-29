@@ -3,6 +3,7 @@
 namespace Graphics::D3D
 {
 	class Descriptor;
+	class RenderTarget;
 
 	class SwapChain
 	{
@@ -32,6 +33,8 @@ namespace Graphics::D3D
 		void Present();
 
 		void Resize(UINT width, UINT height);
+		void PushRenderTarget(const std::shared_ptr<RenderTarget>& renderTarget);
+		void PopRenderTarget();
 
 		void WaitForGPU();
 		void WaitForPreviousFrame();

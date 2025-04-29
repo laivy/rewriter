@@ -114,5 +114,6 @@ namespace Graphics::D3D
 			assert(false && "INVALID PIPELINE STATE TYPE");
 			break;
 		}
+		SetPipelineState(type);
 	}
 }
