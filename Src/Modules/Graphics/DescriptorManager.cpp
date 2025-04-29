@@ -107,7 +107,9 @@ namespace Graphics::D3D
 		UINT descriptorSize{ GetDescriptorSize() };
 		INT index{ static_cast<INT>(m_descriptors.size()) };
 		CD3DX12_CPU_DESCRIPTOR_HANDLE cpuHandle{ m_heap->GetCPUDescriptorHandleForHeapStart(), index, descriptorSize };
-		CD3DX12_GPU_DESCRIPTOR_HANDLE gpuHandle{ m_heap->GetGPUDescriptorHandleForHeapStart(), index, descriptorSize };
+		CD3DX12_GPU_DESCRIPTOR_HANDLE gpuHandle{ D3D12_DEFAULT };
+		if (m_desc.Flags == D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE)
+			gpuHandle.InitOffsetted(m_heap->GetGPUDescriptorHandleForHeapStart(), index, descriptorSize);
 		auto& descriptor{ m_descriptors.emplace_back(cpuHandle, gpuHandle) };
 		return &descriptor;
 	}
@@ -136,7 +138,9 @@ namespace Graphics::D3D
 		for (size_t i{ 0 }; auto & descriptor : m_descriptors)
 		{
 			CD3DX12_CPU_DESCRIPTOR_HANDLE cpuHandle{ m_heap->GetCPUDescriptorHandleForHeapStart(), static_cast<INT>(i), descriptorSize };
-			CD3DX12_GPU_DESCRIPTOR_HANDLE gpuHandle{ m_heap->GetGPUDescriptorHandleForHeapStart(), static_cast<INT>(i), descriptorSize };
+			CD3DX12_GPU_DESCRIPTOR_HANDLE gpuHandle{ D3D12_DEFAULT };
+			if (m_desc.Flags == D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE)
+				gpuHandle.InitOffsetted(m_heap->GetGPUDescriptorHandleForHeapStart(), static_cast<INT>(i), descriptorSize);
 			descriptor = Descriptor{ cpuHandle, gpuHandle };
 			++i;
 		}
