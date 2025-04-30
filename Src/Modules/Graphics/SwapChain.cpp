@@ -36,6 +36,12 @@ namespace Graphics::D3D
 			return;
 		}
 
+		if (FAILED(g_dxgiFactory->MakeWindowAssociation(g_hWnd, DXGI_MWA_NO_ALT_ENTER)))
+		{
+			assert(false);
+			return;
+		}
+
 		m_swapChain = swapChain3;
 		m_frameIndex = swapChain3->GetCurrentBackBufferIndex();
 

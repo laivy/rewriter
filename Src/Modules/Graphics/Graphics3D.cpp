@@ -37,8 +37,6 @@ namespace Graphics::D3D
 #endif
 		if (FAILED(::CreateDXGIFactory2(flags, IID_PPV_ARGS(&g_dxgiFactory))))
 			return false;
-		if (FAILED(g_dxgiFactory->MakeWindowAssociation(g_hWnd, DXGI_MWA_NO_ALT_ENTER)))
-			return false;
 		return true;
 	}
 
