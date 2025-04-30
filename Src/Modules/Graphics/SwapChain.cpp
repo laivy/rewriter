@@ -13,6 +13,9 @@ namespace Graphics::D3D
 		m_fenceEvent{ NULL },
 		m_frameIndex{}
 	{
+		g_viewport = D3D12_VIEWPORT{ 0.0f, 0.0f, static_cast<float>(width), static_cast<float>(height), 0.0f, 1.0f };
+		g_scissorRect = D3D12_RECT{ 0, 0, static_cast<long>(width), static_cast<long>(height) };
+
 		DXGI_SWAP_CHAIN_DESC1 desc{};
 		desc.Width = width;
 		desc.Height = height;
