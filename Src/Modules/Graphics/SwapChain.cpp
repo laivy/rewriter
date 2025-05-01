@@ -184,8 +184,9 @@ namespace Graphics::D3D
 		auto depthStencilCpuHandle{ renderTarget->GetDepthStencilCpuHandle() };
 		g_commandList->OMSetRenderTargets(1, &renderTargetCpuHandle, TRUE, &depthStencilCpuHandle);
 
-		float clearColor[4] = { 0.5f, 0.5f, 0.5f, 1.0f };
+		constexpr float clearColor[4]{ 0.2f, 0.2f, 0.2f, 1.0f };
 		g_commandList->ClearRenderTargetView(renderTargetCpuHandle, clearColor, 0, nullptr);
+		g_commandList->ClearDepthStencilView(depthStencilCpuHandle, D3D12_CLEAR_FLAG_DEPTH | D3D12_CLEAR_FLAG_STENCIL, 1.0f, 0, 0, nullptr);
 
 		g_renderTargets.push_back(renderTarget);
 	}
