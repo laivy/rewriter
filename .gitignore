@@ -439,3 +439,4 @@ FodyWeavers.xsd
 # Rewriter
 Asset/
 Data/
+Src/Modules/Graphics/Shader/*.h
