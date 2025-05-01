@@ -11,7 +11,7 @@ namespace Graphics::ImGui
 	DLL_API void Begin()
 	{
 		if (auto dm{ D3D::DescriptorManager::GetInstance() })
-			g_commandList->SetDescriptorHeaps(1, dm->GetImGuiSrvHeap().GetAddressOf());
+			dm->SetDescriptorHeaps();
 
 		::ImGui_ImplDX12_NewFrame();
 		::ImGui_ImplWin32_NewFrame();

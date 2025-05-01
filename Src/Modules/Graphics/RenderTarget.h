@@ -19,14 +19,14 @@ namespace Graphics::D3D
 #endif
 
 	private:
+#ifdef _IMGUI
+		Descriptor* m_srvDesc;
+#endif
+
 		ComPtr<ID3D12Resource> m_renderTarget;
 		Descriptor* m_rtvDesc;
 
 		ComPtr<ID3D12Resource> m_depthStencil;
 		Descriptor* m_dsvDesc;
-
-#ifdef _IMGUI
-		Descriptor* m_srvDesc;
-#endif
 	};
 }

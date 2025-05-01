@@ -174,13 +174,15 @@ namespace Graphics::D3D
 		if (!dm)
 			return false;
 
+		auto desc{ dm->Allocate(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV) };
+
 		if (!::ImGui_ImplDX12_Init(
 			g_d3dDevice.Get(),
 			SwapChain::FRAME_COUNT,
 			DXGI_FORMAT_R8G8B8A8_UNORM,
-			dm->GetImGuiSrvHeap().Get(),
-			dm->GetImGuiSrvCpuHandle(),
-			dm->GetImGuiSrvGpuHandle()
+			dm->GetSrvHeap().Get(),
+			desc->GetCpuHandle(),
+			desc->GetGpuHandle()
 		))
 			return false;
 

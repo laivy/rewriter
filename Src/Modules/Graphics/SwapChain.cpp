@@ -164,7 +164,12 @@ namespace Graphics::D3D
 
 		DXGI_SWAP_CHAIN_DESC desc{};
 		m_swapChain->GetDesc(&desc);
-		m_swapChain->ResizeBuffers(desc.BufferCount, width, height, desc.BufferDesc.Format, desc.Flags);
+		if (FAILED(m_swapChain->ResizeBuffers(desc.BufferCount, width, height, desc.BufferDesc.Format, desc.Flags)))
+		{
+			assert(false);
+			return;
+		}
+
 		m_frameIndex = m_swapChain->GetCurrentBackBufferIndex();
 
 		CreateRenderTargetView();
@@ -256,6 +261,10 @@ namespace Graphics::D3D
 
 	void SwapChain::CreateRenderTargetView()
 	{
+		auto dm{ DescriptorManager::GetInstance() };
+		if (!dm)
+			return;
+
 		for (size_t i{ 0 }; i < FRAME_COUNT; ++i)
 		{
 			if (FAILED(m_swapChain->GetBuffer(static_cast<UINT>(i), IID_PPV_ARGS(&m_frameResources[i].backBuffer))))
@@ -264,16 +273,14 @@ namespace Graphics::D3D
 				return;
 			}
 
-			if (auto dm{ DescriptorManager::GetInstance() })
+			if (m_frameResources[i].rtvDesc)
 			{
-				if (m_frameResources[i].rtvDesc)
-				{
-					dm->Deallocate(D3D12_DESCRIPTOR_HEAP_TYPE_RTV, m_frameResources[i].rtvDesc);
-					m_frameResources[i].rtvDesc = nullptr;
-				}
-				m_frameResources[i].rtvDesc = dm->Allocate(D3D12_DESCRIPTOR_HEAP_TYPE_RTV);
-				m_frameResources[i].rtvDesc->CreateRenderTargetView(m_frameResources[i].backBuffer, nullptr);
+				dm->Deallocate(D3D12_DESCRIPTOR_HEAP_TYPE_RTV, m_frameResources[i].rtvDesc);
+				m_frameResources[i].rtvDesc = nullptr;
 			}
+
+			m_frameResources[i].rtvDesc = dm->Allocate(D3D12_DESCRIPTOR_HEAP_TYPE_RTV);
+			m_frameResources[i].rtvDesc->CreateRenderTargetView(m_frameResources[i].backBuffer, nullptr);
 		}
 	}
 

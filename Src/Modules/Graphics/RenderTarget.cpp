@@ -6,7 +6,10 @@
 
 namespace Graphics::D3D
 {
-    DLL_API RenderTarget::RenderTarget(UINT width, UINT height) :
+	DLL_API RenderTarget::RenderTarget(UINT width, UINT height) :
+#ifdef _IMGUI
+		m_srvDesc{ nullptr },
+#endif
 		m_rtvDesc{ nullptr },
 		m_dsvDesc{ nullptr }
     {
@@ -23,7 +26,7 @@ namespace Graphics::D3D
 			desc.Layout = D3D12_TEXTURE_LAYOUT_UNKNOWN;
 			desc.Flags = D3D12_RESOURCE_FLAG_ALLOW_RENDER_TARGET;
 
-			constexpr float color[]{ 0.5f, 0.5f, 0.5f, 1.0f };
+			constexpr float color[]{ 0.2f, 0.2f, 0.2f, 1.0f };
 			CD3DX12_CLEAR_VALUE clearValue{ DXGI_FORMAT_R8G8B8A8_UNORM, color };
 
 			g_d3dDevice->CreateCommittedResource(
@@ -61,16 +64,6 @@ namespace Graphics::D3D
 		// 뷰 생성
 		if (auto dm{ DescriptorManager::GetInstance() })
 		{
-			m_rtvDesc = dm->Allocate(D3D12_DESCRIPTOR_HEAP_TYPE_RTV);
-			m_rtvDesc->CreateRenderTargetView(m_renderTarget, nullptr);
-
-			D3D12_DEPTH_STENCIL_VIEW_DESC dsvDesc{};
-			dsvDesc.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
-			dsvDesc.ViewDimension = D3D12_DSV_DIMENSION_TEXTURE2D;
-			dsvDesc.Flags = D3D12_DSV_FLAG_NONE;
-			m_dsvDesc = dm->Allocate(D3D12_DESCRIPTOR_HEAP_TYPE_DSV);
-			m_dsvDesc->CreateDepthStencilView(m_depthStencil, &dsvDesc);
-
 #ifdef _IMGUI
 			D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc{};
 			srvDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
@@ -80,6 +73,16 @@ namespace Graphics::D3D
 			m_srvDesc = dm->Allocate(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
 			m_srvDesc->CreateShaderResourceView(m_renderTarget, &srvDesc);
 #endif
+
+			m_rtvDesc = dm->Allocate(D3D12_DESCRIPTOR_HEAP_TYPE_RTV);
+			m_rtvDesc->CreateRenderTargetView(m_renderTarget, nullptr);
+
+			D3D12_DEPTH_STENCIL_VIEW_DESC dsvDesc{};
+			dsvDesc.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
+			dsvDesc.ViewDimension = D3D12_DSV_DIMENSION_TEXTURE2D;
+			dsvDesc.Flags = D3D12_DSV_FLAG_NONE;
+			m_dsvDesc = dm->Allocate(D3D12_DESCRIPTOR_HEAP_TYPE_DSV);
+			m_dsvDesc->CreateDepthStencilView(m_depthStencil, &dsvDesc);
 		}
     }
 
@@ -87,11 +90,11 @@ namespace Graphics::D3D
 	{
 		if (auto dm{ DescriptorManager::GetInstance() })
 		{
-			dm->Deallocate(D3D12_DESCRIPTOR_HEAP_TYPE_RTV, m_rtvDesc);
-			dm->Deallocate(D3D12_DESCRIPTOR_HEAP_TYPE_DSV, m_dsvDesc);
 #ifdef _IMGUI
 			dm->Deallocate(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV, m_srvDesc);
 #endif
+			dm->Deallocate(D3D12_DESCRIPTOR_HEAP_TYPE_RTV, m_rtvDesc);
+			dm->Deallocate(D3D12_DESCRIPTOR_HEAP_TYPE_DSV, m_dsvDesc);
 		}
 	}
 
@@ -118,7 +121,7 @@ namespace Graphics::D3D
 	ImTextureID RenderTarget::GetImGuiTextureID() const
 	{
 		if (m_srvDesc)
-			return (ImTextureID)m_srvDesc->GetGpuHandle().ptr;
+			return reinterpret_cast<ImTextureID>(m_srvDesc->GetGpuHandle().ptr);
 		return 0;
 	}
 #endif
