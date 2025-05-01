@@ -185,13 +185,15 @@ namespace Graphics::D3D
 	{
 		g_commandList->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(renderTarget->GetResource().Get(), D3D12_RESOURCE_STATE_COMMON, D3D12_RESOURCE_STATE_RENDER_TARGET));
 
-		auto renderTargetCpuHandle{ renderTarget->GetRenderTargetCpuHandle() };
-		auto depthStencilCpuHandle{ renderTarget->GetDepthStencilCpuHandle() };
-		g_commandList->OMSetRenderTargets(1, &renderTargetCpuHandle, TRUE, &depthStencilCpuHandle);
+		auto rtvHandle{ renderTarget->GetRenderTargetCpuHandle() };
+		auto dsvHandle{ renderTarget->GetDepthStencilCpuHandle() };
+		g_commandList->OMSetRenderTargets(1, &rtvHandle, TRUE, &dsvHandle);
+		g_commandList->RSSetViewports(1, &renderTarget->GetViewport());
+		g_commandList->RSSetScissorRects(1, &renderTarget->GetScissorRect());
 
 		constexpr float clearColor[4]{ 0.2f, 0.2f, 0.2f, 1.0f };
-		g_commandList->ClearRenderTargetView(renderTargetCpuHandle, clearColor, 0, nullptr);
-		g_commandList->ClearDepthStencilView(depthStencilCpuHandle, D3D12_CLEAR_FLAG_DEPTH | D3D12_CLEAR_FLAG_STENCIL, 1.0f, 0, 0, nullptr);
+		g_commandList->ClearRenderTargetView(rtvHandle, clearColor, 0, nullptr);
+		g_commandList->ClearDepthStencilView(dsvHandle, D3D12_CLEAR_FLAG_DEPTH | D3D12_CLEAR_FLAG_STENCIL, 1.0f, 0, 0, nullptr);
 
 		g_renderTargets.push_back(renderTarget);
 	}
@@ -205,6 +207,8 @@ namespace Graphics::D3D
 			auto rtvHandle{ m_frameResources[m_frameIndex].rtvDesc->GetCpuHandle() };
 			auto dsvHandle{ m_dsvDesc->GetCpuHandle() };
 			g_commandList->OMSetRenderTargets(1, &rtvHandle, TRUE, &dsvHandle);
+			g_commandList->RSSetViewports(1, &g_viewport);
+			g_commandList->RSSetScissorRects(1, &g_scissorRect);
 		}
 		else
 		{

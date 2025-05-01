@@ -11,7 +11,9 @@ namespace Graphics::D3D
 		m_srvDesc{ nullptr },
 #endif
 		m_rtvDesc{ nullptr },
-		m_dsvDesc{ nullptr }
+		m_dsvDesc{ nullptr },
+		m_viewport{ 0.0f, 0.0f, static_cast<float>(width), static_cast<float>(height), 0.0f, 1.0f },
+		m_scissorRect{ 0, 0, static_cast<long>(width), static_cast<long>(height) }
     {
 		// 렌더타겟
 		{
@@ -115,6 +117,16 @@ namespace Graphics::D3D
 		if (m_dsvDesc)
 			return m_dsvDesc->GetCpuHandle();
 		return CD3DX12_CPU_DESCRIPTOR_HANDLE{ D3D12_DEFAULT };
+	}
+
+	D3D12_VIEWPORT RenderTarget::GetViewport() const
+	{
+		return m_viewport;
+	}
+
+	D3D12_RECT RenderTarget::GetScissorRect() const
+	{
+		return m_scissorRect;
 	}
 
 #ifdef _IMGUI

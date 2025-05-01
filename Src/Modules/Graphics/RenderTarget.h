@@ -13,6 +13,8 @@ namespace Graphics::D3D
 		ComPtr<ID3D12Resource> GetResource() const;
 		CD3DX12_CPU_DESCRIPTOR_HANDLE GetRenderTargetCpuHandle() const;
 		CD3DX12_CPU_DESCRIPTOR_HANDLE GetDepthStencilCpuHandle() const;
+		D3D12_VIEWPORT GetViewport() const;
+		D3D12_RECT GetScissorRect() const;
 
 #ifdef _IMGUI
 		ImTextureID GetImGuiTextureID() const;
@@ -28,5 +30,8 @@ namespace Graphics::D3D
 
 		ComPtr<ID3D12Resource> m_depthStencil;
 		Descriptor* m_dsvDesc;
+
+		D3D12_VIEWPORT m_viewport;
+		D3D12_RECT m_scissorRect;
 	};
 }
