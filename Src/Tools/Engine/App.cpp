@@ -170,26 +170,6 @@ void App::Render()
 {
 	Graphics::D3D::Begin();
 	{
-		static std::shared_ptr<Graphics::D3D::RenderTarget> renderTarget;
-		static std::shared_ptr<Graphics::D3D::Camera> camera;
-		static std::shared_ptr<Resource::Model> robot;
-		//if (!renderTarget)
-		//{
-		//	renderTarget = Graphics::D3D::CreateRenderTarget(800, 600);
-		//}
-		if (!camera)
-		{
-			camera = Graphics::D3D::CreateCamera();
-			camera->SetPosition(Int2{ 100, 100 });
-		}
-		if (!robot)
-		{
-			if (auto prop{ Resource::Get(L"Data/Test.dat/Robot") })
-				robot = prop->GetModel();
-		}
-		Graphics::D3D::SetCamera(camera);
-		Graphics::D3D::Render(robot);
-
 		Graphics::ImGui::Begin();
 		{
 			if (auto desktop{ Desktop::GetInstance() })
