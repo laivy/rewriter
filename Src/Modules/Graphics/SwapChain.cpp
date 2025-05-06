@@ -190,9 +190,7 @@ namespace Graphics::D3D
 		g_commandList->OMSetRenderTargets(1, &rtvHandle, TRUE, &dsvHandle);
 		g_commandList->RSSetViewports(1, &renderTarget->GetViewport());
 		g_commandList->RSSetScissorRects(1, &renderTarget->GetScissorRect());
-
-		constexpr float clearColor[4]{ 0.2f, 0.2f, 0.2f, 1.0f };
-		g_commandList->ClearRenderTargetView(rtvHandle, clearColor, 0, nullptr);
+		g_commandList->ClearRenderTargetView(rtvHandle, renderTarget->GetClearColor(), 0, nullptr);
 		g_commandList->ClearDepthStencilView(dsvHandle, D3D12_CLEAR_FLAG_DEPTH | D3D12_CLEAR_FLAG_STENCIL, 1.0f, 0, 0, nullptr);
 
 		g_renderTargets.push_back(renderTarget);
@@ -212,7 +210,14 @@ namespace Graphics::D3D
 		}
 		else
 		{
-
+			const auto& renderTarget{ g_renderTargets.back() };
+			auto rtvHandle{ renderTarget->GetRenderTargetCpuHandle() };
+			auto dsvHandle{ renderTarget->GetDepthStencilCpuHandle() };
+			g_commandList->OMSetRenderTargets(1, &rtvHandle, TRUE, &dsvHandle);
+			g_commandList->RSSetViewports(1, &renderTarget->GetViewport());
+			g_commandList->RSSetScissorRects(1, &renderTarget->GetScissorRect());
+			g_commandList->ClearRenderTargetView(rtvHandle, renderTarget->GetClearColor(), 0, nullptr);
+			g_commandList->ClearDepthStencilView(dsvHandle, D3D12_CLEAR_FLAG_DEPTH | D3D12_CLEAR_FLAG_STENCIL, 1.0f, 0, 0, nullptr);
 		}
 	}
 

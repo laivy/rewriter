@@ -6,14 +6,15 @@
 
 namespace Graphics::D3D
 {
-	DLL_API RenderTarget::RenderTarget(UINT width, UINT height) :
+	DLL_API RenderTarget::RenderTarget(UINT width, UINT height, const std::array<float, 4>& clearColor) :
 #ifdef _IMGUI
 		m_srvDesc{ nullptr },
 #endif
 		m_rtvDesc{ nullptr },
 		m_dsvDesc{ nullptr },
 		m_viewport{ 0.0f, 0.0f, static_cast<float>(width), static_cast<float>(height), 0.0f, 1.0f },
-		m_scissorRect{ 0, 0, static_cast<long>(width), static_cast<long>(height) }
+		m_scissorRect{ 0, 0, static_cast<long>(width), static_cast<long>(height) },
+		m_clearColor{ clearColor }
     {
 		// 렌더타겟
 		{
@@ -127,6 +128,11 @@ namespace Graphics::D3D
 	D3D12_RECT RenderTarget::GetScissorRect() const
 	{
 		return m_scissorRect;
+	}
+
+	const float* RenderTarget::GetClearColor() const
+	{
+		return m_clearColor.data();
 	}
 
 #ifdef _IMGUI
