@@ -38,7 +38,8 @@ namespace Graphics::D3D
 				&desc,
 				D3D12_RESOURCE_STATE_COMMON,
 				&clearValue,
-				IID_PPV_ARGS(&m_renderTarget));
+				IID_PPV_ARGS(&m_renderTarget)
+			);
 		}
 
 		// 깊이스텐실
@@ -61,7 +62,8 @@ namespace Graphics::D3D
 				& desc,
 				D3D12_RESOURCE_STATE_DEPTH_WRITE,
 				&clearValue,
-				IID_PPV_ARGS(&m_depthStencil));
+				IID_PPV_ARGS(&m_depthStencil)
+			);
 		}
 
 		// 뷰 생성

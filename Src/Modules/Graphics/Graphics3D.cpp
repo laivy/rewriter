@@ -92,14 +92,13 @@ namespace Graphics::D3D
 		rootParameters[0].InitAsConstantBufferView(0);
 		rootParameters[1].InitAsConstantBufferView(1);
 
-		CD3DX12_ROOT_SIGNATURE_DESC rootSignatureDesc{};
-		rootSignatureDesc.Init(
+		CD3DX12_ROOT_SIGNATURE_DESC rootSignatureDesc{
 			static_cast<UINT>(rootParameters.size()),
 			rootParameters.data(),
 			0,
 			nullptr,
 			D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT
-		);
+		};
 
 		ComPtr<ID3DBlob> signature, error;
 		if (FAILED(::D3D12SerializeRootSignature(&rootSignatureDesc, D3D_ROOT_SIGNATURE_VERSION_1, &signature, &error)))
