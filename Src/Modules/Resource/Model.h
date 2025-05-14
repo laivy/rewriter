@@ -7,6 +7,14 @@ namespace Resource
 		struct Vertex
 		{
 			Float3 position;
+			Float3 normal;
+			Float2 uv;
+			int32_t materialIndex;
+		};
+
+		struct Material
+		{
+			Float3 diffuse;
 		};
 
 		struct Mesh
@@ -17,6 +25,7 @@ namespace Resource
 			std::vector<Vertex> vertices;
 			std::vector<int> indices;
 #endif
+			std::vector<Material> materials;
 		};
 
 		std::vector<Mesh> meshes;

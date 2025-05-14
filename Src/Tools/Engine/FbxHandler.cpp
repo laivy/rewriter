@@ -6,19 +6,217 @@ namespace
 {
 	std::vector<Resource::Model::Vertex> LoadVertices(fbxsdk::FbxMesh* mesh)
 	{
-		/*
-		* 제어점(Control Point)은 중복되지 않는 정점이다.
-		* ex. 사각형은 4개의 제어점, 6개의 정점(=2개의 삼각형)으로 이루어져있다.
-		*/
+		using EMappingMode = fbxsdk::FbxGeometryElement::EMappingMode;
+		using EReferenceMode = fbxsdk::FbxGeometryElement::EReferenceMode;
 
-		int count{ mesh->GetControlPointsCount() };
-		std::vector<Resource::Model::Vertex> vertices(count);
-		for (int i{ 0 }; i < count; ++i)
+		auto GetVertexPosition =
+			[mesh](int controlPointIndex)
+			{
+				auto controlPoint{ mesh->GetControlPointAt(controlPointIndex) };
+				Float3 position{};
+				position.x = static_cast<float>(controlPoint[0]);
+				position.y = static_cast<float>(controlPoint[1]);
+				position.z = static_cast<float>(controlPoint[2]);
+				return position;
+			};
+
+		auto GetVertexNormal =
+			[mesh](int vertexIndex, int controlPointIndex)
+			{
+				Float3 normal{};
+				if (mesh->GetElementNormalCount() <= 0)
+					return normal;
+
+				auto elementNormal{ mesh->GetElementNormal() };
+				switch (elementNormal->GetMappingMode())
+				{
+				case EMappingMode::eByControlPoint:
+				{
+					fbxsdk::FbxVector4 vector{};
+					switch (elementNormal->GetReferenceMode())
+					{
+					case EReferenceMode::eDirect:
+					{
+						vector = elementNormal->GetDirectArray().GetAt(controlPointIndex);
+						break;
+					}
+					case EReferenceMode::eIndexToDirect:
+					{
+						int index{ elementNormal->GetIndexArray().GetAt(controlPointIndex) };
+						vector = elementNormal->GetDirectArray().GetAt(index);
+						break;
+					}
+					default:
+						assert(false && "INVALID REFERENCE MODE");
+						break;
+					}
+					break;
+				}
+				case EMappingMode::eByPolygonVertex:
+				{
+					fbxsdk::FbxVector4 vector{};
+					switch (elementNormal->GetReferenceMode())
+					{
+					case EReferenceMode::eDirect:
+					{
+						vector = elementNormal->GetDirectArray().GetAt(vertexIndex);
+						break;
+					}
+					case EReferenceMode::eIndexToDirect:
+					{
+						int index{ elementNormal->GetIndexArray().GetAt(vertexIndex) };
+						vector = elementNormal->GetDirectArray().GetAt(index);
+						break;
+					}
+					default:
+						assert(false && "INVALID REFERENCE MODE");
+						break;
+					}
+
+					normal.x = static_cast<float>(vector[0]);
+					normal.y = static_cast<float>(vector[1]);
+					normal.z = static_cast<float>(vector[2]);
+					break;
+				}
+				default:
+					assert(false && "INVALID MAPPING MODE");
+					break;
+				}
+				return normal;
+			};
+
+		auto GetVertexUV =
+			[mesh](int vertexIndex, int controlPointIndex)
+			{
+				Float2 uv{};
+				if (mesh->GetElementUVCount() <= 0)
+					return uv;
+
+				auto elementUV{ mesh->GetElementUV() };
+				switch (elementUV->GetMappingMode())
+				{
+				case EMappingMode::eByControlPoint:
+				{
+					fbxsdk::FbxVector4 vector{};
+					switch (elementUV->GetReferenceMode())
+					{
+					case EReferenceMode::eDirect:
+					{
+						vector = elementUV->GetDirectArray().GetAt(controlPointIndex);
+						break;
+					}
+					case EReferenceMode::eIndexToDirect:
+					{
+						int index{ elementUV->GetIndexArray().GetAt(controlPointIndex) };
+						vector = elementUV->GetDirectArray().GetAt(index);
+						break;
+					}
+					default:
+						assert(false && "INVALID REFERENCE MODE");
+						break;
+					}
+					break;
+				}
+				case EMappingMode::eByPolygonVertex:
+				{
+					fbxsdk::FbxVector2 vector{};
+					switch (elementUV->GetReferenceMode())
+					{
+					case EReferenceMode::eDirect:
+					{
+						vector = elementUV->GetDirectArray().GetAt(vertexIndex);
+						break;
+					}
+					case EReferenceMode::eIndexToDirect:
+					{
+						int index{ elementUV->GetIndexArray().GetAt(vertexIndex) };
+						vector = elementUV->GetDirectArray().GetAt(index);
+						break;
+					}
+					default:
+						assert(false && "INVALID REFERENCE MODE");
+						break;
+					}
+
+					uv.x = static_cast<float>(vector[0]);
+					uv.y = static_cast<float>(vector[1]);
+					break;
+				}
+				default:
+					assert(false && "INVALID MAPPING MODE");
+					break;
+				}
+				return uv;
+			};
+
+		auto GetMaterialIndex =
+			[mesh](int vertexIndex, int controlPointIndex)
+			{
+				int index{ -1 };
+				if (mesh->GetElementMaterialCount() <= 0)
+					return index;
+
+				auto elementMaterial{ mesh->GetElementMaterial() };
+				switch (elementMaterial->GetMappingMode())
+				{
+				case EMappingMode::eByControlPoint:
+				{
+					switch (elementMaterial->GetReferenceMode())
+					{
+					case EReferenceMode::eIndexToDirect:
+					{
+						index = elementMaterial->GetIndexArray().GetAt(controlPointIndex);
+						break;
+					}
+					default:
+						assert(false && "INVALID REFERENCE MODE");
+						break;
+					}
+					break;
+				}
+				case EMappingMode::eByPolygonVertex:
+				{
+					switch (elementMaterial->GetReferenceMode())
+					{
+					case EReferenceMode::eIndexToDirect:
+					{
+						index = elementMaterial->GetIndexArray().GetAt(vertexIndex);
+						break;
+					}
+					default:
+						assert(false && "INVALID REFERENCE MODE");
+						break;
+					}
+					break;
+				}
+				case EMappingMode::eAllSame:
+				{
+					index = 0;
+					break;
+				}
+				default:
+					assert(false && "INVALID MAPPING MODE");
+					break;
+				}
+				return index;
+			};
+
+		std::vector<Resource::Model::Vertex> vertices(mesh->GetControlPointsCount());
+
+		int vertexIndex{ 0 };
+		int polygonCount{ mesh->GetPolygonCount() };
+		for (int i{ 0 }; i < polygonCount; ++i)
 		{
-			auto point{ mesh->GetControlPointAt(i) };
-			vertices[i].position.x = static_cast<float>(point[0]);
-			vertices[i].position.y = static_cast<float>(point[1]);
-			vertices[i].position.z = static_cast<float>(point[2]);
+			for (int j{ 0 }; j < 3; ++j)
+			{
+				int controlPointIndex{ mesh->GetPolygonVertex(i, j) };
+				auto& vertex{ vertices.at(controlPointIndex) };
+				vertex.position = GetVertexPosition(controlPointIndex);
+				vertex.normal = GetVertexNormal(vertexIndex, controlPointIndex);
+				vertex.uv = GetVertexUV(vertexIndex, controlPointIndex);
+				vertex.materialIndex = GetMaterialIndex(vertexIndex, controlPointIndex);
+				++vertexIndex;
+			}
 		}
 		return vertices;
 	}
@@ -28,6 +226,34 @@ namespace
 		std::vector<int> indices(mesh->GetPolygonCount() * 3ULL);
 		std::memcpy(indices.data(), mesh->GetPolygonVertices(), sizeof(int) * indices.size());
 		return indices;
+	}
+
+	std::vector<Resource::Model::Material> LoadMaterials(fbxsdk::FbxMesh* mesh)
+	{
+		std::vector<Resource::Model::Material> materials;
+
+		auto node{ mesh->GetNode() };
+		if (!node)
+			return materials;
+
+		int materialCount{ node->GetMaterialCount() };
+		for (int i{ 0 }; i < materialCount; ++i)
+		{
+			Resource::Model::Material material{};
+
+			auto fbxMaterial{ node->GetMaterial(i) };
+			if (auto prop{ fbxMaterial->FindProperty("DiffuseColor") }; prop.IsValid())
+			{
+				auto value{ prop.Get<FbxDouble3>() };
+				material.diffuse.x = static_cast<float>(value[0]);
+				material.diffuse.y = static_cast<float>(value[1]);
+				material.diffuse.z = static_cast<float>(value[2]);
+			}
+
+			materials.push_back(material);
+		}
+
+		return materials;
 	}
 
 	std::vector<Resource::Model::Mesh> LoadMeshes(fbxsdk::FbxNode* root)
@@ -46,6 +272,7 @@ namespace
 					auto& mesh{ meshes.emplace_back() };
 					mesh.vertices = std::move(vertices);
 					mesh.indices = std::move(indices);
+					mesh.materials = LoadMaterials(fbxMesh);
 				}
 
 				int count{ node->GetChildCount() };
