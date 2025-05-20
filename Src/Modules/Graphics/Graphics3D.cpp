@@ -201,16 +201,16 @@ namespace Graphics::D3D
 
 	}
 
-	static std::unique_ptr<VertexBuffer> CreateVertexBuffer(const std::vector<Resource::Model::Vertex>& vertices)
+	static std::unique_ptr<VertexBuffer> CreateVertexBuffer(const std::vector<Resource::Model::Mesh::Vertex>& vertices)
 	{
-		auto buffer{ CreateResourceBuffer(D3D12_HEAP_TYPE_DEFAULT, D3D12_RESOURCE_STATE_COMMON, sizeof(Resource::Model::Vertex) * vertices.size()) };
-		CopyResource(buffer, std::span{ reinterpret_cast<const std::byte*>(vertices.data()), sizeof(Resource::Model::Vertex) * vertices.size() });
+		auto buffer{ CreateResourceBuffer(D3D12_HEAP_TYPE_DEFAULT, D3D12_RESOURCE_STATE_COMMON, sizeof(Resource::Model::Mesh::Vertex) * vertices.size()) };
+		CopyResource(buffer, std::span{ reinterpret_cast<const std::byte*>(vertices.data()), sizeof(Resource::Model::Mesh::Vertex) * vertices.size() });
 		g_commandList->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(buffer.Get(), D3D12_RESOURCE_STATE_COPY_DEST, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER));
 
 		D3D12_VERTEX_BUFFER_VIEW view{};
 		view.BufferLocation = buffer->GetGPUVirtualAddress();
-		view.SizeInBytes = static_cast<UINT>(sizeof(Resource::Model::Vertex) * vertices.size());
-		view.StrideInBytes = sizeof(Resource::Model::Vertex);
+		view.SizeInBytes = static_cast<UINT>(sizeof(Resource::Model::Mesh::Vertex) * vertices.size());
+		view.StrideInBytes = sizeof(Resource::Model::Mesh::Vertex);
 
 		return std::make_unique<VertexBuffer>(buffer, view);
 	}
@@ -317,24 +317,32 @@ namespace Graphics::D3D
 
 		for (auto& mesh : model->meshes)
 		{
+			// 정점
 			uint32_t vertexCount{};
 			read(&vertexCount);
 
-			std::vector<Resource::Model::Vertex> vertices(vertexCount);
-			for (auto& vertex : vertices)
-				read(&vertex);
+			std::vector<Resource::Model::Mesh::Vertex> vertices(vertexCount);
+			readBytes(vertices.data(), sizeof(Resource::Model::Mesh::Vertex) * vertexCount);
 
+			auto vertexBuffer{ CreateVertexBuffer(vertices) };
+			mesh.vertexBuffer = { vertexBuffer.release(), [](void* pointer) { delete static_cast<VertexBuffer*>(pointer); } };
+
+			// 정점 인덱스
 			uint32_t indexCount{};
 			read(&indexCount);
 
 			std::vector<int> indices(indexCount);
 			readBytes(indices.data(), sizeof(int) * indexCount);
 
-			auto vertexBuffer{ CreateVertexBuffer(vertices) };
-			mesh.vertexBuffer = { vertexBuffer.release(), [](void* pointer) { delete static_cast<VertexBuffer*>(pointer); } };
-
 			auto indexBuffer{ CreateIndexBuffer(indices) };
 			mesh.indexBuffer = { indexBuffer.release(), [](void* pointer) { delete static_cast<IndexBuffer*>(pointer); } };
+
+			// 재질
+			uint32_t materialCount{};
+			read(&materialCount);
+
+			mesh.materials.resize(materialCount);
+			readBytes(mesh.materials.data(), sizeof(Resource::Model::Mesh::Material) * materialCount);
 
 #ifdef _TOOL
 			mesh.vertices = std::move(vertices);

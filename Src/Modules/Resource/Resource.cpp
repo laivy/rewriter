@@ -106,22 +106,29 @@ namespace Resource
 			// 메쉬 데이터
 			for (const auto& mesh : data->meshes)
 			{
+				// 정점
 				auto vertexCount{ static_cast<uint32_t>(mesh.vertices.size()) };
 				file.write(reinterpret_cast<const char*>(&vertexCount), sizeof(vertexCount));
 				totalSize += sizeof(vertexCount);
 
-				for (const auto& vertex : mesh.vertices)
-				{
-					file.write(reinterpret_cast<const char*>(&vertex), sizeof(vertex));
-					totalSize += sizeof(vertex);
-				}
+				file.write(reinterpret_cast<const char*>(&mesh.vertices), sizeof(Model::Mesh::Vertex) * vertexCount);
+				totalSize += sizeof(Model::Mesh::Vertex) * vertexCount;
 
+				// 정점 인덱스
 				auto indexCount{ static_cast<uint32_t>(mesh.indices.size()) };
 				file.write(reinterpret_cast<const char*>(&indexCount), sizeof(indexCount));
 				totalSize += sizeof(indexCount);
 
 				file.write(reinterpret_cast<const char*>(mesh.indices.data()), sizeof(int) * indexCount);
 				totalSize += sizeof(int) * indexCount;
+
+				// 재질
+				auto materialCount{ static_cast<uint32_t>(mesh.materials.size()) };
+				file.write(reinterpret_cast<const char*>(&materialCount), sizeof(materialCount));
+				totalSize += sizeof(materialCount);
+
+				file.write(reinterpret_cast<const char*>(mesh.materials.data()), sizeof(Model::Mesh::Material) * materialCount);
+				totalSize += sizeof(Model::Mesh::Material) * materialCount;
 			}
 
 			auto endPos{ file.tellp() };

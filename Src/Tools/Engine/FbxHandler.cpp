@@ -4,7 +4,7 @@
 
 namespace
 {
-	std::vector<Resource::Model::Vertex> LoadVertices(fbxsdk::FbxMesh* mesh)
+	std::vector<Resource::Model::Mesh::Vertex> LoadVertices(fbxsdk::FbxMesh* mesh)
 	{
 		using EMappingMode = fbxsdk::FbxGeometryElement::EMappingMode;
 		using EReferenceMode = fbxsdk::FbxGeometryElement::EReferenceMode;
@@ -201,7 +201,7 @@ namespace
 				return index;
 			};
 
-		std::vector<Resource::Model::Vertex> vertices(mesh->GetControlPointsCount());
+		std::vector<Resource::Model::Mesh::Vertex> vertices(mesh->GetControlPointsCount());
 
 		int vertexIndex{ 0 };
 		int polygonCount{ mesh->GetPolygonCount() };
@@ -228,9 +228,9 @@ namespace
 		return indices;
 	}
 
-	std::vector<Resource::Model::Material> LoadMaterials(fbxsdk::FbxMesh* mesh)
+	std::vector<Resource::Model::Mesh::Material> LoadMaterials(fbxsdk::FbxMesh* mesh)
 	{
-		std::vector<Resource::Model::Material> materials;
+		std::vector<Resource::Model::Mesh::Material> materials;
 
 		auto node{ mesh->GetNode() };
 		if (!node)
@@ -239,7 +239,7 @@ namespace
 		int materialCount{ node->GetMaterialCount() };
 		for (int i{ 0 }; i < materialCount; ++i)
 		{
-			Resource::Model::Material material{};
+			Resource::Model::Mesh::Material material{};
 
 			auto fbxMaterial{ node->GetMaterial(i) };
 			if (auto prop{ fbxMaterial->FindProperty("DiffuseColor") }; prop.IsValid())
