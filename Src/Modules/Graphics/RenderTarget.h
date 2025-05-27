@@ -19,11 +19,13 @@ namespace Graphics::D3D
 
 #ifdef _IMGUI
 		ImTextureID GetImGuiTextureID() const;
+		ImVec2 GetSize() const;
 #endif
 
 	private:
 #ifdef _IMGUI
 		Descriptor* m_srvDesc;
+		ImVec2 m_size;
 #endif
 
 		ComPtr<ID3D12Resource> m_renderTarget;

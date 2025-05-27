@@ -41,7 +41,32 @@ namespace Graphics::D3D
 			subresourceData.pData = source.data();
 			subresourceData.RowPitch = source.size();
 			subresourceData.SlicePitch = source.size();
-			::UpdateSubresources<1>(g_commandList.Get(), destination.Get(), uploadBuffer.Get(), 0, 0, 1, &subresourceData);
+			::UpdateSubresources(g_commandList.Get(), destination.Get(), uploadBuffer.Get(), 0, 0, 1, &subresourceData);
+
+			g_uploadBuffers.push_back(std::move(uploadBuffer));
+			break;
+		}
+		default:
+			break;
+		}
+
+		return true;
+	}
+
+	bool CopyResource(const ComPtr<ID3D12Resource>& destination, const D3D12_SUBRESOURCE_DATA& subresource)
+	{
+		D3D12_HEAP_PROPERTIES heapProperties{};
+		D3D12_HEAP_FLAGS heapFlags{};
+		if (FAILED(destination->GetHeapProperties(&heapProperties, &heapFlags)))
+			return false;
+
+		switch (heapProperties.Type)
+		{
+		case D3D12_HEAP_TYPE_DEFAULT:
+		{
+			UINT64 size{ ::GetRequiredIntermediateSize(destination.Get(), 0, 1) };
+			auto uploadBuffer{ CreateResourceBuffer(D3D12_HEAP_TYPE_UPLOAD, D3D12_RESOURCE_STATE_GENERIC_READ, size) };
+			::UpdateSubresources(g_commandList.Get(), destination.Get(), uploadBuffer.Get(), 0, 0, 1, &subresource);
 
 			g_uploadBuffers.push_back(std::move(uploadBuffer));
 			break;

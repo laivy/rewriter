@@ -4,6 +4,12 @@
 #include "Graphics2D.h"
 #include "SwapChain.h"
 
+#ifdef _IMGUI
+#include "External/DirectX/WICTextureLoader12.h"
+#include "Descriptor.h"
+#include "DescriptorManager.h"
+#endif
+
 namespace
 {
 	struct FontCompare

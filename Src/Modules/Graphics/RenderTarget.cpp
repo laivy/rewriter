@@ -77,6 +77,9 @@ namespace Graphics::D3D
 			srvDesc.Texture2D.MipLevels = 1;
 			m_srvDesc = dm->Allocate(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
 			m_srvDesc->CreateShaderResourceView(m_renderTarget, &srvDesc);
+
+			m_size.x = static_cast<float>(width);
+			m_size.y = static_cast<float>(height);
 #endif
 
 			m_rtvDesc = dm->Allocate(D3D12_DESCRIPTOR_HEAP_TYPE_RTV);
@@ -143,6 +146,11 @@ namespace Graphics::D3D
 		if (m_srvDesc)
 			return reinterpret_cast<ImTextureID>(m_srvDesc->GetGpuHandle().ptr);
 		return 0;
+	}
+
+	ImVec2 RenderTarget::GetSize() const
+	{
+		return m_size;
 	}
 #endif
 }

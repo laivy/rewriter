@@ -268,7 +268,7 @@ namespace Graphics::D3D
 
 	DLL_API void Begin()
 	{
-		//g_uploadBuffers.clear(); // 이전 프레임에 복사가 완료됐을 것이므로 업로드 버퍼 해제
+		g_uploadBuffers.clear(); // 이전 프레임에 복사가 완료됐을 것이므로 업로드 버퍼 해제
 		g_camera.reset(); // 카메라 초기화
 		g_swapChain->Begin3D();
 	}
