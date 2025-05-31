@@ -28,10 +28,11 @@ namespace Graphics::D3D
 	{
 		UINT flags{ 0 };
 #ifdef _DEBUG
-		ComPtr<ID3D12Debug> debugController;
+		ComPtr<ID3D12Debug5> debugController;
 		if (SUCCEEDED(::D3D12GetDebugInterface(IID_PPV_ARGS(&debugController))))
 		{
 			debugController->EnableDebugLayer();
+			debugController->SetEnableAutoName(TRUE);
 			flags |= DXGI_CREATE_FACTORY_DEBUG;
 		}
 #endif
@@ -73,6 +74,15 @@ namespace Graphics::D3D
 		return true;
 	}
 
+	static bool CreateUploadCommandList()
+	{
+		if (FAILED(g_d3dDevice->CreateCommandAllocator(D3D12_COMMAND_LIST_TYPE_DIRECT, IID_PPV_ARGS(&g_uploadCommandAllocator))))
+			return false;
+		if (FAILED(g_d3dDevice->CreateCommandList(0, D3D12_COMMAND_LIST_TYPE_DIRECT, g_uploadCommandAllocator.Get(), nullptr, IID_PPV_ARGS(&g_uploadCommandList))))
+			return false;
+		return true;
+	}
+
 	static bool CreateSwapChain()
 	{
 		RECT rect{};
@@ -82,7 +92,6 @@ namespace Graphics::D3D
 		int width{ rect.right - rect.left };
 		int height{ rect.bottom - rect.top };
 		g_swapChain = std::make_unique<SwapChain>(width, height);
-		g_renderTargetSize = Int2{ width, height };
 		return true;
 	}
 
@@ -229,6 +238,19 @@ namespace Graphics::D3D
 		return std::make_unique<IndexBuffer>(buffer, view);
 	}
 
+	static void ExecuteUploadCommandLists()
+	{
+		if (FAILED(g_uploadCommandList->Close()))
+		{
+			assert(false);
+			return;
+		}
+
+		std::array<ID3D12CommandList*, 1> commandLists{ g_uploadCommandList.Get() };
+		g_commandQueue->ExecuteCommandLists(static_cast<UINT>(commandLists.size()), commandLists.data());
+		g_uploadCommandList->Reset(g_uploadCommandAllocator.Get(), nullptr);
+	}
+
 	bool Initialize()
 	{
 		// D3D12
@@ -237,6 +259,8 @@ namespace Graphics::D3D
 		if (!CreateD3DDevice())
 			return false;
 		if (!CreateCommandQueue())
+			return false;
+		if (!CreateUploadCommandList())
 			return false;
 #ifdef _DIRECT2D
 		if (!CreateD3D11On12Device())
@@ -268,7 +292,6 @@ namespace Graphics::D3D
 
 	DLL_API void Begin()
 	{
-		g_uploadBuffers.clear(); // 이전 프레임에 복사가 완료됐을 것이므로 업로드 버퍼 해제
 		g_camera.reset(); // 카메라 초기화
 		g_swapChain->Begin3D();
 	}
@@ -276,11 +299,13 @@ namespace Graphics::D3D
 	DLL_API void End()
 	{
 		g_swapChain->End3D();
+		ExecuteUploadCommandLists();
 	}
 
 	DLL_API void Present()
 	{
 		g_swapChain->Present();
+		g_uploadBuffers.clear();
 	}
 
 	DLL_API std::shared_ptr<Resource::Texture> LoadTexture(std::span<std::byte> binary)

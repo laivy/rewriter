@@ -16,11 +16,11 @@ namespace Graphics
 	extern ComPtr<IDXGIFactory4> g_dxgiFactory;
 	extern ComPtr<ID3D12Device> g_d3dDevice;
 	extern ComPtr<ID3D12CommandQueue> g_commandQueue;
+	extern ComPtr<ID3D12CommandAllocator> g_uploadCommandAllocator;
+	extern ComPtr<ID3D12GraphicsCommandList> g_uploadCommandList;
 	extern std::unique_ptr<D3D::SwapChain> g_swapChain;
 	extern ComPtr<ID3D12GraphicsCommandList> g_commandList;
 	extern ComPtr<ID3D12RootSignature> g_rootSignature;
-	extern D3D12_VIEWPORT g_viewport;
-	extern D3D12_RECT g_scissorRect;
 
 #ifdef _DIRECT2D
 	// D3D11on12
@@ -38,5 +38,4 @@ namespace Graphics
 	// 로직에 사용되는 변수들
 	extern std::vector<ComPtr<ID3D12Resource>> g_uploadBuffers;
 	extern std::shared_ptr<D3D::Camera> g_camera;
-	extern Int2 g_renderTargetSize;
 }

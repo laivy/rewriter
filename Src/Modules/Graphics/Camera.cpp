@@ -2,6 +2,7 @@
 #include "Camera.h"
 #include "ConstantBuffer.h"
 #include "Global.h"
+#include "SwapChain.h"
 
 namespace Graphics::D3D
 {
@@ -61,7 +62,8 @@ namespace Graphics::D3D
 
 			// 투영 변환 행렬
 			DirectX::XMFLOAT4X4 proj{};
-			DirectX::XMStoreFloat4x4(&proj, DirectX::XMMatrixTranspose(DirectX::XMMatrixOrthographicLH(static_cast<float>(g_renderTargetSize.x), static_cast<float>(g_renderTargetSize.y), NearZ, FarZ)));
+			Int2 size{ g_swapChain->GetSize() };
+			DirectX::XMStoreFloat4x4(&proj, DirectX::XMMatrixTranspose(DirectX::XMMatrixOrthographicLH(static_cast<float>(size.x), static_cast<float>(size.y), NearZ, FarZ)));
 			std::memcpy(&m_constants->proj, &proj, sizeof(proj));
 
 			g_commandList->SetGraphicsRootConstantBufferView(m_constants.GetRootParameterIndex(), m_constants.GetGPUVirtualAddress());

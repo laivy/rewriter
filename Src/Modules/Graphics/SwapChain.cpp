@@ -8,14 +8,14 @@
 namespace Graphics::D3D
 {
 	SwapChain::SwapChain(UINT width, UINT height) :
+		m_viewport{ 0.0f, 0.0f, static_cast<float>(width), static_cast<float>(height), 0.0f, 1.0f },
+		m_scissorRect{ 0, 0, static_cast<long>(width), static_cast<long>(height) },
+		m_size{ static_cast<int32_t>(width), static_cast<int32_t>(height) },
 		m_dsvDesc{ nullptr },
-		m_frameResources{},
 		m_fenceEvent{ NULL },
-		m_frameIndex{}
+		m_frameIndex{},
+		m_frameResources{}
 	{
-		g_viewport = D3D12_VIEWPORT{ 0.0f, 0.0f, static_cast<float>(width), static_cast<float>(height), 0.0f, 1.0f };
-		g_scissorRect = D3D12_RECT{ 0, 0, static_cast<long>(width), static_cast<long>(height) };
-
 		DXGI_SWAP_CHAIN_DESC1 desc{};
 		desc.Width = width;
 		desc.Height = height;
@@ -64,6 +64,47 @@ namespace Graphics::D3D
 		::CloseHandle(m_fenceEvent);
 	}
 
+	void SwapChain::OnResize(int width, int height)
+	{
+		WaitForPreviousFrame();
+		for (size_t i{ 0 }; i < m_frameResources.size(); ++i)
+		{
+			m_frameResources[i].backBuffer.Reset();
+#ifdef _DIRECT2D
+			m_frameResources[i].wrappedBackBuffer.Reset();
+			m_frameResources[i].d2dRenderTarget.Reset();
+#endif
+			m_frameResources[i].fenceValue = m_frameResources[m_frameIndex].fenceValue;
+		}
+
+#ifdef _DIRECT2D
+		g_d2dContext->SetTarget(nullptr);
+		g_d2dContext->Flush();
+		g_d3d11DeviceContext->OMSetRenderTargets(0, nullptr, nullptr);
+		g_d3d11DeviceContext->Flush();
+#endif
+
+		m_viewport = D3D12_VIEWPORT{ 0.0f, 0.0f, static_cast<float>(width), static_cast<float>(height), 0.0f, 1.0f };
+		m_scissorRect = D3D12_RECT{ 0, 0, static_cast<long>(width), static_cast<long>(height) };
+		m_size = Int2{ static_cast<int32_t>(width), static_cast<int32_t>(height) };
+
+		DXGI_SWAP_CHAIN_DESC desc{};
+		m_swapChain->GetDesc(&desc);
+		if (FAILED(m_swapChain->ResizeBuffers(desc.BufferCount, width, height, desc.BufferDesc.Format, desc.Flags)))
+		{
+			assert(false);
+			return;
+		}
+		m_frameIndex = m_swapChain->GetCurrentBackBufferIndex();
+
+		CreateRenderTargetView();
+		CreateDepthStencil();
+#ifdef _DIRECT2D
+		CreateWrappedResource();
+		CreateDirect2DRenderTarget();
+#endif
+	}
+
 	void SwapChain::Begin3D()
 	{
 		if (FAILED(m_frameResources[m_frameIndex].commandAllocator->Reset()))
@@ -84,8 +125,8 @@ namespace Graphics::D3D
 		auto rtvHandle{ m_frameResources[m_frameIndex].rtvDesc->GetCpuHandle() };
 		auto dsvHandle{ m_dsvDesc->GetCpuHandle() };
 		g_commandList->OMSetRenderTargets(1, &rtvHandle, TRUE, &dsvHandle);
-		g_commandList->RSSetViewports(1, &g_viewport);
-		g_commandList->RSSetScissorRects(1, &g_scissorRect);
+		g_commandList->RSSetViewports(1, &m_viewport);
+		g_commandList->RSSetScissorRects(1, &m_scissorRect);
 
 		constexpr std::array clearColor{ 0.15625f, 0.171875f, 0.203125f, 1.0f };
 		g_commandList->ClearRenderTargetView(rtvHandle, clearColor.data(), 0, nullptr);
@@ -144,42 +185,6 @@ namespace Graphics::D3D
 		WaitForPreviousFrame();
 	}
 
-	void SwapChain::Resize(UINT width, UINT height)
-	{
-		for (size_t i{ 0 }; i < m_frameResources.size(); ++i)
-		{
-			m_frameResources[i].backBuffer.Reset();
-#ifdef _DIRECT2D
-			m_frameResources[i].wrappedBackBuffer.Reset();
-			m_frameResources[i].d2dRenderTarget.Reset();
-#endif
-			m_frameResources[i].fenceValue = m_frameResources[m_frameIndex].fenceValue;			
-		}
-#ifdef _DIRECT2D
-		g_d2dContext->SetTarget(nullptr);
-		g_d2dContext->Flush();
-		g_d3d11DeviceContext->OMSetRenderTargets(0, nullptr, nullptr);
-		g_d3d11DeviceContext->Flush();
-#endif
-
-		DXGI_SWAP_CHAIN_DESC desc{};
-		m_swapChain->GetDesc(&desc);
-		if (FAILED(m_swapChain->ResizeBuffers(desc.BufferCount, width, height, desc.BufferDesc.Format, desc.Flags)))
-		{
-			assert(false);
-			return;
-		}
-
-		m_frameIndex = m_swapChain->GetCurrentBackBufferIndex();
-
-		CreateRenderTargetView();
-		CreateDepthStencil();
-#ifdef _DIRECT2D
-		CreateWrappedResource();
-		CreateDirect2DRenderTarget();
-#endif
-	}
-
 	static std::vector<std::shared_ptr<RenderTarget>> g_renderTargets;
 	void SwapChain::PushRenderTarget(const std::shared_ptr<RenderTarget>& renderTarget)
 	{
@@ -205,8 +210,8 @@ namespace Graphics::D3D
 			auto rtvHandle{ m_frameResources[m_frameIndex].rtvDesc->GetCpuHandle() };
 			auto dsvHandle{ m_dsvDesc->GetCpuHandle() };
 			g_commandList->OMSetRenderTargets(1, &rtvHandle, TRUE, &dsvHandle);
-			g_commandList->RSSetViewports(1, &g_viewport);
-			g_commandList->RSSetScissorRects(1, &g_scissorRect);
+			g_commandList->RSSetViewports(1, &m_viewport);
+			g_commandList->RSSetScissorRects(1, &m_scissorRect);
 		}
 		else
 		{
@@ -221,51 +226,9 @@ namespace Graphics::D3D
 		}
 	}
 
-	void SwapChain::WaitForGPU()
+	Int2 SwapChain::GetSize() const
 	{
-		if (FAILED(g_commandQueue->Signal(m_fence.Get(), m_frameResources[m_frameIndex].fenceValue)))
-		{
-			assert(false);
-			return;
-		}
-		if (FAILED(m_fence->SetEventOnCompletion(m_frameResources[m_frameIndex].fenceValue, m_fenceEvent)))
-		{
-			assert(false);
-			return;
-		}
-		if (::WaitForSingleObjectEx(m_fenceEvent, INFINITE, FALSE) == WAIT_FAILED)
-		{
-			assert(false);
-			return;
-		}
-		++m_frameResources[m_frameIndex].fenceValue;
-	}
-
-	void SwapChain::WaitForPreviousFrame()
-	{
-		const UINT64 fenceValue{ m_frameResources[m_frameIndex].fenceValue };
-		if (FAILED(g_commandQueue->Signal(m_fence.Get(), fenceValue)))
-		{
-			assert(false);
-			return;
-		}
-
-		if (m_fence->GetCompletedValue() < fenceValue)
-		{
-			if (FAILED(m_fence->SetEventOnCompletion(fenceValue, m_fenceEvent)))
-			{
-				assert(false);
-				return;
-			}
-			if (::WaitForSingleObjectEx(m_fenceEvent, INFINITE, FALSE) == WAIT_FAILED)
-			{
-				assert(false);
-				return;
-			}
-		}
-
-		m_frameIndex = m_swapChain->GetCurrentBackBufferIndex();
-		m_frameResources[m_frameIndex].fenceValue = fenceValue + 1;
+		return m_size;
 	}
 
 	void SwapChain::CreateRenderTargetView()
@@ -440,5 +403,52 @@ namespace Graphics::D3D
 		}
 
 		++m_frameResources[m_frameIndex].fenceValue;
+	}
+
+	void SwapChain::WaitForGPU()
+	{
+		if (FAILED(g_commandQueue->Signal(m_fence.Get(), m_frameResources[m_frameIndex].fenceValue)))
+		{
+			assert(false);
+			return;
+		}
+		if (FAILED(m_fence->SetEventOnCompletion(m_frameResources[m_frameIndex].fenceValue, m_fenceEvent)))
+		{
+			assert(false);
+			return;
+		}
+		if (::WaitForSingleObjectEx(m_fenceEvent, INFINITE, FALSE) == WAIT_FAILED)
+		{
+			assert(false);
+			return;
+		}
+		++m_frameResources[m_frameIndex].fenceValue;
+	}
+
+	void SwapChain::WaitForPreviousFrame()
+	{
+		const UINT64 fenceValue{ m_frameResources[m_frameIndex].fenceValue };
+		if (FAILED(g_commandQueue->Signal(m_fence.Get(), fenceValue)))
+		{
+			assert(false);
+			return;
+		}
+
+		if (m_fence->GetCompletedValue() < fenceValue)
+		{
+			if (FAILED(m_fence->SetEventOnCompletion(fenceValue, m_fenceEvent)))
+			{
+				assert(false);
+				return;
+			}
+			if (::WaitForSingleObjectEx(m_fenceEvent, INFINITE, FALSE) == WAIT_FAILED)
+			{
+				assert(false);
+				return;
+			}
+		}
+
+		m_frameIndex = m_swapChain->GetCurrentBackBufferIndex();
+		m_frameResources[m_frameIndex].fenceValue = fenceValue + 1;
 	}
 }

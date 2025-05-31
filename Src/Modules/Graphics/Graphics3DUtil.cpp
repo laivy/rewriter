@@ -41,7 +41,7 @@ namespace Graphics::D3D
 			subresourceData.pData = source.data();
 			subresourceData.RowPitch = source.size();
 			subresourceData.SlicePitch = source.size();
-			::UpdateSubresources(g_commandList.Get(), destination.Get(), uploadBuffer.Get(), 0, 0, 1, &subresourceData);
+			::UpdateSubresources(g_uploadCommandList.Get(), destination.Get(), uploadBuffer.Get(), 0, 0, 1, &subresourceData);
 
 			g_uploadBuffers.push_back(std::move(uploadBuffer));
 			break;
@@ -66,7 +66,7 @@ namespace Graphics::D3D
 		{
 			UINT64 size{ ::GetRequiredIntermediateSize(destination.Get(), 0, 1) };
 			auto uploadBuffer{ CreateResourceBuffer(D3D12_HEAP_TYPE_UPLOAD, D3D12_RESOURCE_STATE_GENERIC_READ, size) };
-			::UpdateSubresources(g_commandList.Get(), destination.Get(), uploadBuffer.Get(), 0, 0, 1, &subresource);
+			::UpdateSubresources(g_uploadCommandList.Get(), destination.Get(), uploadBuffer.Get(), 0, 0, 1, &subresource);
 
 			g_uploadBuffers.push_back(std::move(uploadBuffer));
 			break;

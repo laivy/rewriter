@@ -24,6 +24,8 @@ namespace Graphics::D3D
 		SwapChain(UINT width, UINT height);
 		~SwapChain();
 
+		void OnResize(int width, int height);
+
 		void Begin3D();
 		void End3D();
 #ifdef _DIRECT2D
@@ -32,12 +34,10 @@ namespace Graphics::D3D
 #endif
 		void Present();
 
-		void Resize(UINT width, UINT height);
 		void PushRenderTarget(const std::shared_ptr<RenderTarget>& renderTarget);
 		void PopRenderTarget();
 
-		void WaitForGPU();
-		void WaitForPreviousFrame();
+		Int2 GetSize() const;
 
 	private:
 		void CreateRenderTargetView();
@@ -49,10 +49,17 @@ namespace Graphics::D3D
 		void CreateCommandAllocators();
 		void CreateFence();
 
+		void WaitForGPU();
+		void WaitForPreviousFrame();
+
 	public:
 		static constexpr auto FRAME_COUNT{ 2U };
 
 	private:
+		D3D12_VIEWPORT m_viewport;
+		D3D12_RECT m_scissorRect;
+		Int2 m_size;
+
 		ComPtr<IDXGISwapChain3> m_swapChain;
 		ComPtr<ID3D12Resource> m_depthStencil;
 		Descriptor* m_dsvDesc;
