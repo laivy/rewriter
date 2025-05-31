@@ -18,11 +18,11 @@
     <Filter Include="모듈 파일\Resource">
       <UniqueIdentifier>{bdff4e94-47c1-4e38-aed3-de0c846c7f89}</UniqueIdentifier>
     </Filter>
-    <Filter Include="헤더 파일\Shared">
-      <UniqueIdentifier>{9c46b12a-80eb-4854-894e-20e99fcec9a3}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="소스 파일\Shared">
+    <Filter Include="소스 파일\Common">
       <UniqueIdentifier>{bd4dc4e4-ac26-45e0-893d-c70afc0d4a1d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="헤더 파일\Common">
+      <UniqueIdentifier>{9c46b12a-80eb-4854-894e-20e99fcec9a3}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -44,14 +44,14 @@
     <ClInclude Include="Query.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\Shared\Time.h">
-      <Filter>헤더 파일\Shared</Filter>
-    </ClInclude>
     <ClInclude Include="..\Resource\Include\Lib.h">
       <Filter>모듈 파일\Resource</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\Shared\Stdafx.h">
-      <Filter>헤더 파일\Shared</Filter>
+    <ClInclude Include="..\..\Common\Stdafx.h">
+      <Filter>헤더 파일\Common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Common\Time.h">
+      <Filter>헤더 파일\Common</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -70,8 +70,8 @@
     <ClCompile Include="Query.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\Shared\Time.cpp">
-      <Filter>소스 파일\Shared</Filter>
+    <ClCompile Include="..\..\Common\Time.cpp">
+      <Filter>소스 파일\Common</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

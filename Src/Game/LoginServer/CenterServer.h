@@ -1,5 +1,5 @@
 #pragma once
-#include "Shared/ServerSocket.h"
+#include "Common/ServerSocket.h"
 
 class CenterServer final :
 	public ServerSocket,

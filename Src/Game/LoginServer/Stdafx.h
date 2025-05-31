@@ -1,5 +1,5 @@
 #pragma once
-#include "Shared/Stdafx.h"
+#include "Common/Stdafx.h"
 
 // C/C++
 #include <execution>
@@ -11,6 +11,5 @@
 #include "Modules/Resource/Include/Lib.h"
 
 // Project
-#include "Shared/Packet.h"
-#include "Shared/Protocol.h"
-#include "Shared/Request.h"
+#include "Common/Packet.h"
+#include "Common/Protocol.h"

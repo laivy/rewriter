@@ -1,5 +1,5 @@
 #pragma once
-#include "Shared/Socket.h"
+#include "Common/Socket.h"
 
 class LoginServer final :
 	public ISocket,

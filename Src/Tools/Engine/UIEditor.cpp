@@ -1,7 +1,7 @@
 #include "Stdafx.h"
 #include "App.h"
 #include "UIEditor.h"
-#include "Shared/Util.h"
+#include "Common/Util.h"
 
 UIEditor::UIEditor() :
 	m_isVisible{ false },

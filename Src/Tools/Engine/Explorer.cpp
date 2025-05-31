@@ -1,6 +1,6 @@
 #include "Stdafx.h"
 #include "Explorer.h"
-#include "Shared/Util.h"
+#include "Common/Util.h"
 
 Explorer::Explorer() :
 	m_scrollAddressBarToRight{ false }

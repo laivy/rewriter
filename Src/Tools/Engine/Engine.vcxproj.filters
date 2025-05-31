@@ -33,14 +33,14 @@
     <Filter Include="헤더 파일\Client">
       <UniqueIdentifier>{d5822da1-6456-4764-a738-e5c082038e97}</UniqueIdentifier>
     </Filter>
-    <Filter Include="소스 파일\Shared">
-      <UniqueIdentifier>{2c2f03d0-2441-4526-be4f-ddb6031b5bdd}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="헤더 파일\Shared">
-      <UniqueIdentifier>{a5643d21-8cf7-4896-97ab-377ce81da1f2}</UniqueIdentifier>
-    </Filter>
     <Filter Include="외부 파일\FBXSDK">
       <UniqueIdentifier>{348eabc9-726c-49b7-b914-d42d1acab958}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="헤더 파일\Common">
+      <UniqueIdentifier>{a5643d21-8cf7-4896-97ab-377ce81da1f2}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="소스 파일\Common">
+      <UniqueIdentifier>{2c2f03d0-2441-4526-be4f-ddb6031b5bdd}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -95,24 +95,6 @@
     <ClInclude Include="..\..\Modules\Resource\Include\Lib.h">
       <Filter>모듈 파일\Resource</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\Shared\Delegate.h">
-      <Filter>헤더 파일\Shared</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Shared\Singleton.h">
-      <Filter>헤더 파일\Shared</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Shared\Stdafx.h">
-      <Filter>헤더 파일\Shared</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Shared\Timer.h">
-      <Filter>헤더 파일\Shared</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Shared\Type.h">
-      <Filter>헤더 파일\Shared</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Shared\Util.h">
-      <Filter>헤더 파일\Shared</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\External\DirectX\d3dx12.h">
       <Filter>외부 파일\DirectX</Filter>
     </ClInclude>
@@ -145,6 +127,24 @@
     </ClInclude>
     <ClInclude Include="Viewport.h">
       <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Common\Delegate.h">
+      <Filter>헤더 파일\Common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Common\Singleton.h">
+      <Filter>헤더 파일\Common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Common\Stdafx.h">
+      <Filter>헤더 파일\Common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Common\Timer.h">
+      <Filter>헤더 파일\Common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Common\Type.h">
+      <Filter>헤더 파일\Common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Common\Util.h">
+      <Filter>헤더 파일\Common</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -196,15 +196,6 @@
     <ClCompile Include="..\..\Game\Client\TextBlock.cpp">
       <Filter>소스 파일\Client</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\Shared\Timer.cpp">
-      <Filter>소스 파일\Shared</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\Shared\Type.cpp">
-      <Filter>소스 파일\Shared</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\Shared\Util.cpp">
-      <Filter>소스 파일\Shared</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\External\Imgui\imgui.cpp">
       <Filter>외부 파일\Imgui</Filter>
     </ClCompile>
@@ -228,6 +219,15 @@
     </ClCompile>
     <ClCompile Include="Viewport.cpp">
       <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Common\Timer.cpp">
+      <Filter>소스 파일\Common</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Common\Type.cpp">
+      <Filter>소스 파일\Common</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Common\Util.cpp">
+      <Filter>소스 파일\Common</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

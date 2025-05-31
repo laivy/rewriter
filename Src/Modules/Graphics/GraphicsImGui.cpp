@@ -6,7 +6,7 @@
 #include "Graphics3DUtil.h"
 #include "GraphicsImGui.h"
 #include "RenderTarget.h"
-#include "Shared/Util.h"
+#include "Common/Util.h"
 #include "External/DirectX/WICTextureLoader12.h"
 
 namespace Graphics::ImGui

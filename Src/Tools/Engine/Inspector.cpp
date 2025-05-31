@@ -3,7 +3,7 @@
 #include "FbxHandler.h"
 #include "Hierarchy.h"
 #include "Inspector.h"
-#include "Shared/Util.h"
+#include "Common/Util.h"
 
 const std::map<Resource::Property::Type, const char*> PROPERTY_TYPES
 {

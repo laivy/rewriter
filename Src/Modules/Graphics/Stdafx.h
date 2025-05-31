@@ -1,5 +1,5 @@
 #pragma once
-#include "Shared/Stdafx.h"
+#include "Common/Stdafx.h"
 
 // Windows
 #include <wincodec.h>

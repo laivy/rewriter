@@ -67,6 +67,9 @@
       <AdditionalLibraryDirectories>$(OutDir);$(SolutionDir)External\FBXSDK\lib\x64\debug\</AdditionalLibraryDirectories>
       <AdditionalDependencies>Graphics.lib;Resource.lib;libfbxsdk.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
+    <PostBuildEvent>
+      <Command>$(SolutionDir)Scripts\CreateDataLinks.bat $(SolutionDir)\Data\Tools\$(ProjectName) $(OutDir) Engine</Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
@@ -90,6 +93,9 @@
       <AdditionalDependencies>Graphics.lib;Resource.lib;libfbxsdk.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalLibraryDirectories>$(OutDir);$(SolutionDir)External\FBXSDK\lib\x64\release\</AdditionalLibraryDirectories>
     </Link>
+    <PostBuildEvent>
+      <Command>$(SolutionDir)Scripts\CreateDataLinks.bat $(SolutionDir)\Data\Tools\$(ProjectName) $(OutDir) Engine</Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\External\DirectX\d3dx12.h" />
@@ -101,6 +107,12 @@
     <ClInclude Include="..\..\..\External\Imgui\imstb_rectpack.h" />
     <ClInclude Include="..\..\..\External\Imgui\imstb_textedit.h" />
     <ClInclude Include="..\..\..\External\Imgui\imstb_truetype.h" />
+    <ClInclude Include="..\..\Common\Delegate.h" />
+    <ClInclude Include="..\..\Common\Singleton.h" />
+    <ClInclude Include="..\..\Common\Stdafx.h" />
+    <ClInclude Include="..\..\Common\Timer.h" />
+    <ClInclude Include="..\..\Common\Type.h" />
+    <ClInclude Include="..\..\Common\Util.h" />
     <ClInclude Include="..\..\Game\Client\Button.h" />
     <ClInclude Include="..\..\Game\Client\Control.h" />
     <ClInclude Include="..\..\Game\Client\Object.h" />
@@ -110,12 +122,6 @@
     <ClInclude Include="..\..\Game\Client\Window.h" />
     <ClInclude Include="..\..\Modules\Graphics\Include\Lib.h" />
     <ClInclude Include="..\..\Modules\Resource\Include\Lib.h" />
-    <ClInclude Include="..\..\Shared\Delegate.h" />
-    <ClInclude Include="..\..\Shared\Singleton.h" />
-    <ClInclude Include="..\..\Shared\Stdafx.h" />
-    <ClInclude Include="..\..\Shared\Timer.h" />
-    <ClInclude Include="..\..\Shared\Type.h" />
-    <ClInclude Include="..\..\Shared\Util.h" />
     <ClInclude Include="App.h" />
     <ClInclude Include="Clipboard.h" />
     <ClInclude Include="FbxHandler.h" />
@@ -152,6 +158,9 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="..\..\Common\Timer.cpp" />
+    <ClCompile Include="..\..\Common\Type.cpp" />
+    <ClCompile Include="..\..\Common\Util.cpp" />
     <ClCompile Include="..\..\Game\Client\Button.cpp" />
     <ClCompile Include="..\..\Game\Client\Control.cpp" />
     <ClCompile Include="..\..\Game\Client\Object.cpp" />
@@ -159,18 +168,6 @@
     <ClCompile Include="..\..\Game\Client\TextBox.cpp" />
     <ClCompile Include="..\..\Game\Client\UI.cpp" />
     <ClCompile Include="..\..\Game\Client\Window.cpp" />
-    <ClCompile Include="..\..\Shared\Timer.cpp">
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
-    </ClCompile>
-    <ClCompile Include="..\..\Shared\Type.cpp">
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
-    </ClCompile>
-    <ClCompile Include="..\..\Shared\Util.cpp">
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
-    </ClCompile>
     <ClCompile Include="App.cpp" />
     <ClCompile Include="Clipboard.cpp" />
     <ClCompile Include="FbxHandler.cpp" />

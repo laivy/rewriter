@@ -51,11 +51,11 @@
     <Filter Include="모듈 파일\Graphics">
       <UniqueIdentifier>{c9664751-745f-402b-8ffe-7804686dd966}</UniqueIdentifier>
     </Filter>
-    <Filter Include="헤더 파일\Shared">
-      <UniqueIdentifier>{8775307d-5339-4060-a00d-ed7e0950e823}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="소스 파일\Shared">
+    <Filter Include="소스 파일\Common">
       <UniqueIdentifier>{7c7c8e48-65f8-4fe0-9b65-6921e1eda03a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="헤더 파일\Common">
+      <UniqueIdentifier>{8775307d-5339-4060-a00d-ed7e0950e823}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -116,24 +116,6 @@
     <ClCompile Include="PopupModal.cpp">
       <Filter>소스 파일\UI</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\Shared\Packet.cpp">
-      <Filter>소스 파일\Shared</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\Shared\Socket.cpp">
-      <Filter>소스 파일\Shared</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\Shared\Time.cpp">
-      <Filter>소스 파일\Shared</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\Shared\Timer.cpp">
-      <Filter>소스 파일\Shared</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\Shared\Type.cpp">
-      <Filter>소스 파일\Shared</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\Shared\Util.cpp">
-      <Filter>소스 파일\Shared</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\External\Imgui\imgui.cpp">
       <Filter>외부 파일\Imgui</Filter>
     </ClCompile>
@@ -151,6 +133,24 @@
     </ClCompile>
     <ClCompile Include="..\..\..\External\Imgui\imgui_widgets.cpp">
       <Filter>외부 파일\Imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Common\Packet.cpp">
+      <Filter>소스 파일\Common</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Common\Socket.cpp">
+      <Filter>소스 파일\Common</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Common\Time.cpp">
+      <Filter>소스 파일\Common</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Common\Timer.cpp">
+      <Filter>소스 파일\Common</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Common\Type.cpp">
+      <Filter>소스 파일\Common</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Common\Util.cpp">
+      <Filter>소스 파일\Common</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -208,39 +208,6 @@
     <ClInclude Include="PopupModal.h">
       <Filter>헤더 파일\UI</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\Shared\Delegate.h">
-      <Filter>헤더 파일\Shared</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Shared\Packet.h">
-      <Filter>헤더 파일\Shared</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Shared\Protocol.h">
-      <Filter>헤더 파일\Shared</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Shared\Singleton.h">
-      <Filter>헤더 파일\Shared</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Shared\Socket.h">
-      <Filter>헤더 파일\Shared</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Shared\Stdafx.h">
-      <Filter>헤더 파일\Shared</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Shared\StringTable.h">
-      <Filter>헤더 파일\Shared</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Shared\Time.h">
-      <Filter>헤더 파일\Shared</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Shared\Timer.h">
-      <Filter>헤더 파일\Shared</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Shared\Type.h">
-      <Filter>헤더 파일\Shared</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Shared\Util.h">
-      <Filter>헤더 파일\Shared</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\Modules\Graphics\Include\Lib.h">
       <Filter>모듈 파일\Graphics</Filter>
     </ClInclude>
@@ -267,6 +234,39 @@
     </ClInclude>
     <ClInclude Include="..\..\..\External\Imgui\imstb_truetype.h">
       <Filter>외부 파일\Imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Common\Delegate.h">
+      <Filter>헤더 파일\Common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Common\Packet.h">
+      <Filter>헤더 파일\Common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Common\Protocol.h">
+      <Filter>헤더 파일\Common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Common\Singleton.h">
+      <Filter>헤더 파일\Common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Common\Socket.h">
+      <Filter>헤더 파일\Common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Common\Stdafx.h">
+      <Filter>헤더 파일\Common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Common\StringTable.h">
+      <Filter>헤더 파일\Common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Common\Time.h">
+      <Filter>헤더 파일\Common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Common\Timer.h">
+      <Filter>헤더 파일\Common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Common\Type.h">
+      <Filter>헤더 파일\Common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Common\Util.h">
+      <Filter>헤더 파일\Common</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

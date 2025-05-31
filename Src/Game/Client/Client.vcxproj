@@ -68,6 +68,9 @@
       <AdditionalDependencies>Graphics.lib;imm32.lib;Resource.lib;ws2_32.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalLibraryDirectories>$(OutDir)</AdditionalLibraryDirectories>
     </Link>
+    <PostBuildEvent>
+      <Command>$(SolutionDir)Scripts\CreateDataLinks.bat $(SolutionDir)\Data\Game\Client $(OutDir) Data</Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
@@ -91,6 +94,9 @@
       <AdditionalDependencies>Graphics.lib;imm32.lib;Resource.lib;ws2_32.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalLibraryDirectories>$(OutDir)</AdditionalLibraryDirectories>
     </Link>
+    <PostBuildEvent>
+      <Command>$(SolutionDir)Scripts\CreateDataLinks.bat $(SolutionDir)\Data\Game\Client $(OutDir) Data</Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="..\..\..\External\Imgui\imgui.cpp">
@@ -117,30 +123,15 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
     </ClCompile>
-    <ClCompile Include="..\..\Shared\Packet.cpp">
+    <ClCompile Include="..\..\Common\Packet.cpp" />
+    <ClCompile Include="..\..\Common\Socket.cpp" />
+    <ClCompile Include="..\..\Common\Time.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
     </ClCompile>
-    <ClCompile Include="..\..\Shared\Socket.cpp">
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
-    </ClCompile>
-    <ClCompile Include="..\..\Shared\Time.cpp">
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
-    </ClCompile>
-    <ClCompile Include="..\..\Shared\Timer.cpp">
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
-    </ClCompile>
-    <ClCompile Include="..\..\Shared\Type.cpp">
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
-    </ClCompile>
-    <ClCompile Include="..\..\Shared\Util.cpp">
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
-    </ClCompile>
+    <ClCompile Include="..\..\Common\Timer.cpp" />
+    <ClCompile Include="..\..\Common\Type.cpp" />
+    <ClCompile Include="..\..\Common\Util.cpp" />
     <ClCompile Include="Button.cpp" />
     <ClCompile Include="Control.cpp" />
     <ClCompile Include="LoginWindow.cpp" />
@@ -193,19 +184,19 @@
     <ClInclude Include="..\..\..\External\Imgui\imstb_rectpack.h" />
     <ClInclude Include="..\..\..\External\Imgui\imstb_textedit.h" />
     <ClInclude Include="..\..\..\External\Imgui\imstb_truetype.h" />
+    <ClInclude Include="..\..\Common\Delegate.h" />
+    <ClInclude Include="..\..\Common\Packet.h" />
+    <ClInclude Include="..\..\Common\Protocol.h" />
+    <ClInclude Include="..\..\Common\Singleton.h" />
+    <ClInclude Include="..\..\Common\Socket.h" />
+    <ClInclude Include="..\..\Common\Stdafx.h" />
+    <ClInclude Include="..\..\Common\StringTable.h" />
+    <ClInclude Include="..\..\Common\Time.h" />
+    <ClInclude Include="..\..\Common\Timer.h" />
+    <ClInclude Include="..\..\Common\Type.h" />
+    <ClInclude Include="..\..\Common\Util.h" />
     <ClInclude Include="..\..\Modules\Graphics\Include\Lib.h" />
     <ClInclude Include="..\..\Modules\Resource\Include\Lib.h" />
-    <ClInclude Include="..\..\Shared\Delegate.h" />
-    <ClInclude Include="..\..\Shared\Packet.h" />
-    <ClInclude Include="..\..\Shared\Protocol.h" />
-    <ClInclude Include="..\..\Shared\Singleton.h" />
-    <ClInclude Include="..\..\Shared\Socket.h" />
-    <ClInclude Include="..\..\Shared\Stdafx.h" />
-    <ClInclude Include="..\..\Shared\StringTable.h" />
-    <ClInclude Include="..\..\Shared\Time.h" />
-    <ClInclude Include="..\..\Shared\Timer.h" />
-    <ClInclude Include="..\..\Shared\Type.h" />
-    <ClInclude Include="..\..\Shared\Util.h" />
     <ClInclude Include="Button.h" />
     <ClInclude Include="Control.h" />
     <ClInclude Include="LoginWindow.h" />

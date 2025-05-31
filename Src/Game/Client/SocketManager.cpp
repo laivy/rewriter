@@ -1,7 +1,7 @@
 #include "Stdafx.h"
 #include "App.h"
 #include "SocketManager.h"
-#include "Shared/Socket.h"
+#include "Common/Socket.h"
 
 SocketManager::SocketManager() :
 	m_iocp{ INVALID_HANDLE_VALUE }

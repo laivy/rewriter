@@ -3,7 +3,7 @@
 #include "Clipboard.h"
 #include "Hierarchy.h"
 #include "Inspector.h"
-#include "Shared/Util.h"
+#include "Common/Util.h"
 
 Hierarchy::IModal::IModal() :
 	m_isValid{ true }

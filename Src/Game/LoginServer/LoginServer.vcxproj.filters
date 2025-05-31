@@ -36,11 +36,11 @@
     <Filter Include="모듈 파일\Graphics">
       <UniqueIdentifier>{c8173bd4-4e49-43f3-9d0f-fe4c593d6c50}</UniqueIdentifier>
     </Filter>
-    <Filter Include="헤더 파일\Shared">
-      <UniqueIdentifier>{9208068c-1ec2-4a86-9b71-ba70df3c56d6}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="소스 파일\Shared">
+    <Filter Include="소스 파일\Common">
       <UniqueIdentifier>{e6a9f60f-e517-4fbf-ad18-eae51af8cc10}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="헤더 파일\Common">
+      <UniqueIdentifier>{9208068c-1ec2-4a86-9b71-ba70df3c56d6}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -86,29 +86,26 @@
     <ClCompile Include="..\..\..\External\Imgui\imgui_widgets.cpp">
       <Filter>외부 파일\Imgui</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\Shared\Packet.cpp">
-      <Filter>소스 파일\Shared</Filter>
+    <ClCompile Include="..\..\Common\Packet.cpp">
+      <Filter>소스 파일\Common</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\Shared\Request.cpp">
-      <Filter>소스 파일\Shared</Filter>
+    <ClCompile Include="..\..\Common\ServerSocket.cpp">
+      <Filter>소스 파일\Common</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\Shared\ServerSocket.cpp">
-      <Filter>소스 파일\Shared</Filter>
+    <ClCompile Include="..\..\Common\Socket.cpp">
+      <Filter>소스 파일\Common</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\Shared\Socket.cpp">
-      <Filter>소스 파일\Shared</Filter>
+    <ClCompile Include="..\..\Common\Time.cpp">
+      <Filter>소스 파일\Common</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\Shared\Time.cpp">
-      <Filter>소스 파일\Shared</Filter>
+    <ClCompile Include="..\..\Common\Timer.cpp">
+      <Filter>소스 파일\Common</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\Shared\Timer.cpp">
-      <Filter>소스 파일\Shared</Filter>
+    <ClCompile Include="..\..\Common\Type.cpp">
+      <Filter>소스 파일\Common</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\Shared\Type.cpp">
-      <Filter>소스 파일\Shared</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\Shared\Util.cpp">
-      <Filter>소스 파일\Shared</Filter>
+    <ClCompile Include="..\..\Common\Util.cpp">
+      <Filter>소스 파일\Common</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -160,38 +157,35 @@
     <ClInclude Include="..\..\..\External\Imgui\imstb_truetype.h">
       <Filter>외부 파일\Imgui</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\Shared\Packet.h">
-      <Filter>헤더 파일\Shared</Filter>
+    <ClInclude Include="..\..\Common\Packet.h">
+      <Filter>헤더 파일\Common</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\Shared\Request.h">
-      <Filter>헤더 파일\Shared</Filter>
+    <ClInclude Include="..\..\Common\ServerSocket.h">
+      <Filter>헤더 파일\Common</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\Shared\ServerSocket.h">
-      <Filter>헤더 파일\Shared</Filter>
+    <ClInclude Include="..\..\Common\Singleton.h">
+      <Filter>헤더 파일\Common</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\Shared\Singleton.h">
-      <Filter>헤더 파일\Shared</Filter>
+    <ClInclude Include="..\..\Common\Socket.h">
+      <Filter>헤더 파일\Common</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\Shared\Socket.h">
-      <Filter>헤더 파일\Shared</Filter>
+    <ClInclude Include="..\..\Common\Stdafx.h">
+      <Filter>헤더 파일\Common</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\Shared\Stdafx.h">
-      <Filter>헤더 파일\Shared</Filter>
+    <ClInclude Include="..\..\Common\StringTable.h">
+      <Filter>헤더 파일\Common</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\Shared\StringTable.h">
-      <Filter>헤더 파일\Shared</Filter>
+    <ClInclude Include="..\..\Common\Time.h">
+      <Filter>헤더 파일\Common</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\Shared\Time.h">
-      <Filter>헤더 파일\Shared</Filter>
+    <ClInclude Include="..\..\Common\Timer.h">
+      <Filter>헤더 파일\Common</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\Shared\Timer.h">
-      <Filter>헤더 파일\Shared</Filter>
+    <ClInclude Include="..\..\Common\Type.h">
+      <Filter>헤더 파일\Common</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\Shared\Type.h">
-      <Filter>헤더 파일\Shared</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Shared\Util.h">
-      <Filter>헤더 파일\Shared</Filter>
+    <ClInclude Include="..\..\Common\Util.h">
+      <Filter>헤더 파일\Common</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

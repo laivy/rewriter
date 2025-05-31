@@ -12,10 +12,10 @@
     <Filter Include="헤더 파일\Include">
       <UniqueIdentifier>{cb49ab78-4e35-4496-9fab-89e65a955b6b}</UniqueIdentifier>
     </Filter>
-    <Filter Include="소스 파일\Shared">
+    <Filter Include="소스 파일\Common">
       <UniqueIdentifier>{cb5b1335-db0e-4ec8-b869-6565663afb53}</UniqueIdentifier>
     </Filter>
-    <Filter Include="헤더 파일\Shared">
+    <Filter Include="헤더 파일\Common">
       <UniqueIdentifier>{4331401c-a549-401c-9899-843cada43d95}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
@@ -38,17 +38,17 @@
     <ClInclude Include="Texture.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\Shared\Singleton.h">
-      <Filter>헤더 파일\Shared</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Shared\Stdafx.h">
-      <Filter>헤더 파일\Shared</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Shared\Type.h">
-      <Filter>헤더 파일\Shared</Filter>
-    </ClInclude>
     <ClInclude Include="Model.h">
       <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Common\Singleton.h">
+      <Filter>헤더 파일\Common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Common\Stdafx.h">
+      <Filter>헤더 파일\Common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Common\Type.h">
+      <Filter>헤더 파일\Common</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -70,11 +70,11 @@
     <ClCompile Include="Texture.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\Shared\Type.cpp">
-      <Filter>소스 파일\Shared</Filter>
-    </ClCompile>
     <ClCompile Include="Model.cpp">
       <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Common\Type.cpp">
+      <Filter>소스 파일\Common</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

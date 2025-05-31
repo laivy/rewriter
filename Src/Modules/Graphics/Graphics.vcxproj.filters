@@ -33,12 +33,6 @@
     <Filter Include="소스 파일\D3D">
       <UniqueIdentifier>{25fcec6e-4ad8-48e8-bf2a-82c59c45594f}</UniqueIdentifier>
     </Filter>
-    <Filter Include="헤더 파일\Shared">
-      <UniqueIdentifier>{cff73b34-9610-4cba-afb6-230229fe093a}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="소스 파일\Shared">
-      <UniqueIdentifier>{1c10cf6a-6ec8-4a98-812e-c8e948694cb5}</UniqueIdentifier>
-    </Filter>
     <Filter Include="헤더 파일\D2D">
       <UniqueIdentifier>{84624f8d-0e92-41bc-8385-076ab1f03d64}</UniqueIdentifier>
     </Filter>
@@ -47,6 +41,12 @@
     </Filter>
     <Filter Include="소스 파일\D3D\Shader">
       <UniqueIdentifier>{eb9a55cc-f6ae-4523-abaf-d51cb9ee5989}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="소스 파일\Common">
+      <UniqueIdentifier>{1c10cf6a-6ec8-4a98-812e-c8e948694cb5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="헤더 파일\Common">
+      <UniqueIdentifier>{cff73b34-9610-4cba-afb6-230229fe093a}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -67,12 +67,6 @@
     </ClCompile>
     <ClCompile Include="DescriptorManager.cpp">
       <Filter>소스 파일\D3D</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\Shared\Type.cpp">
-      <Filter>소스 파일\Shared</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\Shared\Util.cpp">
-      <Filter>소스 파일\Shared</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\External\DirectX\DDSTextureLoader12.cpp">
       <Filter>외부 파일\DirectX</Filter>
@@ -131,6 +125,12 @@
     <ClCompile Include="Descriptor.cpp">
       <Filter>소스 파일\D3D</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\Common\Type.cpp">
+      <Filter>소스 파일\Common</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Common\Util.cpp">
+      <Filter>소스 파일\Common</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Stdafx.h">
@@ -153,12 +153,6 @@
     </ClInclude>
     <ClInclude Include="DescriptorManager.h">
       <Filter>헤더 파일\D3D</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Shared\Type.h">
-      <Filter>헤더 파일\Shared</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Shared\Util.h">
-      <Filter>헤더 파일\Shared</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\External\DirectX\d3dx12.h">
       <Filter>외부 파일\DirectX</Filter>
@@ -196,9 +190,6 @@
     <ClInclude Include="..\..\..\External\Imgui\imstb_truetype.h">
       <Filter>외부 파일\ImGui</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\Shared\Stdafx.h">
-      <Filter>헤더 파일\Shared</Filter>
-    </ClInclude>
     <ClInclude Include="Camera.h">
       <Filter>헤더 파일\D3D</Filter>
     </ClInclude>
@@ -225,6 +216,15 @@
     </ClInclude>
     <ClInclude Include="Descriptor.h">
       <Filter>헤더 파일\D3D</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Common\Stdafx.h">
+      <Filter>헤더 파일\Common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Common\Type.h">
+      <Filter>헤더 파일\Common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Common\Util.h">
+      <Filter>헤더 파일\Common</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
