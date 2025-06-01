@@ -112,6 +112,7 @@ void App::InitApp()
 {
 #ifdef _IMGUI
 	Graphics::Initialize(hWnd);
+	Resource::Initialize(L"Data");
 	OnResize.Register(&Graphics::OnResize);
 
 	ImGui::SetCurrentContext(Graphics::ImGui::GetContext());

@@ -7,20 +7,30 @@
 namespace Resource
 {
 	std::map<std::wstring, std::shared_ptr<Property>> g_resources;
+	std::wstring g_mountPath;
+#if defined _CLIENT || defined _TOOL
 	std::function<std::shared_ptr<Sprite>(std::span<std::byte>)> g_loadSprite;
 	std::function<std::shared_ptr<Texture>(std::span<std::byte>)> g_loadTexture;
 	std::function<std::shared_ptr<Model>(std::span<std::byte>)> g_loadModel;
+#endif
 
 #if defined _CLIENT || defined _TOOL
 	DLL_API void Initialize(
+		std::wstring_view mountPath,
 		const std::function<std::shared_ptr<Sprite>(std::span<std::byte>)>& loadSprite,
 		const std::function<std::shared_ptr<Texture>(std::span<std::byte>)>& loadTexture,
 		const std::function<std::shared_ptr<Model>(std::span<std::byte>)>& loadModel
 	)
 	{
+		g_mountPath = mountPath;
 		g_loadSprite = loadSprite;
 		g_loadTexture = loadTexture;
 		g_loadModel = loadModel;
+	}
+#else
+	DLL_API void Initialize(std::wstring_view mountPath)
+	{
+		g_mountPath = mountPath;
 	}
 #endif
 
@@ -234,14 +244,14 @@ namespace Resource
 		{
 			uint32_t length{};
 			file.read(reinterpret_cast<char*>(&length), sizeof(length));
-#ifdef _SERVER
-			file.ignore(length);
-#else
+#if defined _CLIENT || defined _TOOL
 			std::unique_ptr<std::byte[]> binary{ new std::byte[length]{} };
 			file.read(reinterpret_cast<char*>(binary.get()), length);
 
 			auto data{ g_loadSprite(std::span{ binary.get(), length }) };
 			prop->Set(data);
+#else
+			file.ignore(length);
 #endif
 			break;
 		}
@@ -249,14 +259,14 @@ namespace Resource
 		{
 			uint32_t length{};
 			file.read(reinterpret_cast<char*>(&length), sizeof(length));
-#ifdef _SERVER
-			file.ignore(length);
-#else
+#if defined _CLIENT || defined _TOOL
 			std::unique_ptr<std::byte[]> binary{ new std::byte[length]{} };
 			file.read(reinterpret_cast<char*>(binary.get()), length);
 
 			auto data{ g_loadTexture(std::span{ binary.get(), length }) };
 			prop->Set(data);
+#else
+			file.ignore(length);
 #endif
 			break;
 		}
@@ -264,14 +274,14 @@ namespace Resource
 		{
 			uint32_t length{};
 			file.read(reinterpret_cast<char*>(&length), sizeof(length));
-#ifdef _SERVER
-			file.ignore(length);
-#else
+#if defined _CLIENT || defined _TOOL
 			std::unique_ptr<std::byte[]> binary{ new std::byte[length]{} };
 			file.read(reinterpret_cast<char*>(binary.get()), length);
 
 			auto data{ g_loadModel(std::span{ binary.get(), length }) };
 			prop->Set(data);
+#else
+			file.ignore(length);
 #endif
 			break;
 		}
@@ -296,11 +306,7 @@ namespace Resource
 
 	static std::shared_ptr<Property> Load(std::wstring_view filePath, std::wstring_view path)
 	{
-#ifdef _TOOL
-		std::ifstream file{ filePath.data(), std::ios::binary };
-#else
-		std::ifstream file{ std::format(L"{}{}", Stringtable::DATA_FOLDER_PATH, filePath), std::ios::binary };
-#endif
+		std::ifstream file{ std::format(L"{}/{}", g_mountPath, filePath), std::ios::binary };
 		if (!file)
 		{
 			assert(false && "CAN NOT LOAD DATA FILE");

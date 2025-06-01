@@ -69,7 +69,7 @@
       <AdditionalLibraryDirectories>$(OutDir)</AdditionalLibraryDirectories>
     </Link>
     <PostBuildEvent>
-      <Command>$(SolutionDir)Scripts\CreateDataLinks.bat $(SolutionDir)\Data\Game\Client $(OutDir) Data</Command>
+      <Command>CALL "$(SolutionDir)Scripts\CreateDataLinks.bat" "$(SolutionDir)\Data\Game\Client" "$(OutDir)" Data</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -95,7 +95,7 @@
       <AdditionalLibraryDirectories>$(OutDir)</AdditionalLibraryDirectories>
     </Link>
     <PostBuildEvent>
-      <Command>$(SolutionDir)Scripts\CreateDataLinks.bat $(SolutionDir)\Data\Game\Client $(OutDir) Data</Command>
+      <Command>CALL "$(SolutionDir)Scripts\CreateDataLinks.bat" "$(SolutionDir)\Data\Game\Client" "$(OutDir)" Data</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>

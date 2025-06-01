@@ -9,10 +9,13 @@ namespace Resource
 
 #if defined _CLIENT || defined _TOOL
 	DLL_API void Initialize(
+		std::wstring_view mountPath,
 		const std::function<std::shared_ptr<Sprite>(std::span<std::byte>)>& loadSprite,
 		const std::function<std::shared_ptr<Texture>(std::span<std::byte>)>& loadTexture,
 		const std::function<std::shared_ptr<Model>(std::span<std::byte>)>& loadModel
 	);
+#else
+	DLL_API void Initialize(std::wstring_view mountPath);
 #endif
 	DLL_API void CleanUp();
 

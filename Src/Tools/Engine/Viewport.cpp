@@ -6,7 +6,7 @@ std::shared_ptr<Graphics::ImGui::Texture> g_texture;
 Viewport::Viewport()
 {
 	if (!g_texture)
-		g_texture = Graphics::ImGui::LoadTexture(L"Data/Raw/Cream.png");
+		g_texture = Graphics::ImGui::LoadTexture(L"Engine/Cream.png");
 }
 
 void Viewport::Update(float deltaTime)

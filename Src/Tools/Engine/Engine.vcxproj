@@ -64,11 +64,12 @@
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>$(OutDir);$(SolutionDir)External\FBXSDK\lib\x64\debug\</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(OutDir);$(SolutionDir)External\FBXSDK\lib\$(IntDir)</AdditionalLibraryDirectories>
       <AdditionalDependencies>Graphics.lib;Resource.lib;libfbxsdk.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
-      <Command>$(SolutionDir)Scripts\CreateDataLinks.bat $(SolutionDir)\Data\Tools\$(ProjectName) $(OutDir) Engine</Command>
+      <Command>CALL "$(SolutionDir)Scripts\CreateDataLinks.bat" "$(SolutionDir)\Data\Tools\$(ProjectName)" "$(OutDir)" Engine
+COPY "$(SolutionDir)External\FBXSDK\lib\$(IntDir)libfbxsdk.dll" "$(OutDir)"</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -91,10 +92,11 @@
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalDependencies>Graphics.lib;Resource.lib;libfbxsdk.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>$(OutDir);$(SolutionDir)External\FBXSDK\lib\x64\release\</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(OutDir);$(SolutionDir)External\FBXSDK\lib\$(IntDir)</AdditionalLibraryDirectories>
     </Link>
     <PostBuildEvent>
-      <Command>$(SolutionDir)Scripts\CreateDataLinks.bat $(SolutionDir)\Data\Tools\$(ProjectName) $(OutDir) Engine</Command>
+      <Command>CALL "$(SolutionDir)Scripts\CreateDataLinks.bat" "$(SolutionDir)\Data\Tools\$(ProjectName)" "$(OutDir)" Engine
+COPY "$(SolutionDir)External\FBXSDK\lib\$(IntDir)libfbxsdk.dll" "$(OutDir)"</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>

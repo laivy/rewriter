@@ -108,6 +108,7 @@ void App::InitApp()
 {
 #ifdef _IMGUI
 	Graphics::Initialize(hWnd);
+	Resource::Initialize(L"Data");
 	OnResize.Register(&Graphics::OnResize);
 
 	ImGui::SetCurrentContext(Graphics::ImGui::GetContext());
@@ -122,7 +123,7 @@ void App::InitApp()
 	ImGui::StyleColorsDark();
 #endif
 
-	Database::Initialize(Resource::Get(L"Server.dat/Center/Database"));	
+	Database::Initialize(Resource::Get(L"Server.dat/Center/Database"));
 	SocketManager::Instantiate();
 }
 

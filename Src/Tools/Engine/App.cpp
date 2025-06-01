@@ -128,21 +128,21 @@ void App::InitApp()
 {
 	// 모듈 초기화
 	Graphics::Initialize(hWnd);
-	Resource::Initialize(&Graphics::D2D::LoadSprite, &Graphics::D3D::LoadTexture, &Graphics::D3D::LoadModel);
+	Resource::Initialize(L"Engine", &Graphics::D2D::LoadSprite, &Graphics::D3D::LoadTexture, &Graphics::D3D::LoadModel);
 	OnResize.Register(&Graphics::OnResize);
 
 	// ImGui 초기화
 	ImGui::SetCurrentContext(Graphics::ImGui::GetContext());
 
 	auto& io{ ImGui::GetIO() };
-	io.IniFilename = "Data/imgui_tool.ini";
-	io.Fonts->AddFontFromFileTTF("Data/NanumGothic.ttf", 16.0f, nullptr, io.Fonts->GetGlyphRangesKorean());
+	io.IniFilename = "Engine/imgui_tool.ini";
+	io.Fonts->AddFontFromFileTTF("Engine/NanumGothic.ttf", 16.0f, nullptr, io.Fonts->GetGlyphRangesKorean());
 
 	auto& style{ ImGui::GetStyle() };
 	style.WindowMenuButtonPosition = ImGuiDir_None;
 	style.DockingSeparatorSize = 1.0f;
 	ImGui::StyleColorsDark();
-
+	
 	// 싱글톤 생성
 	Clipboard::Instantiate();
 	Desktop::Instantiate();
