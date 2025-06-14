@@ -9,55 +9,66 @@ namespace
 		static const auto folderIcon{ Graphics::ImGui::LoadTexture(L"Engine/Icon/Folder.png") };
 
 		constexpr ImVec2 iconSize{ 60.0f, 60.0f };
-		const auto textSize{ ImGui::CalcTextSize(label.data()) };
+		const ImVec2 textSize{ ImGui::CalcTextSize(label.data()) };
+
+		if (ImGui::GetWindowWidth() < ImGui::GetCursorPosX() + std::max(iconSize.x, textSize.x))
+			ImGui::Spacing();
+
+		bool isClicked{ false };
+		float iconX{};
+		float textX{};
 		if (iconSize.x < textSize.x)
 		{
-			ImGui::BeginGroup();
-			auto textX{ ImGui::GetCursorPosX() };
-			auto iconX = textX + (textSize.x - iconSize.x) / 2.0f;
-			ImGui::SetCursorPosX(iconX);
-			ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2{ ImGui::GetStyle().ItemSpacing.x, -3.0f });
-			Graphics::ImGui::Image(folderIcon, iconSize);
-			ImGui::SetCursorPosX(textX);
-			ImGui::TextUnformatted(label.data());
-			ImGui::PopStyleVar();
-			ImGui::EndGroup();
+			iconX = ImGui::GetCursorPosX() + (textSize.x - iconSize.x) / 2.0f;
+			textX = ImGui::GetCursorPosX();
 		}
 		else
 		{
-			auto pos{ ImGui::GetCursorScreenPos() };
-			auto drawList{ ImGui::GetWindowDrawList() };
-			ImVec2 lt{ pos.x - ImGui::GetStyle().ItemSpacing.x / 2.0f, pos.y };
-			ImVec2 rb{ pos.x + iconSize.x + ImGui::GetStyle().ItemSpacing.x / 2.0f, pos.y + iconSize.y + textSize.y };
+			iconX = ImGui::GetCursorPosX();
+			textX = ImGui::GetCursorPosX() + (iconSize.x - textSize.x) / 2.0f;
+		}
+
+		static ImGuiID selectedItemID{ 0 };
+		ImGuiID id{ ImGui::GetID(label.data()) };
+
+		ImGui::BeginGroup();
+		ImGui::SetCursorPosX(iconX);
+		ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2{ ImGui::GetStyle().ItemSpacing.x, -3.0f });
+		Graphics::ImGui::Image(folderIcon, iconSize);
+		ImGui::PopStyleVar();
+		if (ImGui::IsItemClicked(ImGuiMouseButton_Left))
+		{
+			if (selectedItemID == id)
+			{
+				isClicked = true;
+				selectedItemID = 0;
+			}
+			else
+			{
+				selectedItemID = id;
+			}
+		}
+		ImGui::SetCursorPosX(textX);
+		if (selectedItemID == id)
+		{
+			const ImVec2 pos{ ImGui::GetCursorScreenPos() };
+			const ImVec2 itemSpacing{ ImGui::GetStyle().ItemSpacing };
+			const ImVec2 lt{
+				pos.x - itemSpacing.x / 2.0f,
+				pos.y - itemSpacing.y / 2.0f
+			};
+			const ImVec2 rb{
+				pos.x + textSize.x + itemSpacing.x / 2.0f,
+				pos.y + textSize.y + itemSpacing.y / 2.0f
+			};
+
+			ImDrawList* drawList{ ImGui::GetWindowDrawList() };
 			drawList->AddRectFilled(lt, rb, IM_COL32(80, 80, 80, 255));
 			drawList->AddRect(lt, rb, IM_COL32(195, 195, 195, 255));
-
-			// 아이콘
-			ImGui::BeginGroup();
-			ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2{ ImGui::GetStyle().ItemSpacing.x, -3.0f });
-			Graphics::ImGui::Image(folderIcon, iconSize);
-			if (ImGui::IsItemClicked(ImGuiMouseButton_Left))
-			{
-				ImGui::PopStyleVar();
-				ImGui::EndGroup();
-				return true;
-			}
-
-			// 텍스트
-			auto textX{ ImGui::GetCursorPosX() };
-			textX += (iconSize.x - textSize.x) / 2.0f;
-			ImGui::SetCursorPosX(textX);
-			ImGui::TextUnformatted(label.data());
-			if (ImGui::IsItemClicked(ImGuiMouseButton_Left))
-			{
-				ImGui::PopStyleVar();
-				ImGui::EndGroup();
-				return true;
-			}
-			ImGui::PopStyleVar();
-			ImGui::EndGroup();
 		}
-		return false;
+		ImGui::TextUnformatted(label.data());
+		ImGui::EndGroup();
+		return isClicked;
 	}
 }
 
@@ -151,13 +162,6 @@ void Explorer::RenderAddressBar()
 
 void Explorer::RenderFileViewer()
 {
-	// 뒤로가기
-	if (m_path.compare(m_path.root_path()) != 0)
-	{
-		if (ImGui::Button(".."))
-			SetPath(std::filesystem::canonical(m_path / L".."));
-	}
-
 	// 폴더
 	for (const auto& entry : std::filesystem::directory_iterator{ m_path })
 	{
