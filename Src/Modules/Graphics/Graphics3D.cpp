@@ -238,9 +238,9 @@ namespace Graphics::D3D
 		return std::make_unique<IndexBuffer>(buffer, view);
 	}
 
-	static void ExecuteUploadCommandLists()
+	static void ExecuteUploadCommandList()
 	{
-		if (FAILED(g_uploadCommandList->Close()))
+		if (auto hr{ g_uploadCommandList->Close() }; FAILED(hr))
 		{
 			assert(false);
 			return;
@@ -248,7 +248,21 @@ namespace Graphics::D3D
 
 		std::array<ID3D12CommandList*, 1> commandLists{ g_uploadCommandList.Get() };
 		g_commandQueue->ExecuteCommandLists(static_cast<UINT>(commandLists.size()), commandLists.data());
-		g_uploadCommandList->Reset(g_uploadCommandAllocator.Get(), nullptr);
+	}
+
+	static void ResetUploadCommandList()
+	{
+		g_uploadBuffers.clear();
+		if (auto hr{ g_uploadCommandAllocator->Reset() }; FAILED(hr))
+		{
+			assert(false);
+			return;
+		}
+		if (auto hr{ g_uploadCommandList->Reset(g_uploadCommandAllocator.Get(), nullptr) }; FAILED(hr))
+		{
+			assert(false);
+			return;
+		}
 	}
 
 	bool Initialize()
@@ -299,13 +313,13 @@ namespace Graphics::D3D
 	DLL_API void End()
 	{
 		g_swapChain->End3D();
-		ExecuteUploadCommandLists();
+		ExecuteUploadCommandList();
 	}
 
 	DLL_API void Present()
 	{
 		g_swapChain->Present();
-		g_uploadBuffers.clear();
+		ResetUploadCommandList();
 	}
 
 	DLL_API std::shared_ptr<Resource::Texture> LoadTexture(std::span<std::byte> binary)
