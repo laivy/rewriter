@@ -2,6 +2,65 @@
 #include "Explorer.h"
 #include "Common/Util.h"
 
+namespace
+{
+	bool Button(std::string_view label)
+	{
+		static const auto folderIcon{ Graphics::ImGui::LoadTexture(L"Engine/Icon/Folder.png") };
+
+		constexpr ImVec2 iconSize{ 60.0f, 60.0f };
+		const auto textSize{ ImGui::CalcTextSize(label.data()) };
+		if (iconSize.x < textSize.x)
+		{
+			ImGui::BeginGroup();
+			auto textX{ ImGui::GetCursorPosX() };
+			auto iconX = textX + (textSize.x - iconSize.x) / 2.0f;
+			ImGui::SetCursorPosX(iconX);
+			ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2{ ImGui::GetStyle().ItemSpacing.x, -3.0f });
+			Graphics::ImGui::Image(folderIcon, iconSize);
+			ImGui::SetCursorPosX(textX);
+			ImGui::TextUnformatted(label.data());
+			ImGui::PopStyleVar();
+			ImGui::EndGroup();
+		}
+		else
+		{
+			auto pos{ ImGui::GetCursorScreenPos() };
+			auto drawList{ ImGui::GetWindowDrawList() };
+			ImVec2 lt{ pos.x - ImGui::GetStyle().ItemSpacing.x / 2.0f, pos.y };
+			ImVec2 rb{ pos.x + iconSize.x + ImGui::GetStyle().ItemSpacing.x / 2.0f, pos.y + iconSize.y + textSize.y };
+			drawList->AddRectFilled(lt, rb, IM_COL32(80, 80, 80, 255));
+			drawList->AddRect(lt, rb, IM_COL32(195, 195, 195, 255));
+
+			// 아이콘
+			ImGui::BeginGroup();
+			ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2{ ImGui::GetStyle().ItemSpacing.x, -3.0f });
+			Graphics::ImGui::Image(folderIcon, iconSize);
+			if (ImGui::IsItemClicked(ImGuiMouseButton_Left))
+			{
+				ImGui::PopStyleVar();
+				ImGui::EndGroup();
+				return true;
+			}
+
+			// 텍스트
+			auto textX{ ImGui::GetCursorPosX() };
+			textX += (iconSize.x - textSize.x) / 2.0f;
+			ImGui::SetCursorPosX(textX);
+			ImGui::TextUnformatted(label.data());
+			if (ImGui::IsItemClicked(ImGuiMouseButton_Left))
+			{
+				ImGui::PopStyleVar();
+				ImGui::EndGroup();
+				return true;
+			}
+			ImGui::PopStyleVar();
+			ImGui::EndGroup();
+		}
+		return false;
+	}
+}
+
 Explorer::Explorer() :
 	m_scrollAddressBarToRight{ false }
 {
@@ -106,7 +165,9 @@ void Explorer::RenderFileViewer()
 			continue;
 
 		std::wstring name{ entry.path().filename() };
-		if (ImGui::Button(name))
+		ImGui::SameLine();
+		if (Button(Util::wstou8s(name)))
+		//if (ImGui::Button(name))
 			SetPath(std::filesystem::canonical(m_path / name));
 	}
 
