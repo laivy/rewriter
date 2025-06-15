@@ -4,69 +4,126 @@
 
 namespace
 {
-	bool Button(std::string_view label)
+	std::vector<std::string> SplitString(std::string_view string, const float width)
 	{
-		static const auto folderIcon{ Graphics::ImGui::LoadTexture(L"Engine/Icon/Folder.png") };
+		std::vector<std::string> lines;
+		size_t i{ 1 };
+		while (!string.empty())
+		{
+			std::string_view substr{ string.substr(0, i) };
+			if (ImGui::CalcTextSize(substr.data(), substr.data() + i).x > width)
+			{
+				std::string_view line{ string.substr(0, i - 1) };
+				lines.emplace_back(line);
+				string = string.substr(i - 1);
 
+				// 3줄까지만 표시
+				if (lines.size() >= 2)
+				{
+					if (ImGui::CalcTextSize(string.data(), string.data() + string.size()).x <= width)
+					{
+						lines.emplace_back(string);
+						return lines;
+					}
+
+					// 남은 문자열의 길이가 width를 넘으면 말줄임 처리
+					const ImVec2 ellipsisTextSize{ ImGui::CalcTextSize("...") };
+					size_t j{ string.size() };
+					while (true)
+					{
+						std::string ellipsized{ string.substr(0, j) };
+						if (ImGui::CalcTextSize(ellipsized.data(), ellipsized.data() + ellipsized.size()).x + ellipsisTextSize.x <= width)
+						{
+							ellipsized += "...";
+							lines.emplace_back(std::move(ellipsized));
+							break;
+						}
+						if (j == 0)
+						{
+							break;
+						}
+						--j;
+					}
+					return lines;
+				}
+
+				i = 1;
+				continue;
+			}
+			if (i == string.size())
+			{
+				lines.emplace_back(string);
+				break;
+			}
+			++i;
+		}
+
+		return lines;
+	}
+
+	bool IconButton(const std::shared_ptr<Graphics::ImGui::Texture>& icon, std::string_view label)
+	{
+		// wrapWidth를 기준으로 줄로 나눔
+		constexpr float wrapWidth{ 80.0f };
+		const std::vector<std::string> lines{ SplitString(label, wrapWidth) };
+
+		// 너비는 고정, 높이는 가변
+		constexpr float itemWidth{ 100.0f };
 		constexpr ImVec2 iconSize{ 60.0f, 60.0f };
-		const ImVec2 textSize{ ImGui::CalcTextSize(label.data()) };
+		const ImVec2 itemSpacing{ ImGui::GetStyle().ItemSpacing };
+		const float fontHeight{ ImGui::GetFontSize() };
+		const ImVec2 itemSize{ itemWidth, iconSize.y + itemSpacing.y * (lines.size() + 1) + fontHeight * lines.size() };
 
-		if (ImGui::GetWindowWidth() < ImGui::GetCursorPosX() + std::max(iconSize.x, textSize.x))
+		// 줄바꿈
+		if (ImGui::GetContentRegionMax().x < ImGui::GetCursorPosX() + itemSpacing.x + itemSize.x)
 			ImGui::Spacing();
 
-		bool isClicked{ false };
-		float iconX{};
-		float textX{};
-		if (iconSize.x < textSize.x)
-		{
-			iconX = ImGui::GetCursorPosX() + (textSize.x - iconSize.x) / 2.0f;
-			textX = ImGui::GetCursorPosX();
-		}
-		else
-		{
-			iconX = ImGui::GetCursorPosX();
-			textX = ImGui::GetCursorPosX() + (iconSize.x - textSize.x) / 2.0f;
-		}
-
+		// 선택된 아이템 하이라이트
 		static ImGuiID selectedItemID{ 0 };
-		ImGuiID id{ ImGui::GetID(label.data()) };
-
-		ImGui::BeginGroup();
-		ImGui::SetCursorPosX(iconX);
-		ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2{ ImGui::GetStyle().ItemSpacing.x, -3.0f });
-		Graphics::ImGui::Image(folderIcon, iconSize);
-		ImGui::PopStyleVar();
-		if (ImGui::IsItemClicked(ImGuiMouseButton_Left))
+		if (selectedItemID == ImGui::GetID(label.data()))
 		{
-			if (selectedItemID == id)
-			{
-				isClicked = true;
-				selectedItemID = 0;
-			}
-			else
-			{
-				selectedItemID = id;
-			}
-		}
-		ImGui::SetCursorPosX(textX);
-		if (selectedItemID == id)
-		{
-			const ImVec2 pos{ ImGui::GetCursorScreenPos() };
-			const ImVec2 itemSpacing{ ImGui::GetStyle().ItemSpacing };
-			const ImVec2 lt{
-				pos.x - itemSpacing.x / 2.0f,
-				pos.y - itemSpacing.y / 2.0f
-			};
-			const ImVec2 rb{
-				pos.x + textSize.x + itemSpacing.x / 2.0f,
-				pos.y + textSize.y + itemSpacing.y / 2.0f
-			};
-
+			const ImVec2 startCursorScreenPos{ ImGui::GetCursorScreenPos() };
+			const ImVec2 lt{ startCursorScreenPos };
+			const ImVec2 rb{ startCursorScreenPos.x + itemSize.x, startCursorScreenPos.y + itemSize.y };
 			ImDrawList* drawList{ ImGui::GetWindowDrawList() };
 			drawList->AddRectFilled(lt, rb, IM_COL32(80, 80, 80, 255));
 			drawList->AddRect(lt, rb, IM_COL32(195, 195, 195, 255));
 		}
-		ImGui::TextUnformatted(label.data());
+
+		ImGui::BeginGroup();
+
+		// 아이콘
+		const ImVec2 startCursorPos{ ImGui::GetCursorPos() };
+		ImGui::SetCursorPosX(startCursorPos.x + (itemWidth - iconSize.x) / 2.0f);
+		ImGui::SetCursorPosY(ImGui::GetCursorPosY() + itemSpacing.y);
+		Graphics::ImGui::Image(icon, iconSize);
+		ImGui::SetCursorPosY(ImGui::GetCursorPosY() - itemSpacing.y);
+
+		// 파일 또는 폴더 이름
+		for (const auto& line : lines)
+		{
+			ImVec2 textSize{ ImGui::CalcTextSize(line.data(), line.data() + line.size()) };
+			ImGui::SetCursorPosX(startCursorPos.x + (itemWidth - textSize.x) / 2.0f);
+			ImGui::TextUnformatted(line.data(), line.data() + line.size());
+		}
+
+		// 전체를 덮는 버튼
+		bool isClicked{ false };
+		ImGui::SetCursorPos(startCursorPos);
+		if (ImGui::InvisibleButton(label.data(), itemSize))
+		{
+			ImGuiID itemID{ ImGui::GetItemID() };
+			if (selectedItemID == itemID)
+			{
+				selectedItemID = 0;
+				isClicked = true;
+			}
+			else
+			{
+				selectedItemID = itemID;
+			}
+		}
+
 		ImGui::EndGroup();
 		return isClicked;
 	}
@@ -168,11 +225,11 @@ void Explorer::RenderFileViewer()
 		if (!entry.is_directory())
 			continue;
 
+		static const auto icon{ Graphics::ImGui::LoadTexture(L"Engine/Icon/Folder.png") };
 		std::wstring name{ entry.path().filename() };
-		ImGui::SameLine();
-		if (Button(Util::wstou8s(name)))
-		//if (ImGui::Button(name))
+		if (IconButton(icon, Util::wstou8s(name)))
 			SetPath(std::filesystem::canonical(m_path / name));
+		ImGui::SameLine();
 	}
 
 	// 파일
@@ -181,8 +238,9 @@ void Explorer::RenderFileViewer()
 		if (!entry.is_regular_file() || entry.path().extension() != Stringtable::DATA_FILE_EXT)
 			continue;
 
+		static const auto icon{ Graphics::ImGui::LoadTexture(L"Engine/Icon/File.png") };
 		std::string name{ Util::u8stou8s(entry.path().filename().u8string()) };
-		ImGui::Selectable(name);
+		IconButton(icon, name);
 		if (ImGui::BeginDragDropSource())
 		{
 			std::wstring fullPath{ entry.path() };
