@@ -144,7 +144,7 @@ namespace Graphics::D3D
 	ImTextureID RenderTarget::GetImGuiTextureID() const
 	{
 		if (m_srvDesc)
-			return reinterpret_cast<ImTextureID>(m_srvDesc->GetGpuHandle().ptr);
+			return m_srvDesc->GetGpuHandle().ptr;
 		return 0;
 	}
 

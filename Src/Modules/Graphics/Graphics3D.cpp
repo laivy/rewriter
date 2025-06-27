@@ -182,16 +182,41 @@ namespace Graphics::D3D
 		if (!dm)
 			return false;
 
-		auto desc{ dm->Allocate(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV) };
+		static std::vector<Descriptor*> imguiSrvDescriptors;
+		ImGui_ImplDX12_InitInfo info{};
+		info.Device = g_d3dDevice.Get();
+		info.CommandQueue = g_commandQueue.Get();
+		info.NumFramesInFlight = SwapChain::FrameCount;
+		info.RTVFormat = DXGI_FORMAT_R8G8B8A8_UNORM;
+		info.DSVFormat = DXGI_FORMAT_D24_UNORM_S8_UINT;
+		info.SrvDescriptorHeap = dm->GetSrvHeap().Get();
+		info.SrvDescriptorAllocFn = [](ImGui_ImplDX12_InitInfo*, D3D12_CPU_DESCRIPTOR_HANDLE* out_cpu_handle, D3D12_GPU_DESCRIPTOR_HANDLE* out_gpu_handle)
+		{
+			auto dm{ DescriptorManager::GetInstance() };
+			if (!dm)
+				return;
 
-		if (!::ImGui_ImplDX12_Init(
-			g_d3dDevice.Get(),
-			SwapChain::FRAME_COUNT,
-			DXGI_FORMAT_R8G8B8A8_UNORM,
-			dm->GetSrvHeap().Get(),
-			desc->GetCpuHandle(),
-			desc->GetGpuHandle()
-		))
+			auto desc{ dm->Allocate(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV) };
+			*out_cpu_handle = desc->GetCpuHandle();
+			*out_gpu_handle = desc->GetGpuHandle();
+			imguiSrvDescriptors.push_back(desc);
+		};
+		info.SrvDescriptorFreeFn = [](ImGui_ImplDX12_InitInfo*, D3D12_CPU_DESCRIPTOR_HANDLE cpu_handle, D3D12_GPU_DESCRIPTOR_HANDLE gpu_handle)
+		{
+			auto dm{ DescriptorManager::GetInstance() };
+			if (!dm)
+				return;
+
+			auto it = std::ranges::find_if(imguiSrvDescriptors, [cpu_handle, gpu_handle](auto desc)
+			{
+				return desc->GetCpuHandle() == cpu_handle && desc->GetGpuHandle() == gpu_handle;
+			});
+			if (it == imguiSrvDescriptors.end())
+				return;
+
+			dm->Deallocate(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV, *it);
+		};
+		if (!::ImGui_ImplDX12_Init(&info))
 			return false;
 
 		return true;

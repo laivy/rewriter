@@ -53,7 +53,7 @@ namespace Graphics::D3D
 		void WaitForPreviousFrame();
 
 	public:
-		static constexpr auto FRAME_COUNT{ 2U };
+		static constexpr auto FrameCount{ 2U };
 
 	private:
 		D3D12_VIEWPORT m_viewport;
@@ -68,6 +68,6 @@ namespace Graphics::D3D
 		HANDLE m_fenceEvent;
 		UINT m_frameIndex;
 
-		std::array<FrameResource, FRAME_COUNT> m_frameResources;
+		std::array<FrameResource, FrameCount> m_frameResources;
 	};
 }

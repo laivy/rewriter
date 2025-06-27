@@ -22,7 +22,7 @@ namespace Graphics::D3D
 		desc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
 		desc.SampleDesc.Count = 1;
 		desc.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
-		desc.BufferCount = FRAME_COUNT;
+		desc.BufferCount = FrameCount;
 		desc.SwapEffect = DXGI_SWAP_EFFECT_FLIP_DISCARD;
 
 		ComPtr<IDXGISwapChain1> swapChain1;
@@ -237,7 +237,7 @@ namespace Graphics::D3D
 		if (!dm)
 			return;
 
-		for (size_t i{ 0 }; i < FRAME_COUNT; ++i)
+		for (size_t i{ 0 }; i < FrameCount; ++i)
 		{
 			if (FAILED(m_swapChain->GetBuffer(static_cast<UINT>(i), IID_PPV_ARGS(&m_frameResources[i].backBuffer))))
 			{
@@ -259,7 +259,7 @@ namespace Graphics::D3D
 #ifdef _DIRECT2D
 	void SwapChain::CreateWrappedResource()
 	{
-		for (size_t i{ 0 }; i < FRAME_COUNT; ++i)
+		for (size_t i{ 0 }; i < FrameCount; ++i)
 		{
 			D3D11_RESOURCE_FLAGS flags{ D3D11_BIND_RENDER_TARGET };
 			if (FAILED(g_d3d11On12Device->CreateWrappedResource(
@@ -285,7 +285,7 @@ namespace Graphics::D3D
 			static_cast<float>(dpi)
 		) };
 
-		for (size_t i{ 0 }; i < FRAME_COUNT; ++i)
+		for (size_t i{ 0 }; i < FrameCount; ++i)
 		{
 			ComPtr<IDXGISurface> surface;
 			if (FAILED(m_frameResources[i].wrappedBackBuffer.As(&surface)))
@@ -359,7 +359,7 @@ namespace Graphics::D3D
 	void SwapChain::CreateCommandAllocators()
 	{
 		// 명령할당자
-		for (size_t i{ 0 }; i < FRAME_COUNT; ++i)
+		for (size_t i{ 0 }; i < FrameCount; ++i)
 		{
 			if (FAILED(g_d3dDevice->CreateCommandAllocator(D3D12_COMMAND_LIST_TYPE_DIRECT, IID_PPV_ARGS(&m_frameResources[i].commandAllocator))))
 			{

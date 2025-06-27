@@ -138,7 +138,7 @@ void App::InitApp()
 
 	auto& io{ ImGui::GetIO() };
 	io.IniFilename = "Data/imgui_client.ini";
-	io.Fonts->AddFontFromFileTTF("Data/Galmuri11.ttf", 14.0f, nullptr, io.Fonts->GetGlyphRangesKorean());
+	io.Fonts->AddFontFromFileTTF("Data/NanumGothic.ttf", 16.0f, nullptr, io.Fonts->GetGlyphRangesKorean());
 
 	auto& style{ ImGui::GetStyle() };
 	style.WindowMenuButtonPosition = ImGuiDir_None;

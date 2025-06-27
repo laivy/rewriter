@@ -40,7 +40,7 @@ namespace Graphics::ImGui
 	DLL_API ImTextureID Texture::GetImGuiTextureID() const
 	{
 		if (m_descriptor)
-			return reinterpret_cast<ImTextureID>(m_descriptor->GetGpuHandle().ptr);
+			return m_descriptor->GetGpuHandle().ptr;
 		return 0;
 	}
 
