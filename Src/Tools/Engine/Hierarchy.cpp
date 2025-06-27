@@ -365,8 +365,7 @@ void Hierarchy::RenderNode(const std::shared_ptr<Resource::Property>& prop)
 {
 	ImGui::PushID(prop.get());
 
-	bool isRoot{ IsRoot(prop) };
-	bool isSelected{ IsSelected(prop) };
+	const bool isRoot{ IsRoot(prop) };
 
 	// 변경 사항이 있으면 '*' 추가
 	auto name{ Util::wstou8s(prop->GetName()) };
@@ -378,7 +377,7 @@ void Hierarchy::RenderNode(const std::shared_ptr<Resource::Property>& prop)
 
 	ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, isRoot ? ImVec2{ 0.0f, 5.0f } : ImVec2{ 0.0f, 2.0f });
 	ImGuiTreeNodeFlags flag{ ImGuiTreeNodeFlags_OpenOnDoubleClick | ImGuiTreeNodeFlags_FramePadding | ImGuiTreeNodeFlags_SpanFullWidth };
-	if (isSelected)
+	if (IsSelected(prop))
 		flag |= ImGuiTreeNodeFlags_Selected;
 	if (!isRoot && prop->GetChildren().empty())
 		flag |= ImGuiTreeNodeFlags_Leaf;

@@ -10,30 +10,32 @@ namespace
 		size_t i{ 1 };
 		while (!string.empty())
 		{
-			std::string_view substr{ string.substr(0, i) };
-			if (ImGui::CalcTextSize(substr.data(), substr.data() + i).x > width)
+			if (ImGui::CalcTextSize(string.data(), string.data() + i).x > width)
 			{
 				std::string_view line{ string.substr(0, i - 1) };
 				lines.emplace_back(line);
 				string = string.substr(i - 1);
+				i = 1;
 
 				// 3줄까지만 표시
-				if (lines.size() >= 2)
+				constexpr auto lineMax{ 3ULL };
+				if (lines.size() >= lineMax - 1)
 				{
+					// 남은 문자열의 길이가 길이 제한에 걸리지 않으면 줄 추가하고 끝
 					if (ImGui::CalcTextSize(string.data(), string.data() + string.size()).x <= width)
 					{
 						lines.emplace_back(string);
 						return lines;
 					}
 
-					// 남은 문자열의 길이가 width를 넘으면 말줄임 처리
+					// 말줄임표를 표시할 수 있을만큼 문자열 뒷부분을 자르고 줄 추가
 					const ImVec2 ellipsisTextSize{ ImGui::CalcTextSize("...") };
 					size_t j{ string.size() };
 					while (true)
 					{
-						std::string ellipsized{ string.substr(0, j) };
-						if (ImGui::CalcTextSize(ellipsized.data(), ellipsized.data() + ellipsized.size()).x + ellipsisTextSize.x <= width)
+						if (ImGui::CalcTextSize(string.data(), string.data() + j).x + ellipsisTextSize.x <= width)
 						{
+							std::string ellipsized{ string.substr(0, j) };
 							ellipsized += "...";
 							lines.emplace_back(std::move(ellipsized));
 							break;
@@ -46,8 +48,6 @@ namespace
 					}
 					return lines;
 				}
-
-				i = 1;
 				continue;
 			}
 			if (i == string.size())
@@ -57,7 +57,6 @@ namespace
 			}
 			++i;
 		}
-
 		return lines;
 	}
 
@@ -106,8 +105,9 @@ namespace
 			ImGui::SetCursorPosX(startCursorPos.x + (itemWidth - textSize.x) / 2.0f);
 			ImGui::TextUnformatted(line.data(), line.data() + line.size());
 		}
+		ImGui::EndGroup();
 
-		// 전체를 덮는 버튼
+		// 전체를 덮는 투명 버튼
 		bool isClicked{ false };
 		ImGui::SetCursorPos(startCursorPos);
 		if (ImGui::InvisibleButton(label.data(), itemSize))
@@ -123,9 +123,208 @@ namespace
 				selectedItemID = itemID;
 			}
 		}
-
-		ImGui::EndGroup();
 		return isClicked;
+	}
+
+	// ImGui::TreeNodeBehavior 함수 기반
+	// <펼침 버튼이 눌렸는지, 이름 부분이 눌렸는지>
+	std::pair<bool, bool> IconTreeNode(const std::shared_ptr<Graphics::ImGui::Texture>& icon, std::string_view label, ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_None)
+	{
+		ImGuiWindow* window = ImGui::GetCurrentWindow();
+		if (window->SkipItems)
+			return std::make_pair(false, false);
+
+		ImGuiContext& g = *GImGui;
+		const ImGuiStyle& style = g.Style;
+		const bool display_frame = (flags & ImGuiTreeNodeFlags_Framed) != 0;
+		const ImVec2 padding = (display_frame || (flags & ImGuiTreeNodeFlags_FramePadding)) ? style.FramePadding : ImVec2(style.FramePadding.x, ImMin(window->DC.CurrLineTextBaseOffset, style.FramePadding.y));
+		const ImVec2 label_size = ImGui::CalcTextSize(label.data());
+
+		// We vertically grow up to current line height up the typical widget height.
+		const float frame_height = ImMax(ImMin(window->DC.CurrLineSize.y, g.FontSize + style.FramePadding.y * 2), label_size.y + padding.y * 2);
+		ImRect frame_bb;
+		frame_bb.Min.x = (flags & ImGuiTreeNodeFlags_SpanFullWidth) ? window->WorkRect.Min.x : window->DC.CursorPos.x;
+		frame_bb.Min.y = window->DC.CursorPos.y;
+		frame_bb.Max.x = window->WorkRect.Max.x;
+		frame_bb.Max.y = window->DC.CursorPos.y + frame_height;
+		if (display_frame)
+		{
+			// Framed header expand a little outside the default padding, to the edge of InnerClipRect
+			// (FIXME: May remove this at some point and make InnerClipRect align with WindowPadding.x instead of WindowPadding.x*0.5f)
+			frame_bb.Min.x -= IM_FLOOR(window->WindowPadding.x * 0.5f - 1.0f);
+			frame_bb.Max.x += IM_FLOOR(window->WindowPadding.x * 0.5f);
+		}
+
+		constexpr ImVec2 icon_size{ 16.0f, 16.0f };
+		const float text_offset_x = g.FontSize + (display_frame ? padding.x * 3 : padding.x * 2) + (icon ? icon_size.x + padding.x : 0.0f); // Collapser arrow width + Spacing + icon
+		const float text_offset_y = ImMax(padding.y, window->DC.CurrLineTextBaseOffset); // Latch before ItemSize changes it
+		const float text_width = g.FontSize + (label_size.x > 0.0f ? label_size.x + padding.x * 2 : 0.0f) + (icon ? icon_size.x + padding.x * 2 : 0.0f); // Include collapser and icon
+		ImVec2 text_pos(window->DC.CursorPos.x + text_offset_x, window->DC.CursorPos.y + text_offset_y);
+		ImGui::ItemSize(ImVec2(text_width, frame_height), padding.y);
+
+		// For regular tree nodes, we arbitrary allow to click past 2 worth of ItemSpacing
+		ImRect interact_bb = frame_bb;
+		if (!display_frame && (flags & (ImGuiTreeNodeFlags_SpanAvailWidth | ImGuiTreeNodeFlags_SpanFullWidth)) == 0)
+			interact_bb.Max.x = frame_bb.Min.x + text_width + style.ItemSpacing.x * 2.0f;
+
+		// Compute open and multi-select states before ItemAdd() as it clear NextItem data.
+		ImGuiID id = ImGui::GetID(label.data());
+		bool is_open = ImGui::TreeNodeUpdateNextOpen(id, flags);
+		bool item_add = ImGui::ItemAdd(interact_bb, id);
+		g.LastItemData.StatusFlags |= ImGuiItemStatusFlags_HasDisplayRect;
+		g.LastItemData.DisplayRect = frame_bb;
+
+		// If a NavLeft request is happening and ImGuiTreeNodeFlags_NavLeftJumpsBackHere enabled:
+		// Store data for the current depth to allow returning to this node from any child item.
+		// For this purpose we essentially compare if g.NavIdIsAlive went from 0 to 1 between TreeNode() and TreePop().
+		// It will become tempting to enable ImGuiTreeNodeFlags_NavLeftJumpsBackHere by default or move it to ImGuiStyle.
+		// Currently only supports 32 level deep and we are fine with (1 << Depth) overflowing into a zero, easy to increase.
+		if (is_open && !g.NavIdIsAlive && (flags & ImGuiTreeNodeFlags_NavLeftJumpsBackHere) && !(flags & ImGuiTreeNodeFlags_NoTreePushOnOpen))
+			if (g.NavMoveDir == ImGuiDir_Left && g.NavWindow == window && ImGui::NavMoveRequestButNoResultYet())
+			{
+				g.NavTreeNodeStack.resize(g.NavTreeNodeStack.Size + 1);
+				ImGuiNavTreeNodeData* nav_tree_node_data = &g.NavTreeNodeStack.back();
+				nav_tree_node_data->ID = id;
+				nav_tree_node_data->InFlags = g.LastItemData.InFlags;
+				nav_tree_node_data->NavRect = g.LastItemData.NavRect;
+				window->DC.TreeJumpToParentOnPopMask |= (1 << window->DC.TreeDepth);
+			}
+
+		const bool is_leaf = (flags & ImGuiTreeNodeFlags_Leaf) != 0;
+		if (!item_add)
+		{
+			if (is_open && !(flags & ImGuiTreeNodeFlags_NoTreePushOnOpen))
+				ImGui::TreePushOverrideID(id);
+			IMGUI_TEST_ENGINE_ITEM_INFO(g.LastItemData.ID, label, g.LastItemData.StatusFlags | (is_leaf ? 0 : ImGuiItemStatusFlags_Openable) | (is_open ? ImGuiItemStatusFlags_Opened : 0));
+			return std::make_pair(is_open, false);
+		}
+
+		ImGuiButtonFlags button_flags = ImGuiTreeNodeFlags_None;
+		if ((flags & ImGuiTreeNodeFlags_AllowOverlap) || (g.LastItemData.InFlags & ImGuiItemFlags_AllowOverlap))
+			button_flags |= ImGuiButtonFlags_AllowOverlap;
+		if (!is_leaf)
+			button_flags |= ImGuiButtonFlags_PressedOnDragDropHold;
+
+		// We allow clicking on the arrow section with keyboard modifiers held, in order to easily
+		// allow browsing a tree while preserving selection with code implementing multi-selection patterns.
+		// When clicking on the rest of the tree node we always disallow keyboard modifiers.
+		const float arrow_hit_x1 = (text_pos.x - text_offset_x) - style.TouchExtraPadding.x;
+		const float arrow_hit_x2 = (text_pos.x - text_offset_x) + (g.FontSize + padding.x * 2.0f) + style.TouchExtraPadding.x;
+		const bool is_mouse_x_over_arrow = (g.IO.MousePos.x >= arrow_hit_x1 && g.IO.MousePos.x < arrow_hit_x2);
+		if (window != g.HoveredWindow || !is_mouse_x_over_arrow)
+			button_flags |= ImGuiButtonFlags_NoKeyModifiers;
+
+		// Open behaviors can be altered with the _OpenOnArrow and _OnOnDoubleClick flags.
+		// Some alteration have subtle effects (e.g. toggle on MouseUp vs MouseDown events) due to requirements for multi-selection and drag and drop support.
+		// - Single-click on label = Toggle on MouseUp (default, when _OpenOnArrow=0)
+		// - Single-click on arrow = Toggle on MouseDown (when _OpenOnArrow=0)
+		// - Single-click on arrow = Toggle on MouseDown (when _OpenOnArrow=1)
+		// - Double-click on label = Toggle on MouseDoubleClick (when _OpenOnDoubleClick=1)
+		// - Double-click on arrow = Toggle on MouseDoubleClick (when _OpenOnDoubleClick=1 and _OpenOnArrow=0)
+		// It is rather standard that arrow click react on Down rather than Up.
+		// We set ImGuiButtonFlags_PressedOnClickRelease on OpenOnDoubleClick because we want the item to be active on the initial MouseDown in order for drag and drop to work.
+		if (is_mouse_x_over_arrow)
+			button_flags |= ImGuiButtonFlags_PressedOnClick;
+		else if (flags & ImGuiTreeNodeFlags_OpenOnDoubleClick)
+			button_flags |= ImGuiButtonFlags_PressedOnClickRelease | ImGuiButtonFlags_PressedOnDoubleClick;
+		else
+			button_flags |= ImGuiButtonFlags_PressedOnClickRelease;
+
+		bool selected = (flags & ImGuiTreeNodeFlags_Selected) != 0;
+		const bool was_selected = selected;
+
+		bool hovered, held;
+		bool pressed = ImGui::ButtonBehavior(interact_bb, id, &hovered, &held, button_flags);
+		bool toggled = false;
+		if (!is_leaf)
+		{
+			if (pressed && g.DragDropHoldJustPressedId != id)
+			{
+				toggled |= is_mouse_x_over_arrow && !g.NavDisableMouseHover; // Lightweight equivalent of IsMouseHoveringRect() since ButtonBehavior() already did the job
+			}
+			else if (pressed && g.DragDropHoldJustPressedId == id)
+			{
+				IM_ASSERT(button_flags & ImGuiButtonFlags_PressedOnDragDropHold);
+				if (!is_open) // When using Drag and Drop "hold to open" we keep the node highlighted after opening, but never close it again.
+					toggled = true;
+			}
+
+			if (g.NavId == id && g.NavMoveDir == ImGuiDir_Left && is_open)
+			{
+				toggled = true;
+				ImGui::NavClearPreferredPosForAxis(ImGuiAxis_X);
+				ImGui::NavMoveRequestCancel();
+			}
+			if (g.NavId == id && g.NavMoveDir == ImGuiDir_Right && !is_open) // If there's something upcoming on the line we may want to give it the priority?
+			{
+				toggled = true;
+				ImGui::NavClearPreferredPosForAxis(ImGuiAxis_X);
+				ImGui::NavMoveRequestCancel();
+			}
+
+			if (toggled)
+			{
+				is_open = !is_open;
+				window->DC.StateStorage->SetInt(id, is_open);
+				g.LastItemData.StatusFlags |= ImGuiItemStatusFlags_ToggledOpen;
+			}
+		}
+
+		// In this branch, TreeNodeBehavior() cannot toggle the selection so this will never trigger.
+		if (selected != was_selected) //-V547
+			g.LastItemData.StatusFlags |= ImGuiItemStatusFlags_ToggledSelection;
+
+		// Render
+		const ImU32 text_col = ImGui::GetColorU32(ImGuiCol_Text);
+		ImGuiNavHighlightFlags nav_highlight_flags = ImGuiNavHighlightFlags_TypeThin;
+		if (display_frame)
+		{
+			// Framed type
+			const ImU32 bg_col = ImGui::GetColorU32((held && hovered) ? ImGuiCol_HeaderActive : hovered ? ImGuiCol_HeaderHovered : ImGuiCol_Header);
+			ImGui::RenderFrame(frame_bb.Min, frame_bb.Max, bg_col, true, style.FrameRounding);
+			ImGui::RenderNavHighlight(frame_bb, id, nav_highlight_flags);
+			if (flags & ImGuiTreeNodeFlags_Bullet)
+				ImGui::RenderBullet(window->DrawList, ImVec2(text_pos.x - text_offset_x * 0.60f, text_pos.y + g.FontSize * 0.5f), text_col);
+			else if (!is_leaf)
+				ImGui::RenderArrow(window->DrawList, ImVec2(text_pos.x - text_offset_x + padding.x, text_pos.y), text_col, is_open ? ((flags & ImGuiTreeNodeFlags_UpsideDownArrow) ? ImGuiDir_Up : ImGuiDir_Down) : ImGuiDir_Right, 1.0f);
+			else // Leaf without bullet, left-adjusted text
+				text_pos.x -= text_offset_x - padding.x;
+			if (flags & ImGuiTreeNodeFlags_ClipLabelForTrailingButton)
+				frame_bb.Max.x -= g.FontSize + style.FramePadding.x;
+
+			if (g.LogEnabled)
+				ImGui::LogSetNextTextDecoration("###", "###");
+			ImGui::RenderTextClipped(text_pos, frame_bb.Max, label.data(), nullptr, &label_size);
+		}
+		else
+		{
+			// Unframed typed for tree nodes
+			if (hovered || selected)
+			{
+				const ImU32 bg_col = ImGui::GetColorU32((held && hovered) ? ImGuiCol_HeaderActive : hovered ? ImGuiCol_HeaderHovered : ImGuiCol_Header);
+				ImGui::RenderFrame(frame_bb.Min, frame_bb.Max, bg_col, false);
+			}
+			ImGui::RenderNavHighlight(frame_bb, id, nav_highlight_flags);
+			if (flags & ImGuiTreeNodeFlags_Bullet)
+				ImGui::RenderBullet(window->DrawList, ImVec2(text_pos.x - text_offset_x * 0.5f, text_pos.y + g.FontSize * 0.5f), text_col);
+			else if (!is_leaf)
+				ImGui::RenderArrow(window->DrawList, ImVec2(text_pos.x - text_offset_x + padding.x, text_pos.y + g.FontSize * 0.15f), text_col, is_open ? ((flags & ImGuiTreeNodeFlags_UpsideDownArrow) ? ImGuiDir_Up : ImGuiDir_Down) : ImGuiDir_Right, 0.70f);
+			if (icon)
+			{
+				ImVec2 lt{ text_pos.x - padding.x - icon_size.x, text_pos.y };
+				ImVec2 rb{ text_pos.x - padding.x, text_pos.y + icon_size.y };
+				ImDrawList* drawList{ ImGui::GetWindowDrawList() };
+				drawList->AddImage(icon->GetImGuiTextureID(), lt, rb);
+			}
+			if (g.LogEnabled)
+				ImGui::LogSetNextTextDecoration(">", NULL);
+			ImGui::RenderText(text_pos, label.data(), nullptr, false);
+		}
+
+		if (is_open && !(flags & ImGuiTreeNodeFlags_NoTreePushOnOpen))
+			ImGui::TreePushOverrideID(id);
+		IMGUI_TEST_ENGINE_ITEM_INFO(id, label, g.LastItemData.StatusFlags | (is_leaf ? 0 : ImGuiItemStatusFlags_Openable) | (is_open ? ImGuiItemStatusFlags_Opened : 0));
+		return std::make_pair(is_open, pressed && !toggled);
 	}
 }
 
@@ -141,27 +340,113 @@ void Explorer::Update(float deltaTime)
 
 void Explorer::Render()
 {
-	ImGui::PushID(WINDOW_NAME);
 	if (ImGui::Begin(WINDOW_NAME))
 	{
-		if ( ImGui::BeginChild("ADDRESS_BAR", ImVec2{ 0, 23 }))
-			RenderAddressBar();
-		ImGui::EndChild();
-
+		RenderFileTree();
+		ImGui::BeginGroup();
+		RenderAddressBar();
 		ImGui::Separator();
-
-		if (ImGui::BeginChild("FILE_VIEWER", ImVec2{}, false, ImGuiWindowFlags_HorizontalScrollbar) )
-			RenderFileViewer();
-		ImGui::EndChild();
+		RenderFileViewer();
+		ImGui::EndGroup();
 	}
 	ImGui::End();
-	ImGui::PopID();
+}
+
+void Explorer::RenderFileTree()
+{
+	if (!ImGui::BeginChild("FileTree", ImVec2{ 175.0f, 0.0f }, false, ImGuiWindowFlags_HorizontalScrollbar))
+	{
+		ImGui::EndChild();
+		return;
+	}
+
+	DWORD bufferSize{ ::GetLogicalDriveStrings(0, nullptr) };
+	std::wstring buffer(bufferSize, L'\0');
+	if (!::GetLogicalDriveStrings(bufferSize, buffer.data()))
+	{
+		ImGui::EndChild();
+		return;
+	}
+
+	std::vector<std::filesystem::path> drives;
+	while (true)
+	{
+		size_t pos{ buffer.find(L'\0') };
+		if (pos == 0 || pos == std::wstring::npos)
+			break;
+
+		drives.push_back(buffer.substr(0, pos));
+		buffer.erase(0, pos + 1);
+	}
+
+	for (int i{ 0 }; const auto& drive : drives)
+	{
+		ImGui::PushID(i++);
+		std::function<void(const std::filesystem::path&)> recrusive = [this, &recrusive](const std::filesystem::path& path)
+		{
+			static const auto folderIcon{ Graphics::ImGui::LoadTexture(L"Engine/Icon/Folder.png") };
+			static const auto fileIcon{ Graphics::ImGui::LoadTexture(L"Engine/Icon/File.png") };
+
+			const bool isDirectory{ std::filesystem::is_directory(path) };
+			const auto icon{ isDirectory ? folderIcon : fileIcon };
+			const std::string label{ (path == path.root_path()) ? Util::u8stou8s(path.u8string()) : Util::u8stou8s(path.filename().u8string()) };
+			const ImGuiTreeNodeFlags flags{ ImGuiTreeNodeFlags_SpanFullWidth | (isDirectory ? ImGuiTreeNodeFlags_None : ImGuiTreeNodeFlags_Leaf) };
+
+			const auto [isOpened, isPressed] { IconTreeNode(icon, label, flags) };
+			if (isDirectory)
+			{
+				if (isOpened)
+				{
+					for (const auto& entry : std::filesystem::directory_iterator{ path, std::filesystem::directory_options::skip_permission_denied })
+					{
+						if (entry.is_directory())
+							recrusive(entry);
+					}
+					for (const auto& entry : std::filesystem::directory_iterator{ path, std::filesystem::directory_options::skip_permission_denied })
+					{
+						if (entry.is_regular_file())
+							recrusive(entry);
+					}
+					ImGui::TreePop();
+				}
+				if (isPressed)
+				{
+					SetPath(path);
+				}
+			}
+			else
+			{
+				if (isOpened)
+				{
+					ImGui::TreePop();
+				}
+				if (isPressed)
+				{
+					auto log{ std::format(L"File: {}\n", path.wstring()) };
+					::OutputDebugString(log.c_str());
+				}
+			}
+		};
+		recrusive(drive);
+		ImGui::PopID();
+	}
+
+	ImGui::EndChild();
+	ImGui::SameLine();
+	ImGui::SeparatorEx(ImGuiSeparatorFlags_Vertical);
+	ImGui::SameLine();
 }
 
 void Explorer::RenderAddressBar()
 {
+	if ( !ImGui::BeginChild("AddressBar", ImVec2{ 0, 23 }))
+	{
+		ImGui::EndChild();
+		return;
+	}
+
 	ImGui::SetNextItemWidth(50.0f);
-	if (ImGui::BeginCombo("##DISKDRIVE", reinterpret_cast<const char*>(m_path.root_name().u8string().c_str())))
+	if (ImGui::BeginCombo("##DiskDrive", reinterpret_cast<const char*>(m_path.root_name().u8string().c_str())))
 	{
 		DWORD bufferSize{ ::GetLogicalDriveStrings(0, nullptr) };
 		std::wstring buffer(bufferSize, L'\0');
@@ -215,12 +500,19 @@ void Explorer::RenderAddressBar()
 		ImGui::SetScrollHereX(1.0f);
 		m_scrollAddressBarToRight = false;
 	}
+	ImGui::EndChild();
 }
 
 void Explorer::RenderFileViewer()
 {
+	if (!ImGui::BeginChild("FILE_VIEWER", ImVec2{}, false, ImGuiWindowFlags_HorizontalScrollbar))
+	{
+		ImGui::EndChild();
+		return;
+	}
+
 	// 폴더
-	for (const auto& entry : std::filesystem::directory_iterator{ m_path })
+	for (const auto& entry : std::filesystem::directory_iterator{ m_path, std::filesystem::directory_options::skip_permission_denied })
 	{
 		if (!entry.is_directory())
 			continue;
@@ -233,9 +525,12 @@ void Explorer::RenderFileViewer()
 	}
 
 	// 파일
-	for (const auto& entry : std::filesystem::directory_iterator{ m_path })
+	for (const auto& entry : std::filesystem::directory_iterator{ m_path, std::filesystem::directory_options::skip_permission_denied })
 	{
-		if (!entry.is_regular_file() || entry.path().extension() != Stringtable::DATA_FILE_EXT)
+		if (!entry.is_regular_file())
+			continue;
+
+		if (entry.path().extension() != Stringtable::DATA_FILE_EXT)
 			continue;
 
 		static const auto icon{ Graphics::ImGui::LoadTexture(L"Engine/Icon/File.png") };
@@ -250,6 +545,7 @@ void Explorer::RenderFileViewer()
 			ImGui::EndDragDropSource();
 		}
 	}
+	ImGui::EndChild();
 }
 
 void Explorer::SetPath(const std::filesystem::path& path)

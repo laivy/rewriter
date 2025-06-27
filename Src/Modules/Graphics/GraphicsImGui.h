@@ -1,14 +1,30 @@
 #pragma once
 
 #ifdef _IMGUI
+struct ID3D12Resource;
+
 namespace Graphics::D3D
 {
+	class Descriptor;
 	class RenderTarget;
 }
 
 namespace Graphics::ImGui
 {
-	class Texture;
+	class Texture
+	{
+	public:
+		DLL_API Texture(const ComPtr<ID3D12Resource>& resource);
+		DLL_API ~Texture();
+
+		DLL_API ImTextureID GetImGuiTextureID() const;
+		DLL_API ImVec2 GetSize() const;
+
+	private:
+		ComPtr<ID3D12Resource> m_resource;
+		D3D::Descriptor* m_descriptor;
+		ImVec2 m_size;
+	};
 
 	DLL_API void Begin();
 	DLL_API void End();

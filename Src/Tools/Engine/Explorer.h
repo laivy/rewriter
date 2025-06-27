@@ -10,6 +10,7 @@ public:
 	void Render();
 
 private:
+	void RenderFileTree();
 	void RenderAddressBar();
 	void RenderFileViewer();
 
