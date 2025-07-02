@@ -530,18 +530,23 @@ void Explorer::RenderFileTree()
 
 void Explorer::RenderAddressBar()
 {
-	if ( !ImGui::BeginChild("AddressBar", ImVec2{ 0, 23 }))
+	if (!ImGui::BeginChild("AddressBar", ImVec2{ 0.0f, 23.0f }))
 	{
 		ImGui::EndChild();
 		return;
 	}
 
+	// 디스크 드라이브 콤보 박스
 	ImGui::SetNextItemWidth(50.0f);
 	if (ImGui::BeginCombo("##DiskDrive", reinterpret_cast<const char*>(m_path.root_name().u8string().c_str())))
 	{
 		DWORD bufferSize{ ::GetLogicalDriveStrings(0, nullptr) };
 		std::wstring buffer(bufferSize, L'\0');
-		::GetLogicalDriveStrings(bufferSize, buffer.data());
+		if (!::GetLogicalDriveStrings(bufferSize, buffer.data()))
+		{
+			ImGui::EndChild();
+			return;
+		}
 
 		std::vector<std::filesystem::path> drives;
 		while (true)
@@ -565,7 +570,7 @@ void Explorer::RenderAddressBar()
 		ImGui::EndCombo();
 	}
 
-	ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2{ 3, 0 });
+	ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2{ 3.0f, ImGui::GetStyle().ItemSpacing.y });
 	std::filesystem::path newPath;
 	std::filesystem::path temp{ m_path.root_path() };
 	for (const auto& entry : m_path)
@@ -573,20 +578,54 @@ void Explorer::RenderAddressBar()
 		if (entry.has_root_name() || entry.has_root_directory())
 			continue;
 
+		ImGui::PushID(reinterpret_cast<const char*>(temp.u8string().c_str()));
 		temp /= entry;
 
 		ImGui::SameLine();
 		if (ImGui::Button(entry))
 		{
 			newPath = temp;
+			ImGui::PopID();
 			break;
 		}
+
+		// 하위 폴더가 있으면 ">" 버튼 표시
+		bool hasSubfolder{ false };
+		std::vector<std::filesystem::path> subfolders;
+		for (const auto& e : std::filesystem::directory_iterator{ temp, std::filesystem::directory_options::skip_permission_denied })
+		{
+			if (!e.is_directory())
+				continue;
+			hasSubfolder = true;
+			subfolders.push_back(e);
+		}
+		if (hasSubfolder)
+		{
+			ImGui::SameLine();
+			if (ImGui::Button(">"))
+				ImGui::OpenPopup("FolderList");
+			if (ImGui::BeginPopup("FolderList"))
+			{
+				for (const auto& e : subfolders)
+				{
+					if (ImGui::Selectable(e.filename().u8string()))
+					{
+						newPath = e;
+						break;
+					}
+				}
+				ImGui::EndPopup();
+			}
+		}
+		ImGui::PopID();
 	}
-	if (!newPath.empty())
-		SetPath(newPath);
 	ImGui::PopStyleVar();
 
-	if (m_scrollAddressBarToRight)
+	if (!newPath.empty())
+		SetPath(newPath);
+
+	// 경로가 바뀌지 않았을 때 갱신해야 제대로 작동함
+	if (newPath.empty() && m_scrollAddressBarToRight)
 	{
 		ImGui::SetScrollHereX(1.0f);
 		m_scrollAddressBarToRight = false;
