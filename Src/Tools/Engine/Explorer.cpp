@@ -4,6 +4,9 @@
 
 namespace
 {
+	// 파일, 폴더 이름 텍스트 최대 줄 수
+	constexpr size_t LineMax{ 3 };
+
 	std::vector<std::string> SplitString(std::string_view string, const float width)
 	{
 		std::vector<std::string> lines;
@@ -17,9 +20,7 @@ namespace
 				string = string.substr(i - 1);
 				i = 1;
 
-				// 3줄까지만 표시
-				constexpr auto lineMax{ 3ULL };
-				if (lines.size() >= lineMax - 1)
+				if (lines.size() >= LineMax - 1)
 				{
 					// 남은 문자열의 길이가 길이 제한에 걸리지 않으면 줄 추가하고 끝
 					if (ImGui::CalcTextSize(string.data(), string.data() + string.size()).x <= width)
@@ -71,7 +72,7 @@ namespace
 		constexpr ImVec2 iconSize{ 60.0f, 60.0f };
 		const ImVec2 itemSpacing{ ImGui::GetStyle().ItemSpacing };
 		const float fontHeight{ ImGui::GetFontSize() };
-		const ImVec2 itemSize{ itemWidth, iconSize.y + itemSpacing.y * (lines.size() + 1) + fontHeight * lines.size() };
+		const ImVec2 itemSize{ itemWidth, iconSize.y + itemSpacing.y * (LineMax + 1) + fontHeight * LineMax };
 
 		// 줄바꿈
 		if (ImGui::GetContentRegionMax().x < ImGui::GetCursorPosX() + itemSpacing.x + itemSize.x)
@@ -82,8 +83,9 @@ namespace
 		if (selectedItemID == ImGui::GetID(label.data()))
 		{
 			const ImVec2 startCursorScreenPos{ ImGui::GetCursorScreenPos() };
+			const ImVec2 size{ itemWidth, iconSize.y + itemSpacing.y * (lines.size() + 1) + fontHeight * lines.size() };
 			const ImVec2 lt{ startCursorScreenPos };
-			const ImVec2 rb{ startCursorScreenPos.x + itemSize.x, startCursorScreenPos.y + itemSize.y };
+			const ImVec2 rb{ startCursorScreenPos.x + size.x, startCursorScreenPos.y + size.y };
 			ImDrawList* drawList{ ImGui::GetWindowDrawList() };
 			drawList->AddRectFilled(lt, rb, IM_COL32(80, 80, 80, 255));
 			drawList->AddRect(lt, rb, IM_COL32(195, 195, 195, 255));
@@ -642,6 +644,7 @@ void Explorer::RenderFileViewer()
 	}
 
 	// 폴더
+	ImGui::Dummy({ 0.0f, 1.0f });
 	for (const auto& entry : std::filesystem::directory_iterator{ m_path, std::filesystem::directory_options::skip_permission_denied })
 	{
 		if (!entry.is_directory())
