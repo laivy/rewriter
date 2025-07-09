@@ -69,7 +69,8 @@
       <AdditionalLibraryDirectories>$(OutDir)</AdditionalLibraryDirectories>
     </Link>
     <PostBuildEvent>
-      <Command>CALL "$(SolutionDir)Scripts\CreateDataLinks.bat" "$(SolutionDir)\Data\Game\Client" "$(OutDir)" Data</Command>
+      <Command>PY "$(SolutionDir)Scripts\MakeDataSymlink.py" "$(OutDir)Data" "$(SolutionDir)Data\Game\Client"</Command>
+      <Message>데이터 파일 심볼릭 링크 만듦...</Message>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -95,7 +96,8 @@
       <AdditionalLibraryDirectories>$(OutDir)</AdditionalLibraryDirectories>
     </Link>
     <PostBuildEvent>
-      <Command>CALL "$(SolutionDir)Scripts\CreateDataLinks.bat" "$(SolutionDir)\Data\Game\Client" "$(OutDir)" Data</Command>
+      <Command>PY "$(SolutionDir)Scripts\MakeDataSymlink.py" "$(OutDir)Data" "$(SolutionDir)Data\Game\Client"</Command>
+      <Message>데이터 파일 심볼릭 링크 만듦...</Message>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>

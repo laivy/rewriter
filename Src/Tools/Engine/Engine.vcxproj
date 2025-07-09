@@ -68,8 +68,9 @@
       <AdditionalDependencies>Graphics.lib;Resource.lib;libfbxsdk.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
-      <Command>CALL "$(SolutionDir)Scripts\CreateDataLinks.bat" "$(SolutionDir)\Data\Tools\$(ProjectName)" "$(OutDir)" Engine
+      <Command>PY "$(SolutionDir)Scripts\MakeDataSymlink.py" "$(OutDir)$(ProjectName)" "$(SolutionDir)Data\Tools\$(ProjectName)"
 COPY "$(SolutionDir)External\FBXSDK\lib\$(IntDir)libfbxsdk.dll" "$(OutDir)"</Command>
+      <Message>데이터 파일 심볼릭 링크 만듦...</Message>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -95,8 +96,9 @@ COPY "$(SolutionDir)External\FBXSDK\lib\$(IntDir)libfbxsdk.dll" "$(OutDir)"</Com
       <AdditionalLibraryDirectories>$(OutDir);$(SolutionDir)External\FBXSDK\lib\$(IntDir)</AdditionalLibraryDirectories>
     </Link>
     <PostBuildEvent>
-      <Command>CALL "$(SolutionDir)Scripts\CreateDataLinks.bat" "$(SolutionDir)\Data\Tools\$(ProjectName)" "$(OutDir)" Engine
+      <Command>PY "$(SolutionDir)Scripts\MakeDataSymlink.py" "$(OutDir)$(ProjectName)" "$(SolutionDir)Data\Tools\$(ProjectName)"
 COPY "$(SolutionDir)External\FBXSDK\lib\$(IntDir)libfbxsdk.dll" "$(OutDir)"</Command>
+      <Message>데이터 파일 심볼릭 링크 만듦...</Message>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
@@ -126,6 +128,7 @@ COPY "$(SolutionDir)External\FBXSDK\lib\$(IntDir)libfbxsdk.dll" "$(OutDir)"</Com
     <ClInclude Include="..\..\Modules\Resource\Include\Lib.h" />
     <ClInclude Include="App.h" />
     <ClInclude Include="Clipboard.h" />
+    <ClInclude Include="Delegates.h" />
     <ClInclude Include="FbxHandler.h" />
     <ClInclude Include="Hierarchy.h" />
     <ClInclude Include="Explorer.h" />
@@ -172,6 +175,7 @@ COPY "$(SolutionDir)External\FBXSDK\lib\$(IntDir)libfbxsdk.dll" "$(OutDir)"</Com
     <ClCompile Include="..\..\Game\Client\Window.cpp" />
     <ClCompile Include="App.cpp" />
     <ClCompile Include="Clipboard.cpp" />
+    <ClCompile Include="Delegates.cpp" />
     <ClCompile Include="FbxHandler.cpp" />
     <ClCompile Include="Hierarchy.cpp" />
     <ClCompile Include="Inspector.cpp" />
