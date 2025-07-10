@@ -70,7 +70,7 @@
     </Link>
     <PostBuildEvent>
       <Command>PY "$(SolutionDir)Scripts\MakeDataSymlink.py" "$(OutDir)Data" "$(SolutionDir)Data\Game\Client" "$(SolutionDir)Data\Game\Server"</Command>
-      <Message>데이터 파일 심볼릭 링크 만듦...</Message>
+      <Message>Make Data Symlink...</Message>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -97,7 +97,7 @@
     </Link>
     <PostBuildEvent>
       <Command>PY "$(SolutionDir)Scripts\MakeDataSymlink.py" "$(OutDir)Data" "$(SolutionDir)Data\Game\Client" "$(SolutionDir)Data\Game\Server"</Command>
-      <Message>데이터 파일 심볼릭 링크 만듦...</Message>
+      <Message>Make Data Symlink...</Message>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>

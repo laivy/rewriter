@@ -33,7 +33,7 @@ def make_symlink_recursive(src_dir: Path, dst_dir: Path):
 def main():
     # 명령행 인자 유효성 체크
     if len(sys.argv) < 3:
-        msg: str = "명령행 인자가 잘못됐습니다"
+        msg: str = "Invalid command line argument"
         for i, arg in enumerate(sys.argv):
             msg += f"\n{i}: \"{arg}\""
         sys.exit(msg)
@@ -43,8 +43,8 @@ def main():
     non_symlink_files: list[Path] = list()
     remove_all_symlinks(dst_dir, non_symlink_files)
     if non_symlink_files:
-        msg: str = "링크 실패\n"
-        msg += "링크가 아닌 실제 파일이 존재합니다"
+        msg: str = "Symlink Fail\n"
+        msg += "Non-symlink file exists"
         for file in non_symlink_files:
             msg += f"\n    {file}"
         sys.exit(msg)
@@ -56,11 +56,11 @@ def main():
         make_symlink_recursive(src_dir, dst_dir)
 
     # 결과
-    msg: str = "링크 성공\n"
-    msg += f"입력:\n"
+    msg: str = "Symlink Success\n"
+    msg += f"Source:\n"
     for src_dir in src_dirs:
         msg += f"    {src_dir}\n"
-    msg += "출력:\n"
+    msg += "Destination:\n"
     msg += f"    {dst_dir}"
     print(msg)
 
