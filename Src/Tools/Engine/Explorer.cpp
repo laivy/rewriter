@@ -663,9 +663,6 @@ void Explorer::RenderFileViewer()
 		if (!entry.is_regular_file())
 			continue;
 
-		if (entry.path().extension() != Stringtable::DATA_FILE_EXT)
-			continue;
-
 		static const auto icon{ Graphics::ImGui::LoadTexture(L"Engine/Icon/File.png") };
 		std::string name{ Util::u8stou8s(entry.path().filename().u8string()) };
 		IconButton(icon, name);
@@ -677,6 +674,7 @@ void Explorer::RenderFileViewer()
 			ImGui::Text(name.c_str());
 			ImGui::EndDragDropSource();
 		}
+		ImGui::SameLine();
 	}
 	ImGui::EndChild();
 }
