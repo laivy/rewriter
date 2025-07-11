@@ -11,7 +11,7 @@ def remove_all_symlinks(path: Path, non_symlink_files: list[Path]):
         if item.is_file():
             if item.is_symlink():
                 item.unlink()
-            else:
+            elif item.name != ".gitkeep":
                 non_symlink_files.append(item)
         elif item.is_dir():
             remove_all_symlinks(item, non_symlink_files)
@@ -23,7 +23,8 @@ def make_symlink_recursive(src_dir: Path, dst_dir: Path):
     for item in src_dir.iterdir():
         if item.is_file():
             dst_file: Path = dst_dir / item.name
-            os.symlink(item.resolve(), dst_file, item.is_dir())
+            if dst_file.name != ".gitkeep":
+                os.symlink(item.resolve(), dst_file, item.is_dir())
         elif item.is_dir():
             dst_subdir: Path = dst_dir / item.name
             dst_subdir.mkdir(parents=True, exist_ok=True)
