@@ -185,7 +185,7 @@ namespace Resource
 	}
 #endif
 
-	static std::shared_ptr<Property> LoadRecursive(std::ifstream& file, std::wstring_view path)
+	static std::shared_ptr<Property> LoadRecursive(std::ifstream& file, std::wstring_view subPath)
 	{
 		auto prop{ std::make_shared<Property>() };
 
@@ -295,7 +295,7 @@ namespace Resource
 		file.read(reinterpret_cast<char*>(&count), sizeof(count));
 		for (uint16_t i{ 0 }; i < count; ++i)
 		{
-			auto child{ LoadRecursive(file, path) };
+			auto child{ LoadRecursive(file, subPath) };
 #ifdef _TOOL
 			child->SetParent(prop);
 #endif
@@ -304,16 +304,20 @@ namespace Resource
 		return prop;
 	}
 
-	static std::shared_ptr<Property> Load(std::wstring_view filePath, std::wstring_view path)
+	static std::shared_ptr<Property> Load(const std::filesystem::path& filePath, std::wstring_view subPath)
 	{
-		std::ifstream file{ std::format(L"{}/{}", g_mountPath, filePath), std::ios::binary };
+		std::ifstream file;
+		if (filePath.is_absolute())
+			file.open(filePath, std::ios::binary);
+		else
+			file.open(g_mountPath / filePath, std::ios::binary);
 		if (!file)
 		{
 			assert(false && "CAN NOT LOAD DATA FILE");
 			return nullptr;
 		}
 
-		auto root{ LoadRecursive(file, path) };
+		auto root{ LoadRecursive(file, subPath) };
 		return root;
 	}
 
