@@ -98,8 +98,8 @@ namespace Resource
 		DLL_API std::shared_ptr<Texture> GetTexture(std::wstring_view path = L"") const;
 		DLL_API std::shared_ptr<Model> GetModel(std::wstring_view path = L"") const;
 		DLL_API std::shared_ptr<Property> Get(std::wstring_view path) const;
-		DLL_API const std::vector<std::shared_ptr<Property>>& GetChildren() const;
 		DLL_API std::vector<std::shared_ptr<Property>>& GetChildren();
+		DLL_API const std::vector<std::shared_ptr<Property>>& GetChildren() const;
 
 #ifdef _TOOL
 		DLL_API void SetParent(const std::shared_ptr<Property>& prop);

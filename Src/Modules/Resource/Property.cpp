@@ -382,12 +382,12 @@ namespace Resource
 		return *it;
 	}
 
-	DLL_API const std::vector<std::shared_ptr<Property>>& Property::GetChildren() const
+	DLL_API std::vector<std::shared_ptr<Property>>& Property::GetChildren()
 	{
 		return m_children;
 	}
 
-	DLL_API std::vector<std::shared_ptr<Property>>& Property::GetChildren()
+	DLL_API const std::vector<std::shared_ptr<Property>>& Property::GetChildren() const
 	{
 		return m_children;
 	}

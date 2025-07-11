@@ -313,7 +313,6 @@ namespace Graphics::D3D
 			return false;
 		if (!CreateRootSignature())
 			return false;
-
 #ifdef _IMGUI
 		if (!InitializeImGui())
 			return false;
