@@ -9,6 +9,8 @@ public:
 
 	void Run();
 
+	Int2 GetCursorPosition() const;
+
 private:
 	static LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);
 
@@ -21,11 +23,7 @@ private:
 private:
 	static constexpr auto WINDOW_TITLE_NAME{ L"Engine" };
 
-public:
-	static inline HWND hWnd{ NULL };
-	static inline Int2 size{ 1920, 1080 };
-
-private:
-	bool m_isActive;
+	HWND m_hWnd;
+	Int2 m_windowSize;
 	Timer m_timer;
 };

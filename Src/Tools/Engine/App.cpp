@@ -11,7 +11,8 @@
 #include "Viewport.h"
 
 App::App() :
-	m_isActive{ true }
+	m_hWnd{ NULL },
+	m_windowSize{ 1920, 1080 }
 {
 	InitWindow();
 	InitApp();
@@ -33,7 +34,7 @@ App::~App()
 void App::Run()
 {
 	MSG msg{};
-	while (m_isActive)
+	while (true)
 	{
 		if (::PeekMessage(&msg, NULL, 0, 0, PM_REMOVE))
 		{
@@ -48,6 +49,16 @@ void App::Run()
 			Render();
 		}
 	}
+}
+
+Int2 App::GetCursorPosition() const
+{
+	POINT mouse{};
+	if (!::GetCursorPos(&mouse))
+		return Int2{};
+	if (!::ScreenToClient(m_hWnd, &mouse))
+		return Int2{};
+	return Int2{ static_cast<int32_t>(mouse.x), static_cast<int32_t>(mouse.y) };
 }
 
 LRESULT App::WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
@@ -96,17 +107,17 @@ void App::InitWindow()
 	wcex.cbClsExtra = 0;
 	wcex.cbWndExtra = 0;
 	wcex.hInstance = HINST_THISCOMPONENT;
-	wcex.hCursor = LoadCursor(NULL, IDC_ARROW);
+	wcex.hCursor = ::LoadCursor(NULL, IDC_ARROW);
 	wcex.hbrBackground = NULL;
 	wcex.lpszMenuName = NULL;
 	wcex.lpszClassName = WINDOW_TITLE_NAME;
 	::RegisterClassEx(&wcex);
 
 	// 화면 최대 크기로 윈도우 생성
-	RECT rect{ 0, 0, size.x, size.y };
+	RECT rect{ 0, 0, m_windowSize.x, m_windowSize.y };
 	::AdjustWindowRect(&rect, WS_OVERLAPPEDWINDOW, FALSE);
 
-	hWnd = ::CreateWindow(
+	m_hWnd = ::CreateWindow(
 		wcex.lpszClassName,
 		WINDOW_TITLE_NAME,
 		WS_OVERLAPPEDWINDOW,
@@ -119,15 +130,15 @@ void App::InitWindow()
 		wcex.hInstance,
 		this
 	);
-	::SetWindowText(hWnd, WINDOW_TITLE_NAME);
-	::ShowWindow(hWnd, SW_SHOWDEFAULT);
-	::UpdateWindow(hWnd);
+	::SetWindowText(m_hWnd, WINDOW_TITLE_NAME);
+	::ShowWindow(m_hWnd, SW_SHOWDEFAULT);
+	::UpdateWindow(m_hWnd);
 }
 
 void App::InitApp()
 {
 	// 모듈 초기화
-	Graphics::Initialize(hWnd);
+	Graphics::Initialize(m_hWnd);
 	Resource::Initialize(L"Engine", &Graphics::D2D::LoadSprite, &Graphics::D3D::LoadTexture, &Graphics::D3D::LoadModel);
 	Delegates::OnWindowResized.Register(&Graphics::OnResize);
 

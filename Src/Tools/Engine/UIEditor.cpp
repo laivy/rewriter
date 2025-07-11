@@ -143,9 +143,7 @@ void UIEditor::RenderTopBar()
 
 	ImGui::Text(Util::wstou8s(m_window->path).c_str());
 
-	POINT mouse{};
-	::GetCursorPos(&mouse);
-	::ScreenToClient(App::hWnd, &mouse);
+	Int2 mouse{ App::GetInstance()->GetCursorPosition() };
 	if (m_viewerRect.Contains(Float2{ mouse.x, mouse.y }))
 	{
 		ImGui::SameLine();
