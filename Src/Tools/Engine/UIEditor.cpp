@@ -1,5 +1,6 @@
 #include "Stdafx.h"
 #include "App.h"
+#include "Delegates.h"
 #include "UIEditor.h"
 #include "Common/Util.h"
 
@@ -8,8 +9,8 @@ UIEditor::UIEditor() :
 	m_viewerRect{},
 	m_moveCameraToCenter{ true }
 {
-	App::OnPropertyDelete.Register(this, std::bind_front(&UIEditor::OnPropertyDelete, this));
-	App::OnPropertyModified.Register(this, std::bind_front(&UIEditor::OnPropertyModified, this));
+	Delegates::OnPropDeleted.Register(this, std::bind_front(&UIEditor::OnPropDeleted, this));
+	Delegates::OnPropModified.Register(this, std::bind_front(&UIEditor::OnPropModified, this));
 }
 
 void UIEditor::Render()
@@ -57,7 +58,7 @@ void UIEditor::Render2D()
 	Graphics::D2D::PopClipRect();
 }
 
-void UIEditor::OnPropertyDelete(const std::shared_ptr<Resource::Property>& prop)
+void UIEditor::OnPropDeleted(const std::shared_ptr<Resource::Property>& prop)
 {
 	if (!m_window)
 		return;
@@ -80,7 +81,7 @@ void UIEditor::OnPropertyDelete(const std::shared_ptr<Resource::Property>& prop)
 	}
 }
 
-void UIEditor::OnPropertyModified(const std::shared_ptr<Resource::Property>& prop)
+void UIEditor::OnPropModified(const std::shared_ptr<Resource::Property>& prop)
 {
 	if (!m_window)
 		return;
@@ -233,7 +234,7 @@ void UIEditor::DragDrop()
 	BuildWindow(prop);
 	m_moveCameraToCenter = true;
 
-	App::OnPropertySelected.Notify(prop);
+	Delegates::OnPropSelected.Notify(prop);
 }
 
 void UIEditor::BuildWindow(const std::shared_ptr<Resource::Property>& prop)

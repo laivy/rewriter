@@ -1,5 +1,6 @@
 #include "Stdafx.h"
 #include "App.h"
+#include "Delegates.h"
 #include "FbxHandler.h"
 #include "Hierarchy.h"
 #include "Inspector.h"
@@ -19,8 +20,8 @@ const std::map<Resource::Property::Type, const char*> PROPERTY_TYPES
 
 Inspector::Inspector()
 {
-	App::OnPropertySelected.Register(this, std::bind_front(&Inspector::OnPropertySelected, this));
-	App::OnPropertyDelete.Register(this, std::bind_front(&Inspector::OnPropertyDelete, this));
+	Delegates::OnPropSelected.Register(this, std::bind_front(&Inspector::OnPropSelected, this));
+	Delegates::OnPropDeleted.Register(this, std::bind_front(&Inspector::OnPropDeleted, this));
 }
 
 void Inspector::Update(float deltaTime)
@@ -38,13 +39,13 @@ void Inspector::Render()
 	ImGui::PopID();
 }
 
-void Inspector::OnPropertyDelete(const std::shared_ptr<Resource::Property>& prop)
+void Inspector::OnPropDeleted(const std::shared_ptr<Resource::Property>& prop)
 {
 	if (m_prop.lock() == prop)
 		m_prop.reset();
 }
 
-void Inspector::OnPropertySelected(const std::shared_ptr<Resource::Property>& prop)
+void Inspector::OnPropSelected(const std::shared_ptr<Resource::Property>& prop)
 {
 	m_prop = prop;
 }
@@ -76,7 +77,7 @@ void Inspector::RenderNodeName(const std::shared_ptr<Resource::Property>& prop)
 		if (!parent || !parent->Get(newName))
 		{
 			prop->SetName(newName);
-			App::OnPropertyModified.Notify(prop);
+			Delegates::OnPropModified.Notify(prop);
 		}
 	}
 }
@@ -103,7 +104,7 @@ void Inspector::RenderNodeType(const std::shared_ptr<Resource::Property>& prop)
 			if (ImGui::Selectable(label))
 			{
 				prop->SetType(type);
-				App::OnPropertyModified.Notify(prop);
+				Delegates::OnPropModified.Notify(prop);
 			}
 		}
 		ImGui::EndCombo();
@@ -127,7 +128,7 @@ void Inspector::RenderNodeValue(const std::shared_ptr<Resource::Property>& prop)
 		if (ImGui::InputInt("##INSPECTOR/INT", &data))
 		{
 			prop->Set(data);
-			App::OnPropertyModified.Notify(prop);
+			Delegates::OnPropModified.Notify(prop);
 		}
 
 		auto cursorPosition{ ImGui::GetCursorScreenPos() };
@@ -149,7 +150,7 @@ void Inspector::RenderNodeValue(const std::shared_ptr<Resource::Property>& prop)
 				auto a{ static_cast<uint32_t>(color.w * 255.0f) & 0xFF };
 				data = (a << 24) | (r << 16) | (g << 8) | b;
 				prop->Set(data);
-				App::OnPropertyModified.Notify(prop);
+				Delegates::OnPropModified.Notify(prop);
 			}
 			ImGui::EndPopup();
 		}
@@ -162,7 +163,7 @@ void Inspector::RenderNodeValue(const std::shared_ptr<Resource::Property>& prop)
 		if (ImGui::InputInt2("##INSPECTOR/INT2", reinterpret_cast<int*>(&data)))
 		{
 			prop->Set(data);
-			App::OnPropertyModified.Notify(prop);
+			Delegates::OnPropModified.Notify(prop);
 		}
 		break;
 	}
@@ -173,7 +174,7 @@ void Inspector::RenderNodeValue(const std::shared_ptr<Resource::Property>& prop)
 		if (ImGui::InputFloat("##INSPECTOR/FLOAT", &data))
 		{
 			prop->Set(data);
-			App::OnPropertyModified.Notify(prop);
+			Delegates::OnPropModified.Notify(prop);
 		}
 		break;
 	}
@@ -184,7 +185,7 @@ void Inspector::RenderNodeValue(const std::shared_ptr<Resource::Property>& prop)
 		if (ImGui::InputTextMultiline("##INSPECTOR/STRING", &data))
 		{
 			prop->Set(Util::u8stows(data));
-			App::OnPropertyModified.Notify(prop);
+			Delegates::OnPropModified.Notify(prop);
 		}
 		break;
 	}
@@ -218,7 +219,7 @@ void Inspector::RenderNodeValue(const std::shared_ptr<Resource::Property>& prop)
 		std::span<std::byte> binary{ buffer.release(), size };
 		auto sprite{ Graphics::D2D::LoadSprite(binary) };
 		prop->Set(sprite);
-		App::OnPropertyModified.Notify(prop);
+		Delegates::OnPropModified.Notify(prop);
 		break;
 	}
 	case Resource::Property::Type::Texture:
@@ -265,7 +266,7 @@ void Inspector::RenderNodeValue(const std::shared_ptr<Resource::Property>& prop)
 
 		auto model{ fbxHandler->Load(filePath.data()) };
 		prop->Set(model);
-		App::OnPropertyModified.Notify(prop);
+		Delegates::OnPropModified.Notify(prop);
 		break;
 	}
 	default:

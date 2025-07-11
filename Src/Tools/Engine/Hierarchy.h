@@ -11,7 +11,7 @@ private:
 		bool isModified{ false };
 	};
 
-	class IModal abstract
+	class IModal
 	{
 	public:
 		IModal();
@@ -38,10 +38,10 @@ public:
 	bool IsRoot(const std::shared_ptr<Resource::Property>& prop) const;
 
 private:
-	void OnPropertyAdd(const std::shared_ptr<Resource::Property>& prop);
-	void OnPropertyDelete(const std::shared_ptr<Resource::Property>& prop);
-	void OnPropertyModified(const std::shared_ptr<Resource::Property>& prop);
-	void OnPropertySelected(const std::shared_ptr<Resource::Property>& prop);
+	void OnPropAdded(const std::shared_ptr<Resource::Property>& prop);
+	void OnPropDeleted(const std::shared_ptr<Resource::Property>& prop);
+	void OnPropModified(const std::shared_ptr<Resource::Property>& prop);
+	void OnPropSelected(const std::shared_ptr<Resource::Property>& prop);
 	void OnMenuFileNew();
 	void OnMenuFileOpen();
 	void OnMenuFileSave();
@@ -53,8 +53,8 @@ private:
 	void Shortcut();
 	void DragDrop();
 	void RenderMenuBar();
-	void RenderTreeNode();
-	void RenderNode(const std::shared_ptr<Resource::Property>& prop);
+	void RenderPropertyTree();
+	void RenderProperty(const std::shared_ptr<Resource::Property>& prop);
 	void RenderNodeContextMenu(const std::shared_ptr<Resource::Property>& prop);
 	void RenderModal();
 

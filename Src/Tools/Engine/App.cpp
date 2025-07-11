@@ -1,6 +1,7 @@
 #include "Stdafx.h"
 #include "App.h"
 #include "Clipboard.h"
+#include "Delegates.h"
 #include "Desktop.h"
 #include "Explorer.h"
 #include "FbxHandler.h"
@@ -14,7 +15,6 @@ App::App() :
 {
 	InitWindow();
 	InitApp();
-	m_timer.Tick();
 }
 
 App::~App()
@@ -72,7 +72,7 @@ LRESULT App::WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 			int height{ GET_Y_LPARAM(lParam) };
 			if (width == 0 && height == 0)
 				assert(false);
-			OnResize.Notify(width, height);
+			Delegates::OnWindowResized.Notify(width, height);
 		}
 		break;
 	}
@@ -129,13 +129,13 @@ void App::InitApp()
 	// 모듈 초기화
 	Graphics::Initialize(hWnd);
 	Resource::Initialize(L"Engine", &Graphics::D2D::LoadSprite, &Graphics::D3D::LoadTexture, &Graphics::D3D::LoadModel);
-	OnResize.Register(&Graphics::OnResize);
+	Delegates::OnWindowResized.Register(&Graphics::OnResize);
 
 	// ImGui 초기화
 	ImGui::SetCurrentContext(Graphics::ImGui::GetContext());
 
 	auto& io{ ImGui::GetIO() };
-	io.IniFilename = "Engine/imgui_tool.ini";
+	io.IniFilename = "Engine/Imgui.ini";
 	io.Fonts->AddFontFromFileTTF("Engine/NanumGothic.ttf", 16.0f, nullptr, io.Fonts->GetGlyphRangesKorean());
 
 	auto& style{ ImGui::GetStyle() };
@@ -151,6 +151,9 @@ void App::InitApp()
 	Hierarchy::Instantiate();
 	Inspector::Instantiate();
 	Viewport::Instantiate();
+
+	// 타이머 초기화
+	m_timer.Tick();
 }
 
 void App::Update()

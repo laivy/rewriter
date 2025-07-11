@@ -1,6 +1,7 @@
 #include "Stdafx.h"
 #include "App.h"
 #include "Clipboard.h"
+#include "Delegates.h"
 #include "Hierarchy.h"
 #include "Inspector.h"
 #include "Common/Util.h"
@@ -22,10 +23,10 @@ bool Hierarchy::IModal::IsValid() const
 
 Hierarchy::Hierarchy()
 {
-	App::OnPropertyAdd.Register(this, std::bind_front(&Hierarchy::OnPropertyAdd, this));
-	App::OnPropertyDelete.Register(this, std::bind_front(&Hierarchy::OnPropertyDelete, this));
-	App::OnPropertyModified.Register(this, std::bind_front(&Hierarchy::OnPropertyModified, this));
-	App::OnPropertySelected.Register(this, std::bind_front(&Hierarchy::OnPropertySelected, this));
+	Delegates::OnPropAdded.Register(this, std::bind_front(&Hierarchy::OnPropAdded, this));
+	Delegates::OnPropDeleted.Register(this, std::bind_front(&Hierarchy::OnPropDeleted, this));
+	Delegates::OnPropModified.Register(this, std::bind_front(&Hierarchy::OnPropModified, this));
+	Delegates::OnPropSelected.Register(this, std::bind_front(&Hierarchy::OnPropSelected, this));
 }
 
 void Hierarchy::Update(float deltaTime)
@@ -55,17 +56,15 @@ void Hierarchy::Update(float deltaTime)
 
 void Hierarchy::Render()
 {
-	ImGui::PushID(WINDOW_NAME);
-	if (ImGui::Begin(WINDOW_NAME, NULL, ImGuiWindowFlags_MenuBar))
+	if (ImGui::Begin(WINDOW_NAME, nullptr, ImGuiWindowFlags_MenuBar))
 	{
 		Shortcut();
 		DragDrop();
 		RenderMenuBar();
-		RenderTreeNode();
+		RenderPropertyTree();
 	}
 	ImGui::End();
 	RenderModal();
-	ImGui::PopID();
 }
 
 void Hierarchy::OpenTree(const std::shared_ptr<Resource::Property>& prop)
@@ -84,24 +83,24 @@ bool Hierarchy::IsRoot(const std::shared_ptr<Resource::Property>& prop) const
 	return m_roots.contains(prop);
 }
 
-void Hierarchy::OnPropertyAdd(const std::shared_ptr<Resource::Property>& prop)
+void Hierarchy::OnPropAdded(const std::shared_ptr<Resource::Property>& prop)
 {
 	if (auto parent{ prop->GetParent() })
 		OpenTree(parent);
 	SetModified(prop, true);
 }
 
-void Hierarchy::OnPropertyDelete(const std::shared_ptr<Resource::Property>& prop)
+void Hierarchy::OnPropDeleted(const std::shared_ptr<Resource::Property>& prop)
 {
 	SetModified(prop, true);
 }
 
-void Hierarchy::OnPropertyModified(const std::shared_ptr<Resource::Property>& prop)
+void Hierarchy::OnPropModified(const std::shared_ptr<Resource::Property>& prop)
 {
 	SetModified(prop, true);
 }
 
-void Hierarchy::OnPropertySelected(const std::shared_ptr<Resource::Property>& prop)
+void Hierarchy::OnPropSelected(const std::shared_ptr<Resource::Property>& prop)
 {
 	// 이미 선택된 노드를 선택한 경우 선택 해제 안함
 	// 그리고 이미 선택된 노드이기 때문에 컨테이너에 추가 안함
@@ -314,8 +313,9 @@ void Hierarchy::DragDrop()
 
 	if (auto payload{ ImGui::AcceptDragDropPayload("EXPLORER/OPENFILE") })
 	{
-		std::wstring filePath{ static_cast<const wchar_t*>(payload->Data) };
-		LoadDataFile(filePath);
+		std::filesystem::path filePath{ static_cast<const wchar_t*>(payload->Data) };
+		if (filePath.extension() == Stringtable::DATA_FILE_EXT)
+			LoadDataFile(filePath);
 	}
 
 	ImGui::EndDragDropTarget();
@@ -353,44 +353,48 @@ void Hierarchy::RenderMenuBar()
 	ImGui::EndMenuBar();
 }
 
-void Hierarchy::RenderTreeNode()
+void Hierarchy::RenderPropertyTree()
 {
-	ImGui::PushID("PROPERTY");
+	ImGui::PushID("TreeNode");
 	for (const auto& root : m_roots | std::views::keys)
-		RenderNode(root);
+		RenderProperty(root);
 	ImGui::PopID();
 }
 
-void Hierarchy::RenderNode(const std::shared_ptr<Resource::Property>& prop)
+void Hierarchy::RenderProperty(const std::shared_ptr<Resource::Property>& prop)
 {
 	ImGui::PushID(prop.get());
 
 	const bool isRoot{ IsRoot(prop) };
+	std::string name{ Util::wstou8s(prop->GetName()) };
+	if (isRoot)
+	{
+		// 자식 노드에 변경 사항이 있으면 루트 노드 이름 앞에 '*' 추가
+		if (IsModified(prop))
+			name.insert(0, "* ");
 
-	// 변경 사항이 있으면 '*' 추가
-	auto name{ Util::wstou8s(prop->GetName()) };
-	if (isRoot && IsModified(prop))
-		name.insert(0, "* ");
+		// 루트 노드는 폰트 키움
+		ImGui::PushFont(nullptr, ImGui::GetStyle().FontSizeBase * 1.1f);
+	}
 
-	bool isOpened{ IsOpened(prop) };
+	const bool isOpened{ IsOpened(prop) };
 	ImGui::SetNextItemOpen(isOpened);
 
-	ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, isRoot ? ImVec2{ 0.0f, 5.0f } : ImVec2{ 0.0f, 2.0f });
 	ImGuiTreeNodeFlags flag{ ImGuiTreeNodeFlags_OpenOnDoubleClick | ImGuiTreeNodeFlags_FramePadding | ImGuiTreeNodeFlags_SpanFullWidth };
 	if (IsSelected(prop))
 		flag |= ImGuiTreeNodeFlags_Selected;
-	if (!isRoot && prop->GetChildren().empty())
-		flag |= ImGuiTreeNodeFlags_Leaf;
-	bool isTreeNodeOpen{ ImGui::TreeNodeEx(name.c_str(), flag) };
-	ImGui::PopStyleVar();
+	const bool isTreeNodeOpen{ ImGui::TreeNodeEx(name.c_str(), flag) };
 
-	// 루트 노드와 동일한 인덴트
+	// 자식 노드 시작을 루트 노드와 동일한 인덴트로, 폰트 크기 원복
 	if (isRoot)
+	{
+		ImGui::PopFont();
 		ImGui::Unindent();
+	}
 
 	// 닫혀있어도 클릭 되도록
 	if (ImGui::IsItemClicked())
-		App::OnPropertySelected.Notify(prop);
+		Delegates::OnPropSelected.Notify(prop);
 
 	// 트리 여닫기
 	if (ImGui::IsItemToggledOpen())
@@ -415,8 +419,8 @@ void Hierarchy::RenderNode(const std::shared_ptr<Resource::Property>& prop)
 	// 하위 트리
 	if (isTreeNodeOpen)
 	{
-		for (const auto& [_, child] : *prop)
-			RenderNode(child);
+		for (const auto& child : *prop | std::views::values)
+			RenderProperty(child);
 		ImGui::TreePop();
 	}
 
@@ -431,7 +435,8 @@ void Hierarchy::RenderNodeContextMenu(const std::shared_ptr<Resource::Property>&
 	if (!ImGui::BeginPopupContextItem("CONTEXT"))
 		return;
 
-	App::OnPropertySelected.Notify(prop);
+	if (!IsSelected(prop))
+		Delegates::OnPropSelected.Notify(prop);
 
 	// 루트 노드 전용 메뉴
 	if (std::ranges::all_of(m_selects, [this](const auto& select) { return IsRoot(select.lock()); }))
@@ -572,9 +577,11 @@ void Hierarchy::RenderModal()
 
 void Hierarchy::LoadDataFile(const std::filesystem::path& path)
 {
-	auto root{ Resource::Get(path.wstring()) };
-	root->SetName(path.filename().wstring());
-	m_roots.emplace(root, Root{ .path = path });
+	if (auto root{ Resource::Get(path.wstring()) })
+	{
+		root->SetName(path.filename().wstring());
+		m_roots.emplace(root, Root{ .path = path });
+	}
 }
 
 void Hierarchy::Recurse(const std::shared_ptr<Resource::Property>& prop, const std::function<void(const std::shared_ptr<Resource::Property>&)>& func)
@@ -588,14 +595,14 @@ void Hierarchy::Add(const std::shared_ptr<Resource::Property>& parent, const std
 {
 	child->SetParent(parent);
 	parent->Add(child);
-	App::OnPropertyAdd.Notify(child);
-	App::OnPropertySelected.Notify(child);
+	Delegates::OnPropAdded.Notify(child);
+	Delegates::OnPropSelected.Notify(child);
 }
 
 void Hierarchy::Delete(const std::shared_ptr<Resource::Property>& prop)
 {
 	m_invalids.emplace_back(prop);
-	App::OnPropertyDelete.Notify(prop);
+	Delegates::OnPropDeleted.Notify(prop);
 }
 
 void Hierarchy::Save(const std::shared_ptr<Resource::Property>& prop)

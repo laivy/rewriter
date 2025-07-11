@@ -11,20 +11,17 @@ public:
 
 private:
 	static LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);
+
 	void InitWindow();
 	void InitApp();
 
 	void Update();
 	void Render();
 
-public:
-	static inline auto OnResize{ Delegate<int, int>() };
-	static inline auto OnPropertyAdd{ Delegate<const std::shared_ptr<Resource::Property>&>() };
-	static inline auto OnPropertyDelete{ Delegate<const std::shared_ptr<Resource::Property>&>() };
-	static inline auto OnPropertyModified{ Delegate<const std::shared_ptr<Resource::Property>&>() };
-	static inline auto OnPropertySelected{ Delegate<const std::shared_ptr<Resource::Property>&>() };
+private:
+	static constexpr auto WINDOW_TITLE_NAME{ L"Engine" };
 
-	static constexpr auto WINDOW_TITLE_NAME{ L"ENGINE" };
+public:
 	static inline HWND hWnd{ NULL };
 	static inline Int2 size{ 1920, 1080 };
 
