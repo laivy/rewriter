@@ -1,5 +1,8 @@
-#include "Stdafx.h"
-#include "Delegates.h"
+module Delegates;
+
+import std;
+import Common.Delegate;
+import Library.Resource;
 
 namespace Delegates
 {

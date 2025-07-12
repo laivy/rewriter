@@ -1,14 +1,25 @@
-#include "Stdafx.h"
-#include "App.h"
-#include "Clipboard.h"
-#include "Delegates.h"
-#include "Desktop.h"
-#include "Explorer.h"
-#include "FbxHandler.h"
-#include "Hierarchy.h"
-#include "Inspector.h"
-#include "UIEditor.h"
-#include "Viewport.h"
+module;
+
+// Windows
+#include <Windows.h>
+#include <windowsx.h>
+
+// ImGui
+#include "External/Imgui/imgui.h"
+
+module App;
+
+import std;
+import Delegates;
+import Common.Timer;
+import Common.Type;
+import Library.Graphics;
+import Library.Graphics.D2D;
+import Library.Graphics.D3D;
+import Library.Resource;
+
+EXTERN_C IMAGE_DOS_HEADER __ImageBase;
+#define HINST_THISCOMPONENT ((HINSTANCE)&__ImageBase)
 
 App::App() :
 	m_hWnd{ NULL },
@@ -20,6 +31,7 @@ App::App() :
 
 App::~App()
 {
+	/*
 	Desktop::Destroy();
 	Explorer::Destroy();
 	Hierarchy::Destroy();
@@ -29,6 +41,7 @@ App::~App()
 	UIEditor::Destroy();
 	Resource::CleanUp();
 	Graphics::CleanUp();
+	*/
 }
 
 void App::Run()
@@ -139,8 +152,9 @@ void App::InitApp()
 {
 	// 모듈 초기화
 	Graphics::Initialize(m_hWnd);
-	Resource::Initialize(L"Engine", &Graphics::D2D::LoadSprite, &Graphics::D3D::LoadTexture, &Graphics::D3D::LoadModel);
-	Delegates::OnWindowResized.Register(&Graphics::OnResize);
+	Resource::Initialize(L"Engine", &Graphics::D2D::LoadSprite, &Graphics::D3D::LoadModel);
+
+	Delegates::OnWindowResized.Register(&Graphics::OnWindowResized);
 
 	// ImGui 초기화
 	ImGui::SetCurrentContext(Graphics::ImGui::GetContext());
@@ -155,6 +169,7 @@ void App::InitApp()
 	ImGui::StyleColorsDark();
 	
 	// 싱글톤 생성
+	/*
 	Clipboard::Instantiate();
 	Desktop::Instantiate();
 	Explorer::Instantiate();
@@ -162,6 +177,7 @@ void App::InitApp()
 	Hierarchy::Instantiate();
 	Inspector::Instantiate();
 	Viewport::Instantiate();
+	*/
 
 	// 타이머 초기화
 	m_timer.Tick();
@@ -170,6 +186,7 @@ void App::InitApp()
 void App::Update()
 {
 	float deltaTime{ m_timer.Tick() };
+	/*
 	if (auto explorer{ Explorer::GetInstance() })
 		explorer->Update(deltaTime);
 	if (auto hierarchy{ Hierarchy::GetInstance() })
@@ -178,6 +195,7 @@ void App::Update()
 		inspector->Update(deltaTime);
 	if (auto viewport{ Viewport::GetInstance() })
 		viewport->Update(deltaTime);
+	*/
 }
 
 void App::Render()
@@ -186,6 +204,7 @@ void App::Render()
 	{
 		Graphics::ImGui::Begin();
 		{
+			/*
 			if (auto desktop{ Desktop::GetInstance() })
 				desktop->Render();
 			if (auto explorer{ Explorer::GetInstance() })
@@ -198,6 +217,7 @@ void App::Render()
 				uiEditor->Render();
 			if (auto viewport{ Viewport::GetInstance() })
 				viewport->Render();
+			*/
 			ImGui::ShowDemoWindow();
 		}
 		Graphics::ImGui::End();
@@ -205,8 +225,10 @@ void App::Render()
 	Graphics::D3D::End();
 	Graphics::D2D::Begin();
 	{
+		/*
 		if (auto uiEditor{ UIEditor::GetInstance() })
 			uiEditor->Render2D();
+		*/
 	}
 	Graphics::D2D::End();
 	Graphics::D3D::Present();

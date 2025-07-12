@@ -54,12 +54,10 @@
       <WarningLevel>Level3</WarningLevel>
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_DIRECT2D;_IMGUI;_TOOL;_DEBUG;_WINDOW;NOMINMAX;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <ConformanceMode>false</ConformanceMode>
-      <PrecompiledHeader>Use</PrecompiledHeader>
       <AdditionalIncludeDirectories>$(SolutionDir);$(SolutionDir)Src\;$(SolutionDir)External\FBXSDK\include\</AdditionalIncludeDirectories>
-      <LanguageStandard>stdcpp20</LanguageStandard>
-      <PrecompiledHeaderFile>Stdafx.h</PrecompiledHeaderFile>
+      <LanguageStandard>stdcpp23</LanguageStandard>
       <AdditionalOptions>/utf-8 %(AdditionalOptions)</AdditionalOptions>
+      <BuildStlModules>true</BuildStlModules>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -80,12 +78,10 @@ COPY "$(SolutionDir)External\FBXSDK\lib\$(IntDir)libfbxsdk.dll" "$(OutDir)"</Com
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_DIRECT2D;_IMGUI;_TOOL;_TOOL;_WINDOWS;NDEBUG;NOMINMAX;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <ConformanceMode>false</ConformanceMode>
-      <LanguageStandard>stdcpp20</LanguageStandard>
-      <PrecompiledHeader>Use</PrecompiledHeader>
+      <LanguageStandard>stdcpp23</LanguageStandard>
       <AdditionalIncludeDirectories>$(SolutionDir);$(SolutionDir)Src\;$(SolutionDir)External\FBXSDK\include\</AdditionalIncludeDirectories>
-      <PrecompiledHeaderFile>Stdafx.h</PrecompiledHeaderFile>
       <AdditionalOptions>/utf-8 %(AdditionalOptions)</AdditionalOptions>
+      <BuildStlModules>true</BuildStlModules>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -111,32 +107,35 @@ COPY "$(SolutionDir)External\FBXSDK\lib\$(IntDir)libfbxsdk.dll" "$(OutDir)"</Com
     <ClInclude Include="..\..\..\External\Imgui\imstb_rectpack.h" />
     <ClInclude Include="..\..\..\External\Imgui\imstb_textedit.h" />
     <ClInclude Include="..\..\..\External\Imgui\imstb_truetype.h" />
-    <ClInclude Include="..\..\Common\Delegate.h" />
-    <ClInclude Include="..\..\Common\Singleton.h" />
-    <ClInclude Include="..\..\Common\Stdafx.h" />
-    <ClInclude Include="..\..\Common\Timer.h" />
-    <ClInclude Include="..\..\Common\Type.h" />
-    <ClInclude Include="..\..\Common\Util.h" />
-    <ClInclude Include="..\..\Game\Client\Button.h" />
-    <ClInclude Include="..\..\Game\Client\Control.h" />
-    <ClInclude Include="..\..\Game\Client\Object.h" />
-    <ClInclude Include="..\..\Game\Client\TextBlock.h" />
-    <ClInclude Include="..\..\Game\Client\TextBox.h" />
-    <ClInclude Include="..\..\Game\Client\UI.h" />
-    <ClInclude Include="..\..\Game\Client\Window.h" />
-    <ClInclude Include="..\..\Modules\Graphics\Include\Lib.h" />
-    <ClInclude Include="..\..\Modules\Resource\Include\Lib.h" />
-    <ClInclude Include="App.h" />
-    <ClInclude Include="Clipboard.h" />
-    <ClInclude Include="Delegates.h" />
-    <ClInclude Include="FbxHandler.h" />
-    <ClInclude Include="Hierarchy.h" />
-    <ClInclude Include="Explorer.h" />
-    <ClInclude Include="Desktop.h" />
-    <ClInclude Include="Inspector.h" />
-    <ClInclude Include="Stdafx.h" />
-    <ClInclude Include="UIEditor.h" />
-    <ClInclude Include="Viewport.h" />
+    <ClCompile Include="..\..\Common\Delegate.ixx">
+      <FileType>Document</FileType>
+    </ClCompile>
+    <ClCompile Include="..\..\Common\Timer.ixx">
+      <FileType>Document</FileType>
+    </ClCompile>
+    <ClCompile Include="..\..\Libraries\Graphics\Include\Camera.ixx" />
+    <ClCompile Include="..\..\Libraries\Graphics\Include\ConstantBuffer.ixx" />
+    <ClCompile Include="..\..\Libraries\Graphics\Include\Descriptor.ixx" />
+    <ClCompile Include="..\..\Libraries\Graphics\Include\DescriptorManager.ixx" />
+    <ClCompile Include="..\..\Libraries\Graphics\Include\Graphics.ixx" />
+    <ClCompile Include="..\..\Libraries\Graphics\Include\Graphics2D.ixx" />
+    <ClCompile Include="..\..\Libraries\Graphics\Include\Graphics3D.ixx" />
+    <ClCompile Include="..\..\Libraries\Graphics\Include\Graphics3DUtil.ixx" />
+    <ClCompile Include="..\..\Libraries\Graphics\Include\GraphicsImGui.ixx" />
+    <ClCompile Include="..\..\Libraries\Graphics\Include\PipelineState.ixx" />
+    <ClCompile Include="..\..\Libraries\Graphics\Include\RenderTarget.ixx" />
+    <ClCompile Include="..\..\Libraries\Graphics\Include\SwapChain.ixx" />
+    <ClCompile Include="..\..\Libraries\Resource\Include\Model.ixx" />
+    <ClCompile Include="..\..\Libraries\Resource\Include\Property.ixx" />
+    <ClCompile Include="..\..\Libraries\Resource\Include\Resource.ixx" />
+    <ClCompile Include="..\..\Libraries\Resource\Include\Sprite.ixx" />
+    <ClCompile Include="App.ixx">
+      <FileType>Document</FileType>
+    </ClCompile>
+    <ClCompile Include="Delegates.cpp" />
+    <ClCompile Include="Delegates.ixx">
+      <FileType>Document</FileType>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\..\External\Imgui\imgui.cpp">
@@ -163,31 +162,14 @@ COPY "$(SolutionDir)External\FBXSDK\lib\$(IntDir)libfbxsdk.dll" "$(OutDir)"</Com
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="..\..\Common\Singleton.ixx" />
     <ClCompile Include="..\..\Common\Timer.cpp" />
     <ClCompile Include="..\..\Common\Type.cpp" />
+    <ClCompile Include="..\..\Common\Type.ixx" />
     <ClCompile Include="..\..\Common\Util.cpp" />
-    <ClCompile Include="..\..\Game\Client\Button.cpp" />
-    <ClCompile Include="..\..\Game\Client\Control.cpp" />
-    <ClCompile Include="..\..\Game\Client\Object.cpp" />
-    <ClCompile Include="..\..\Game\Client\TextBlock.cpp" />
-    <ClCompile Include="..\..\Game\Client\TextBox.cpp" />
-    <ClCompile Include="..\..\Game\Client\UI.cpp" />
-    <ClCompile Include="..\..\Game\Client\Window.cpp" />
+    <ClCompile Include="..\..\Common\Util.ixx" />
     <ClCompile Include="App.cpp" />
-    <ClCompile Include="Clipboard.cpp" />
-    <ClCompile Include="Delegates.cpp" />
-    <ClCompile Include="FbxHandler.cpp" />
-    <ClCompile Include="Hierarchy.cpp" />
-    <ClCompile Include="Inspector.cpp" />
     <ClCompile Include="Main.cpp" />
-    <ClCompile Include="Explorer.cpp" />
-    <ClCompile Include="Desktop.cpp" />
-    <ClCompile Include="Stdafx.cpp">
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
-    </ClCompile>
-    <ClCompile Include="UIEditor.cpp" />
-    <ClCompile Include="Viewport.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

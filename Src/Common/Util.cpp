@@ -1,5 +1,16 @@
-#include "Stdafx.h"
-#include "Util.h"
+module;
+
+// Windows
+#include <Windows.h>
+
+// External
+#ifdef _IMGUI
+#include "External/Imgui/imgui.h"
+#endif
+
+module Common.Util;
+
+import std;
 
 namespace Util
 {

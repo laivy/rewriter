@@ -1,5 +1,6 @@
-#include "Stdafx.h"
-#include "App.h"
+#include <Windows.h>
+
+import App;
 
 int WINAPI WinMain(_In_		HINSTANCE hInstance,
 				   _In_opt_	HINSTANCE hPrevInstance,

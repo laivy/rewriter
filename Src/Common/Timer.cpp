@@ -1,5 +1,6 @@
-#include "Stdafx.h"
-#include "Timer.h"
+module Common.Timer;
+
+import std;
 
 Timer::Timer() :
 	m_lastTimePoint{ std::chrono::steady_clock::now() }

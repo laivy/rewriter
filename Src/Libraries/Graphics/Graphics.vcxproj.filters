@@ -1,0 +1,240 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="External">
+      <UniqueIdentifier>{0cdda5fb-3772-4f54-abe3-9d89693e052e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="External\ImGui">
+      <UniqueIdentifier>{549c79cb-d9f4-47d5-b72f-183608d5c4a7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="External\DirectX">
+      <UniqueIdentifier>{42edbb19-e699-40e6-becd-557caaf541c4}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Library">
+      <UniqueIdentifier>{333af12c-3669-4ce5-9c8a-edb92362d3c0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Library\Resource">
+      <UniqueIdentifier>{aaa2fbea-0d05-4136-bd86-0528fcf3fb33}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;c++;cppm;ixx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="Source\Common">
+      <UniqueIdentifier>{1c10cf6a-6ec8-4a98-812e-c8e948694cb5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Module">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hh;hpp;hxx;h++;hm;inl;inc;ipp;xsd</Extensions>
+    </Filter>
+    <Filter Include="Module\Include">
+      <UniqueIdentifier>{c9c06d3f-61f3-49fa-8a30-17b546d87ce9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Module\Common">
+      <UniqueIdentifier>{cff73b34-9610-4cba-afb6-230229fe093a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\D3D">
+      <UniqueIdentifier>{5c55bf10-af0a-4964-b52a-a07ed92fc243}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Module\Include\D3D">
+      <UniqueIdentifier>{c1a0a7fe-dea7-49bc-bfa7-f0686e2cfeac}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\D3D\Shader">
+      <UniqueIdentifier>{19c9066f-08da-4317-b97e-2f3e6a242198}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Module\Include\D2D">
+      <UniqueIdentifier>{1ad13bc3-0480-4973-afe9-1e99e1d7c557}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\D2D">
+      <UniqueIdentifier>{b4f6f567-df53-4ce9-ba6f-d68bcdd23724}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="DllMain.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="Graphics.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="Global.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\External\DirectX\DDSTextureLoader12.cpp">
+      <Filter>External\DirectX</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\External\DirectX\WICTextureLoader12.cpp">
+      <Filter>External\DirectX</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\External\Imgui\imgui_impl_dx12.cpp">
+      <Filter>External\ImGui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\External\Imgui\imgui_impl_win32.cpp">
+      <Filter>External\ImGui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\External\Imgui\imgui.cpp">
+      <Filter>External\ImGui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\External\Imgui\imgui_demo.cpp">
+      <Filter>External\ImGui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\External\Imgui\imgui_draw.cpp">
+      <Filter>External\ImGui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\External\Imgui\imgui_stdlib.cpp">
+      <Filter>External\ImGui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\External\Imgui\imgui_tables.cpp">
+      <Filter>External\ImGui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\External\Imgui\imgui_widgets.cpp">
+      <Filter>External\ImGui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Common\Type.cpp">
+      <Filter>Source\Common</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Common\Util.cpp">
+      <Filter>Source\Common</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Resource\Include\Model.ixx">
+      <Filter>Library\Resource</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Resource\Include\Property.ixx">
+      <Filter>Library\Resource</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Resource\Include\Resource.ixx">
+      <Filter>Library\Resource</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Resource\Include\Sprite.ixx">
+      <Filter>Library\Resource</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Common\Type.ixx">
+      <Filter>Module\Common</Filter>
+    </ClCompile>
+    <ClCompile Include="Global.ixx">
+      <Filter>Module</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Common\Singleton.ixx">
+      <Filter>Module\Common</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Common\Util.ixx">
+      <Filter>Module\Common</Filter>
+    </ClCompile>
+    <ClCompile Include="Include\Graphics.ixx">
+      <Filter>Module\Include</Filter>
+    </ClCompile>
+    <ClCompile Include="Descriptor.cpp">
+      <Filter>Source\D3D</Filter>
+    </ClCompile>
+    <ClCompile Include="DescriptorManager.cpp">
+      <Filter>Source\D3D</Filter>
+    </ClCompile>
+    <ClCompile Include="Graphics3D.cpp">
+      <Filter>Source\D3D</Filter>
+    </ClCompile>
+    <ClCompile Include="Include\Graphics3D.ixx">
+      <Filter>Module\Include\D3D</Filter>
+    </ClCompile>
+    <ClCompile Include="Include\ConstantBuffer.ixx">
+      <Filter>Module\Include\D3D</Filter>
+    </ClCompile>
+    <ClCompile Include="Include\Descriptor.ixx">
+      <Filter>Module\Include\D3D</Filter>
+    </ClCompile>
+    <ClCompile Include="Include\DescriptorManager.ixx">
+      <Filter>Module\Include\D3D</Filter>
+    </ClCompile>
+    <ClCompile Include="Include\Graphics3DUtil.ixx">
+      <Filter>Module\Include\D3D</Filter>
+    </ClCompile>
+    <ClCompile Include="Graphics3DUtil.cpp">
+      <Filter>Source\D3D</Filter>
+    </ClCompile>
+    <ClCompile Include="Include\SwapChain.ixx">
+      <Filter>Module\Include\D3D</Filter>
+    </ClCompile>
+    <ClCompile Include="SwapChain.cpp">
+      <Filter>Source\D3D</Filter>
+    </ClCompile>
+    <ClCompile Include="Include\RenderTarget.ixx">
+      <Filter>Module\Include\D3D</Filter>
+    </ClCompile>
+    <ClCompile Include="RenderTarget.cpp">
+      <Filter>Source\D3D</Filter>
+    </ClCompile>
+    <ClCompile Include="Include\PipelineState.ixx">
+      <Filter>Module\Include\D3D</Filter>
+    </ClCompile>
+    <ClCompile Include="PipelineState.cpp">
+      <Filter>Source\D3D</Filter>
+    </ClCompile>
+    <ClCompile Include="Include\Camera.ixx">
+      <Filter>Module\Include\D3D</Filter>
+    </ClCompile>
+    <ClCompile Include="Camera.cpp">
+      <Filter>Source\D3D</Filter>
+    </ClCompile>
+    <ClCompile Include="Include\Graphics2D.ixx">
+      <Filter>Module\Include\D2D</Filter>
+    </ClCompile>
+    <ClCompile Include="Graphics2D.cpp">
+      <Filter>Source\D2D</Filter>
+    </ClCompile>
+    <ClCompile Include="Include\GraphicsImGui.ixx">
+      <Filter>Module\Include\D3D</Filter>
+    </ClCompile>
+    <ClCompile Include="GraphicsImGui.cpp">
+      <Filter>Source\D3D</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\..\External\DirectX\d3dx12.h">
+      <Filter>External\DirectX</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\External\DirectX\DDSTextureLoader12.h">
+      <Filter>External\DirectX</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\External\DirectX\WICTextureLoader12.h">
+      <Filter>External\DirectX</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\External\Imgui\imgui_impl_dx12.h">
+      <Filter>External\ImGui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\External\Imgui\imgui_impl_win32.h">
+      <Filter>External\ImGui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\External\Imgui\imgui.h">
+      <Filter>External\ImGui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\External\Imgui\imconfig.h">
+      <Filter>External\ImGui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\External\Imgui\imgui_internal.h">
+      <Filter>External\ImGui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\External\Imgui\imgui_stdlib.h">
+      <Filter>External\ImGui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\External\Imgui\imstb_rectpack.h">
+      <Filter>External\ImGui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\External\Imgui\imstb_textedit.h">
+      <Filter>External\ImGui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\External\Imgui\imstb_truetype.h">
+      <Filter>External\ImGui</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Shader\Constants.hlsli">
+      <Filter>Source\D3D\Shader</Filter>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <FxCompile Include="Shader\Model.ps">
+      <Filter>Source\D3D\Shader</Filter>
+    </FxCompile>
+    <FxCompile Include="Shader\Model.vs">
+      <Filter>Source\D3D\Shader</Filter>
+    </FxCompile>
+  </ItemGroup>
+</Project>

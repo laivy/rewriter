@@ -1,0 +1,60 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Source">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;c++;cppm;ixx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="Source\Common">
+      <UniqueIdentifier>{cb5b1335-db0e-4ec8-b869-6565663afb53}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Module">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hh;hpp;hxx;h++;hm;inl;inc;ipp;xsd</Extensions>
+    </Filter>
+    <Filter Include="Module\Include">
+      <UniqueIdentifier>{cb49ab78-4e35-4496-9fab-89e65a955b6b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Module\Common">
+      <UniqueIdentifier>{4331401c-a549-401c-9899-843cada43d95}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="DllMain.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="Resource.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Common\Type.cpp">
+      <Filter>Source\Common</Filter>
+    </ClCompile>
+    <ClCompile Include="Include\Resource.ixx">
+      <Filter>Module\Include</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Common\Type.ixx">
+      <Filter>Module\Common</Filter>
+    </ClCompile>
+    <ClCompile Include="Property.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="Include\Model.ixx">
+      <Filter>Module\Include</Filter>
+    </ClCompile>
+    <ClCompile Include="Include\Property.ixx">
+      <Filter>Module\Include</Filter>
+    </ClCompile>
+    <ClCompile Include="Global.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="Sprite.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="Global.ixx">
+      <Filter>Module</Filter>
+    </ClCompile>
+    <ClCompile Include="Include\Sprite.ixx">
+      <Filter>Module\Include</Filter>
+    </ClCompile>
+  </ItemGroup>
+</Project>
