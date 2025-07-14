@@ -1,5 +1,8 @@
 module;
 
+// C
+#include <assert.h>
+
 // Windows
 #include <wrl.h>
 
@@ -84,7 +87,11 @@ namespace Graphics::D3D
 		m_desc.NumDescriptors = numDescriptors;
 		m_desc.Flags = flags;
 		m_desc.NodeMask = nodeMask;
-		g_d3dDevice->CreateDescriptorHeap(&m_desc, IID_PPV_ARGS(&m_heap));
+		if (auto hr{ g_d3dDevice->CreateDescriptorHeap(&m_desc, IID_PPV_ARGS(&m_heap)) }; FAILED(hr))
+		{
+			assert(false);
+			return;
+		}
 
 		m_descriptors.resize(numDescriptors);
 		m_freeList.reserve(numDescriptors);
@@ -98,10 +105,10 @@ namespace Graphics::D3D
 
 	Descriptor* DescriptorManager::Heap::Allocate()
 	{
-		INT index{ m_freeList.back() };
+		const INT index{ m_freeList.back() };
 		m_freeList.pop_back();
 
-		UINT descriptorSize{ GetDescriptorSize() };
+		const UINT descriptorSize{ GetDescriptorSize() };
 		CD3DX12_CPU_DESCRIPTOR_HANDLE cpuHandle{ m_heap->GetCPUDescriptorHandleForHeapStart(), index, descriptorSize };
 		CD3DX12_GPU_DESCRIPTOR_HANDLE gpuHandle{ D3D12_DEFAULT };
 		if (m_desc.Flags == D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE)
