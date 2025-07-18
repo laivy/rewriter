@@ -1,8 +1,8 @@
-export module Library.Resource;
+export module rewriter.library.resource;
 
-export import :Model;
-export import :Property;
-export import :Sprite;
+export import :model;
+export import :property;
+export import :sprite;
 
 import std;
 

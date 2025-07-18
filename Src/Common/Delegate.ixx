@@ -1,4 +1,4 @@
-export module Common.Delegate;
+export module rewriter.common.delegate;
 
 import std;
 

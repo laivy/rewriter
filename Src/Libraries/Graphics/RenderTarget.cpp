@@ -11,13 +11,13 @@ module;
 #include "External/ImGui/imgui.h"
 #endif
 
-module Library.Graphics.D3D:RenderTarget;
+module rewriter.library.graphics.direct3d:render_target;
 
 import std;
-import :Descriptor;
-import :DescriptorManager;
-import Library.Graphics;
-import Library.Graphics.Global;
+import :descriptor;
+import :descriptor_manager;
+import rewriter.library.graphics;
+import rewriter.library.graphics.global;
 
 using Microsoft::WRL::ComPtr;
 

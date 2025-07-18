@@ -1,9 +1,9 @@
-module Library.Resource:Global;
+module rewriter.library.resource:global;
 
 import std;
-import :Model;
-import :Property;
-import :Sprite;
+import :model;
+import :property;
+import :sprite;
 
 std::unordered_map<std::filesystem::path, std::shared_ptr<Resource::Property>> g_resources;
 

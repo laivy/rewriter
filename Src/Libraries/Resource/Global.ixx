@@ -1,9 +1,9 @@
-export module Library.Resource:Global;
+export module rewriter.library.resource:global;
 
 import std;
-import :Model;
-import :Property;
-import :Sprite;
+import :model;
+import :property;
+import :sprite;
 
 export
 {

@@ -12,14 +12,14 @@ module;
 
 #endif
 
-module Library.Graphics.D2D;
+module rewriter.library.graphics.direct2d;
 
 #ifdef _DIRECT2D
 import std;
-import Common.Type;
-import Library.Graphics.D3D;
-import Library.Graphics.Global;
-import Library.Resource;
+import rewriter.common.type;
+import rewriter.library.graphics.direct3d;
+import rewriter.library.graphics.global;
+import rewriter.library.resource;
 
 using Microsoft::WRL::ComPtr;
 

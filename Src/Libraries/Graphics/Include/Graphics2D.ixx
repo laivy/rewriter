@@ -1,10 +1,10 @@
-export module Library.Graphics.D2D;
+export module rewriter.library.graphics.direct2d;
 
 #ifdef _DIRECT2D
 
 import std;
-import Common.Type;
-import Library.Resource;
+import rewriter.common.type;
+import rewriter.library.resource;
 
 #ifdef _GRAPHICS
 #define GRAPHICS_API __declspec(dllexport)

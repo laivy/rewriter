@@ -12,13 +12,13 @@ module;
 #include "External/ImGui/imgui_impl_dx12.h"
 #include "External/ImGui/imgui_impl_win32.h"
 
-module Library.Graphics.D3D:ImGui;
+module rewriter.library.graphics.direct3d:imgui;
 
 import std;
-import :Descriptor;
-import :DescriptorManager;
-import :Util;
-import Library.Graphics.Global;
+import :descriptor;
+import :descriptor_manager;
+import :util;
+import rewriter.library.graphics.global;
 
 using Microsoft::WRL::ComPtr;
 

@@ -6,10 +6,10 @@ module;
 // DirectX
 #include <d3d12.h>
 
-export module Library.Graphics.D3D:DescriptorManager;
+export module rewriter.library.graphics.direct3d:descriptor_manager;
 
 import std;
-import Common.Singleton;
+import rewriter.common.singleton;
 
 using Microsoft::WRL::ComPtr;
 

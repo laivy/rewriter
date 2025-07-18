@@ -1,10 +1,10 @@
-module Library.Resource:Property;
+module rewriter.library.resource:property;
 
 import std;
-import :Model;
-import :Global;
-import :Sprite;
-import Common.Type;
+import :model;
+import :global;
+import :sprite;
+import rewriter.common.type;
 
 namespace Resource
 {

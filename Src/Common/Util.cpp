@@ -8,7 +8,7 @@ module;
 #include "External/Imgui/imgui.h"
 #endif
 
-module Common.Util;
+module rewriter.common.util;
 
 import std;
 

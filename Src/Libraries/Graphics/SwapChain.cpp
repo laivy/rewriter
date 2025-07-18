@@ -17,15 +17,15 @@ module;
 #include <dwrite_3.h>
 #endif
 
-module Library.Graphics.D3D:SwapChain;
+module rewriter.library.graphics.direct3d:swap_chain;
 
 import std;
-import :Descriptor;
-import :DescriptorManager;
-import :RenderTarget;
-import Common.Type;
-import Library.Graphics;
-import Library.Graphics.Global;
+import :descriptor;
+import :descriptor_manager;
+import :render_target;
+import rewriter.common.type;
+import rewriter.library.graphics;
+import rewriter.library.graphics.global;
 
 using Microsoft::WRL::ComPtr;
 

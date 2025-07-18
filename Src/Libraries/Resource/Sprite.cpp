@@ -3,7 +3,7 @@ module;
 #include <Unknwn.h>
 #include <wrl.h>
 
-module Library.Resource:Sprite;
+module rewriter.library.resource:sprite;
 
 using Microsoft::WRL::ComPtr;
 

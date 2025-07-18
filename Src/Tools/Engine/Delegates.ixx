@@ -1,8 +1,8 @@
-export module Delegates;
+export module rewriter.tool.engine.delegates;
 
 import std;
-import Common.Delegate;
-import Library.Resource;
+import rewriter.common.delegate;
+import rewriter.library.resource;
 
 export namespace Delegates
 {

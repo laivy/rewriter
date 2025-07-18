@@ -4,7 +4,7 @@ module;
 #include "External/Imgui/imgui.h"
 #endif
 
-export module Common.Util;
+export module rewriter.common.util;
 
 import std;
 

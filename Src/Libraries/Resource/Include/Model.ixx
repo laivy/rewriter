@@ -1,7 +1,7 @@
-export module Library.Resource:Model;
+export module rewriter.library.resource:model;
 
 import std;
-import Common.Type;
+import rewriter.common.type;
 
 export namespace Resource
 {

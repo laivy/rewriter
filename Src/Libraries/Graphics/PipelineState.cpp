@@ -14,11 +14,11 @@ module;
 #include "Shader/Model.vs.h"
 #include "Shader/Model.ps.h"
 
-module Library.Graphics.D3D:PipelineState;
+module rewriter.library.graphics.direct3d:pipeline_state;
 
 import std;
-import Library.Graphics;
-import Library.Graphics.Global;
+import rewriter.library.graphics;
+import rewriter.library.graphics.global;
 
 using Microsoft::WRL::ComPtr;
 

@@ -1,8 +1,8 @@
-module Library.Graphics;
+module rewriter.library.graphics;
 
-import Library.Graphics.D2D;
-import Library.Graphics.D3D;
-import Library.Graphics.Global;
+import rewriter.library.graphics.direct2d;
+import rewriter.library.graphics.direct3d;
+import rewriter.library.graphics.global;
 
 namespace Graphics
 {

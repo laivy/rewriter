@@ -13,10 +13,10 @@ module;
 #include <dwrite_3.h>
 #endif
 
-export module Library.Graphics.D3D:SwapChain;
+export module rewriter.library.graphics.direct3d:swap_chain;
 
 import std;
-import Common.Type;
+import rewriter.common.type;
 
 using Microsoft::WRL::ComPtr;
 

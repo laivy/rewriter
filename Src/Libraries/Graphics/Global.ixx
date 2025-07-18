@@ -12,7 +12,7 @@ module;
 #include <dwrite_3.h>
 #endif
 
-export module Library.Graphics.Global;
+export module rewriter.library.graphics.global;
 
 import std;
 

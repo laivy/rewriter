@@ -21,19 +21,19 @@ module;
 #include "External/ImGui/imgui_impl_win32.h"
 #endif
 
-module Library.Graphics.D3D;
+module rewriter.library.graphics.direct3d;
 
 import std;
-import :ConstantBuffer;
-import :Descriptor;
-import :DescriptorManager;
-import :SwapChain;
-import :Util;
-import Library.Graphics;
-import Library.Graphics.Global;
-import Library.Resource;
+import :constant_buffer;
+import :descriptor;
+import :descriptor_manager;
+import :swap_chain;
+import :util;
+import rewriter.library.graphics;
+import rewriter.library.graphics.global;
+import rewriter.library.resource;
 #ifdef _IMGUI
-import :ImGui;
+import :imgui;
 #endif
 
 using Microsoft::WRL::ComPtr;

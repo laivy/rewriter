@@ -1,19 +1,19 @@
-export module Library.Graphics.D3D;
+export module rewriter.library.graphics.direct3d;
 
-export import Library.Graphics;
-export import :Camera;
-export import :ConstantBuffer;
-export import :Descriptor;
-export import :DescriptorManager;
-export import :PipelineState;
-export import :RenderTarget;
-export import :SwapChain;
+export import rewriter.library.graphics;
+export import :camera;
+export import :constant_buffer;
+export import :descriptor;
+export import :descriptor_manager;
+export import :pipeline_state;
+export import :render_target;
+export import :swap_chain;
 #ifdef _IMGUI
-export import :ImGui;
+export import :imgui;
 #endif
 
 import std;
-import Library.Resource;
+import rewriter.library.resource;
 
 #ifdef _GRAPHICS
 #define GRAPHICS_API __declspec(dllexport)

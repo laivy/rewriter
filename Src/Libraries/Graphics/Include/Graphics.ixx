@@ -1,4 +1,4 @@
-export module Library.Graphics;
+export module rewriter.library.graphics;
 
 #ifdef _GRAPHICS
 #define GRAPHICS_API __declspec(dllexport)

@@ -1,7 +1,7 @@
-export module Library.Resource:Property;
+export module rewriter.library.resource:property;
 
 import std;
-import Common.Type;
+import rewriter.common.type;
 
 #ifdef _RESOURCE
 #define RESOURCE_API __declspec(dllexport)

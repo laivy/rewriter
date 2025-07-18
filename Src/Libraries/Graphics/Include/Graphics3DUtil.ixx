@@ -6,7 +6,7 @@ module;
 // DirectX
 #include <d3d12.h>
 
-export module Library.Graphics.D3D:Util;
+export module rewriter.library.graphics.direct3d:util;
 
 import std;
 

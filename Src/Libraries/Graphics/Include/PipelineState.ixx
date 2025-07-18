@@ -1,4 +1,4 @@
-export module Library.Graphics.D3D:PipelineState;
+export module rewriter.library.graphics.direct3d:pipeline_state;
 
 export namespace Graphics::D3D
 {

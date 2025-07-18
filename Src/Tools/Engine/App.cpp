@@ -7,16 +7,16 @@ module;
 // ImGui
 #include "External/Imgui/imgui.h"
 
-module App;
+module rewriter.tool.engine.app;
 
 import std;
-import Delegates;
-import Common.Timer;
-import Common.Type;
-import Library.Graphics;
-import Library.Graphics.D2D;
-import Library.Graphics.D3D;
-import Library.Resource;
+import rewriter.tool.engine.delegates;
+import rewriter.common.timer;
+import rewriter.common.type;
+import rewriter.library.graphics;
+import rewriter.library.graphics.direct2d;
+import rewriter.library.graphics.direct3d;
+import rewriter.library.resource;
 
 EXTERN_C IMAGE_DOS_HEADER __ImageBase;
 #define HINST_THISCOMPONENT ((HINSTANCE)&__ImageBase)

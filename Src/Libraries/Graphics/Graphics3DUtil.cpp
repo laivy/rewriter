@@ -7,11 +7,11 @@ module;
 #include <d3d12.h>
 #include "External/DirectX/d3dx12.h"
 
-module Library.Graphics.D3D:Util;
+module rewriter.library.graphics.direct3d:util;
 
 import std;
-import Library.Graphics;
-import Library.Graphics.Global;
+import rewriter.library.graphics;
+import rewriter.library.graphics.global;
 
 using Microsoft::WRL::ComPtr;
 

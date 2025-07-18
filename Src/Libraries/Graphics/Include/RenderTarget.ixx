@@ -13,7 +13,7 @@ module;
 #include "External/ImGui/imgui.h"
 #endif
 
-export module Library.Graphics.D3D:RenderTarget;
+export module rewriter.library.graphics.direct3d:render_target;
 
 import std;
 

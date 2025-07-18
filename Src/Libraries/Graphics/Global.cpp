@@ -12,10 +12,10 @@ module;
 #include <dwrite_3.h>
 #endif
 
-module Library.Graphics.Global;
+module rewriter.library.graphics.global;
 
 import std;
-import Library.Graphics.D3D;
+import rewriter.library.graphics.direct3d;
 
 using Microsoft::WRL::ComPtr;
 

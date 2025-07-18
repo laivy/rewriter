@@ -1,4 +1,4 @@
-module Common.Type;
+module rewriter.common.type;
 
 import std;
 

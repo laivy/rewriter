@@ -3,10 +3,10 @@ module;
 #include <Unknwn.h>
 #include <wrl.h>
 
-export module Library.Resource:Sprite;
+export module rewriter.library.resource:sprite;
 
 import std;
-import Common.Type;
+import rewriter.common.type;
 
 using Microsoft::WRL::ComPtr;
 

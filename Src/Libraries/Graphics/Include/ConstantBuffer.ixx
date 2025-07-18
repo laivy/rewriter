@@ -7,10 +7,10 @@ module;
 // DirectX
 #include <d3d12.h>
 
-export module Library.Graphics.D3D:ConstantBuffer;
+export module rewriter.library.graphics.direct3d:constant_buffer;
 
 import std;
-import :Util;
+import :util;
 
 using Microsoft::WRL::ComPtr;
 

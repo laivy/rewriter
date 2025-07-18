@@ -3,10 +3,10 @@ module;
 #include <wrl.h>
 #include "External/ImGui/imgui.h"
 
-export module Library.Graphics.D3D:ImGui;
+export module rewriter.library.graphics.direct3d:imgui;
 
 import std;
-import :RenderTarget;
+import :render_target;
 
 using Microsoft::WRL::ComPtr;
 

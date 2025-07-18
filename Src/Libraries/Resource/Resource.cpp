@@ -1,9 +1,9 @@
-module Library.Resource;
+module rewriter.library.resource;
 
 import std;
-import :Global;
-import :Model;
-import :Sprite;
+import :global;
+import :model;
+import :sprite;
 
 namespace Resource
 {

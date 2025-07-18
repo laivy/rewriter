@@ -6,7 +6,7 @@ module;
 // DirectX
 #include "External/DirectX/d3dx12.h"
 
-export module Library.Graphics.D3D:Descriptor;
+export module rewriter.library.graphics.direct3d:descriptor;
 
 using Microsoft::WRL::ComPtr;
 

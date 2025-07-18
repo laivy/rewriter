@@ -7,14 +7,14 @@ module;
 #include <d3d12.h>
 #include <DirectXMath.h>
 
-module Library.Graphics.D3D:Camera;
+module rewriter.library.graphics.direct3d:camera;
 
 import std;
-import :ConstantBuffer;
-import :SwapChain;
-import Common.Type;
-import Library.Graphics;
-import Library.Graphics.Global;
+import :constant_buffer;
+import :swap_chain;
+import rewriter.common.type;
+import rewriter.library.graphics;
+import rewriter.library.graphics.global;
 
 using Microsoft::WRL::ComPtr;
 

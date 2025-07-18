@@ -1,4 +1,4 @@
-export module Common.Singleton;
+export module rewriter.common.singleton;
 
 import std;
 

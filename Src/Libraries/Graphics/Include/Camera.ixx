@@ -1,7 +1,7 @@
-export module Library.Graphics.D3D:Camera;
+export module rewriter.library.graphics.direct3d:camera;
 
 import std;
-import Common.Type;
+import rewriter.common.type;
 
 #ifdef _GRAPHICS
 #define GRAPHICS_API __declspec(dllexport)

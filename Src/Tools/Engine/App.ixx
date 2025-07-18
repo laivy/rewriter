@@ -3,11 +3,11 @@ module;
 // Windows
 #include <Windows.h>
 
-export module App;
+export module rewriter.tool.engine.app;
 
-import Common.Singleton;
-import Common.Timer;
-import Common.Type;
+import rewriter.common.singleton;
+import rewriter.common.timer;
+import rewriter.common.type;
 
 export class App : public TSingleton<App>
 {

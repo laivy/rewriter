@@ -1,4 +1,4 @@
-export module Common.Timer;
+export module rewriter.common.timer;
 
 import std;
 
