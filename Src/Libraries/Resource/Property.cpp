@@ -33,6 +33,105 @@ namespace Resource
 		> data;
 		std::vector<std::shared_ptr<Resource::Property>> children;
 	};
+
+	Iterator::Iterator(Container::iterator iterator) :
+		m_iterator{ iterator }
+	{
+	}
+
+	Iterator::reference Iterator::operator*() const
+	{
+		auto& prop{ *m_iterator };
+		return std::make_pair(prop->name, std::ref(prop));
+	}
+
+	Iterator& Iterator::operator++()
+	{
+		++m_iterator;
+		return *this;
+	}
+
+	Iterator Iterator::operator++(int)
+	{
+		Iterator temp{ *this };
+		++*this;
+		return temp;
+	}
+
+	Iterator& Iterator::operator+=(const difference_type offset)
+	{
+		m_iterator += offset;
+		return *this;
+	}
+
+	Iterator Iterator::operator+(const difference_type offset)
+	{
+		Iterator temp{ *this };
+		temp += offset;
+		return temp;
+	}
+
+	Iterator& Iterator::operator--()
+	{
+		--m_iterator;
+		return *this;
+	}
+
+	Iterator Iterator::operator--(int)
+	{
+		Iterator temp{ *this };
+		--*this;
+		return temp;
+	}
+
+	Iterator& Iterator::operator-=(const difference_type offset)
+	{
+		m_iterator -= offset;
+		return *this;
+	}
+
+	Iterator Iterator::operator-(const difference_type offset)
+	{
+		Iterator temp{ *this };
+		temp -= offset;
+		return temp;
+	}
+
+	Iterator::reference Iterator::operator[](const difference_type offset)
+	{
+		return *(*this + offset);
+	}
+
+	bool Iterator::operator==(const Iterator& rhs) const
+	{
+		return m_iterator == rhs.m_iterator;
+	}
+
+	bool Iterator::operator!=(const Iterator& rhs) const
+	{
+		return m_iterator != rhs.m_iterator;
+	}
+
+	View::View(Container::iterator begin, Container::iterator end) :
+		m_begin{ begin },
+		m_end{ end }
+	{
+	}
+
+	Iterator View::begin() const
+	{
+		return Iterator{ m_begin };
+	}
+
+	Iterator View::end() const
+	{
+		return Iterator{ m_end };
+	}
+
+	size_t View::size() const
+	{
+		return std::distance(m_begin, m_end);
+	}
 }
 
 namespace
@@ -43,7 +142,7 @@ namespace
 		if (filePath.is_absolute())
 			file.open(filePath, std::ios::binary);
 		else
-			file.open(L"Data" / filePath, std::ios::binary);
+			file.open(g_mountPath / filePath, std::ios::binary);
 
 		if (!file)
 			return nullptr;
@@ -196,6 +295,18 @@ namespace Resource
 		return Get(*it, path);
 	}
 
+	std::wstring GetName(std::wstring_view path)
+	{
+		auto p{ Get(path) };
+		return p->name;
+	}
+
+	std::wstring GetName(const std::shared_ptr<Property>& prop, std::wstring_view path)
+	{
+		auto p{ Get(prop, path) };
+		return p->name;
+	}
+
 	std::int32_t GetInt(std::wstring_view path)
 	{
 		auto p{ Get(path) };
@@ -256,11 +367,43 @@ namespace Resource
 		return std::get<std::shared_ptr<Sprite>>(p->data);
 	}
 
+	View Iterate(const std::shared_ptr<Property>& prop)
+	{
+		View::Container::iterator begin;
+		View::Container::iterator end;
+		if (prop)
+		{
+			begin = prop->children.begin();
+			end = prop->children.end();
+		}
+		return View{ begin, end };
+	}
+
+	View Iterate(std::wstring_view path)
+	{
+		return Iterate(Get(path));
+	}
+
 	void Unload(std::wstring_view path)
 	{
 	}
 
 #ifdef _TOOL
+	std::shared_ptr<Property> NewProperty()
+	{
+		return std::make_shared<Property>();
+	}
+
+	void SetName(const std::shared_ptr<Property>& prop, std::wstring_view name)
+	{
+		prop->name = name;
+	}
+
+	void AddChild(const std::shared_ptr<Property>& prop, const std::shared_ptr<Property>& child)
+	{
+		prop->children.push_back(child);
+	}
+
 	bool Save(const std::filesystem::path& filePath, const std::shared_ptr<Resource::Property>& prop)
 	{
 		std::ofstream file{ filePath, std::ios::binary };
