@@ -136,6 +136,12 @@ COPY "$(SolutionDir)External\FBXSDK\lib\$(IntDir)libfbxsdk.dll" "$(OutDir)"</Com
     <ClCompile Include="Delegates.ixx">
       <FileType>Document</FileType>
     </ClCompile>
+    <ClCompile Include="Hierarchy.ixx">
+      <FileType>Document</FileType>
+    </ClCompile>
+    <ClCompile Include="..\..\Common\StringTable.ixx">
+      <FileType>Document</FileType>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\..\External\Imgui\imgui.cpp">
@@ -169,6 +175,7 @@ COPY "$(SolutionDir)External\FBXSDK\lib\$(IntDir)libfbxsdk.dll" "$(OutDir)"</Com
     <ClCompile Include="..\..\Common\Util.cpp" />
     <ClCompile Include="..\..\Common\Util.ixx" />
     <ClCompile Include="App.cpp" />
+    <ClCompile Include="Hierarchy.cpp" />
     <ClCompile Include="Main.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

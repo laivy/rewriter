@@ -3,7 +3,7 @@ export module rewriter.common.delegate;
 import std;
 
 // Delegate에 콜백 함수를 등록할 개체의 수명이 무한하지 않을 경우 이 클래스를 상속받는 것이 좋다.
-class IObserver
+export class IObserver
 {
 	template <class... Params>
 	friend class Delegate;

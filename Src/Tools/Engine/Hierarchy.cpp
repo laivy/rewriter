@@ -1,10 +1,27 @@
-#include "Stdafx.h"
-#include "App.h"
-#include "Clipboard.h"
-#include "Delegates.h"
-#include "Hierarchy.h"
-#include "Inspector.h"
-#include "Common/Util.h"
+module;
+#include "External/ImGui/imgui.h"
+#include "External/ImGui/imgui_internal.h"
+
+module rewriter.tool.engine.hierarchy;
+
+import std;
+import rewriter.tool.engine.delegates;
+import rewriter.common.stringtable;
+import rewriter.common.util;
+import rewriter.library.graphics.direct3d;
+import rewriter.library.resource;
+
+namespace
+{
+	constexpr auto WindowName{ "Hierarchy" };
+	constexpr auto MenuFile{ "File" };
+	constexpr auto MenuFileNew{ "New" };
+	constexpr auto MenuFileOpen{ "Open" };
+	constexpr auto MenuFileSave{ "Save" };
+	constexpr auto MenuFileSaveAs{ "Save As" };
+	constexpr auto DefaultFileName{ L"File" };
+	constexpr auto DefaultPropertyName{ L"Property" };
+}
 
 Hierarchy::IModal::IModal() :
 	m_isValid{ true }
@@ -41,8 +58,10 @@ void Hierarchy::Update(float deltaTime)
 		if (m_roots.erase(prop) > 0)
 			continue;
 
-		for (const auto& root : m_roots | std::views::keys)
+		/*
+		for (const auto& root : m_roots | std::ranges::views::keys)
 			Recurse(root, [&prop](const auto& p) { p->Delete(prop); });
+		*/
 	}
 	m_invalids.clear();
 
@@ -56,7 +75,7 @@ void Hierarchy::Update(float deltaTime)
 
 void Hierarchy::Render()
 {
-	if (ImGui::Begin(WINDOW_NAME, nullptr, ImGuiWindowFlags_MenuBar))
+	if (ImGui::Begin(WindowName, nullptr, ImGuiWindowFlags_MenuBar))
 	{
 		Shortcut();
 		DragDrop();
@@ -85,8 +104,10 @@ bool Hierarchy::IsRoot(const std::shared_ptr<Resource::Property>& prop) const
 
 void Hierarchy::OnPropAdded(const std::shared_ptr<Resource::Property>& prop)
 {
+	/*
 	if (auto parent{ prop->GetParent() })
 		OpenTree(parent);
+	*/
 	SetModified(prop, true);
 }
 
@@ -117,22 +138,23 @@ void Hierarchy::OnPropSelected(const std::shared_ptr<Resource::Property>& prop)
 void Hierarchy::OnMenuFileNew()
 {
 	size_t index{ 0 };
-	auto name{ std::format(L"{}{}", DEFAULT_FILE_NAME, Stringtable::DATA_FILE_EXT) };
+	auto name{ std::format(L"{}{}", DefaultFileName, Stringtable::DATA_FILE_EXT) };
 	while (true)
 	{
-		auto it{ std::ranges::find_if(m_roots, [&name](const auto& root) { return root.first->GetName() == name; }) };
+		auto it{ std::ranges::find_if(m_roots, [&name](const auto& root) { return Resource::GetName( root.first ) == name; }) };
 		if (it == m_roots.end())
 			break;
-		name = std::format(L"{}{}{}", DEFAULT_FILE_NAME, ++index, Stringtable::DATA_FILE_EXT);
+		name = std::format(L"{}{}{}", DefaultFileName, ++index, Stringtable::DATA_FILE_EXT);
 	}
 
-	auto root{ std::make_shared<Resource::Property>() };
-	root->SetName(name);
+	auto root{ Resource::NewProperty() };
+	Resource::SetName(root, name);
 	m_roots.emplace(root, Root{ .isModified = true });
 }
 
 void Hierarchy::OnMenuFileOpen()
 {
+	/*
 	std::array<wchar_t, MAX_PATH> filePath{};
 
 	OPENFILENAME ofn{};
@@ -167,6 +189,7 @@ void Hierarchy::OnMenuFileOpen()
 		for (const auto& file : fileNames)
 			LoadDataFile(path / file);
 	}
+	*/
 }
 
 void Hierarchy::OnMenuFileSave()
@@ -197,8 +220,10 @@ void Hierarchy::OnCut()
 		}
 	}
 
+	/*
 	if (auto clipboard{ Clipboard::GetInstance() })
 		clipboard->Copy(targets);
+	*/
 }
 
 void Hierarchy::OnCopy()
@@ -210,8 +235,10 @@ void Hierarchy::OnCopy()
 			targets.push_back(prop);
 	}
 
+	/*
 	if (auto clipboard{ Clipboard::GetInstance() })
 		clipboard->Copy(targets);
+	*/
 }
 
 void Hierarchy::OnPaste()
@@ -223,8 +250,10 @@ void Hierarchy::OnPaste()
 	if (!select)
 		return;
 
+	/*
 	if (auto clipboard{ Clipboard::GetInstance() })
 		clipboard->Paste(select);
+	*/
 }
 
 void Hierarchy::Shortcut()
@@ -248,6 +277,7 @@ void Hierarchy::Shortcut()
 	{
 		do
 		{
+			/*
 			if (m_selects.size() != 1)
 				break;
 
@@ -265,12 +295,14 @@ void Hierarchy::Shortcut()
 				break;
 
 			std::iter_swap(it, it - 1);
+			*/
 		} while (false);
 	}
 	if (ImGui::IsKeyDown(ImGuiMod_Alt) && ImGui::IsKeyPressed(ImGuiKey_DownArrow, false))
 	{
 		do
 		{
+			/*
 			if (m_selects.size() != 1)
 				break;
 
@@ -288,6 +320,7 @@ void Hierarchy::Shortcut()
 				break;
 
 			std::iter_swap(it, it + 1);
+			*/
 		} while (false);
 	}
 	if (ImGui::IsKeyDown(ImGuiKey_F2))
@@ -326,24 +359,24 @@ void Hierarchy::RenderMenuBar()
 	if (!ImGui::BeginMenuBar())
 		return;
 
-	if (ImGui::BeginMenu(MENU_FILE))
+	if (ImGui::BeginMenu(MenuFile))
 	{
-		if (ImGui::MenuItem(MENU_FILE_NEW, "Ctrl+N") || (ImGui::IsKeyPressed(ImGuiMod_Ctrl) && ImGui::IsKeyPressed(ImGuiKey_N)))
+		if (ImGui::MenuItem(MenuFileNew, "Ctrl+N") || (ImGui::IsKeyPressed(ImGuiMod_Ctrl) && ImGui::IsKeyPressed(ImGuiKey_N)))
 		{
 			ImGui::CloseCurrentPopup();
 			OnMenuFileNew();
 		}
-		if (ImGui::MenuItem(MENU_FILE_OPEN, "Ctrl+O") || ImGui::Shortcut(ImGuiMod_Ctrl | ImGuiKey_O))
+		if (ImGui::MenuItem(MenuFileOpen, "Ctrl+O") || ImGui::Shortcut(ImGuiMod_Ctrl | ImGuiKey_O))
 		{
 			ImGui::CloseCurrentPopup();
 			OnMenuFileOpen();
 		}
-		if (ImGui::MenuItem(MENU_FILE_SAVE, "Ctrl+S") || ImGui::Shortcut(ImGuiMod_Ctrl | ImGuiKey_S))
+		if (ImGui::MenuItem(MenuFileSave, "Ctrl+S") || ImGui::Shortcut(ImGuiMod_Ctrl | ImGuiKey_S))
 		{
 			ImGui::CloseCurrentPopup();
 			OnMenuFileSave();
 		}
-		if (ImGui::MenuItem(MENU_FILE_SAVEAS, "Ctrl+Shift+S") || ImGui::Shortcut(ImGuiMod_Ctrl | ImGuiMod_Shift | ImGuiKey_S))
+		if (ImGui::MenuItem(MenuFileSaveAs, "Ctrl+Shift+S") || ImGui::Shortcut(ImGuiMod_Ctrl | ImGuiMod_Shift | ImGuiKey_S))
 		{
 			ImGui::CloseCurrentPopup();
 			OnMenuFileSaveAs();
@@ -366,7 +399,7 @@ void Hierarchy::RenderProperty(const std::shared_ptr<Resource::Property>& prop)
 	ImGui::PushID(prop.get());
 
 	const bool isRoot{ IsRoot(prop) };
-	std::string name{ Util::wstou8s(prop->GetName()) };
+	std::string name{ Util::wstou8s(Resource::GetName(prop)) };
 	if (isRoot)
 	{
 		// 자식 노드에 변경 사항이 있으면 루트 노드 이름 앞에 '*' 추가
@@ -419,7 +452,7 @@ void Hierarchy::RenderProperty(const std::shared_ptr<Resource::Property>& prop)
 	// 하위 트리
 	if (isTreeNodeOpen)
 	{
-		for (const auto& child : *prop | std::views::values)
+		for (const auto& child : Resource::Iterate(prop) | std::ranges::views::values)
 			RenderProperty(child);
 		ImGui::TreePop();
 	}
@@ -479,7 +512,8 @@ void Hierarchy::RenderNodeContextMenu(const std::shared_ptr<Resource::Property>&
 					ImGui::SetNextWindowPos(center, ImGuiCond_Appearing, ImVec2(0.5f, 0.5f));
 					if (ImGui::BeginPopupModal("Hierarchy##FileCloseModal", nullptr, ImGuiWindowFlags_AlwaysAutoResize))
 					{
-						ImGui::TextUnformatted(Util::wstou8s(std::format(L"변경 내용을 {}에 저장하시겠습니까?", p->GetName())).c_str());
+						//ImGui::TextUnformatted(Util::wstou8s(std::format(L"변경 내용을 {}에 저장하시겠습니까?", p->GetName())).c_str());
+						ImGui::TextUnformatted("Save?");
 						if (ImGui::Button("저장"))
 						{
 							ImGui::CloseCurrentPopup();
@@ -540,19 +574,19 @@ void Hierarchy::RenderNodeContextMenu(const std::shared_ptr<Resource::Property>&
 		ImGui::CloseCurrentPopup();
 
 		size_t index{ 0 };
-		std::wstring name{ DEFAULT_PROPERTY_NAME };
+		std::wstring name{ DefaultPropertyName };
 		while (true)
 		{
-			if (auto child{ prop->Get(name) })
+			if (auto child{ Resource::Get(prop, name) })
 			{
-				name = std::format(L"{}{}", DEFAULT_PROPERTY_NAME, ++index);
+				name = std::format(L"{}{}", DefaultPropertyName, ++index);
 				continue;
 			}
 			break;
 		}
 
-		auto child{ std::make_shared<Resource::Property>() };
-		child->SetName(name);
+		auto child{ Resource::NewProperty() };
+		Resource::SetName(child, name);
 		Add(prop, child);
 	}
 
@@ -577,24 +611,30 @@ void Hierarchy::RenderModal()
 
 void Hierarchy::LoadDataFile(const std::filesystem::path& path)
 {
+	/*
 	if (auto root{ Resource::Get(path.wstring()) })
 	{
 		root->SetName(path.filename().wstring());
 		m_roots.emplace(root, Root{ .path = path });
 	}
+	*/
 }
 
 void Hierarchy::Recurse(const std::shared_ptr<Resource::Property>& prop, const std::function<void(const std::shared_ptr<Resource::Property>&)>& func)
 {
+	/*
 	for (const auto& [_, child] : *prop)
 		Recurse(child, func);
 	func(prop);
+	*/
 }
 
 void Hierarchy::Add(const std::shared_ptr<Resource::Property>& parent, const std::shared_ptr<Resource::Property>& child)
 {
+	/*
 	child->SetParent(parent);
-	parent->Add(child);
+	*/
+	Resource::AddChild(parent, child);
 	Delegates::OnPropAdded.Notify(child);
 	Delegates::OnPropSelected.Notify(child);
 }
@@ -614,6 +654,7 @@ void Hierarchy::Save(const std::shared_ptr<Resource::Property>& prop)
 	if (!IsModified(root))
 		return;
 
+	/*
 	auto& info{ m_roots.at(root) };
 	if (info.path.empty())
 	{
@@ -634,6 +675,7 @@ void Hierarchy::Save(const std::shared_ptr<Resource::Property>& prop)
 	}
 	root->SetName(info.path.filename().wstring());
 	Resource::Save(root, info.path.wstring());
+	*/
 	SetModified(root, false);
 }
 
@@ -645,11 +687,14 @@ void Hierarchy::SetModified(const std::shared_ptr<Resource::Property>& prop, boo
 
 std::shared_ptr<Resource::Property> Hierarchy::GetRoot(const std::shared_ptr<Resource::Property>& prop) const
 {
+	/*
 	auto root{ prop };
 	auto parent{ prop };
 	while (parent = parent->GetParent())
 		root = parent;
 	return IsRoot(root) ? root : nullptr;
+	*/
+	return nullptr;
 }
 
 bool Hierarchy::IsModified(const std::shared_ptr<Resource::Property>& prop) const

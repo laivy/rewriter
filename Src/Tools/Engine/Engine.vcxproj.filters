@@ -172,5 +172,14 @@
     <ClCompile Include="..\..\Libraries\Graphics\Include\GraphicsImGui.ixx">
       <Filter>Library\Graphics</Filter>
     </ClCompile>
+    <ClCompile Include="Hierarchy.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="Hierarchy.ixx">
+      <Filter>Module</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Common\StringTable.ixx">
+      <Filter>Module</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>

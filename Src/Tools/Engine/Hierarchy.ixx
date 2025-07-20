@@ -1,6 +1,10 @@
-#pragma once
+export module rewriter.tool.engine.hierarchy;
 
-class Hierarchy :
+import rewriter.common.delegate;
+import rewriter.common.singleton;
+import rewriter.library.resource;
+
+export class Hierarchy :
 	public IObserver,
 	public TSingleton<Hierarchy>
 {
@@ -71,15 +75,6 @@ private:
 	bool IsOpened(const std::shared_ptr<Resource::Property>& prop) const;
 
 private:
-	static constexpr auto WINDOW_NAME{ "Hierarchy" };
-	static constexpr auto MENU_FILE{ "File" };
-	static constexpr auto MENU_FILE_NEW{ "New" };
-	static constexpr auto MENU_FILE_OPEN{ "Open" };
-	static constexpr auto MENU_FILE_SAVE{ "Save" };
-	static constexpr auto MENU_FILE_SAVEAS{ "Save As" };
-	static constexpr auto DEFAULT_FILE_NAME{ L"File" };
-	static constexpr auto DEFAULT_PROPERTY_NAME{ L"Property" };
-
 	std::map<std::shared_ptr<Resource::Property>, Root> m_roots;
 	std::vector<std::weak_ptr<Resource::Property>> m_invalids;
 	std::vector<std::weak_ptr<Resource::Property>> m_selects;

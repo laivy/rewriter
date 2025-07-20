@@ -11,6 +11,7 @@ module rewriter.tool.engine.app;
 
 import std;
 import rewriter.tool.engine.delegates;
+import rewriter.tool.engine.hierarchy;
 import rewriter.common.timer;
 import rewriter.common.type;
 import rewriter.library.graphics;
@@ -169,15 +170,13 @@ void App::InitApp()
 	ImGui::StyleColorsDark();
 	
 	// 싱글톤 생성
-	/*
-	Clipboard::Instantiate();
-	Desktop::Instantiate();
-	Explorer::Instantiate();
-	FbxHandler::Instantiate();
+	//Clipboard::Instantiate();
+	//Desktop::Instantiate();
+	//Explorer::Instantiate();
+	//FbxHandler::Instantiate();
 	Hierarchy::Instantiate();
-	Inspector::Instantiate();
-	Viewport::Instantiate();
-	*/
+	//Inspector::Instantiate();
+	//Viewport::Instantiate();
 
 	// 타이머 초기화
 	m_timer.Tick();
@@ -186,16 +185,14 @@ void App::InitApp()
 void App::Update()
 {
 	float deltaTime{ m_timer.Tick() };
-	/*
-	if (auto explorer{ Explorer::GetInstance() })
-		explorer->Update(deltaTime);
+	//if (auto explorer{ Explorer::GetInstance() })
+	//	explorer->Update(deltaTime);
 	if (auto hierarchy{ Hierarchy::GetInstance() })
 		hierarchy->Update(deltaTime);
-	if (auto inspector{ Inspector::GetInstance() })
-		inspector->Update(deltaTime);
-	if (auto viewport{ Viewport::GetInstance() })
-		viewport->Update(deltaTime);
-	*/
+	//if (auto inspector{ Inspector::GetInstance() })
+	//	inspector->Update(deltaTime);
+	//if (auto viewport{ Viewport::GetInstance() })
+	//	viewport->Update(deltaTime);
 }
 
 void App::Render()
@@ -204,20 +201,18 @@ void App::Render()
 	{
 		Graphics::ImGui::Begin();
 		{
-			/*
-			if (auto desktop{ Desktop::GetInstance() })
-				desktop->Render();
-			if (auto explorer{ Explorer::GetInstance() })
-				explorer->Render();
+			//if (auto desktop{ Desktop::GetInstance() })
+			//	desktop->Render();
+			//if (auto explorer{ Explorer::GetInstance() })
+			//	explorer->Render();
 			if (auto hierarchy{ Hierarchy::GetInstance() })
 				hierarchy->Render();
-			if (auto inspector{ Inspector::GetInstance() })
-				inspector->Render();
-			if (auto uiEditor{ UIEditor::GetInstance() })
-				uiEditor->Render();
-			if (auto viewport{ Viewport::GetInstance() })
-				viewport->Render();
-			*/
+			//if (auto inspector{ Inspector::GetInstance() })
+			//	inspector->Render();
+			//if (auto uiEditor{ UIEditor::GetInstance() })
+			//	uiEditor->Render();
+			//if (auto viewport{ Viewport::GetInstance() })
+			//	viewport->Render();
 			ImGui::ShowDemoWindow();
 		}
 		Graphics::ImGui::End();
