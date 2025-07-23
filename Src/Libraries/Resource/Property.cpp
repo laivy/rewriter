@@ -507,7 +507,7 @@ namespace Resource
 		auto recursive = [&file](this const auto& self, const std::shared_ptr<Resource::Property>& prop) -> bool
 		{
 			// 이름
-			uint16_t length{ static_cast<uint16_t>(prop->name.size()) };
+			std::uint16_t length{ static_cast<std::uint16_t>(prop->name.size()) };
 			file.write(reinterpret_cast<const char*>(&length), sizeof(length));
 			file.write(reinterpret_cast<const char*>(prop->name.data()), prop->name.size() * sizeof(std::wstring::value_type));
 
@@ -565,6 +565,11 @@ namespace Resource
 				break;
 			}
 
+			// 자식
+			std::uint16_t count{ static_cast<std::uint16_t>(prop->children.size()) };
+			file.write(reinterpret_cast<const char*>(&count), sizeof(count));
+			for (const auto& child : prop->children)
+				self(child);
 			return true;
 		};
 
