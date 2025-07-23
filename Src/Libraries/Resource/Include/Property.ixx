@@ -19,16 +19,16 @@ export namespace Resource
 	public:
 		using Container = std::vector<std::shared_ptr<Property>>;
 
-	public:
 		using iterator_concept = Container::iterator::iterator_concept;
 		using iterator_category = Container::iterator::iterator_category;
-		using value_type = std::pair<const std::wstring, std::shared_ptr<Property>>;
+		using value_type = std::pair<std::wstring, std::shared_ptr<Property>>;
 		using difference_type = Container::difference_type;
-		using reference = std::pair<const std::wstring, std::shared_ptr<Property>&>;
+		using reference = std::pair<std::wstring, std::shared_ptr<Property>&>;
 
 	public:
-		Iterator() = default;
-		RESOURCE_API Iterator(Container::iterator iterator);
+		RESOURCE_API Iterator();
+		RESOURCE_API Iterator(std::wstring_view path);
+		RESOURCE_API Iterator(const std::shared_ptr<Property>& prop);
 
 		RESOURCE_API reference operator*() const;
 		RESOURCE_API Iterator& operator++();
@@ -43,30 +43,47 @@ export namespace Resource
 		RESOURCE_API bool operator==(const Iterator& rhs) const;
 		RESOURCE_API bool operator!=(const Iterator& rhs) const;
 
+		RESOURCE_API Iterator begin() const;
+		RESOURCE_API Iterator end() const;
+
 	private:
-		Container::iterator m_iterator;
+		Property* m_prop;
+		Container::iterator m_iter;
 	};
 
-	class View : public std::ranges::view_interface<View>
+	class RecursiveIterator
 	{
 	public:
 		using Container = std::vector<std::shared_ptr<Property>>;
 
-	public:
-		View(Container::iterator begin, Container::iterator end);
+		using iterator_category = std::input_iterator_tag;
+		using value_type = std::pair<std::wstring, std::shared_ptr<Property>>;
+		using difference_type = Container::difference_type;
+		using reference = std::pair<std::wstring, std::shared_ptr<Property>&>;
 
-		RESOURCE_API Iterator begin() const;
-		RESOURCE_API Iterator end() const;
-		RESOURCE_API size_t size() const;
+	public:
+		RESOURCE_API RecursiveIterator();
+		RESOURCE_API RecursiveIterator(std::wstring_view path);
+		RESOURCE_API RecursiveIterator(const std::shared_ptr<Property>& prop);
+
+		RESOURCE_API RecursiveIterator& operator++();
+		RESOURCE_API RecursiveIterator operator++(int);
+		RESOURCE_API bool operator==(const RecursiveIterator& rhs) const;
+		RESOURCE_API bool operator!=(const RecursiveIterator& rhs) const;
+		RESOURCE_API reference operator*() const;
+
+		RESOURCE_API RecursiveIterator begin() const;
+		RESOURCE_API RecursiveIterator end() const;
 
 	private:
-		Container::iterator m_begin;
-		Container::iterator m_end;
+		Property* m_prop;
+		Container::iterator m_iter;
+		std::vector<Container::iterator> m_parents;
+		std::vector<Container::iterator> m_ends;
 	};
 
 	RESOURCE_API std::shared_ptr<Property> Get(std::wstring_view path);
 	RESOURCE_API std::shared_ptr<Property> Get(const std::shared_ptr<Property>& prop, std::wstring_view path);
-	RESOURCE_API std::wstring GetName(std::wstring_view path);
 	RESOURCE_API std::wstring GetName(const std::shared_ptr<Property>& prop, std::wstring_view path = L"");
 	RESOURCE_API std::int32_t GetInt(std::wstring_view path);
 	RESOURCE_API std::int32_t GetInt(const std::shared_ptr<Property>& prop, std::wstring_view path = L"");
@@ -78,8 +95,6 @@ export namespace Resource
 	RESOURCE_API std::wstring GetString(const std::shared_ptr<Property>& prop, std::wstring_view path = L"");
 	RESOURCE_API std::shared_ptr<Sprite> GetSprite(std::wstring_view path);
 	RESOURCE_API std::shared_ptr<Sprite> GetSprite(const std::shared_ptr<Property>& prop, std::wstring_view path = L"");
-	RESOURCE_API View Iterate(const std::shared_ptr<Property>& prop);
-	RESOURCE_API View Iterate(std::wstring_view path);
 	RESOURCE_API void Unload(std::wstring_view path);
 
 #ifdef _TOOL

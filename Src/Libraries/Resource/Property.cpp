@@ -34,20 +34,30 @@ namespace Resource
 		std::vector<std::shared_ptr<Resource::Property>> children;
 	};
 
-	Iterator::Iterator(Container::iterator iterator) :
-		m_iterator{ iterator }
+	Iterator::Iterator() :
+		m_prop{ nullptr }
+	{
+	}
+
+	Iterator::Iterator(std::wstring_view path) :
+		Iterator{ Get(path) }
+	{
+	}
+
+	Iterator::Iterator(const std::shared_ptr<Property>& prop) :
+		m_prop{ prop.get() }
 	{
 	}
 
 	Iterator::reference Iterator::operator*() const
 	{
-		auto& prop{ *m_iterator };
+		auto& prop{ *m_iter };
 		return std::make_pair(prop->name, std::ref(prop));
 	}
 
 	Iterator& Iterator::operator++()
 	{
-		++m_iterator;
+		++m_iter;
 		return *this;
 	}
 
@@ -60,7 +70,7 @@ namespace Resource
 
 	Iterator& Iterator::operator+=(const difference_type offset)
 	{
-		m_iterator += offset;
+		m_iter += offset;
 		return *this;
 	}
 
@@ -73,7 +83,7 @@ namespace Resource
 
 	Iterator& Iterator::operator--()
 	{
-		--m_iterator;
+		--m_iter;
 		return *this;
 	}
 
@@ -86,7 +96,7 @@ namespace Resource
 
 	Iterator& Iterator::operator-=(const difference_type offset)
 	{
-		m_iterator -= offset;
+		m_iter -= offset;
 		return *this;
 	}
 
@@ -104,33 +114,140 @@ namespace Resource
 
 	bool Iterator::operator==(const Iterator& rhs) const
 	{
-		return m_iterator == rhs.m_iterator;
+		return m_iter == rhs.m_iter;
 	}
 
 	bool Iterator::operator!=(const Iterator& rhs) const
 	{
-		return m_iterator != rhs.m_iterator;
+		return m_iter != rhs.m_iter;
 	}
 
-	View::View(Container::iterator begin, Container::iterator end) :
-		m_begin{ begin },
-		m_end{ end }
+	Iterator Iterator::begin() const
+	{
+		if (!m_prop)
+			return Iterator{};
+
+		Iterator iter{};
+		iter.m_prop = m_prop;
+		iter.m_iter = m_prop->children.begin();
+		return iter;
+	}
+
+	Iterator Iterator::end() const
+	{
+		if (!m_prop)
+			return Iterator{};
+
+		Iterator iter{};
+		iter.m_prop = m_prop;
+		iter.m_iter = m_prop->children.end();
+		return iter;
+	}
+
+	RecursiveIterator::RecursiveIterator()
+	{
+
+	}
+
+	RecursiveIterator::RecursiveIterator(std::wstring_view path) :
+		RecursiveIterator{ Get(path) }
+	{
+
+	}
+
+	RecursiveIterator::RecursiveIterator(const std::shared_ptr<Property>& prop) :
+		m_prop{ prop.get() }
 	{
 	}
 
-	Iterator View::begin() const
+	RecursiveIterator& RecursiveIterator::operator++()
 	{
-		return Iterator{ m_begin };
+		auto& p{ *m_iter };
+		if (p->children.empty())
+		{
+			++m_iter;
+			if (!m_ends.empty() && m_iter == m_ends.back())
+			{
+				if (!m_parents.empty())
+				{
+					m_iter = m_parents.back() + 1;
+					m_parents.pop_back();
+				}
+				m_ends.pop_back();
+			}
+		}
+		else
+		{
+			m_parents.push_back(m_iter);
+			m_iter = p->children.begin();
+			m_ends.push_back(p->children.end());
+		}
+		return *this;
 	}
 
-	Iterator View::end() const
+	RecursiveIterator RecursiveIterator::operator++(int)
 	{
-		return Iterator{ m_end };
+		RecursiveIterator temp{ *this };
+		++*this;
+		return temp;
 	}
 
-	size_t View::size() const
+	bool RecursiveIterator::operator==(const RecursiveIterator& rhs) const
 	{
-		return std::distance(m_begin, m_end);
+		if (m_parents != rhs.m_parents)
+			return false;
+		if (m_iter != rhs.m_iter)
+			return false;
+		return true;
+	}
+
+	bool RecursiveIterator::operator!=(const RecursiveIterator& rhs) const
+	{
+		if (m_parents != rhs.m_parents)
+			return true;
+		if (m_iter != rhs.m_iter)
+			return true;
+		return false;
+	}
+
+	RecursiveIterator::reference RecursiveIterator::operator*() const
+	{
+		std::wstring fullName;
+		for (const auto& name : m_parents
+							  | std::ranges::views::transform([](const auto& parent) { return (*parent)->name; })
+							  | std::ranges::views::join_with('/'))
+		{
+			fullName += name;
+		}
+
+		auto& p{ *m_iter };
+		if (fullName.empty())
+			fullName = p->name;
+		else
+			fullName += L"/" + p->name;
+		return std::make_pair(fullName, std::ref(p));
+	}
+
+	RecursiveIterator RecursiveIterator::begin() const
+	{
+		if (!m_prop)
+			return RecursiveIterator{};
+
+		RecursiveIterator iter{};
+		iter.m_prop = m_prop;
+		iter.m_iter = m_prop->children.begin();
+		return iter;
+	}
+
+	RecursiveIterator RecursiveIterator::end() const
+	{
+		if (!m_prop)
+			return RecursiveIterator{};
+
+		RecursiveIterator iter{};
+		iter.m_prop = m_prop;
+		iter.m_iter = m_prop->children.end();
+		return iter;
 	}
 }
 
@@ -295,12 +412,6 @@ namespace Resource
 		return Get(*it, path);
 	}
 
-	std::wstring GetName(std::wstring_view path)
-	{
-		auto p{ Get(path) };
-		return p->name;
-	}
-
 	std::wstring GetName(const std::shared_ptr<Property>& prop, std::wstring_view path)
 	{
 		auto p{ Get(prop, path) };
@@ -365,23 +476,6 @@ namespace Resource
 	{
 		auto p{ Get(prop, path) };
 		return std::get<std::shared_ptr<Sprite>>(p->data);
-	}
-
-	View Iterate(const std::shared_ptr<Property>& prop)
-	{
-		View::Container::iterator begin;
-		View::Container::iterator end;
-		if (prop)
-		{
-			begin = prop->children.begin();
-			end = prop->children.end();
-		}
-		return View{ begin, end };
-	}
-
-	View Iterate(std::wstring_view path)
-	{
-		return Iterate(Get(path));
 	}
 
 	void Unload(std::wstring_view path)

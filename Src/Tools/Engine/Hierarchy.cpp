@@ -452,7 +452,7 @@ void Hierarchy::RenderProperty(const std::shared_ptr<Resource::Property>& prop)
 	// 하위 트리
 	if (isTreeNodeOpen)
 	{
-		for (const auto& child : Resource::Iterate(prop) | std::ranges::views::values)
+		for (const auto& child : Resource::Iterator{ prop } | std::ranges::views::values)
 			RenderProperty(child);
 		ImGui::TreePop();
 	}
