@@ -29,4 +29,7 @@ export namespace Graphics::ImGui
 	GRAPHICS_API std::shared_ptr<Texture> LoadTexture(const std::filesystem::path& path);
 	GRAPHICS_API void Image(const std::shared_ptr<Texture>& texture, const ImVec2& size = ImVec2{ 0, 0 }, const ImVec2& uv0 = ImVec2{ 0, 0 }, const ImVec2& uv1 = ImVec2{ 1, 1 }, const ImVec4& tint_col = ImVec4{ 1, 1, 1, 1 }, const ImVec4& border_col = ImVec4{ 0, 0, 0, 0 });
 	GRAPHICS_API void Image(const std::shared_ptr<D3D::RenderTarget>& renderTarget, const ImVec2& size = ImVec2{ 0, 0 }, const ImVec2& uv0 = ImVec2{ 0, 0 }, const ImVec2& uv1 = ImVec2{ 1, 1 }, const ImVec4& tint_col = ImVec4{ 1, 1, 1, 1 }, const ImVec4& border_col = ImVec4{ 0, 0, 0, 0 });
+
+	GRAPHICS_API void OpenFileDialog(std::string_view str_id);
+	GRAPHICS_API bool BeginFileDialog(std::string_view name, bool* p_open = nullptr, ImGuiWindowFlags flags = ImGuiWindowFlags_None);
 }

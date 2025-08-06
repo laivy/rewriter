@@ -198,7 +198,7 @@ namespace Graphics::D3D
 		::ImGui::CreateContext();
 
 		ImGuiConfigFlags flags{ ImGuiConfigFlags_NavEnableKeyboard | ImGuiConfigFlags_DockingEnable };
-#ifdef _CLIENT
+#if defined _CLIENT || defined _TOOL
 		flags |= ImGuiConfigFlags_ViewportsEnable;
 #endif
 		::ImGui::GetIO().ConfigFlags |= flags;

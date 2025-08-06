@@ -81,6 +81,11 @@ void Hierarchy::Render()
 		DragDrop();
 		RenderMenuBar();
 		RenderPropertyTree();
+
+		if (Graphics::ImGui::BeginFileDialog("Open File"))
+		{
+			ImGui::EndPopup();
+		}
 	}
 	ImGui::End();
 	RenderModal();
@@ -154,6 +159,7 @@ void Hierarchy::OnMenuFileNew()
 
 void Hierarchy::OnMenuFileOpen()
 {
+	Graphics::ImGui::OpenFileDialog("Open File");
 	/*
 	std::array<wchar_t, MAX_PATH> filePath{};
 
