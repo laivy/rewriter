@@ -185,6 +185,12 @@
     <ClCompile Include="GraphicsImGui.cpp">
       <Filter>Source\D3D</Filter>
     </ClCompile>
+    <ClCompile Include="Include\GraphicsImGui_FileDialog.ixx">
+      <Filter>Module\Include\D3D</Filter>
+    </ClCompile>
+    <ClCompile Include="GraphicsImGui_FileDialog.cpp">
+      <Filter>Source\D3D</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\External\DirectX\d3dx12.h">

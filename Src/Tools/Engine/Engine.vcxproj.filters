@@ -181,5 +181,8 @@
     <ClCompile Include="..\..\Common\StringTable.ixx">
       <Filter>Module</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\Libraries\Graphics\Include\GraphicsImGui_FileDialog.ixx">
+      <Filter>Library\Graphics</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>

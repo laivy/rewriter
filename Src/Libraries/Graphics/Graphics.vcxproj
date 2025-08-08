@@ -359,6 +359,7 @@
     <ClCompile Include="Graphics3D.cpp" />
     <ClCompile Include="Graphics3DUtil.cpp" />
     <ClCompile Include="GraphicsImGui.cpp" />
+    <ClCompile Include="GraphicsImGui_FileDialog.cpp" />
     <ClCompile Include="Include\Camera.ixx" />
     <ClCompile Include="Include\ConstantBuffer.ixx" />
     <ClCompile Include="Include\Descriptor.ixx" />
@@ -368,6 +369,7 @@
     <ClCompile Include="Include\Graphics3D.ixx" />
     <ClCompile Include="Include\Graphics3DUtil.ixx" />
     <ClCompile Include="Include\GraphicsImGui.ixx" />
+    <ClCompile Include="Include\GraphicsImGui_FileDialog.ixx" />
     <ClCompile Include="Include\PipelineState.ixx" />
     <ClCompile Include="Include\RenderTarget.ixx" />
     <ClCompile Include="Include\SwapChain.ixx" />

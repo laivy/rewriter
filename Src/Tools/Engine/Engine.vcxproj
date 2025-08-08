@@ -122,6 +122,7 @@ COPY "$(SolutionDir)External\FBXSDK\lib\$(IntDir)libfbxsdk.dll" "$(OutDir)"</Com
     <ClCompile Include="..\..\Libraries\Graphics\Include\Graphics3D.ixx" />
     <ClCompile Include="..\..\Libraries\Graphics\Include\Graphics3DUtil.ixx" />
     <ClCompile Include="..\..\Libraries\Graphics\Include\GraphicsImGui.ixx" />
+    <ClCompile Include="..\..\Libraries\Graphics\Include\GraphicsImGui_FileDialog.ixx" />
     <ClCompile Include="..\..\Libraries\Graphics\Include\PipelineState.ixx" />
     <ClCompile Include="..\..\Libraries\Graphics\Include\RenderTarget.ixx" />
     <ClCompile Include="..\..\Libraries\Graphics\Include\SwapChain.ixx" />
