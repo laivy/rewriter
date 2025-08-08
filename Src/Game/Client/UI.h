@@ -1,7 +1,7 @@
 #pragma once
 #include "Object.h"
 
-class IUserInterface abstract : public IObject2D
+class IUserInterface : public IObject2D
 {
 public:
 	IUserInterface();

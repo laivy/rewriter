@@ -1,6 +1,6 @@
 #pragma once
 
-class IObject abstract
+class IObject
 {
 public:
 	IObject();
@@ -17,7 +17,7 @@ private:
 	bool m_isValid;
 };
 
-class IObject2D abstract : public IObject
+class IObject2D : public IObject
 {
 public:
 	IObject2D();
@@ -31,6 +31,6 @@ private:
 	int m_z; // 클 수록 위에 그려짐
 };
 
-class IObject3D abstract : public IObject
+class IObject3D : public IObject
 {
 };

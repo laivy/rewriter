@@ -58,3 +58,4 @@ EXTERN_C IMAGE_DOS_HEADER __ImageBase;
 #include "Singleton.h"
 #include "StringTable.h"
 #include "Time.h"
+#include "Type.h"

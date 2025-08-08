@@ -1,16 +1,5 @@
-module;
-
-// Windows
-#include <Windows.h>
-
-// External
-#ifdef _IMGUI
-#include "External/Imgui/imgui.h"
-#endif
-
-module rewriter.common.util;
-
-import std;
+﻿#include "Stdafx.h"
+#include "Util.h"
 
 namespace Util
 {

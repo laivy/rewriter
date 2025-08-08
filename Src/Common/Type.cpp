@@ -1,8 +1,7 @@
-module rewriter.common.type;
+﻿#include "Stdafx.h"
+#include "Type.h"
 
-import std;
-
-Int2::Int2(std::int32_t x, std::int32_t y) :
+Int2::Int2(int32_t x, int32_t y) :
 	x{ x },
 	y{ y }
 {
