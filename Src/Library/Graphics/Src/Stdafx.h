@@ -21,19 +21,19 @@
 #include <dxgidebug.h>
 #endif
 
-#include "External/DirectX/d3dx12.h"
-#include "External/DirectX/WICTextureLoader12.h"
+#include "DirectX/d3dx12.h"
+#include "DirectX/WICTextureLoader12.h"
 
 // ImGui
 #ifdef _IMGUI
-#include "External/Imgui/imgui.h"
-#include "External/Imgui/imgui_impl_dx12.h"
-#include "External/Imgui/imgui_impl_win32.h"
+#include "Imgui/imgui.h"
+#include "Imgui/imgui_impl_dx12.h"
+#include "Imgui/imgui_impl_win32.h"
 extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
 #endif
 
 // Library
-#include "Library/Resource/Include/Lib.h"
+#include "Resource/Resource.h"
 
 // Project
 #ifdef _GRAPHICS

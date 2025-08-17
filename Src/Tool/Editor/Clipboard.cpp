@@ -24,7 +24,7 @@ void Clipboard::Paste(const std::shared_ptr<Resource::Property>& destination) co
 
 		clone->SetParent(destination);
 		destination->Add(clone);
-		Delegates::OnPropAdded.Notify(clone);
+		Delegates::OnPropertyAdded.Notify(clone);
 	}
 
 	if (auto hierarchy{ Hierarchy::GetInstance() })

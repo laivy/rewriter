@@ -10,7 +10,7 @@ namespace Graphics::D3D
 	class RenderTarget;
 
 	bool Initialize();
-	void CleanUp();
+	void Uninitialize();
 
 	GRAPHICS_API void Begin();
 	GRAPHICS_API void End();

@@ -1,9 +1,9 @@
 module;
 
 // ImGui
-#include "External/ImGui/imgui.h"
-#include "External/ImGui/imgui_internal.h"
-#include "External/ImGui/imgui_stdlib.h"
+#include "ImGui/imgui.h"
+#include "ImGui/imgui_internal.h"
+#include "ImGui/imgui_stdlib.h"
 
 module rewriter.library.graphics.direct3d:filedialog;
 

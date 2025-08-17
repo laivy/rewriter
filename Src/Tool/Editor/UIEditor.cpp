@@ -10,8 +10,8 @@ UIEditor::UIEditor() :
 	m_viewerRect{},
 	m_moveCameraToCenter{ true }
 {
-	Delegates::OnPropDeleted.Register(this, std::bind_front(&UIEditor::OnPropDeleted, this));
-	Delegates::OnPropModified.Register(this, std::bind_front(&UIEditor::OnPropModified, this));
+	Delegates::OnPropertyDeleted.Register(this, std::bind_front(&UIEditor::OnPropertyDeleted, this));
+	Delegates::OnPropertyModified.Register(this, std::bind_front(&UIEditor::OnPropertyModified, this));
 }
 
 void UIEditor::Render()
@@ -59,7 +59,7 @@ void UIEditor::Render2D()
 	Graphics::D2D::PopClipRect();
 }
 
-void UIEditor::OnPropDeleted(const std::shared_ptr<Resource::Property>& prop)
+void UIEditor::OnPropertyDeleted(const std::shared_ptr<Resource::Property>& prop)
 {
 	/* TODO
 	if (!m_window)
@@ -84,7 +84,7 @@ void UIEditor::OnPropDeleted(const std::shared_ptr<Resource::Property>& prop)
 	*/
 }
 
-void UIEditor::OnPropModified(const std::shared_ptr<Resource::Property>& prop)
+void UIEditor::OnPropertyModified(const std::shared_ptr<Resource::Property>& prop)
 {
 	/* TODO
 	if (!m_window)
@@ -237,7 +237,7 @@ void UIEditor::DragDrop()
 	BuildWindow(prop);
 	m_moveCameraToCenter = true;
 
-	Delegates::OnPropSelected.Notify(prop);
+	Delegates::OnPropertySelected.Notify(prop);
 }
 
 void UIEditor::BuildWindow(const std::shared_ptr<Resource::Property>& prop)

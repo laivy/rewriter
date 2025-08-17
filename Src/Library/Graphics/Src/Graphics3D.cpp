@@ -8,7 +8,7 @@
 #include "PipelineState.h"
 #include "RenderTarget.h"
 #include "SwapChain.h"
-#include "External/DirectX/DDSTextureLoader12.h"
+#include "DirectX/DDSTextureLoader12.h"
 
 namespace Graphics::D3D
 {
@@ -319,7 +319,7 @@ namespace Graphics::D3D
 		return true;
 	}
 
-	void CleanUp()
+	void Uninitialize()
 	{
 		g_swapChain.reset();
 #ifdef _IMGUI

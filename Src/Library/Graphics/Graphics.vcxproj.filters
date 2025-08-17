@@ -33,41 +33,14 @@
     <Filter Include="Header\Common">
       <UniqueIdentifier>{cff73b34-9610-4cba-afb6-230229fe093a}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Source\Direct2D">
-      <UniqueIdentifier>{67405b34-9d41-45a3-aa01-fcc3af9d3d9f}</UniqueIdentifier>
+    <Filter Include="Header\Include\Graphics">
+      <UniqueIdentifier>{61879c45-06d1-48c0-92d0-55632d89e5d7}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Source\Direct3D12">
-      <UniqueIdentifier>{25fcec6e-4ad8-48e8-bf2a-82c59c45594f}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Source\Direct3D12\Shader">
-      <UniqueIdentifier>{eb9a55cc-f6ae-4523-abaf-d51cb9ee5989}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Header\Direct2D">
-      <UniqueIdentifier>{84624f8d-0e92-41bc-8385-076ab1f03d64}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Header\Direct3D12">
-      <UniqueIdentifier>{3cdc4177-3027-48b3-8459-9004992d8cad}</UniqueIdentifier>
+    <Filter Include="Source\Shader">
+      <UniqueIdentifier>{5de68f36-b3f1-4931-afb5-5c58bd111570}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="DllMain.cpp">
-      <Filter>Source</Filter>
-    </ClCompile>
-    <ClCompile Include="Stdafx.cpp">
-      <Filter>Source</Filter>
-    </ClCompile>
-    <ClCompile Include="Graphics.cpp">
-      <Filter>Source</Filter>
-    </ClCompile>
-    <ClCompile Include="Global.cpp">
-      <Filter>Source</Filter>
-    </ClCompile>
-    <ClCompile Include="Graphics3D.cpp">
-      <Filter>Source\Direct3D12</Filter>
-    </ClCompile>
-    <ClCompile Include="DescriptorManager.cpp">
-      <Filter>Source\Direct3D12</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\External\DirectX\DDSTextureLoader12.cpp">
       <Filter>External\DirectX</Filter>
     </ClCompile>
@@ -98,62 +71,59 @@
     <ClCompile Include="..\..\..\External\Imgui\imgui_widgets.cpp">
       <Filter>External\ImGui</Filter>
     </ClCompile>
-    <ClCompile Include="Camera.cpp">
-      <Filter>Source\Direct3D12</Filter>
-    </ClCompile>
-    <ClCompile Include="GraphicsImGui.cpp">
-      <Filter>Source\Direct3D12</Filter>
-    </ClCompile>
-    <ClCompile Include="Graphics3DUtil.cpp">
-      <Filter>Source\Direct3D12</Filter>
-    </ClCompile>
-    <ClCompile Include="ConstantBuffer.cpp">
-      <Filter>Source\Direct3D12</Filter>
-    </ClCompile>
-    <ClCompile Include="Graphics2D.cpp">
-      <Filter>Source\Direct2D</Filter>
-    </ClCompile>
-    <ClCompile Include="PipelineState.cpp">
-      <Filter>Source\Direct3D12</Filter>
-    </ClCompile>
-    <ClCompile Include="RenderTarget.cpp">
-      <Filter>Source\Direct3D12</Filter>
-    </ClCompile>
-    <ClCompile Include="SwapChain.cpp">
-      <Filter>Source\Direct3D12</Filter>
-    </ClCompile>
-    <ClCompile Include="Descriptor.cpp">
-      <Filter>Source\Direct3D12</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\Common\Type.cpp">
       <Filter>Source\Common</Filter>
     </ClCompile>
     <ClCompile Include="..\..\Common\Util.cpp">
       <Filter>Source\Common</Filter>
     </ClCompile>
+    <ClCompile Include="Src\Camera.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\ConstantBuffer.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Descriptor.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\DescriptorManager.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\DllMain.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Global.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Graphics.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Graphics2D.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Graphics3D.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Graphics3DUtil.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\GraphicsImGui.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\PipelineState.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\RenderTarget.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Stdafx.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\SwapChain.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Stdafx.h">
-      <Filter>Header</Filter>
-    </ClInclude>
-    <ClInclude Include="Include\Lib.h">
-      <Filter>Header\Include</Filter>
-    </ClInclude>
-    <ClInclude Include="Graphics.h">
-      <Filter>Header</Filter>
-    </ClInclude>
-    <ClInclude Include="Global.h">
-      <Filter>Header</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Resource\Include\Lib.h">
-      <Filter>Library\Resource</Filter>
-    </ClInclude>
-    <ClInclude Include="Graphics3D.h">
-      <Filter>Header\Direct3D12</Filter>
-    </ClInclude>
-    <ClInclude Include="DescriptorManager.h">
-      <Filter>Header\Direct3D12</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\External\DirectX\d3dx12.h">
       <Filter>External\DirectX</Filter>
     </ClInclude>
@@ -190,33 +160,6 @@
     <ClInclude Include="..\..\..\External\Imgui\imstb_truetype.h">
       <Filter>External\ImGui</Filter>
     </ClInclude>
-    <ClInclude Include="Camera.h">
-      <Filter>Header\Direct3D12</Filter>
-    </ClInclude>
-    <ClInclude Include="GraphicsImGui.h">
-      <Filter>Header\Direct3D12</Filter>
-    </ClInclude>
-    <ClInclude Include="Graphics3DUtil.h">
-      <Filter>Header\Direct3D12</Filter>
-    </ClInclude>
-    <ClInclude Include="ConstantBuffer.h">
-      <Filter>Header\Direct3D12</Filter>
-    </ClInclude>
-    <ClInclude Include="Graphics2D.h">
-      <Filter>Header\Direct2D</Filter>
-    </ClInclude>
-    <ClInclude Include="PipelineState.h">
-      <Filter>Header\Direct3D12</Filter>
-    </ClInclude>
-    <ClInclude Include="RenderTarget.h">
-      <Filter>Header\Direct3D12</Filter>
-    </ClInclude>
-    <ClInclude Include="SwapChain.h">
-      <Filter>Header\Direct3D12</Filter>
-    </ClInclude>
-    <ClInclude Include="Descriptor.h">
-      <Filter>Header\Direct3D12</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\Common\Stdafx.h">
       <Filter>Header\Common</Filter>
     </ClInclude>
@@ -226,18 +169,66 @@
     <ClInclude Include="..\..\Common\Util.h">
       <Filter>Header\Common</Filter>
     </ClInclude>
+    <ClInclude Include="Include\Graphics\Camera.h">
+      <Filter>Header\Include\Graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="Include\Graphics\Graphics.h">
+      <Filter>Header\Include\Graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="Include\Graphics\Graphics3D.h">
+      <Filter>Header\Include\Graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="Include\Graphics\GraphicsImGui.h">
+      <Filter>Header\Include\Graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="Include\Graphics\Graphics2D.h">
+      <Filter>Header\Include\Graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Resource\Include\Resource\Resource.h">
+      <Filter>Library\Resource</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\ConstantBuffer.h">
+      <Filter>Header</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Descriptor.h">
+      <Filter>Header</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\DescriptorManager.h">
+      <Filter>Header</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Global.h">
+      <Filter>Header</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Graphics.h">
+      <Filter>Header</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Graphics3DUtil.h">
+      <Filter>Header</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\PipelineState.h">
+      <Filter>Header</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\RenderTarget.h">
+      <Filter>Header</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\SwapChain.h">
+      <Filter>Header</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Stdafx.h">
+      <Filter>Header</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <FxCompile Include="Shader\model.vs">
-      <Filter>Source\Direct3D12\Shader</Filter>
-    </FxCompile>
-    <FxCompile Include="Shader\model.ps">
-      <Filter>Source\Direct3D12\Shader</Filter>
-    </FxCompile>
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Shader\Constants.hlsli">
-      <Filter>Source\Direct3D12\Shader</Filter>
+    <None Include="Src\Shader\Constants.hlsli">
+      <Filter>Source\Shader</Filter>
     </None>
+  </ItemGroup>
+  <ItemGroup>
+    <FxCompile Include="Src\Shader\Model.ps">
+      <Filter>Source\Shader</Filter>
+    </FxCompile>
+    <FxCompile Include="Src\Shader\Model.vs">
+      <Filter>Source\Shader</Filter>
+    </FxCompile>
   </ItemGroup>
 </Project>

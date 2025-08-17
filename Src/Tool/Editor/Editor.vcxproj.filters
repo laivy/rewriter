@@ -38,34 +38,7 @@
     <ClInclude Include="App.h">
       <Filter>Header</Filter>
     </ClInclude>
-    <ClInclude Include="Clipboard.h">
-      <Filter>Header</Filter>
-    </ClInclude>
-    <ClInclude Include="Delegates.h">
-      <Filter>Header</Filter>
-    </ClInclude>
-    <ClInclude Include="Desktop.h">
-      <Filter>Header</Filter>
-    </ClInclude>
-    <ClInclude Include="Explorer.h">
-      <Filter>Header</Filter>
-    </ClInclude>
-    <ClInclude Include="FbxHandler.h">
-      <Filter>Header</Filter>
-    </ClInclude>
-    <ClInclude Include="Hierarchy.h">
-      <Filter>Header</Filter>
-    </ClInclude>
-    <ClInclude Include="Inspector.h">
-      <Filter>Header</Filter>
-    </ClInclude>
     <ClInclude Include="Stdafx.h">
-      <Filter>Header</Filter>
-    </ClInclude>
-    <ClInclude Include="UIEditor.h">
-      <Filter>Header</Filter>
-    </ClInclude>
-    <ClInclude Include="Viewport.h">
       <Filter>Header</Filter>
     </ClInclude>
     <ClInclude Include="..\..\Common\Stdafx.h">
@@ -101,51 +74,27 @@
     <ClInclude Include="..\..\..\External\FBXSDK\include\fbxsdk.h">
       <Filter>External\FBXSDK</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\Library\Graphics\Include\Lib.h">
-      <Filter>Library\Graphics</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Library\Resource\Include\Lib.h">
-      <Filter>Library\Resource</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\Common\Timer.h">
       <Filter>Header\Common</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\Library\Resource\Include\Resource\Resource.h">
+      <Filter>Library\Resource</Filter>
+    </ClInclude>
+    <ClInclude Include="Delegates.h">
+      <Filter>Header</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Library\Graphics\Include\Graphics\Graphics.h">
+      <Filter>Library\Graphics</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="Viewport.cpp">
-      <Filter>Source</Filter>
-    </ClCompile>
     <ClCompile Include="App.cpp">
-      <Filter>Source</Filter>
-    </ClCompile>
-    <ClCompile Include="Clipboard.cpp">
-      <Filter>Source</Filter>
-    </ClCompile>
-    <ClCompile Include="Delegates.cpp">
-      <Filter>Source</Filter>
-    </ClCompile>
-    <ClCompile Include="Desktop.cpp">
-      <Filter>Source</Filter>
-    </ClCompile>
-    <ClCompile Include="Explorer.cpp">
-      <Filter>Source</Filter>
-    </ClCompile>
-    <ClCompile Include="FbxHandler.cpp">
-      <Filter>Source</Filter>
-    </ClCompile>
-    <ClCompile Include="Hierarchy.cpp">
-      <Filter>Source</Filter>
-    </ClCompile>
-    <ClCompile Include="Inspector.cpp">
       <Filter>Source</Filter>
     </ClCompile>
     <ClCompile Include="Main.cpp">
       <Filter>Source</Filter>
     </ClCompile>
     <ClCompile Include="Stdafx.cpp">
-      <Filter>Source</Filter>
-    </ClCompile>
-    <ClCompile Include="UIEditor.cpp">
       <Filter>Source</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\External\Imgui\imgui.cpp">
@@ -174,6 +123,9 @@
     </ClCompile>
     <ClCompile Include="..\..\Common\Timer.cpp">
       <Filter>Source\Common</Filter>
+    </ClCompile>
+    <ClCompile Include="Delegates.cpp">
+      <Filter>Source</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

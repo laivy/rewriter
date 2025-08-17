@@ -1,678 +1,429 @@
 #include "Stdafx.h"
-#include <variant>
-#include "Global.h"
-#include "Model.h"
+#include "Delegates.h"
 #include "Property.h"
-#include "Sprite.h"
-#include "External/DirectX/WICTextureLoader12.h"
-
-namespace Resource
-{
-	struct Property
-	{
-		std::wstring name;
-		std::variant<
-			std::int32_t,
-			Int2,
-			float,
-			std::wstring,
-			std::shared_ptr<Sprite>,
-			std::shared_ptr<Model>
-		> data;
-		std::vector<std::shared_ptr<Property>> children;
-
-#ifdef _TOOL
-		Type type{ Type::Folder };
-		std::weak_ptr<Property> parent;
-#endif
-	};
-
-	Iterator::Iterator() :
-		m_prop{ nullptr }
-	{
-	}
-
-	Iterator::Iterator(std::wstring_view path) :
-		Iterator{ Get(path) }
-	{
-	}
-
-	Iterator::Iterator(const std::shared_ptr<Property>& prop) :
-		m_prop{ prop.get() }
-	{
-	}
-
-	Iterator::reference Iterator::operator*() const
-	{
-		auto& prop{ *m_iter };
-		return std::make_pair(prop->name, std::ref(prop));
-	}
-
-	Iterator& Iterator::operator++()
-	{
-		++m_iter;
-		return *this;
-	}
-
-	Iterator Iterator::operator++(int)
-	{
-		Iterator temp{ *this };
-		++*this;
-		return temp;
-	}
-
-	Iterator& Iterator::operator+=(const difference_type offset)
-	{
-		m_iter += offset;
-		return *this;
-	}
-
-	Iterator Iterator::operator+(const difference_type offset)
-	{
-		Iterator temp{ *this };
-		temp += offset;
-		return temp;
-	}
-
-	Iterator& Iterator::operator--()
-	{
-		--m_iter;
-		return *this;
-	}
-
-	Iterator Iterator::operator--(int)
-	{
-		Iterator temp{ *this };
-		--*this;
-		return temp;
-	}
-
-	Iterator& Iterator::operator-=(const difference_type offset)
-	{
-		m_iter -= offset;
-		return *this;
-	}
-
-	Iterator Iterator::operator-(const difference_type offset)
-	{
-		Iterator temp{ *this };
-		temp -= offset;
-		return temp;
-	}
-
-	Iterator::reference Iterator::operator[](const difference_type offset)
-	{
-		return *(*this + offset);
-	}
-
-	bool Iterator::operator==(const Iterator& rhs) const
-	{
-		return m_iter == rhs.m_iter;
-	}
-
-	bool Iterator::operator!=(const Iterator& rhs) const
-	{
-		return m_iter != rhs.m_iter;
-	}
-
-	Iterator Iterator::begin() const
-	{
-		if (!m_prop)
-			return Iterator{};
-
-		Iterator iter{};
-		iter.m_prop = m_prop;
-		iter.m_iter = m_prop->children.begin();
-		return iter;
-	}
-
-	Iterator Iterator::end() const
-	{
-		if (!m_prop)
-			return Iterator{};
-
-		Iterator iter{};
-		iter.m_prop = m_prop;
-		iter.m_iter = m_prop->children.end();
-		return iter;
-	}
-
-	RecursiveIterator::RecursiveIterator() :
-		m_prop{ nullptr }
-	{
-	}
-
-	RecursiveIterator::RecursiveIterator(std::wstring_view path) :
-		RecursiveIterator{ Get(path) }
-	{
-	}
-
-	RecursiveIterator::RecursiveIterator(const std::shared_ptr<Property>& prop) :
-		m_prop{ prop.get() }
-	{
-	}
-
-	RecursiveIterator& RecursiveIterator::operator++()
-	{
-		auto& p{ *m_iter };
-		if (p->children.empty())
-		{
-			++m_iter;
-			if (!m_ends.empty() && m_iter == m_ends.back())
-			{
-				if (!m_parents.empty())
-				{
-					m_iter = m_parents.back() + 1;
-					m_parents.pop_back();
-				}
-				m_ends.pop_back();
-			}
-		}
-		else
-		{
-			m_parents.push_back(m_iter);
-			m_iter = p->children.begin();
-			m_ends.push_back(p->children.end());
-		}
-		return *this;
-	}
-
-	RecursiveIterator RecursiveIterator::operator++(int)
-	{
-		RecursiveIterator temp{ *this };
-		++*this;
-		return temp;
-	}
-
-	bool RecursiveIterator::operator==(const RecursiveIterator& rhs) const
-	{
-		if (m_parents != rhs.m_parents)
-			return false;
-		if (m_iter != rhs.m_iter)
-			return false;
-		return true;
-	}
-
-	bool RecursiveIterator::operator!=(const RecursiveIterator& rhs) const
-	{
-		if (m_parents != rhs.m_parents)
-			return true;
-		if (m_iter != rhs.m_iter)
-			return true;
-		return false;
-	}
-
-	RecursiveIterator::reference RecursiveIterator::operator*() const
-	{
-		std::wstring fullName;
-		for (const auto& name : m_parents
-							  | std::ranges::views::transform([](const auto& parent) { return (*parent)->name; })
-							  | std::ranges::views::join_with('/'))
-		{
-			fullName += name;
-		}
-
-		auto& p{ *m_iter };
-		if (fullName.empty())
-			fullName = p->name;
-		else
-			fullName += L"/" + p->name;
-		return std::make_pair(fullName, std::ref(p));
-	}
-
-	RecursiveIterator RecursiveIterator::begin() const
-	{
-		if (!m_prop)
-			return RecursiveIterator{};
-
-		RecursiveIterator iter{};
-		iter.m_prop = m_prop;
-		iter.m_iter = m_prop->children.begin();
-		return iter;
-	}
-
-	RecursiveIterator RecursiveIterator::end() const
-	{
-		if (!m_prop)
-			return RecursiveIterator{};
-
-		RecursiveIterator iter{};
-		iter.m_prop = m_prop;
-		iter.m_iter = m_prop->children.end();
-		return iter;
-	}
-}
 
 namespace
 {
-	std::shared_ptr<Resource::Property> Load(const std::filesystem::path& filePath, std::wstring_view subPath)
+	using Value = std::variant<
+		std::monostate,
+		std::int32_t,
+		float,
+		std::wstring,
+		Resource::Sprite
+	>;
+
+	struct Entry
 	{
-		std::ifstream file;
-		if (filePath.is_absolute())
-			file.open(filePath, std::ios::binary);
-		else
-			file.open(g_mountPath / filePath, std::ios::binary);
+		Resource::Property::ID id;
+		std::wstring name;
+		Value value;
+	};
 
-		if (!file)
-			return nullptr;
+	constexpr std::array Signature{ 'l', 'v', 'y' };
+	constexpr std::uint32_t Version{ 1U };
 
-		auto recursive = [&file](this const auto& self) -> std::shared_ptr<Resource::Property>
+	std::function<Resource::Sprite(std::span<std::byte>)> g_loadSprite;
+
+	std::vector<Entry> g_entries;
+	std::unordered_map<Resource::Property::ID, std::wstring> g_hashes;
+	std::unordered_map<Resource::Property::ID, std::vector<Resource::Property::ID>> g_children;
+
+	auto _ = []()
+	{
+		OnInitialize.Register([](const Resource::Initializer& initializer)
 		{
-			auto prop{ std::make_shared<Resource::Property>() };
+			g_loadSprite = initializer.loadSprite;
+		});
 
-			// 이름
-			std::uint16_t length{};
-			file.read(reinterpret_cast<char*>(&length), sizeof(length));
-			prop->name.resize(length);
-			file.read(reinterpret_cast<char*>(prop->name.data()), length * sizeof(std::wstring::value_type));
-
-			// 타입
-			file.read(reinterpret_cast<char*>(&prop->type), sizeof(prop->type));
-
-			// 데이터
-			switch (prop->type)
-			{
-			case Resource::Type::Folder:
-			{
-				break;
-			}
-			case Resource::Type::Int:
-			{
-				std::int32_t data{};
-				file.read(reinterpret_cast<char*>(&data), sizeof(data));
-				prop->data.emplace<decltype(data)>(data);
-				break;
-			}
-			case Resource::Type::Int2:
-			{
-				Int2 data{};
-				file.read(reinterpret_cast<char*>(&data), sizeof(data));
-				prop->data.emplace<decltype(data)>(data);
-				break;
-			}
-			case Resource::Type::Float:
-			{
-				float data{};
-				file.read(reinterpret_cast<char*>(&data), sizeof(data));
-				prop->data.emplace<decltype(data)>(data);
-				break;
-			}
-			case Resource::Type::String:
-			{
-				std::uint16_t length{};
-				file.read(reinterpret_cast<char*>(&length), sizeof(length));
-				std::wstring data(length, L'\0');
-				file.read(reinterpret_cast<char*>(data.data()), length * sizeof(std::wstring::value_type));
-				prop->data.emplace<decltype(data)>(data);
-				break;
-			}
-			case Resource::Type::Sprite:
-			{
-				std::uint32_t length{};
-				file.read(reinterpret_cast<char*>(&length), sizeof(length));
-#if defined _CLIENT || defined _TOOL
-				std::unique_ptr<std::byte[]> binary{ new std::byte[length]{} };
-				file.read(reinterpret_cast<char*>(binary.get()), length);
-
-				auto data{ g_loadSprite(std::span{ binary.get(), length}) };
-				prop->data.emplace<decltype(data)>(data);
-#else
-				file.ignore(length);
-#endif
-				break;
-			}
-			case Resource::Type::Model:
-			{
-				std::uint32_t length{};
-				file.read(reinterpret_cast<char*>(&length), sizeof(length));
-#if defined _CLIENT || defined _TOOL
-				std::unique_ptr<std::byte[]> binary{ new std::byte[length]{} };
-				file.read(reinterpret_cast<char*>(binary.get()), length);
-
-				auto data{ g_loadModel(std::span{ binary.get(), length}) };
-				prop->data.emplace<decltype(data)>(data);
-#else
-				file.ignore(length);
-#endif
-				break;
-			}
-			default:
-				break;
-			}
-
-			// 자식 프로퍼티
-			std::uint16_t childrenCount{};
-			file.read(reinterpret_cast<char*>(&childrenCount), sizeof(childrenCount));
-			for (std::uint16_t i{ 0 }; i < childrenCount; ++i)
-			{
-				auto child{ self() };
-				prop->children.push_back(std::move(child));
-			}
-			return prop;
-		};
-
-		return recursive();
-	}
-}
-
-namespace Resource
-{
-	std::shared_ptr<Resource::Property> Get(std::wstring_view path)
-	{
-		std::filesystem::path filePath{ path };
-		std::wstring_view subPath;
-
-		// 파일 이름, 하위 경로 분리
-		constexpr std::wstring_view extension{ L".dat" };
-		if (size_t pos{ path.rfind(extension) }; pos != path.npos)
+		OnUninitialize.Register([]()
 		{
-			filePath = path.substr(0, pos + extension.size());
-			if (path.size() > pos + extension.size() + 1)
-				subPath = path.substr(pos + extension.size() + 1);
-		}
+			g_entries.clear();
+			g_hashes.clear();
+			g_children.clear();
+		});
+		return true;
+	}();
 
-		// 캐시에 있는지 확인해서 반환
-		if (g_resources.contains(filePath))
-			return Get(g_resources[filePath], subPath);
-
-		// 로드
-		if (auto prop{ Load(filePath, subPath) })
-		{
-			g_resources.emplace(filePath, prop);
-			if (subPath.empty())
-				return prop;
-			return Get(prop, subPath);
-		}
-		return nullptr;
+	Resource::Property::ID Hash(std::wstring_view name)
+	{
+		return std::hash<std::wstring_view>{}(name);
 	}
 
-	std::shared_ptr<Resource::Property> Get(const std::shared_ptr<Resource::Property>& prop, std::wstring_view path)
+	void Register(const Entry& entry, std::wstring_view fullPath, const std::optional<Resource::Property::ID> parentID = std::nullopt)
 	{
-		if (path.empty())
-			return prop;
-
-		size_t pos{ path.find(L'/') };
-		std::wstring_view childName{ path.substr(0, pos) };
-		auto it{ std::ranges::find_if(prop->children, [childName](const auto& child) { return child->name == childName; }) };
-		if (it == prop->children.end())
-			return nullptr;
-
-		if (pos == path.npos)
-			return *it;
-
-		path.remove_prefix(pos + 1);
-		return Get(*it, path);
+		g_entries.push_back(entry);
+		g_hashes.emplace(entry.id, fullPath);
+		if (parentID && *parentID != Resource::Property::InvalidID)
+			g_children[*parentID].push_back(entry.id);
 	}
 
-	std::wstring GetName(const std::shared_ptr<Property>& prop, std::wstring_view path)
+	std::optional<std::reference_wrapper<Entry>> GetEntry(const Resource::Property::ID id)
 	{
-		auto p{ Get(prop, path) };
-		return p->name;
+		auto entry{ std::ranges::lower_bound(g_entries, id, std::less{}, [](const auto& data) { return data.id; }) };
+		if (entry == g_entries.end())
+			return std::nullopt;
+		if (entry->id != id)
+			return std::nullopt;
+		return std::ref(*entry);
 	}
 
-	std::int32_t GetInt(std::wstring_view path)
+	bool Save(const Resource::Property::ID id, const std::filesystem::path& path)
 	{
-		auto p{ Get(path) };
-		return GetInt(p);
-	}
+		if (!g_children.contains(id))
+			return false;
 
-	std::int32_t GetInt(const std::shared_ptr<Resource::Property>& prop, std::wstring_view path)
-	{
-		auto p{ Get(prop, path) };
-		return std::get<std::int32_t>(p->data);
-	}
+		auto entry{ GetEntry(id) };
+		if (!entry)
+			return false;
 
-	Int2 GetInt2(std::wstring_view path)
-	{
-		auto p{ Get(path) };
-		return GetInt2(p);
-	}
-
-	Int2 GetInt2(const std::shared_ptr<Resource::Property>& prop, std::wstring_view path)
-	{
-		auto p{ Get(prop, path) };
-		return std::get<Int2>(p->data);
-	}
-
-	float GetFloat(std::wstring_view path)
-	{
-		auto p{ Get(path) };
-		return GetFloat(p);
-	}
-
-	float GetFloat(const std::shared_ptr<Resource::Property>& prop, std::wstring_view path)
-	{
-		auto p{ Get(prop, path) };
-		return std::get<float>(p->data);
-	}
-
-	std::wstring GetString(std::wstring_view path)
-	{
-		auto p{ Get(path) };
-		return GetString(p);
-	}
-
-	std::wstring GetString(const std::shared_ptr<Resource::Property>& prop, std::wstring_view path)
-	{
-		auto p{ Get(prop, path) };
-		return std::get<std::wstring>(p->data);
-	}
-
-	std::shared_ptr<Sprite> GetSprite(std::wstring_view path)
-	{
-		auto p{ Get(path) };
-		return GetSprite(p);
-	}
-
-	std::shared_ptr<Sprite> GetSprite(const std::shared_ptr<Property>& prop, std::wstring_view path)
-	{
-		auto p{ Get(prop, path) };
-		return std::get<std::shared_ptr<Sprite>>(p->data);
-	}
-
-	std::shared_ptr<Model> GetModel(std::wstring_view path)
-	{
-		auto p{ Get(path) };
-		return GetModel(p);
-	}
-
-	std::shared_ptr<Model> GetModel(const std::shared_ptr<Property>& prop, std::wstring_view path)
-	{
-		auto p{ Get(prop, path) };
-		return std::get<std::shared_ptr<Model>>(p->data);
-	}
-
-	void SetName(const std::shared_ptr<Property>& prop, std::wstring_view name)
-	{
-		prop->name = name;
-	}
-
-	void Set(const std::shared_ptr<Property>& prop, std::int32_t value)
-	{
-		prop->data = value;
-	}
-
-	void Set(const std::shared_ptr<Property>& prop, Int2 value)
-	{
-		prop->data = value;
-	}
-
-	void Set(const std::shared_ptr<Property>& prop, float value)
-	{
-		prop->data = value;
-	}
-
-	void Set(const std::shared_ptr<Property>& prop, std::wstring_view value)
-	{
-		prop->data = std::wstring{ value };
-	}
-
-	void Set(const std::shared_ptr<Property>& prop, const std::shared_ptr<Sprite>& value)
-	{
-		prop->data = value;
-	}
-
-	void Set(const std::shared_ptr<Property>& prop, const std::shared_ptr<Model>& value)
-	{
-		prop->data = value;
-	}
-
-	void Unload(std::wstring_view path)
-	{
-	}
-
-#ifdef _TOOL
-	std::shared_ptr<Property> New()
-	{
-		return std::make_shared<Property>();
-	}
-
-	std::shared_ptr<Property> Clone(const std::shared_ptr<Property>& prop)
-	{
-		auto clone{ std::make_shared<Property>() };
-		clone->name = prop->name;
-		clone->type = prop->type;
-		clone->data = prop->data;
-		for (const auto& child : prop->children)
-		{
-			auto childClone{ Clone(child) };
-			clone->children.push_back(childClone);
-		}
-		return clone;
-	}
-
-	Type GetType(const std::shared_ptr<Property>& prop)
-	{
-		if (std::holds_alternative<std::int32_t>(prop->data))
-			return Type::Int;
-		if (std::holds_alternative<Int2>(prop->data))
-			return Type::Int2;
-		if (std::holds_alternative<float>(prop->data))
-			return Type::Float;
-		if (std::holds_alternative<std::wstring>(prop->data))
-			return Type::String;
-		if (std::holds_alternative<std::shared_ptr<Sprite>>(prop->data))
-			return Type::Sprite;
-		if (std::holds_alternative<std::shared_ptr<Model>>(prop->data))
-			return Type::Model;
-		return Type::Folder;
-	}
-
-	void SetType(const std::shared_ptr<Property>& prop, Type type)
-	{
-		switch (type)
-		{
-		case Resource::Type::Folder:
-			break;
-		case Resource::Type::Int:
-			break;
-		case Resource::Type::Int2:
-			break;
-		case Resource::Type::Float:
-			break;
-		case Resource::Type::String:
-			break;
-		case Resource::Type::Sprite:
-			prop->data.emplace<std::shared_ptr<Sprite>>(nullptr);
-			break;
-		case Resource::Type::Model:
-			break;
-		default:
-			break;
-		}
-	}
-
-	void AddChild(const std::shared_ptr<Property>& prop, const std::shared_ptr<Property>& child)
-	{
-		child->parent = prop;
-		prop->children.push_back(child);
-	}
-
-	std::shared_ptr<Property> GetParent(const std::shared_ptr<Property>& prop)
-	{
-		return prop->parent.lock();
-	}
-
-	bool Save(const std::filesystem::path& filePath, const std::shared_ptr<Resource::Property>& prop)
-	{
-		std::ofstream file{ filePath, std::ios::binary };
+		std::ofstream file{ path, std::ios::binary };
 		if (!file)
 			return false;
 
-		auto recursive = [&file](this const auto& self, const std::shared_ptr<Resource::Property>& prop) -> bool
+		// 시그니처
+		file.write(Signature.data(), Signature.size());
+
+		// 버전
+		file.write(reinterpret_cast<const char*>(&Version), sizeof(Version));
+
+		auto recursive = [&file](this auto self, const Entry& entry)
 		{
 			// 이름
-			std::uint16_t length{ static_cast<std::uint16_t>(prop->name.size()) };
-			file.write(reinterpret_cast<const char*>(&length), sizeof(length));
-			file.write(reinterpret_cast<const char*>(prop->name.data()), prop->name.size() * sizeof(std::wstring::value_type));
+			const auto nameSize{ static_cast<std::uint16_t>(entry.name.size()) };
+			file.write(reinterpret_cast<const char*>(&nameSize), sizeof(nameSize));
+			file.write(reinterpret_cast<const char*>(entry.name.data()), nameSize * sizeof(std::wstring::value_type));
 
-			// 타입
-			file.write(reinterpret_cast<const char*>(&prop->type), sizeof(prop->type));
+			// 값 타입
+			const auto valueType{ static_cast<std::uint8_t>(entry.value.index()) };
+			file.write(reinterpret_cast<const char*>(&valueType), sizeof(valueType));
 
-			// 데이터
-			switch (prop->type)
+			// 값
+			std::visit([&file](auto&& arg)
 			{
-			case Type::Folder:
+				using T = std::decay_t< decltype(arg) >;
+				if constexpr (std::is_same_v<T, std::int32_t>)
+				{
+					file.write(reinterpret_cast<const char*>(&arg), sizeof(arg));
+				}
+				else if constexpr (std::is_same_v<T, float>)
+				{
+					file.write(reinterpret_cast<const char*>(&arg), sizeof(arg));
+				}
+				else if constexpr (std::is_same_v<T, std::wstring>)
+				{
+					auto dataLength{ static_cast<std::uint16_t>(arg.size()) };
+					file.write(reinterpret_cast<const char*>(&dataLength), sizeof(dataLength));
+					file.write(reinterpret_cast<const char*>(arg.data()), dataLength * sizeof(std::wstring::value_type));
+				}
+				else if constexpr (std::is_same_v<T, Resource::Sprite>)
+				{
+					auto dataLength{ static_cast<std::uint32_t>(arg.binary.size()) };
+					file.write(reinterpret_cast<const char*>(&dataLength), sizeof(dataLength));
+					file.write(reinterpret_cast<const char*>(arg.binary.data()), dataLength * sizeof(std::byte));
+				}
+			}, entry.value);
+
+			// 자식
+			if (!g_children.contains(entry.id))
+			{
+				constexpr std::uint32_t childCount{ 0 };
+				file.write(reinterpret_cast<const char*>(&childCount), sizeof(childCount));
+				return;
+			}
+
+			const auto& children{ g_children[entry.id] };
+			const auto childCount{ static_cast<std::uint32_t>(children.size()) };
+			file.write(reinterpret_cast<const char*>(&childCount), sizeof(childCount));
+			for (const auto& childID : children)
+			{
+				auto child{ GetEntry(childID) };
+				if (!child)
+					continue;
+				self(*child);
+			}
+		};
+
+		// 저장
+		const auto& children{ g_children[id] };
+		const auto childCount{ static_cast<std::uint32_t>(children.size()) };
+		file.write(reinterpret_cast<const char*>(&childCount), sizeof(childCount));
+		for (const auto& childID : children)
+		{
+			auto child{ GetEntry(childID) };
+			if (!child)
+				continue;
+			recursive(*child);
+		}
+		return true;
+	}
+
+	bool Load(std::wstring_view fullPath)
+	{
+		// 파일 경로와 세부 경로 분리
+		constexpr std::wstring_view Extension{ Stringtable::DATA_FILE_EXT };
+		std::filesystem::path filePath;
+		std::wstring_view subPath;
+		if (fullPath.ends_with(Extension))
+		{
+			filePath = fullPath;
+		}
+		else
+		{
+			std::size_t pos{ fullPath.rfind(Extension) };
+			filePath = fullPath.substr(0, pos + Extension.size());
+			subPath = fullPath.substr(pos + Extension.size() + 1);
+		}
+
+		if (filePath.extension() != Extension)
+			return false;
+
+		std::ifstream file{ filePath, std::ios::binary };
+		if (!file)
+			return false;
+
+		// 시그니처 확인
+		std::array<char, Signature.size()> signature{};
+		file.read(signature.data(), signature.size());
+		if (!std::ranges::equal(signature, Signature))
+			return false;
+
+		// 버전 확인
+		std::uint32_t version{ 0 };
+		file.read(reinterpret_cast<char*>(&version), sizeof(version));
+
+		auto recursive = [&file, version](this auto self, std::wstring_view parentPath = L"") -> Resource::Property::ID
+		{
+			// 이름
+			std::uint16_t nameSize{ 0 };
+			file.read(reinterpret_cast<char*>(&nameSize), sizeof(nameSize));
+			std::wstring name(nameSize, L'\0');
+			file.read(reinterpret_cast<char*>(name.data()), nameSize * sizeof(std::wstring::value_type));
+
+			// 값 타입
+			std::uint8_t valueType{ 0 };
+			file.read(reinterpret_cast<char*>(&valueType), sizeof(valueType));
+
+			// 값
+			Value value;
+			switch (valueType)
+			{
+			case 0: // 폴더
 			{
 				break;
 			}
-			case Type::Int:
+			case 1: // 정수
 			{
-				auto data{ std::get<std::int32_t>(prop->data) };
-				file.write(reinterpret_cast<const char*>(&data), sizeof(data));
+				std::int32_t data{ 0 };
+				file.read(reinterpret_cast<char*>(&data), sizeof(data));
+				value = data;
 				break;
 			}
-			case Type::Int2:
+			case 2: // 실수
 			{
-				auto data{ std::get<Int2>(prop->data) };
-				file.write(reinterpret_cast<const char*>(&data), sizeof(data));
+				float data{ 0.0f };
+				file.read(reinterpret_cast<char*>(&data), sizeof(data));
+				value = data;
 				break;
 			}
-			case Type::Float:
+			case 3: // 문자열
 			{
-				auto data{ std::get<float>(prop->data) };
-				file.write(reinterpret_cast<const char*>(&data), sizeof(data));
+				std::uint16_t dataLength{ 0 };
+				file.read(reinterpret_cast<char*>(&dataLength), sizeof(dataLength));
+				std::wstring data(dataLength, L'\0');
+				file.read(reinterpret_cast<char*>(data.data()), dataLength * sizeof(std::wstring::value_type));
+				value = std::move(data);
 				break;
 			}
-			case Type::String:
+			case 4: // .png
 			{
-				const auto& data{ std::get<std::wstring>(prop->data) };
-				std::uint16_t length{ static_cast<std::uint16_t>(data.size()) };
-				file.write(reinterpret_cast<const char*>(&length), sizeof(length));
-				file.write(reinterpret_cast<const char*>(data.data()), data.size() * sizeof(std::wstring::value_type));
-				break;
-			}
-			case Type::Sprite:
-			{
-				// TODO
-				std::uint32_t length{};
-				file.write(reinterpret_cast<const char*>(&length), sizeof(length));
-				break;
-			}
-			case Type::Model:
-			{
-				// TODO
-				std::uint32_t length{};
-				file.write(reinterpret_cast<const char*>(&length), sizeof(length));
+				std::uint32_t dataLength{ 0 };
+				file.read(reinterpret_cast<char*>(&dataLength), sizeof(dataLength));
+				std::vector<std::byte> data(dataLength);
+				file.read(reinterpret_cast<char*>(data.data()), dataLength * sizeof(std::byte));
+				value = g_loadSprite(data);
 				break;
 			}
 			default:
-				break;
+				assert(false && "Unknown value type");
+				return Resource::Property::InvalidID;
 			}
 
+			// 등록
+			const auto fullPath{ std::format(L"{}/{}", parentPath, name) };
+			const auto id{ Hash(fullPath) };
+			g_entries.emplace_back(id, std::move(name), std::move(value));
+			g_hashes.emplace(id, fullPath);
+
 			// 자식
-			std::uint16_t count{ static_cast<std::uint16_t>(prop->children.size()) };
-			file.write(reinterpret_cast<const char*>(&count), sizeof(count));
-			for (const auto& child : prop->children)
-				self(child);
-			return true;
+			std::uint32_t childCount{ 0 };
+			file.read(reinterpret_cast<char*>(&childCount), sizeof(childCount));
+			for (std::uint32_t i{ 0 }; i < childCount; ++i)
+			{
+				const auto childID{ self(fullPath) };
+				g_children[id].push_back(childID);
+			}
+			return id;
 		};
 
-		std::wstring name{ prop->name };
-		prop->name = L"Root";
-		bool success{ recursive(prop) };
-		prop->name = name;
-		return success;
+		const auto RootID{ Hash(filePath.wstring()) };
+		if (!g_hashes.contains(RootID))
+			g_hashes.emplace(RootID, filePath.wstring());
+
+		std::uint32_t count{ 0 };
+		file.read(reinterpret_cast<char*>(&count), sizeof(count));
+		for (std::uint32_t i{ 0 }; i < count; ++i)
+			recursive(fullPath);
+		return true;
 	}
-#endif
+}
+
+namespace Resource::Property
+{
+	ID New(std::wstring_view name)
+	{
+		if (name.find(L'/') != std::wstring_view::npos)
+		{
+			assert(false && "name should not contain '/'");
+			return InvalidID;
+		}
+
+		const ID id{ Hash(name) };
+		if (g_hashes.contains(id))
+		{
+			assert(false && "already exists");
+			return id;
+		}
+
+		Entry entry{};
+		entry.id = id;
+		entry.name = name;
+		Register(entry, name);
+		return id;
+	}
+
+	ID Property::New(const ID parentID, std::wstring_view name)
+	{
+		if (name.find(L'/') != std::wstring_view::npos)
+		{
+			assert(false && "name should not contain '/'");
+			return InvalidID;
+		}
+
+		auto parent{ GetEntry(parentID) };
+		if (!parent)
+		{
+			assert(false && "parent not found");
+			return InvalidID;
+		}
+
+		if (!g_hashes.contains(parentID))
+		{
+			assert(false && "parent not found");
+			return InvalidID;
+		}
+
+		auto fullPath{ std::format(L"{}/{}", g_hashes[parentID], name) };
+		const ID id{ Hash(fullPath) };
+
+		Entry entry{};
+		entry.id = id;
+		entry.name = name;
+		Register(entry, fullPath, parentID);
+		return id;
+	}
+
+	ID Get(std::wstring_view fullPath)
+	{
+		const ID id{ Hash(fullPath) };
+		if (g_hashes.contains(id))
+			return id;
+		if (!Load(fullPath))
+			return InvalidID;
+		return id;
+	}
+
+	ID Get(const ID id, std::wstring_view fullPath)
+	{
+		if (!g_hashes.contains(id))
+			return InvalidID;
+
+		auto key{ std::format(L"{}/{}", g_hashes[id], fullPath) };
+		const ID targetID{ Hash(key) };
+
+		auto base{ std::lower_bound(g_entries.begin(), g_entries.end(), targetID,
+			[](const Entry& data, ID id)
+			{
+				return data.id < id;
+			}) };
+		if (base == g_entries.end())
+			return InvalidID;
+		if (base->id != targetID)
+			return InvalidID;
+		return targetID;
+	}
+
+	void Set(const ID id, std::int32_t value)
+	{
+		if (auto entry{ GetEntry(id) })
+			entry->get().value = value;
+	}
+
+	void Set(const ID id, float value)
+	{
+		if (auto entry{ GetEntry(id) })
+			entry->get().value = value;
+	}
+
+	void Set(const ID id, const std::wstring& value)
+	{
+		if (auto entry{ GetEntry(id) })
+			entry->get().value = value;
+	}
+
+	void Set(const ID id, const Sprite& value)
+	{
+		if (auto entry{ GetEntry(id) })
+			entry->get().value = value;
+	}
+
+	std::optional<std::int32_t> GetInt(const ID id)
+	{
+		auto entry{ GetEntry(id) };
+		if (!entry)
+			return std::nullopt;
+
+		const auto& value{ entry->get().value };
+		if (!std::holds_alternative<std::int32_t>(value))
+			return std::nullopt;
+		return std::get<std::int32_t>(value);
+	}
+
+	std::optional<float> Property::GetFloat(const ID id)
+	{
+		auto entry{ GetEntry(id) };
+		if (!entry)
+			return std::nullopt;
+
+		const auto& value{ entry->get().value };
+		if (!std::holds_alternative<float>(value))
+			return std::nullopt;
+		return std::get<float>(value);
+	}
+
+	std::optional<std::wstring> Property::GetString(const ID id)
+	{
+		auto entry{ GetEntry(id) };
+		if (!entry)
+			return std::nullopt;
+
+		const auto& value{ entry->get().value };
+		if (!std::holds_alternative<std::wstring>(value))
+			return std::nullopt;
+		return std::get<std::wstring>(value);
+	}
+
+	bool Save(const ID id, const std::filesystem::path& path)
+	{
+		return ::Save(id, path);
+	}
 }

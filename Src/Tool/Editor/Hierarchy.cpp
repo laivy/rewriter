@@ -32,10 +32,10 @@ bool Hierarchy::IModal::IsValid() const
 
 Hierarchy::Hierarchy()
 {
-	Delegates::OnPropAdded.Register(this, std::bind_front(&Hierarchy::OnPropAdded, this));
-	Delegates::OnPropDeleted.Register(this, std::bind_front(&Hierarchy::OnPropDeleted, this));
-	Delegates::OnPropModified.Register(this, std::bind_front(&Hierarchy::OnPropModified, this));
-	Delegates::OnPropSelected.Register(this, std::bind_front(&Hierarchy::OnPropSelected, this));
+	Delegates::OnPropertyAdded.Register(this, std::bind_front(&Hierarchy::OnPropertyAdded, this));
+	Delegates::OnPropertyDeleted.Register(this, std::bind_front(&Hierarchy::OnPropertyDeleted, this));
+	Delegates::OnPropertyModified.Register(this, std::bind_front(&Hierarchy::OnPropertyModified, this));
+	Delegates::OnPropertySelected.Register(this, std::bind_front(&Hierarchy::OnPropertySelected, this));
 }
 
 void Hierarchy::Update(float deltaTime)
@@ -50,10 +50,8 @@ void Hierarchy::Update(float deltaTime)
 		if (m_roots.erase(prop) > 0)
 			continue;
 
-		/*
 		for (const auto& root : m_roots | std::ranges::views::keys)
-			Recurse(root, [&prop](const auto& p) { p->Delete(prop); });
-		*/
+			Resource::Delete(root, prop);
 	}
 	m_invalids.clear();
 
@@ -101,26 +99,24 @@ bool Hierarchy::IsRoot(const std::shared_ptr<Resource::Property>& prop) const
 	return m_roots.contains(prop);
 }
 
-void Hierarchy::OnPropAdded(const std::shared_ptr<Resource::Property>& prop)
+void Hierarchy::OnPropertyAdded(const std::shared_ptr<Resource::Property>& prop)
 {
-	/*
-	if (auto parent{ prop->GetParent() })
+	if (auto parent{ Resource::GetParent(prop) })
 		OpenTree(parent);
-	*/
 	SetModified(prop, true);
 }
 
-void Hierarchy::OnPropDeleted(const std::shared_ptr<Resource::Property>& prop)
+void Hierarchy::OnPropertyDeleted(const std::shared_ptr<Resource::Property>& prop)
 {
 	SetModified(prop, true);
 }
 
-void Hierarchy::OnPropModified(const std::shared_ptr<Resource::Property>& prop)
+void Hierarchy::OnPropertyModified(const std::shared_ptr<Resource::Property>& prop)
 {
 	SetModified(prop, true);
 }
 
-void Hierarchy::OnPropSelected(const std::shared_ptr<Resource::Property>& prop)
+void Hierarchy::OnPropertySelected(const std::shared_ptr<Resource::Property>& prop)
 {
 	// 이미 선택된 노드를 선택한 경우 선택 해제 안함
 	// 그리고 이미 선택된 노드이기 때문에 컨테이너에 추가 안함
@@ -429,7 +425,7 @@ void Hierarchy::RenderProperty(const std::shared_ptr<Resource::Property>& prop)
 
 	// 닫혀있어도 클릭 되도록
 	if (ImGui::IsItemClicked())
-		Delegates::OnPropSelected.Notify(prop);
+		Delegates::OnPropertySelected.Notify(prop);
 
 	// 트리 여닫기
 	if (ImGui::IsItemToggledOpen())
@@ -471,7 +467,7 @@ void Hierarchy::RenderNodeContextMenu(const std::shared_ptr<Resource::Property>&
 		return;
 
 	if (!IsSelected(prop))
-		Delegates::OnPropSelected.Notify(prop);
+		Delegates::OnPropertySelected.Notify(prop);
 
 	// 루트 노드 전용 메뉴
 	if (std::ranges::all_of(m_selects, [this](const auto& select) { return IsRoot(select.lock()); }))
@@ -614,38 +610,27 @@ void Hierarchy::RenderModal()
 
 void Hierarchy::LoadDataFile(const std::filesystem::path& path)
 {
-	/*
-	if (auto root{ Resource::Get(path.wstring()) })
+	auto root{ Resource::Get(path.wstring()) };
+	if (!root)
 	{
-		root->SetName(path.filename().wstring());
-		m_roots.emplace(root, Root{ .path = path });
+		assert(false && "Failed to load data file");
+		return;
 	}
-	*/
-}
-
-void Hierarchy::Recurse(const std::shared_ptr<Resource::Property>& prop, const std::function<void(const std::shared_ptr<Resource::Property>&)>& func)
-{
-	/*
-	for (const auto& [_, child] : *prop)
-		Recurse(child, func);
-	func(prop);
-	*/
+	Resource::SetName(root, path.filename().wstring());
+	m_roots.emplace(root, Root{ .path = path });
 }
 
 void Hierarchy::Add(const std::shared_ptr<Resource::Property>& parent, const std::shared_ptr<Resource::Property>& child)
 {
-	/*
-	child->SetParent(parent);
-	*/
-	Resource::AddChild(parent, child);
-	Delegates::OnPropAdded.Notify(child);
-	Delegates::OnPropSelected.Notify(child);
+	Resource::Add(parent, child);
+	Delegates::OnPropertyAdded.Notify(child);
+	Delegates::OnPropertySelected.Notify(child);
 }
 
 void Hierarchy::Delete(const std::shared_ptr<Resource::Property>& prop)
 {
 	m_invalids.emplace_back(prop);
-	Delegates::OnPropDeleted.Notify(prop);
+	Delegates::OnPropertyDeleted.Notify(prop);
 }
 
 void Hierarchy::Save(const std::shared_ptr<Resource::Property>& prop)
@@ -690,14 +675,11 @@ void Hierarchy::SetModified(const std::shared_ptr<Resource::Property>& prop, boo
 
 std::shared_ptr<Resource::Property> Hierarchy::GetRoot(const std::shared_ptr<Resource::Property>& prop) const
 {
-	/*
 	auto root{ prop };
 	auto parent{ prop };
-	while (parent = parent->GetParent())
+	while (parent = Resource::GetParent(parent))
 		root = parent;
 	return IsRoot(root) ? root : nullptr;
-	*/
-	return nullptr;
 }
 
 bool Hierarchy::IsModified(const std::shared_ptr<Resource::Property>& prop) const

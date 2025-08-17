@@ -12,8 +12,8 @@ public:
 	void Render();
 
 private:
-	void OnPropDeleted(const std::shared_ptr<Resource::Property>& prop);
-	void OnPropSelected(const std::shared_ptr<Resource::Property>& prop);
+	void OnPropertyDeleted(const std::shared_ptr<Resource::Property>& prop);
+	void OnPropertySelected(const std::shared_ptr<Resource::Property>& prop);
 
 	void RenderNode();
 	void RenderNodeName(const std::shared_ptr<Resource::Property>& prop);

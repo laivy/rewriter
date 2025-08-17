@@ -7,7 +7,7 @@
 #include "GraphicsImGui.h"
 #include "RenderTarget.h"
 #include "Common/Util.h"
-#include "External/DirectX/WICTextureLoader12.h"
+#include "DirectX/WICTextureLoader12.h"
 
 namespace Graphics::ImGui
 {

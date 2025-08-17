@@ -38,10 +38,10 @@ public:
 	bool IsRoot(const std::shared_ptr<Resource::Property>& prop) const;
 
 private:
-	void OnPropAdded(const std::shared_ptr<Resource::Property>& prop);
-	void OnPropDeleted(const std::shared_ptr<Resource::Property>& prop);
-	void OnPropModified(const std::shared_ptr<Resource::Property>& prop);
-	void OnPropSelected(const std::shared_ptr<Resource::Property>& prop);
+	void OnPropertyAdded(const std::shared_ptr<Resource::Property>& prop);
+	void OnPropertyDeleted(const std::shared_ptr<Resource::Property>& prop);
+	void OnPropertyModified(const std::shared_ptr<Resource::Property>& prop);
+	void OnPropertySelected(const std::shared_ptr<Resource::Property>& prop);
 	void OnMenuFileNew();
 	void OnMenuFileOpen();
 	void OnMenuFileSave();
@@ -59,7 +59,6 @@ private:
 	void RenderModal();
 
 	void LoadDataFile(const std::filesystem::path& path);
-	void Recurse(const std::shared_ptr<Resource::Property>& prop, const std::function<void(const std::shared_ptr<Resource::Property>&)>& func);
 	void Add(const std::shared_ptr<Resource::Property>& parent, const std::shared_ptr<Resource::Property>& child);
 	void Delete(const std::shared_ptr<Resource::Property>& prop);
 	void Save(const std::shared_ptr<Resource::Property>& prop);

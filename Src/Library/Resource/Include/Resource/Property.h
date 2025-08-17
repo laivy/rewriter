@@ -1,122 +1,53 @@
 #pragma once
+#include "Sprite.h"
 
-namespace Resource
+namespace Resource::Property
 {
-	struct Property;
-	struct Sprite;
+	using ID = std::invoke_result_t<std::hash<std::wstring_view>, std::wstring_view>;
 
+	// 직계 자식 프로퍼티 순회
 	class Iterator
 	{
 	public:
-		using Container = std::vector<std::shared_ptr<Property>>;
-
-		using iterator_concept = Container::iterator::iterator_concept;
-		using iterator_category = Container::iterator::iterator_category;
-		using value_type = std::pair<std::wstring, std::shared_ptr<Property>>;
-		using difference_type = Container::difference_type;
-		using reference = std::pair<std::wstring, std::shared_ptr<Property>&>;
+		using value_type = std::pair<std::wstring_view, ID>;
+		using pointer = value_type*;
+		using const_pointer = const value_type*;
+		using reference = value_type&;
+		using const_reference = const value_type&;
+		using difference_type = std::ptrdiff_t;
 
 	public:
-		RESOURCE_API Iterator();
-		RESOURCE_API Iterator(std::wstring_view path);
-		RESOURCE_API Iterator(const std::shared_ptr<Property>& prop);
+		Iterator(const ID id);
+		Iterator(std::wstring_view path);
 
-		RESOURCE_API reference operator*() const;
-		RESOURCE_API Iterator& operator++();
-		RESOURCE_API Iterator operator++(int);
-		RESOURCE_API Iterator& operator+=(const difference_type offset);
-		RESOURCE_API Iterator operator+(const difference_type offset);
-		RESOURCE_API Iterator& operator--();
-		RESOURCE_API Iterator operator--(int);
-		RESOURCE_API Iterator& operator-=(const difference_type offset);
-		RESOURCE_API Iterator operator-(const difference_type offset);
-		RESOURCE_API reference operator[](const difference_type offset);
-		RESOURCE_API bool operator==(const Iterator& rhs) const;
-		RESOURCE_API bool operator!=(const Iterator& rhs) const;
+		bool operator!=(const Iterator& other) const;
+		Iterator& operator++();
+		value_type operator*() const;
 
-		RESOURCE_API Iterator begin() const;
-		RESOURCE_API Iterator end() const;
+		Iterator begin() const;
+		Iterator end() const;
 
 	private:
-		Property* m_prop;
-		Container::iterator m_iter;
+		ID m_parentID;
+		std::size_t m_depth;
+		std::size_t m_current;
+		std::size_t m_end;
 	};
 
-	class RecursiveIterator
-	{
-	public:
-		using Container = std::vector<std::shared_ptr<Property>>;
+	const ID InvalidID{ std::hash<std::wstring_view>{}(L"") };
 
-		using iterator_category = std::input_iterator_tag;
-		using value_type = std::pair<std::wstring, std::shared_ptr<Property>>;
-		using difference_type = Container::difference_type;
-		using reference = std::pair<std::wstring, std::shared_ptr<Property>&>;
+	RESOURCE_API ID New(std::wstring_view name);
+	RESOURCE_API ID New(const ID parentID, std::wstring_view name);
+	RESOURCE_API ID Get(std::wstring_view path);
+	RESOURCE_API ID Get(const ID parentID, std::wstring_view path);
 
-	public:
-		RESOURCE_API RecursiveIterator();
-		RESOURCE_API RecursiveIterator(std::wstring_view path);
-		RESOURCE_API RecursiveIterator(const std::shared_ptr<Property>& prop);
+	RESOURCE_API void Set(const ID id, std::int32_t value);
+	RESOURCE_API void Set(const ID id, float value);
+	RESOURCE_API void Set(const ID id, const std::wstring& value);
+	RESOURCE_API void Set(const ID id, const Sprite& value);
+	RESOURCE_API std::optional<std::int32_t> GetInt(const ID id);
+	RESOURCE_API std::optional<float> GetFloat(const ID id);
+	RESOURCE_API std::optional<std::wstring> GetString(const ID id);
 
-		RESOURCE_API RecursiveIterator& operator++();
-		RESOURCE_API RecursiveIterator operator++(int);
-		RESOURCE_API bool operator==(const RecursiveIterator& rhs) const;
-		RESOURCE_API bool operator!=(const RecursiveIterator& rhs) const;
-		RESOURCE_API reference operator*() const;
-
-		RESOURCE_API RecursiveIterator begin() const;
-		RESOURCE_API RecursiveIterator end() const;
-
-	private:
-		Property* m_prop;
-		Container::iterator m_iter;
-		std::vector<Container::iterator> m_parents;
-		std::vector<Container::iterator> m_ends;
-	};
-
-	RESOURCE_API std::shared_ptr<Property> Get(std::wstring_view path);
-	RESOURCE_API std::shared_ptr<Property> Get(const std::shared_ptr<Property>& prop, std::wstring_view path);
-	RESOURCE_API std::wstring GetName(const std::shared_ptr<Property>& prop, std::wstring_view path = L"");
-	RESOURCE_API std::int32_t GetInt(std::wstring_view path);
-	RESOURCE_API std::int32_t GetInt(const std::shared_ptr<Property>& prop, std::wstring_view path = L"");
-	RESOURCE_API Int2 GetInt2(std::wstring_view path);
-	RESOURCE_API Int2 GetInt2(const std::shared_ptr<Property>& prop, std::wstring_view path = L"");
-	RESOURCE_API float GetFloat(std::wstring_view path);
-	RESOURCE_API float GetFloat(const std::shared_ptr<Property>& prop, std::wstring_view path = L"");
-	RESOURCE_API std::wstring GetString(std::wstring_view path);
-	RESOURCE_API std::wstring GetString(const std::shared_ptr<Property>& prop, std::wstring_view path = L"");
-	RESOURCE_API std::shared_ptr<Sprite> GetSprite(std::wstring_view path);
-	RESOURCE_API std::shared_ptr<Sprite> GetSprite(const std::shared_ptr<Property>& prop, std::wstring_view path = L"");
-	RESOURCE_API std::shared_ptr<Model> GetModel(std::wstring_view path);
-	RESOURCE_API std::shared_ptr<Model> GetModel(const std::shared_ptr<Property>& prop, std::wstring_view path = L"");
-
-	RESOURCE_API void SetName(const std::shared_ptr<Property>& prop, std::wstring_view name);
-	RESOURCE_API void Set(const std::shared_ptr<Property>& prop, std::int32_t value);
-	RESOURCE_API void Set(const std::shared_ptr<Property>& prop, Int2 value);
-	RESOURCE_API void Set(const std::shared_ptr<Property>& prop, float value);
-	RESOURCE_API void Set(const std::shared_ptr<Property>& prop, std::wstring_view value);
-	RESOURCE_API void Set(const std::shared_ptr<Property>& prop, const std::shared_ptr<Sprite>& value);
-	RESOURCE_API void Set(const std::shared_ptr<Property>& prop, const std::shared_ptr<Model>& value);
-
-	RESOURCE_API void Unload(std::wstring_view path);
-
-#ifdef _TOOL
-	enum class Type : std::int8_t
-	{
-		Folder,
-		Int,
-		Int2,
-		Float,
-		String,
-		Sprite,
-		Model
-	};
-
-	RESOURCE_API std::shared_ptr<Property> New();
-	RESOURCE_API std::shared_ptr<Property> Clone(const std::shared_ptr<Property>& prop);
-	RESOURCE_API Type GetType(const std::shared_ptr<Property>& prop);
-	RESOURCE_API void SetType(const std::shared_ptr<Property>& prop, Type type);
-	RESOURCE_API void AddChild(const std::shared_ptr<Property>& prop, const std::shared_ptr<Property>& child);
-	RESOURCE_API std::shared_ptr<Property> GetParent(const std::shared_ptr<Property>& prop);
-	RESOURCE_API bool Save(const std::filesystem::path& filePath, const std::shared_ptr<Property>& prop);
-#endif
+	RESOURCE_API bool Save(const ID id, const std::filesystem::path& path);
 }

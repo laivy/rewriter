@@ -32,8 +32,8 @@ public:
 	void Render2D();
 
 private:
-	void OnPropDeleted(const std::shared_ptr<Resource::Property>& prop);
-	void OnPropModified(const std::shared_ptr<Resource::Property>& prop);
+	void OnPropertyDeleted(const std::shared_ptr<Resource::Property>& prop);
+	void OnPropertyModified(const std::shared_ptr<Resource::Property>& prop);
 
 	void UpdateImguiWindowRect();
 	void RenderTopBar();

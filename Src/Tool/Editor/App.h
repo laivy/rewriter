@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 #include "Common/Timer.h"
 
 class App : public TSingleton<App>
@@ -21,7 +21,7 @@ private:
 	void Render();
 
 private:
-	static constexpr auto WINDOW_TITLE_NAME{ L"Engine" };
+	static constexpr auto WINDOW_TITLE_NAME{ L"Editor" };
 
 	HWND m_hWnd;
 	Int2 m_windowSize;

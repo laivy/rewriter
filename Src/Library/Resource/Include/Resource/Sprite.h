@@ -1,16 +1,14 @@
 #pragma once
 
-struct IUnknown;
-
 namespace Resource
 {
-	struct Sprite;
-
-	RESOURCE_API std::shared_ptr<Sprite> NewSprite(IUnknown* bitmap, Float2 size);
-	RESOURCE_API IUnknown* GetSpriteBitmap(const std::shared_ptr<Sprite>& sprite);
-	RESOURCE_API Float2 GetSpriteSize(const std::shared_ptr<Sprite>& sprite);
-
+	struct Sprite
+	{
+		ComPtr<IUnknown> bitmap; // ID2D1Bitmap;
+		float width{ 0 };
+		float height{ 0 };
 #ifdef _TOOL
-	RESOURCE_API void SetSpriteBinary(const std::shared_ptr<Sprite>& sprite, std::span<std::byte> binary);
+		std::vector<std::byte> binary;
 #endif
+	};
 }

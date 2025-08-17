@@ -18,6 +18,7 @@
 #include <string>
 #include <thread>
 #include <unordered_map>
+#include <variant>
 #include <vector>
 using namespace std::chrono_literals;
 
@@ -48,9 +49,9 @@ EXTERN_C IMAGE_DOS_HEADER __ImageBase;
 
 // Imgui
 #ifdef _IMGUI
-#include "External/Imgui/imgui.h"
-#include "External/Imgui/imgui_internal.h"
-#include "External/Imgui/imgui_stdlib.h"
+#include "Imgui/imgui.h"
+#include "Imgui/imgui_internal.h"
+#include "Imgui/imgui_stdlib.h"
 #endif
 
 // Project

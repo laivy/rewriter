@@ -19,11 +19,11 @@ namespace Graphics
 		return true;
 	}
 
-	void CleanUp()
+	void Uninitialize()
 	{
-		D3D::CleanUp();
+		D3D::Uninitialize();
 #ifdef _DIRECT2D
-		D2D::CleanUp();
+		D2D::Uninitialize();
 #endif
 	}
 

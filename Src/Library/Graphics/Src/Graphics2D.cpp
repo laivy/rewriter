@@ -111,7 +111,7 @@ namespace Graphics::D2D
 		return true;
 	}
 
-	void CleanUp()
+	void Uninitialize()
 	{
 		::CoUninitialize();
 	}
@@ -126,8 +126,10 @@ namespace Graphics::D2D
 		g_swapChain->End2D();
 	}
 
-	std::shared_ptr<Resource::Sprite> LoadSprite(std::span<std::byte> binary)
+	Resource::Sprite LoadSprite(std::span<std::byte> binary)
 	{
+		static const Resource::Sprite InvalidSprite{};
+
 		ComPtr<IWICImagingFactory> factory;
 		ComPtr<IWICStream> stream;
 		ComPtr<IWICBitmapDecoder> decoder;
@@ -136,26 +138,30 @@ namespace Graphics::D2D
 		ComPtr<ID2D1Bitmap> bitmap;
 
 		if (FAILED(::CoCreateInstance(CLSID_WICImagingFactory, nullptr, CLSCTX_INPROC_SERVER, IID_PPV_ARGS(&factory))))
-			return nullptr;
+			return InvalidSprite;
 		if (FAILED(factory->CreateStream(&stream)))
-			return nullptr;
+			return InvalidSprite;
 		if (FAILED(stream->InitializeFromMemory(reinterpret_cast<WICInProcPointer>(binary.data()), static_cast<DWORD>(binary.size()))))
-			return nullptr;
+			return InvalidSprite;
 		if (FAILED(factory->CreateDecoderFromStream(stream.Get(), nullptr, WICDecodeMetadataCacheOnLoad, &decoder)))
-			return nullptr;
+			return InvalidSprite;
 		if (FAILED(factory->CreateFormatConverter(&converter)))
-			return nullptr;
+			return InvalidSprite;
 		if (FAILED(decoder->GetFrame(0, &frameDecode)))
-			return nullptr;
+			return InvalidSprite;
 		if (FAILED(converter->Initialize(frameDecode.Get(), GUID_WICPixelFormat32bppPBGRA, WICBitmapDitherTypeNone, nullptr, 0.0f, WICBitmapPaletteTypeMedianCut)))
-			return nullptr;
+			return InvalidSprite;
 		if (FAILED(g_d2dContext->CreateBitmapFromWicBitmap(converter.Get(), bitmap.GetAddressOf())))
-			return nullptr;
+			return InvalidSprite;
 
-		auto size{ bitmap->GetSize() };
-		auto sprite{ Resource::NewSprite(bitmap.Get(), Float2{ size.width, size.height }) };
+		const auto size{ bitmap->GetSize() };
+
+		Resource::Sprite sprite{};
+		sprite.bitmap.Swap(bitmap);
+		sprite.width = size.width;
+		sprite.height = size.height;
 #ifdef _TOOL
-		Resource::SetSpriteBinary(sprite, binary);
+		sprite.binary.assign(binary.begin(), binary.end());
 #endif
 		return sprite;
 	}
@@ -271,14 +277,14 @@ namespace Graphics::D2D
 
 	void DrawSprite(const std::shared_ptr<Resource::Sprite>& sprite, const Float2& position, float opacity)
 	{
-		auto size{ Resource::GetSpriteSize(sprite) };
-		DrawSprite(sprite, RectF{ 0.0f, 0.0f, size.x, size.y }.Offset(position), opacity);
+		//auto size{ Resource::GetSpriteSize(sprite) };
+		//DrawSprite(sprite, RectF{ 0.0f, 0.0f, size.x, size.y }.Offset(position), opacity);
 	}
 
 	void DrawSprite(const std::shared_ptr<Resource::Sprite>& sprite, const RectF& rect, float opacity)
 	{
-		auto bitmap{ Resource::GetSpriteBitmap(sprite) };
-		g_d2dCurrentRenderTargets.back()->DrawBitmap(static_cast<ID2D1Bitmap*>(bitmap), D2D1_RECT_F{ rect.left, rect.top, rect.right, rect.bottom }, opacity);
+		//auto bitmap{ Resource::GetSpriteBitmap(sprite) };
+		//g_d2dCurrentRenderTargets.back()->DrawBitmap(static_cast<ID2D1Bitmap*>(bitmap), D2D1_RECT_F{ rect.left, rect.top, rect.right, rect.bottom }, opacity);
 	}
 
 	void DrawLayer(const std::shared_ptr<Layer>& layer)

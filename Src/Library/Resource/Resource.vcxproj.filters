@@ -32,7 +32,7 @@
     <ClInclude Include="..\..\Common\Type.h">
       <Filter>Header\Common</Filter>
     </ClInclude>
-    <ClInclude Include="Src\Global.h">
+    <ClInclude Include="Src\Delegates.h">
       <Filter>Header</Filter>
     </ClInclude>
     <ClInclude Include="Src\Stdafx.h">
@@ -58,7 +58,7 @@
     <ClCompile Include="Src\DllMain.cpp">
       <Filter>Source</Filter>
     </ClCompile>
-    <ClCompile Include="Src\Global.cpp">
+    <ClCompile Include="Src\Delegates.cpp">
       <Filter>Source</Filter>
     </ClCompile>
     <ClCompile Include="Src\Model.cpp">

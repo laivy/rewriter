@@ -109,7 +109,7 @@
       <PreprocessorDefinitions>_DEBUG;_DIRECT2D;_IMGUI;_TOOL;NOMINMAX;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp23</LanguageStandard>
-      <AdditionalIncludeDirectories>$(SolutionDir);$(SolutionDir)Src\;$(SolutionDir)External\FBXSDK\include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)External\;$(SolutionDir)Src\;$(SolutionDir)External\FBXSDK\include;$(SolutionDir)Src\Library\Resource\Include;$(SolutionDir)Src\Library\Graphics\Include</AdditionalIncludeDirectories>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>Stdafx.h</PrecompiledHeaderFile>
       <AdditionalOptions>/utf-8 %(AdditionalOptions)</AdditionalOptions>
@@ -121,7 +121,7 @@
       <AdditionalLibraryDirectories>$(OutDir);$(SolutionDir)External\FBXSDK\lib\x64\debug</AdditionalLibraryDirectories>
     </Link>
     <PostBuildEvent>
-      <Command>PY "$(SolutionDir)Scripts\MakeDataSymlink.py" "$(OutDir)Editor" "$(SolutionDir)Data\Tool\Editor"
+      <Command>PY "$(SolutionDir)Script\MakeDataSymlink.py" "$(OutDir)Editor" "$(SolutionDir)Data\Tool\Editor"
 COPY "$(SolutionDir)External\FBXSDK\lib\x64\debug\libfbxsdk.dll" "$(OutDir)"</Command>
       <Message>
       </Message>
@@ -136,7 +136,7 @@ COPY "$(SolutionDir)External\FBXSDK\lib\x64\debug\libfbxsdk.dll" "$(OutDir)"</Co
       <PreprocessorDefinitions>_DIRECT2D;_IMGUI;_TOOL;NDEBUG;NOMINMAX;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp23</LanguageStandard>
-      <AdditionalIncludeDirectories>$(SolutionDir);$(SolutionDir)Src\;$(SolutionDir)External\FBXSDK\include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)External\;$(SolutionDir)Src\;$(SolutionDir)External\FBXSDK\include;$(SolutionDir)Src\Library\Resource\Include;$(SolutionDir)Src\Library\Graphics\Include</AdditionalIncludeDirectories>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>Stdafx.h</PrecompiledHeaderFile>
       <AdditionalOptions>/utf-8 %(AdditionalOptions)</AdditionalOptions>
@@ -148,7 +148,7 @@ COPY "$(SolutionDir)External\FBXSDK\lib\x64\debug\libfbxsdk.dll" "$(OutDir)"</Co
       <AdditionalLibraryDirectories>$(OutDir);$(SolutionDir)External\FBXSDK\lib\x64\release</AdditionalLibraryDirectories>
     </Link>
     <PostBuildEvent>
-      <Command>PY "$(SolutionDir)Scripts\MakeDataSymlink.py" "$(OutDir)Editor" "$(SolutionDir)Data\Tool\Editor"
+      <Command>PY "$(SolutionDir)Script\MakeDataSymlink.py" "$(OutDir)Editor" "$(SolutionDir)Data\Tool\Editor"
 COPY "$(SolutionDir)External\FBXSDK\lib\x64\debug\libfbxsdk.dll" "$(OutDir)"</Command>
       <Message>
       </Message>
@@ -167,19 +167,11 @@ COPY "$(SolutionDir)External\FBXSDK\lib\x64\debug\libfbxsdk.dll" "$(OutDir)"</Co
     <ClInclude Include="..\..\Common\Timer.h" />
     <ClInclude Include="..\..\Common\Type.h" />
     <ClInclude Include="..\..\Common\Util.h" />
-    <ClInclude Include="..\..\Library\Graphics\Include\Lib.h" />
-    <ClInclude Include="..\..\Library\Resource\Include\Lib.h" />
+    <ClInclude Include="..\..\Library\Graphics\Include\Graphics\Graphics.h" />
+    <ClInclude Include="..\..\Library\Resource\Include\Resource\Resource.h" />
     <ClInclude Include="App.h" />
-    <ClInclude Include="Clipboard.h" />
     <ClInclude Include="Delegates.h" />
-    <ClInclude Include="Desktop.h" />
-    <ClInclude Include="Explorer.h" />
-    <ClInclude Include="FbxHandler.h" />
-    <ClInclude Include="Hierarchy.h" />
-    <ClInclude Include="Inspector.h" />
     <ClInclude Include="Stdafx.h" />
-    <ClInclude Include="UIEditor.h" />
-    <ClInclude Include="Viewport.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\..\External\Imgui\imgui.cpp">
@@ -210,20 +202,12 @@ COPY "$(SolutionDir)External\FBXSDK\lib\x64\debug\libfbxsdk.dll" "$(OutDir)"</Co
     <ClCompile Include="..\..\Common\Type.cpp" />
     <ClCompile Include="..\..\Common\Util.cpp" />
     <ClCompile Include="App.cpp" />
-    <ClCompile Include="Clipboard.cpp" />
     <ClCompile Include="Delegates.cpp" />
-    <ClCompile Include="Desktop.cpp" />
-    <ClCompile Include="Explorer.cpp" />
-    <ClCompile Include="FbxHandler.cpp" />
-    <ClCompile Include="Hierarchy.cpp" />
-    <ClCompile Include="Inspector.cpp" />
     <ClCompile Include="Main.cpp" />
     <ClCompile Include="Stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
-    <ClCompile Include="UIEditor.cpp" />
-    <ClCompile Include="Viewport.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

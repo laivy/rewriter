@@ -1,14 +1,6 @@
 #include "Stdafx.h"
 #include "App.h"
-#include "Clipboard.h"
 #include "Delegates.h"
-#include "Desktop.h"
-#include "Explorer.h"
-#include "FbxHandler.h"
-#include "Hierarchy.h"
-#include "Inspector.h"
-#include "UIEditor.h"
-#include "Viewport.h"
 
 App::App() :
 	m_hWnd{ NULL },
@@ -20,15 +12,8 @@ App::App() :
 
 App::~App()
 {
-	Desktop::Destroy();
-	Explorer::Destroy();
-	Hierarchy::Destroy();
-	Inspector::Destroy();
-	Clipboard::Destroy();
-	FbxHandler::Destroy();
-	//UIEditor::Destroy();
-	Resource::CleanUp();
-	Graphics::CleanUp();
+	Resource::Uninitialize();
+	Graphics::Uninitialize();
 }
 
 void App::Run()
@@ -139,7 +124,7 @@ void App::InitApp()
 {
 	// 모듈 초기화
 	Graphics::Initialize(m_hWnd);
-	Resource::Initialize(L"Engine", &Graphics::D2D::LoadSprite, &Graphics::D3D::LoadModel);
+	Resource::Initialize({ L"Editor", &Graphics::D2D::LoadSprite, &Graphics::D3D::LoadModel });
 	Delegates::OnWindowResized.Register(&Graphics::OnWindowResized);
 
 	// ImGui 초기화
@@ -154,15 +139,6 @@ void App::InitApp()
 	style.DockingSeparatorSize = 1.0f;
 	ImGui::StyleColorsDark();
 	
-	// 싱글톤 생성
-	Clipboard::Instantiate();
-	Desktop::Instantiate();
-	Explorer::Instantiate();
-	FbxHandler::Instantiate();
-	Hierarchy::Instantiate();
-	Inspector::Instantiate();
-	Viewport::Instantiate();
-
 	// 타이머 초기화
 	m_timer.Tick();
 }
@@ -170,14 +146,6 @@ void App::InitApp()
 void App::Update()
 {
 	float deltaTime{ m_timer.Tick() };
-	if (auto explorer{ Explorer::GetInstance() })
-		explorer->Update(deltaTime);
-	if (auto hierarchy{ Hierarchy::GetInstance() })
-		hierarchy->Update(deltaTime);
-	if (auto inspector{ Inspector::GetInstance() })
-		inspector->Update(deltaTime);
-	if (auto viewport{ Viewport::GetInstance() })
-		viewport->Update(deltaTime);
 }
 
 void App::Render()
@@ -186,20 +154,6 @@ void App::Render()
 	{
 		Graphics::ImGui::Begin();
 		{
-			if (auto desktop{ Desktop::GetInstance() })
-				desktop->Render();
-			if (auto explorer{ Explorer::GetInstance() })
-				explorer->Render();
-			if (auto hierarchy{ Hierarchy::GetInstance() })
-				hierarchy->Render();
-			if (auto inspector{ Inspector::GetInstance() })
-				inspector->Render();
-			/*
-			if (auto uiEditor{ UIEditor::GetInstance() })
-				uiEditor->Render();
-			*/
-			if (auto viewport{ Viewport::GetInstance() })
-				viewport->Render();
 			ImGui::ShowDemoWindow();
 		}
 		Graphics::ImGui::End();
@@ -207,10 +161,6 @@ void App::Render()
 	Graphics::D3D::End();
 	Graphics::D2D::Begin();
 	{
-		/*
-		if (auto uiEditor{ UIEditor::GetInstance() })
-			uiEditor->Render2D();
-		*/
 	}
 	Graphics::D2D::End();
 	Graphics::D3D::Present();

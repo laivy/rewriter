@@ -1,6 +1,11 @@
 #pragma once
 
 #ifdef _IMGUI
+namespace Graphics::D3D
+{
+	class RenderTarget;
+}
+
 namespace Graphics::ImGui
 {
 	struct Texture;

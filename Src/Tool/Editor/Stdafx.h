@@ -8,5 +8,5 @@
 #include <commdlg.h>
 
 // Library
-#include "Library/Graphics/Include/Lib.h"
-#include "Library/Resource/Include/Lib.h"
+#include "Graphics/Graphics.h"
+#include "Resource/Resource.h"
