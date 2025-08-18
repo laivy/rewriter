@@ -18,26 +18,11 @@
     <Filter Include="Header\Common">
       <UniqueIdentifier>{4331401c-a549-401c-9899-843cada43d95}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header\Include\Resource">
+      <UniqueIdentifier>{a19a01b3-f6df-4989-8214-561e9aa7e3af}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Stdafx.h">
-      <Filter>Header</Filter>
-    </ClInclude>
-    <ClInclude Include="Include\Lib.h">
-      <Filter>Header\Include</Filter>
-    </ClInclude>
-    <ClInclude Include="Sprite.h">
-      <Filter>Header</Filter>
-    </ClInclude>
-    <ClInclude Include="Property.h">
-      <Filter>Header</Filter>
-    </ClInclude>
-    <ClInclude Include="Resource.h">
-      <Filter>Header</Filter>
-    </ClInclude>
-    <ClInclude Include="Model.h">
-      <Filter>Header</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\Common\Singleton.h">
       <Filter>Header\Common</Filter>
     </ClInclude>
@@ -47,33 +32,48 @@
     <ClInclude Include="..\..\Common\Type.h">
       <Filter>Header\Common</Filter>
     </ClInclude>
-    <ClInclude Include="Global.h">
+    <ClInclude Include="Src\Global.h">
       <Filter>Header</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Stdafx.h">
+      <Filter>Header</Filter>
+    </ClInclude>
+    <ClInclude Include="Include\Resource\Model.h">
+      <Filter>Header\Include\Resource</Filter>
+    </ClInclude>
+    <ClInclude Include="Include\Resource\Property.h">
+      <Filter>Header\Include\Resource</Filter>
+    </ClInclude>
+    <ClInclude Include="Include\Resource\Resource.h">
+      <Filter>Header\Include\Resource</Filter>
+    </ClInclude>
+    <ClInclude Include="Include\Resource\Sprite.h">
+      <Filter>Header\Include\Resource</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="DllMain.cpp">
-      <Filter>Source</Filter>
-    </ClCompile>
-    <ClCompile Include="Stdafx.cpp">
-      <Filter>Source</Filter>
-    </ClCompile>
-    <ClCompile Include="Property.cpp">
-      <Filter>Source</Filter>
-    </ClCompile>
-    <ClCompile Include="Sprite.cpp">
-      <Filter>Source</Filter>
-    </ClCompile>
-    <ClCompile Include="Resource.cpp">
-      <Filter>Source</Filter>
-    </ClCompile>
-    <ClCompile Include="Model.cpp">
-      <Filter>Source</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\Common\Type.cpp">
       <Filter>Source\Common</Filter>
     </ClCompile>
-    <ClCompile Include="Global.cpp">
+    <ClCompile Include="Src\DllMain.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Global.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Model.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Property.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Resource.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Sprite.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Stdafx.cpp">
       <Filter>Source</Filter>
     </ClCompile>
   </ItemGroup>

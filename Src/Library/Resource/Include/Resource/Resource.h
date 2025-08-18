@@ -1,10 +1,18 @@
 #pragma once
 
+#ifdef _RESOURCE
+#define RESOURCE_API __declspec(dllexport)
+#else
+#define RESOURCE_API __declspec(dllimport)
+#endif
+
+#include "Model.h"
+#include "Property.h"
+#include "Resource.h"
+#include "Sprite.h"
+
 namespace Resource
 {
-	struct Sprite;
-	struct Model;
-
 	RESOURCE_API void Initialize(
 		const std::filesystem::path& mountPath,
 		const std::function<std::shared_ptr<Sprite>(std::span<std::byte>)>& loadSprite,
