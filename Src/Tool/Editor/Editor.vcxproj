@@ -121,7 +121,7 @@
       <AdditionalLibraryDirectories>$(OutDir);$(SolutionDir)External\FBXSDK\lib\x64\debug</AdditionalLibraryDirectories>
     </Link>
     <PostBuildEvent>
-      <Command>PY "$(SolutionDir)Script\MakeDataSymlink.py" "$(OutDir)Editor" "$(SolutionDir)Data\Tool\Editor"
+      <Command>CALL PY "$(SolutionDir)Script\MakeDataSymlink.py" "$(OutDir)Editor" "$(SolutionDir)Data\Tool\Editor" || EXIT /B 1
 COPY "$(SolutionDir)External\FBXSDK\lib\x64\debug\libfbxsdk.dll" "$(OutDir)"</Command>
       <Message>
       </Message>
@@ -148,7 +148,7 @@ COPY "$(SolutionDir)External\FBXSDK\lib\x64\debug\libfbxsdk.dll" "$(OutDir)"</Co
       <AdditionalLibraryDirectories>$(OutDir);$(SolutionDir)External\FBXSDK\lib\x64\release</AdditionalLibraryDirectories>
     </Link>
     <PostBuildEvent>
-      <Command>PY "$(SolutionDir)Script\MakeDataSymlink.py" "$(OutDir)Editor" "$(SolutionDir)Data\Tool\Editor"
+      <Command>CALL PY "$(SolutionDir)Script\MakeDataSymlink.py" "$(OutDir)Editor" "$(SolutionDir)Data\Tool\Editor" || EXIT /B 1
 COPY "$(SolutionDir)External\FBXSDK\lib\x64\debug\libfbxsdk.dll" "$(OutDir)"</Command>
       <Message>
       </Message>
