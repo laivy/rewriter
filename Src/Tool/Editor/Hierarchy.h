@@ -7,23 +7,16 @@ class Hierarchy :
 private:
 	struct Root
 	{
+		Resource::Property::ID id;
 		std::filesystem::path path;
-		bool isModified{ false };
 	};
 
-	class IModal
+	struct Context
 	{
-	public:
-		IModal();
-		virtual ~IModal() = default;
-
-		virtual void Run() = 0;
-
-		void Close();
-		bool IsValid() const;
-
-	private:
-		bool m_isValid;
+		bool isInvalid;
+		bool isModified;
+		bool isOpened;
+		bool isSelected;
 	};
 
 public:
@@ -33,19 +26,24 @@ public:
 	void Update(float deltaTime);
 	void Render();
 
-	void OpenTree(const std::shared_ptr<Resource::Property>& prop);
-	void CloseTree(const std::shared_ptr<Resource::Property>& prop);
-	bool IsRoot(const std::shared_ptr<Resource::Property>& prop) const;
+	void OpenTree(const Resource::Property::ID id);
+	void CloseTree(const Resource::Property::ID id);
+	bool IsRoot(const Resource::Property::ID id) const;
 
 private:
-	void OnPropertyAdded(const std::shared_ptr<Resource::Property>& prop);
-	void OnPropertyDeleted(const std::shared_ptr<Resource::Property>& prop);
-	void OnPropertyModified(const std::shared_ptr<Resource::Property>& prop);
-	void OnPropertySelected(const std::shared_ptr<Resource::Property>& prop);
+	// 델리게이트
+	void OnPropertyAdded(const Resource::Property::ID id);
+	void OnPropertyDeleted(const Resource::Property::ID id);
+	void OnPropertyModified(const Resource::Property::ID id);
+	void OnPropertySelected(const Resource::Property::ID id);
+
+	// 메뉴
 	void OnMenuFileNew();
 	void OnMenuFileOpen();
 	void OnMenuFileSave();
 	void OnMenuFileSaveAs();
+
+	// 단축키
 	void OnCut();
 	void OnCopy();
 	void OnPaste();
@@ -54,25 +52,21 @@ private:
 	void DragDrop();
 	void RenderMenuBar();
 	void RenderPropertyTree();
-	void RenderProperty(const std::shared_ptr<Resource::Property>& prop);
-	void RenderNodeContextMenu(const std::shared_ptr<Resource::Property>& prop);
+	void RenderProperty(const Resource::Property::ID id);
+	void RenderNodeContextMenu(const Resource::Property::ID id);
 	void RenderModal();
 
 	void LoadDataFile(const std::filesystem::path& path);
-	void Add(const std::shared_ptr<Resource::Property>& parent, const std::shared_ptr<Resource::Property>& child);
-	void Delete(const std::shared_ptr<Resource::Property>& prop);
-	void Save(const std::shared_ptr<Resource::Property>& prop);
-	void SetModified(const std::shared_ptr<Resource::Property>& prop, bool modified);
+	void Add(const Resource::Property::ID parentID, const Resource::Property::ID childID);
+	void Delete(const Resource::Property::ID id);
+	void SetModified(const Resource::Property::ID id, bool modified);
 
-	std::shared_ptr<Resource::Property> GetRoot(const std::shared_ptr<Resource::Property>& prop) const;
-	bool IsModified(const std::shared_ptr<Resource::Property>& prop) const;
-	bool IsSelected(const std::shared_ptr<Resource::Property>& prop) const;
-	bool IsOpened(const std::shared_ptr<Resource::Property>& prop) const;
+	Root GetRoot(const Resource::Property::ID id) const;
+	bool IsModified(const Resource::Property::ID id) const;
+	bool IsOpened(const Resource::Property::ID id) const;
+	bool IsSelected(const Resource::Property::ID id) const;
 
 private:
-	std::map<std::shared_ptr<Resource::Property>, Root> m_roots;
-	std::vector<std::weak_ptr<Resource::Property>> m_invalids;
-	std::vector<std::weak_ptr<Resource::Property>> m_selects;
-	std::vector<std::weak_ptr<Resource::Property>> m_opens;
-	std::vector<std::unique_ptr<IModal>> m_modals;
+	std::vector<Root> m_roots;
+	std::unordered_map<Resource::Property::ID, Context> m_contexts;
 };

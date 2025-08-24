@@ -27,7 +27,7 @@ IWindow::IWindow(std::wstring_view path) :
 {
 }
 
-IWindow::IWindow(const std::shared_ptr<Resource::Property>& prop) :
+IWindow::IWindow(const Resource::Property::ID id) :
 	IWindow{}
 {
 	Build(prop);
@@ -149,7 +149,7 @@ std::shared_ptr<Graphics::D2D::Layer> IWindow::GetLayer(int z) const
 	return nullptr;
 }
 
-void IWindow::Build(const std::shared_ptr<Resource::Property>& prop, std::wstring_view path)
+void IWindow::Build(const Resource::Property::ID id, std::wstring_view path)
 {
 	if (!prop)
 		return;
@@ -196,7 +196,7 @@ void IWindow::Build(const std::shared_ptr<Resource::Property>& prop, std::wstrin
 	}
 }
 
-void IWindow::SetInfo(const std::shared_ptr<Resource::Property>& prop)
+void IWindow::SetInfo(const Resource::Property::ID id)
 {
 	/*
 	- Size(Int2)
@@ -215,7 +215,7 @@ void IWindow::SetInfo(const std::shared_ptr<Resource::Property>& prop)
 	m_titleBarRect.bottom = titleBarRB.y;
 }
 
-void IWindow::SetNinePatch(const std::shared_ptr<Resource::Property>& prop)
+void IWindow::SetNinePatch(const Resource::Property::ID id)
 {
 	m_ninePatch.fill(nullptr);
 

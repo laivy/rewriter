@@ -86,6 +86,9 @@
     <ClInclude Include="..\..\Library\Graphics\Include\Graphics\Graphics.h">
       <Filter>Library\Graphics</Filter>
     </ClInclude>
+    <ClInclude Include="Hierarchy.h">
+      <Filter>Header</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="App.cpp">
@@ -125,6 +128,9 @@
       <Filter>Source\Common</Filter>
     </ClCompile>
     <ClCompile Include="Delegates.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="Hierarchy.cpp">
       <Filter>Source</Filter>
     </ClCompile>
   </ItemGroup>

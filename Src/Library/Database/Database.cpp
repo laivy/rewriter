@@ -5,7 +5,7 @@
 
 namespace Database
 {
-	DLL_API void Initialize(const std::shared_ptr<Resource::Property>& prop)
+	DLL_API void Initialize(const Resource::Property::ID id)
 	{
 		if (!prop)
 		{

@@ -8,7 +8,7 @@ class IWindow abstract : public IUserInterface
 public:
 	IWindow();
 	IWindow(std::wstring_view path);
-	IWindow(const std::shared_ptr<Resource::Property>& prop);
+	IWindow(const Resource::Property::ID id);
 	virtual ~IWindow() = default;
 
 	virtual void OnMouseLeave(int x, int y) override;
@@ -34,9 +34,9 @@ protected:
 	}
 
 private:
-	void Build(const std::shared_ptr<Resource::Property>& prop, std::wstring_view path = L"");
-	void SetInfo(const std::shared_ptr<Resource::Property>& prop);
-	void SetNinePatch(const std::shared_ptr<Resource::Property>& prop);
+	void Build(const Resource::Property::ID id, std::wstring_view path = L"");
+	void SetInfo(const Resource::Property::ID id);
+	void SetNinePatch(const Resource::Property::ID id);
 
 	void UpdateMouseOverControl(int x, int y);
 	void UpdateFocusControl(int x, int y);

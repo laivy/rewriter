@@ -15,7 +15,7 @@ private:
 	};
 
 public:
-	Button(IWindow* owner, const std::shared_ptr<Resource::Property>& prop = nullptr);
+	Button(IWindow* owner, const Resource::Property::ID id = nullptr);
 	~Button() = default;
 
 	virtual void OnMouseEnter(int x, int y) override final;
@@ -25,7 +25,7 @@ public:
 	virtual void Render() const override final;
 
 private:
-	void Build(const std::shared_ptr<Resource::Property>& prop);
+	void Build(const Resource::Property::ID id);
 
 public:
 	Delegate<> OnButtonClick;

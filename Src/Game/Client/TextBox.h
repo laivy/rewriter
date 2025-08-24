@@ -7,7 +7,7 @@ private:
 	using Visual = std::variant<std::shared_ptr<Resource::Sprite>, std::tuple<Int2, Graphics::D2D::Color, Graphics::D2D::Color>>;
 
 public:
-	TextBox(IWindow* owner, const std::shared_ptr<Resource::Property>& prop = nullptr);
+	TextBox(IWindow* owner, const Resource::Property::ID id = nullptr);
 	~TextBox() = default;
 
 	void Update(float deltaTime) override;
@@ -22,7 +22,7 @@ public:
 	std::wstring GetText() const;
 
 private:
-	void Build(const std::shared_ptr<Resource::Property>& prop);
+	void Build(const Resource::Property::ID id);
 
 	void RenderBackground() const;
 	void RenderText() const;

@@ -1,7 +1,7 @@
 #include "Stdafx.h"
 #include "TextBlock.h"
 
-TextBlock::TextBlock(IWindow* owner, const std::shared_ptr<Resource::Property>& prop) :
+TextBlock::TextBlock(IWindow* owner, const Resource::Property::ID id) :
 	IControl{ owner },
 	m_font{ L"", 16.0f }
 {
@@ -23,7 +23,7 @@ void TextBlock::SetText(std::wstring_view text)
 	SetSize(Int2{ metrics.left + metrics.width, metrics.top + metrics.height });
 }
 
-void TextBlock::Build(const std::shared_ptr<Resource::Property>& prop)
+void TextBlock::Build(const Resource::Property::ID id)
 {
 	/*
 	- Z(Int)

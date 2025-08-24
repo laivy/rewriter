@@ -1,6 +1,7 @@
 #include "Stdafx.h"
 #include "App.h"
 #include "Delegates.h"
+#include "Hierarchy.h"
 
 App::App() :
 	m_hWnd{ NULL },
@@ -12,6 +13,7 @@ App::App() :
 
 App::~App()
 {
+	Hierarchy::Destroy();
 	Resource::Uninitialize();
 	Graphics::Uninitialize();
 }
@@ -123,8 +125,8 @@ void App::InitWindow()
 void App::InitApp()
 {
 	// 모듈 초기화
-	Graphics::Initialize(m_hWnd);
 	Resource::Initialize({ L"Editor", &Graphics::D2D::LoadSprite, &Graphics::D3D::LoadModel });
+	Graphics::Initialize(m_hWnd);
 	Delegates::OnWindowResized.Register(&Graphics::OnWindowResized);
 
 	// ImGui 초기화
@@ -138,6 +140,9 @@ void App::InitApp()
 	style.WindowMenuButtonPosition = ImGuiDir_None;
 	style.DockingSeparatorSize = 1.0f;
 	ImGui::StyleColorsDark();
+
+	// 싱글톤 초기화
+	Hierarchy::Instantiate();
 	
 	// 타이머 초기화
 	m_timer.Tick();
@@ -146,6 +151,8 @@ void App::InitApp()
 void App::Update()
 {
 	float deltaTime{ m_timer.Tick() };
+	if (auto hierarchy{ Hierarchy::GetInstance() })
+		hierarchy->Update(deltaTime);
 }
 
 void App::Render()
@@ -155,6 +162,8 @@ void App::Render()
 		Graphics::ImGui::Begin();
 		{
 			ImGui::ShowDemoWindow();
+			if (auto hierarchy{ Hierarchy::GetInstance() })
+				hierarchy->Render();
 		}
 		Graphics::ImGui::End();
 	}

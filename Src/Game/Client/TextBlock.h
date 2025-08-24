@@ -4,7 +4,7 @@
 class TextBlock final : public IControl
 {
 public:
-	TextBlock(IWindow* owner, const std::shared_ptr<Resource::Property>& prop = nullptr);
+	TextBlock(IWindow* owner, const Resource::Property::ID id = nullptr);
 	~TextBlock() = default;
 
 	void Render() const override;
@@ -12,7 +12,7 @@ public:
 	void SetText(std::wstring_view text);
 
 private:
-	void Build(const std::shared_ptr<Resource::Property>& prop);
+	void Build(const Resource::Property::ID id);
 
 private:
 	std::wstring m_text;

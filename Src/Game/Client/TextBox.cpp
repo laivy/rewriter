@@ -3,7 +3,7 @@
 #include "TextBox.h"
 #include "Window.h"
 
-TextBox::TextBox(IWindow* owner, const std::shared_ptr<Resource::Property>& prop) :
+TextBox::TextBox(IWindow* owner, const Resource::Property::ID id) :
 	IControl{ owner },
 	m_visuals{},
 	m_font{ L"", 16.0f },
@@ -160,7 +160,7 @@ std::wstring TextBox::GetText() const
 	return m_text;
 }
 
-void TextBox::Build(const std::shared_ptr<Resource::Property>& prop)
+void TextBox::Build(const Resource::Property::ID id)
 {
 	/*
 	- Z(Int)

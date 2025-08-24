@@ -3,7 +3,7 @@
 #include "Button.h"
 #include "Window.h"
 
-Button::Button(IWindow* owner, const std::shared_ptr<Resource::Property>& prop) :
+Button::Button(IWindow* owner, const Resource::Property::ID id) :
 	IControl{ owner },
 	m_state{ State::Normal }
 {
@@ -59,7 +59,7 @@ void Button::Render() const
 	}
 }
 
-void Button::Build(const std::shared_ptr<Resource::Property>& prop)
+void Button::Build(const Resource::Property::ID id)
 {
 	/*
 	- Z(Int)

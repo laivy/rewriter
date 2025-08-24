@@ -51,7 +51,8 @@ namespace
 
 	void Register(const Entry& entry, std::wstring_view fullPath, const std::optional<Resource::Property::ID> parentID = std::nullopt)
 	{
-		g_entries.push_back(entry);
+		auto it{ std::ranges::lower_bound(g_entries, entry.id, std::less{}, [](const auto& data) { return data.id; }) };
+		g_entries.insert(it, entry);
 		g_hashes.emplace(entry.id, fullPath);
 		if (parentID && *parentID != Resource::Property::InvalidID)
 			g_children[*parentID].push_back(entry.id);
@@ -279,6 +280,137 @@ namespace
 
 namespace Resource::Property
 {
+	Iterator::Iterator() :
+		m_parentID{ InvalidID },
+		m_current{ 0 },
+		m_end{ 0 }
+	{
+	}
+
+	Iterator::Iterator(const ID id) :
+		m_parentID{ id },
+		m_current{ 0 },
+		m_end{ 0 }
+	{
+		if (g_children.contains(m_parentID))
+			m_end = g_children[m_parentID].size();
+	}
+
+	Iterator::Iterator(std::wstring_view path) :
+		Iterator{ Get(path) }
+	{
+	}
+
+	Iterator::value_type Iterator::operator*() const
+	{
+		const auto id{ g_children[m_parentID][m_current] };
+		auto entry{ GetEntry(id) };
+		if (!entry)
+			return { L"", InvalidID };
+		return { entry->get().name, id };
+	}
+
+	Iterator& Iterator::operator++()
+	{
+		++m_current;
+		return *this;
+	}
+
+	Iterator Iterator::operator++(int)
+	{
+		auto it{ *this };
+		++m_current;
+		return it;
+	}
+
+	Iterator& Iterator::operator--()
+	{
+		--m_current;
+		return *this;
+	}
+
+	Iterator Iterator::operator--(int)
+	{
+		auto it{ *this };
+		--m_current;
+		return it;
+	}
+
+	Iterator& Iterator::operator+=(const difference_type offset)
+	{
+		m_current += offset;
+		return *this;
+	}
+
+	Iterator Iterator::operator+(const difference_type offset) const
+	{
+		auto it{ *this };
+		it.m_current += offset;
+		return it;
+	}
+
+	Iterator& Iterator::operator-=(const difference_type offset)
+	{
+		m_current -= offset;
+		return *this;
+	}
+
+	Iterator Iterator::operator-(const difference_type offset) const
+	{
+		auto it{ *this };
+		it.m_current -= offset;
+		return it;
+	}
+
+	Iterator::difference_type Iterator::operator-(const Iterator& other) const
+	{
+		if (m_parentID != other.m_parentID)
+		{
+			assert(false && "different parentID");
+			return 0;
+		}
+		return static_cast<difference_type>(m_current) - static_cast<difference_type>(other.m_current);
+	}
+
+	Iterator::value_type Iterator::operator[](const difference_type offset) const
+	{
+		const auto index{ static_cast<std::size_t>(static_cast<difference_type>(m_current) + offset) };
+		if (index >= m_end)
+		{
+			assert(false && "out of range");
+			return { L"", InvalidID };
+		}
+
+		const auto id{ g_children[m_parentID][index] };
+		auto entry{ GetEntry(id) };
+		if (!entry)
+			return { L"", InvalidID };
+		return { entry->get().name, id };
+	}
+
+	bool Iterator::operator==(const Iterator& other) const
+	{
+		if (m_parentID != other.m_parentID)
+			return false;
+		if (m_current != other.m_current)
+			return false;
+		if (m_end != other.m_end)
+			return false;
+		return true;
+	}
+
+	Iterator Iterator::begin() const
+	{
+		return *this;
+	}
+
+	Iterator Iterator::end() const
+	{
+		auto it{ *this };
+		it.m_current = it.m_end;
+		return it;
+	}
+
 	ID New(std::wstring_view name)
 	{
 		if (name.find(L'/') != std::wstring_view::npos)
@@ -362,6 +494,63 @@ namespace Resource::Property
 		return targetID;
 	}
 
+	ID Property::GetParent(const ID id)
+	{
+		if (!g_hashes.contains(id))
+			return InvalidID;
+
+		const auto fullPath{ g_hashes[id] };
+		const auto pos{ fullPath.rfind(L'/') };
+		if (pos == std::wstring_view::npos)
+			return InvalidID;
+
+		auto parentPath{ fullPath.substr(0, pos) };
+		const ID parentID{ Hash(parentPath) };
+		if (!g_hashes.contains(parentID))
+			return InvalidID;
+		return parentID;
+	}
+
+	std::wstring GetPath(const ID id)
+	{
+		if (g_hashes.contains(id))
+			return g_hashes[id];
+		return L"";
+	}
+
+	void SetName(const ID id, std::wstring_view name)
+	{
+		auto entry{ GetEntry(id) };
+		if (!entry)
+		{
+			assert(false && "not found");
+			return;
+		}
+		const auto newID{ Hash(name) };
+		if (g_hashes.contains(newID))
+		{
+			assert(false && "already exists");
+			return;
+		}
+
+		entry->get().name = name;
+
+		if (const auto parentID{ GetParent(id) }; parentID != InvalidID)
+		{
+			auto it{ std::ranges::find(g_children[parentID], id) };
+			if (it != g_children[parentID].end())
+				*it = newID;
+		}
+
+		auto hashHandle{ g_hashes.extract(id) };
+		hashHandle.key() = newID;
+		g_hashes.insert(std::move(hashHandle));
+
+		auto childrenHandle{ g_children.extract(id) };
+		childrenHandle.key() = newID;
+		g_children.insert(std::move(childrenHandle));
+	}
+
 	void Set(const ID id, std::int32_t value)
 	{
 		if (auto entry{ GetEntry(id) })
@@ -374,16 +563,24 @@ namespace Resource::Property
 			entry->get().value = value;
 	}
 
-	void Set(const ID id, const std::wstring& value)
+	void Set(const ID id, std::wstring_view value)
 	{
 		if (auto entry{ GetEntry(id) })
-			entry->get().value = value;
+			entry->get().value.emplace<std::wstring>(value);
 	}
 
 	void Set(const ID id, const Sprite& value)
 	{
 		if (auto entry{ GetEntry(id) })
 			entry->get().value = value;
+	}
+
+	std::optional<std::wstring> Property::GetName(const ID id)
+	{
+		auto entry{ GetEntry(id) };
+		if (!entry)
+			return std::nullopt;
+		return entry->get().name;
 	}
 
 	std::optional<std::int32_t> GetInt(const ID id)
@@ -420,6 +617,33 @@ namespace Resource::Property
 		if (!std::holds_alternative<std::wstring>(value))
 			return std::nullopt;
 		return std::get<std::wstring>(value);
+	}
+
+	std::optional<Sprite> Property::GetSprite(const ID id)
+	{
+		auto entry{ GetEntry(id) };
+		if (!entry)
+			return std::nullopt;
+
+		const auto& value{ entry->get().value };
+		if (!std::holds_alternative<Resource::Sprite>(value))
+			return std::nullopt;
+		return std::get<Resource::Sprite>(value);
+	}
+
+	void Unload(const ID id)
+	{
+		if (!g_hashes.contains(id))
+			return;
+
+		auto it{ std::ranges::lower_bound(g_entries, id, std::less{}, [](const auto& data) { return data.id; }) };
+		if (it == g_entries.end())
+			return;
+		if (it->id != id)
+			return;
+		g_entries.erase(it);
+		g_hashes.erase(id);
+		g_children.erase(id);
 	}
 
 	bool Save(const ID id, const std::filesystem::path& path)
