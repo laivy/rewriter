@@ -439,4 +439,6 @@ FodyWeavers.xsd
 # Rewriter
 Asset/
 Data/
-Src/Modules/Graphics/Shader/*.h
+Src/Library/Graphics/Src/Shader/*.h
+/Src/Library/Graphics/Src/Shader/Model.ps.h
+/Src/Library/Graphics/Src/Shader/Model.vs.h
