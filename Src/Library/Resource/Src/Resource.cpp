@@ -6,11 +6,11 @@ namespace Resource
 {
 	void Initialize(const Initializer& initializer)
 	{
-		OnInitialize.Notify(initializer);
+		Delegates::OnInitialize.Notify(initializer);
 	}
 
 	void Uninitialize()
 	{
-		OnUninitialize.Notify();
+		Delegates::OnUninitialize.Notify();
 	}
 }

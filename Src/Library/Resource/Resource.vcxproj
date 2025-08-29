@@ -248,17 +248,20 @@
     <ClInclude Include="..\..\Common\Singleton.h" />
     <ClInclude Include="..\..\Common\Stdafx.h" />
     <ClInclude Include="..\..\Common\Type.h" />
+    <ClInclude Include="Include\Resource\Define.h" />
     <ClInclude Include="Include\Resource\Model.h" />
     <ClInclude Include="Include\Resource\Property.h" />
     <ClInclude Include="Include\Resource\Resource.h" />
     <ClInclude Include="Include\Resource\Sprite.h" />
     <ClInclude Include="Src\Delegates.h" />
+    <ClInclude Include="Src\Manager.h" />
     <ClInclude Include="Src\Stdafx.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\Common\Type.cpp" />
     <ClCompile Include="Src\DllMain.cpp" />
     <ClCompile Include="Src\Delegates.cpp" />
+    <ClCompile Include="Src\Manager.cpp" />
     <ClCompile Include="Src\Model.cpp" />
     <ClCompile Include="Src\Property.cpp" />
     <ClCompile Include="Src\Resource.cpp" />

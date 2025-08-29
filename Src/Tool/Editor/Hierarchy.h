@@ -7,7 +7,7 @@ class Hierarchy :
 private:
 	struct Root
 	{
-		Resource::Property::ID id;
+		Resource::ID id;
 		std::filesystem::path path;
 	};
 
@@ -26,16 +26,16 @@ public:
 	void Update(float deltaTime);
 	void Render();
 
-	void OpenTree(const Resource::Property::ID id);
-	void CloseTree(const Resource::Property::ID id);
-	bool IsRoot(const Resource::Property::ID id) const;
+	void OpenTree(Resource::ID id);
+	void CloseTree(Resource::ID id);
+	bool IsRoot(Resource::ID id) const;
 
 private:
 	// 델리게이트
-	void OnPropertyAdded(const Resource::Property::ID id);
-	void OnPropertyDeleted(const Resource::Property::ID id);
-	void OnPropertyModified(const Resource::Property::ID id);
-	void OnPropertySelected(const Resource::Property::ID id);
+	void OnPropertyAdded(Resource::ID id);
+	void OnPropertyDeleted(Resource::ID id);
+	void OnPropertyModified(Resource::ID id);
+	void OnPropertySelected(Resource::ID id);
 
 	// 메뉴
 	void OnMenuFileNew();
@@ -52,21 +52,21 @@ private:
 	void DragDrop();
 	void RenderMenuBar();
 	void RenderPropertyTree();
-	void RenderProperty(const Resource::Property::ID id);
-	void RenderNodeContextMenu(const Resource::Property::ID id);
+	void RenderProperty(Resource::ID id);
+	void RenderNodeContextMenu(Resource::ID id);
 	void RenderModal();
 
 	void LoadDataFile(const std::filesystem::path& path);
-	void Add(const Resource::Property::ID parentID, const Resource::Property::ID childID);
-	void Delete(const Resource::Property::ID id);
-	void SetModified(const Resource::Property::ID id, bool modified);
+	void Add(Resource::ID parentID, Resource::ID childID);
+	void Delete(Resource::ID id);
+	void SetModified(Resource::ID id, bool modified);
 
-	Root GetRoot(const Resource::Property::ID id) const;
-	bool IsModified(const Resource::Property::ID id) const;
-	bool IsOpened(const Resource::Property::ID id) const;
-	bool IsSelected(const Resource::Property::ID id) const;
+	Root GetRoot(Resource::ID id) const;
+	bool IsModified(Resource::ID id) const;
+	bool IsOpened(Resource::ID id) const;
+	bool IsSelected(Resource::ID id) const;
 
 private:
 	std::vector<Root> m_roots;
-	std::unordered_map<Resource::Property::ID, Context> m_contexts;
+	std::unordered_map<Resource::ID, Context> m_contexts;
 };

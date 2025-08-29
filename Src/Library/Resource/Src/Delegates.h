@@ -2,5 +2,8 @@
 #include "Sprite.h"
 #include "Resource.h"
 
-extern Delegate<const Resource::Initializer&> OnInitialize;
-extern Delegate<> OnUninitialize;
+namespace Delegates
+{
+	extern Delegate<const Resource::Initializer&> OnInitialize;
+	extern Delegate<> OnUninitialize;
+}

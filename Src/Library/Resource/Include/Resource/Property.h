@@ -1,10 +1,8 @@
 #pragma once
-#include "Sprite.h"
+#include "Define.h"
 
-namespace Resource::Property
+namespace Resource
 {
-	using ID = std::invoke_result_t<std::hash<std::wstring_view>, std::wstring_view>;
-
 	// 직계 자식 프로퍼티 순회
 	class RESOURCE_API Iterator
 	{
@@ -18,8 +16,8 @@ namespace Resource::Property
 
 	public:
 		Iterator();
-		Iterator(const ID id);
-		Iterator(std::wstring_view path);
+		Iterator(ID id);
+		Iterator(const std::wstring& path);
 
 		value_type operator*() const;
 		Iterator& operator++();
@@ -43,26 +41,24 @@ namespace Resource::Property
 		std::size_t m_end;
 	};
 
-	const ID InvalidID{ std::hash<std::wstring_view>{}(L"") };
+	RESOURCE_API ID New(const std::wstring& name);
+	RESOURCE_API ID New(ID parentID, const std::wstring& name);
+	RESOURCE_API ID Get(const std::wstring& path);
+	RESOURCE_API ID Get(ID parentID, const std::wstring& path);
+	RESOURCE_API ID GetParent(ID id);
 
-	RESOURCE_API ID New(std::wstring_view name);
-	RESOURCE_API ID New(const ID parentID, std::wstring_view name);
-	RESOURCE_API ID Get(std::wstring_view path);
-	RESOURCE_API ID Get(const ID parentID, std::wstring_view path);
-	RESOURCE_API ID GetParent(const ID id);
-	RESOURCE_API std::wstring GetPath(const ID id);
+	RESOURCE_API void SetName(ID id, const std::wstring& name);
+	RESOURCE_API void Set(ID id, std::int32_t value);
+	RESOURCE_API void Set(ID id, float value);
+	RESOURCE_API void Set(ID id, const std::wstring& value);
+	//RESOURCE_API void Set(const ID id, const Sprite& value);
 
-	RESOURCE_API void SetName(const ID id, std::wstring_view name);
-	RESOURCE_API void Set(const ID id, std::int32_t value);
-	RESOURCE_API void Set(const ID id, float value);
-	RESOURCE_API void Set(const ID id, std::wstring_view value);
-	RESOURCE_API void Set(const ID id, const Sprite& value);
-	RESOURCE_API std::optional<std::wstring> GetName(const ID id);
+	RESOURCE_API std::wstring GetName(ID id);
 	RESOURCE_API std::optional<std::int32_t> GetInt(const ID id);
 	RESOURCE_API std::optional<float> GetFloat(const ID id);
 	RESOURCE_API std::optional<std::wstring> GetString(const ID id);
-	RESOURCE_API std::optional<Sprite> GetSprite(const ID id);
+	//RESOURCE_API std::optional<Sprite> GetSprite(const ID id);
 
-	RESOURCE_API void Unload(const ID id);
-	RESOURCE_API bool Save(const ID id, const std::filesystem::path& path);
+	//RESOURCE_API void Unload(const ID id);
+	RESOURCE_API bool SaveToFile(const ID id, const std::filesystem::path& path);
 }

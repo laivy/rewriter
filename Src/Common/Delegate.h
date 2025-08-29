@@ -41,18 +41,16 @@ public:
 		for (const auto& callback : m_rawCallbacks)
 			callback(params...);
 
-		std::erase_if(m_safeCallbacks,
-			[&params...](const auto& elem)
-			{
-				const auto& [ref, callback] { elem };
-				auto lock{ ref.lock() };
-				if (!lock)
-					return true;
+		std::erase_if(m_safeCallbacks, [&params...](const auto& elem)
+		{
+			const auto& [ref, callback] { elem };
+			auto lock{ ref.lock() };
+			if (!lock)
+				return true;
 
-				callback(params...);
-				return false;
-			}
-		);
+			callback(params...);
+			return false;
+		});
 	}
 
 private:

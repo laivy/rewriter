@@ -51,42 +51,42 @@ void Hierarchy::Render()
 	RenderModal();
 }
 
-void Hierarchy::OpenTree(const Resource::Property::ID id)
+void Hierarchy::OpenTree(Resource::ID id)
 {
 	m_contexts[id].isOpened = true;
 }
 
-void Hierarchy::CloseTree(const Resource::Property::ID id)
+void Hierarchy::CloseTree(Resource::ID id)
 {
 	m_contexts[id].isOpened = false;
 }
 
-bool Hierarchy::IsRoot(const Resource::Property::ID id) const
+bool Hierarchy::IsRoot(Resource::ID id) const
 {
 	return std::ranges::find_if(m_roots, [id](const auto& root) { return root.id == id; }) != m_roots.end();
 }
 
-void Hierarchy::OnPropertyAdded(const Resource::Property::ID id)
+void Hierarchy::OnPropertyAdded(Resource::ID id)
 {
-	const auto parentID{ Resource::Property::GetParent(id) };
-	if (parentID == Resource::Property::InvalidID)
+	const auto parentID{ Resource::GetParent(id) };
+	if (parentID == Resource::InvalidID)
 		return;
 
 	OpenTree(parentID);
 	SetModified(id, true);
 }
 
-void Hierarchy::OnPropertyDeleted(const Resource::Property::ID id)
+void Hierarchy::OnPropertyDeleted(Resource::ID id)
 {
 	SetModified(id, true);
 }
 
-void Hierarchy::OnPropertyModified(const Resource::Property::ID id)
+void Hierarchy::OnPropertyModified(Resource::ID id)
 {
 	SetModified(id, true);
 }
 
-void Hierarchy::OnPropertySelected(const Resource::Property::ID id)
+void Hierarchy::OnPropertySelected(Resource::ID id)
 {
 	// 이미 선택된 노드를 선택한 경우 선택 해제 안함
 	// 그리고 이미 선택된 노드이기 때문에 컨테이너에 추가 안함
@@ -106,11 +106,11 @@ void Hierarchy::OnMenuFileNew()
 {
 	std::size_t index{ 0 };
 	std::wstring name{ std::format(L"{}{}", DefaultFileName, Stringtable::DATA_FILE_EXT) };
-	auto id{ Resource::Property::InvalidID };
+	auto id{ Resource::InvalidID };
 	while (true)
 	{
-		id = Resource::Property::New(name);
-		if (id != Resource::Property::InvalidID)
+		id = Resource::New(name);
+		if (id != Resource::InvalidID)
 			break;
 		name = std::format(L"{}{}{}", DefaultFileName, ++index, Stringtable::DATA_FILE_EXT);
 	};
@@ -172,7 +172,7 @@ void Hierarchy::OnMenuFileSave()
 			continue;
 
 		SetModified(root.id, false);
-		Resource::Property::Save(root.id, root.path);
+		Resource::SaveToFile(root.id, root.path);
 	}
 }
 
@@ -327,18 +327,18 @@ void Hierarchy::RenderMenuBar()
 
 void Hierarchy::RenderPropertyTree()
 {
-	ImGui::PushID("TreeNode");
+	ImGui::PushID("Property");
 	for (const auto& root : m_roots)
 		RenderProperty(root.id);
 	ImGui::PopID();
 }
 
-void Hierarchy::RenderProperty(const Resource::Property::ID id)
+void Hierarchy::RenderProperty(Resource::ID id)
 {
-	ImGui::PushID(id);
+	ImGui::PushID(std::to_string(id).c_str());
 
 	const bool isRoot{ IsRoot(id) };
-	std::string name{ Util::wstou8s(Resource::Property::GetName(id).value_or(L"")) };
+	std::string name{ Util::wstou8s(Resource::GetName(id)) };
 	if (isRoot)
 	{
 		// 자식 노드에 변경 사항이 있으면 루트 노드 이름 앞에 '*' 추가
@@ -391,7 +391,7 @@ void Hierarchy::RenderProperty(const Resource::Property::ID id)
 	// 하위 트리
 	if (isTreeNodeOpened)
 	{
-		for (const auto& child : Resource::Property::Iterator{ id } | std::views::values)
+		for (const auto& child : Resource::Iterator{ id } | std::views::values)
 			RenderProperty(child);
 		ImGui::TreePop();
 	}
@@ -402,7 +402,7 @@ void Hierarchy::RenderProperty(const Resource::Property::ID id)
 	ImGui::PopID();
 }
 
-void Hierarchy::RenderNodeContextMenu(const Resource::Property::ID id)
+void Hierarchy::RenderNodeContextMenu(Resource::ID id)
 {
 	if (!ImGui::BeginPopupContextItem("CONTEXT"))
 		return;
@@ -445,7 +445,7 @@ void Hierarchy::RenderNodeContextMenu(const Resource::Property::ID id)
 
 		std::size_t index{ 0 };
 		std::wstring name{ DefaultPropertyName };
-		while (Resource::Property::New(id, name) == Resource::Property::InvalidID)
+		while (Resource::New(id, name) == Resource::InvalidID)
 			name = std::format(L"{}{}", DefaultPropertyName, ++index);
 	}
 
@@ -468,62 +468,62 @@ void Hierarchy::RenderModal()
 
 void Hierarchy::LoadDataFile(const std::filesystem::path& path)
 {
-	const auto rootID{ Resource::Property::Get(path.wstring()) };
-	if (rootID == Resource::Property::InvalidID)
+	const auto rootID{ Resource::Get(path.wstring()) };
+	if (rootID == Resource::InvalidID)
 	{
 		assert(false && "failed to load data file");
 		return;
 	}
-	Resource::Property::SetName(rootID, path.filename().wstring());
+	Resource::SetName(rootID, path.filename().wstring());
 	m_roots.emplace_back(rootID, path);
 }
 
-void Hierarchy::Add(const Resource::Property::ID parentID, const Resource::Property::ID childID)
+void Hierarchy::Add(Resource::ID parentID, Resource::ID childID)
 {
 	assert(false && "Not implemented");
 }
 
-void Hierarchy::Delete(const Resource::Property::ID id)
+void Hierarchy::Delete(Resource::ID id)
 {
 	m_contexts[id].isInvalid = true;
 }
 
-void Hierarchy::SetModified(const Resource::Property::ID id, bool modified)
+void Hierarchy::SetModified(Resource::ID id, bool modified)
 {
 	m_contexts[id].isModified = modified;
 }
 
-Hierarchy::Root Hierarchy::GetRoot(const Resource::Property::ID id) const
+Hierarchy::Root Hierarchy::GetRoot(Resource::ID id) const
 {
-	Resource::Property::ID rootID{ Resource::Property::InvalidID };
-	Resource::Property::ID parentID{ Resource::Property::GetParent(id) };
+	Resource::ID rootID{ Resource::InvalidID };
+	Resource::ID parentID{ Resource::GetParent(id) };
 	do
 	{
 		rootID = parentID;
-		parentID = Resource::Property::GetParent(parentID);
-	} while (parentID != Resource::Property::InvalidID);
+		parentID = Resource::GetParent(parentID);
+	} while (parentID != Resource::InvalidID);
 
 	auto it{ std::ranges::find_if(m_roots, [rootID](const auto& root) { return root.id == rootID; }) };
 	if (it == m_roots.end())
-		return Root{ Resource::Property::InvalidID };
+		return Root{ Resource::InvalidID };
 	return *it;
 }
 
-bool Hierarchy::IsModified(const Resource::Property::ID id) const
+bool Hierarchy::IsModified(Resource::ID id) const
 {
 	if (!m_contexts.contains(id))
 		return false;
 	return m_contexts.at(id).isModified;
 }
 
-bool Hierarchy::IsOpened(const Resource::Property::ID id) const
+bool Hierarchy::IsOpened(Resource::ID id) const
 {
 	if (!m_contexts.contains(id))
 		return false;
 	return m_contexts.at(id).isOpened;
 }
 
-bool Hierarchy::IsSelected(const Resource::Property::ID id) const
+bool Hierarchy::IsSelected(Resource::ID id) const
 {
 	if (!m_contexts.contains(id))
 		return false;
