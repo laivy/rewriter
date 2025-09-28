@@ -43,6 +43,7 @@ namespace Resource
 
 	RESOURCE_API ID New(const std::wstring& name);
 	RESOURCE_API ID New(ID parentID, const std::wstring& name);
+	RESOURCE_API void Delete(ID id);
 	RESOURCE_API ID Get(const std::wstring& path);
 	RESOURCE_API ID Get(ID parentID, const std::wstring& path);
 	RESOURCE_API ID GetParent(ID id);

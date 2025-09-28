@@ -25,6 +25,7 @@ namespace Resource
 
 		struct Entry
 		{
+			std::wstring path;
 			ID parentID;
 			std::vector<ID> children;
 		};
@@ -32,8 +33,9 @@ namespace Resource
 	public:
 		Manager();
 
-		ID New(const std::wstring& name);
-		ID New(ID parentID, const std::wstring& name);
+		ID New(const std::wstring& path);
+		ID New(ID parentID, const std::wstring& path);
+		void Delete(ID id);
 		ID Get(const std::wstring& path) const;
 		ID Get(ID parentID, const std::wstring& path) const;
 		ID GetParent(ID id) const;
@@ -91,14 +93,15 @@ namespace Resource
 		void OnInitialize(const Initializer& initializer);
 		void OnUninitialize();
 
+		ID LoadFromFile(const std::filesystem::path& path, const std::wstring& subPath);
+
 	private:
 		std::filesystem::path m_mountPath;
 		std::function<Sprite(std::span<std::byte>)> m_loadSprite;
 		std::function<std::shared_ptr<Model>(std::span<std::byte>)> m_loadModel;
 
 		std::vector<std::optional<Property>> m_properties;
-		std::unordered_map<ID, Entry> m_entries;
-		std::unordered_map<ID, std::wstring> m_idToPath;
 		std::unordered_map<std::wstring, ID> m_pathToID;
+		std::unordered_map<ID, Entry> m_idToEntry;
 	};
 }

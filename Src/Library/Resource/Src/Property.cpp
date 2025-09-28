@@ -161,6 +161,12 @@ namespace Resource
 		return InvalidID;
 	}
 
+	void Delete(ID id)
+	{
+		if (auto manager{ Manager::GetInstance() })
+			manager->Delete(id);
+	}
+
 	ID Get(const std::wstring& path)
 	{
 		if (auto manager{ Manager::GetInstance() })

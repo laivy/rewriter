@@ -50,10 +50,9 @@ private:
 
 	void Shortcut();
 	void DragDrop();
-	void RenderMenuBar();
-	void RenderPropertyTree();
-	void RenderProperty(Resource::ID id);
-	void RenderNodeContextMenu(Resource::ID id);
+	void MenuBar();
+	void TreeView();
+	void PropertyContextMenu(Resource::ID id);
 	void RenderModal();
 
 	void LoadDataFile(const std::filesystem::path& path);
