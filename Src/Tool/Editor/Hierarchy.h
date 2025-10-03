@@ -1,7 +1,7 @@
 #pragma once
 
 class Hierarchy :
-	public IObserver,
+	public IDelegate::IListener,
 	public TSingleton<Hierarchy>
 {
 private:

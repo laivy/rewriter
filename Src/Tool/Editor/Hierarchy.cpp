@@ -17,10 +17,10 @@ namespace
 
 Hierarchy::Hierarchy()
 {
-	Delegates::OnPropertyAdded.Register(this, std::bind_front(&Hierarchy::OnPropertyAdded, this));
-	Delegates::OnPropertyDeleted.Register(this, std::bind_front(&Hierarchy::OnPropertyDeleted, this));
-	Delegates::OnPropertyModified.Register(this, std::bind_front(&Hierarchy::OnPropertyModified, this));
-	Delegates::OnPropertySelected.Register(this, std::bind_front(&Hierarchy::OnPropertySelected, this));
+	Delegates::OnPropertyAdded.Bind(this, std::bind_front(&Hierarchy::OnPropertyAdded, this));
+	Delegates::OnPropertyDeleted.Bind(this, std::bind_front(&Hierarchy::OnPropertyDeleted, this));
+	Delegates::OnPropertyModified.Bind(this, std::bind_front(&Hierarchy::OnPropertyModified, this));
+	Delegates::OnPropertySelected.Bind(this, std::bind_front(&Hierarchy::OnPropertySelected, this));
 }
 
 void Hierarchy::Update(float deltaTime)
@@ -363,7 +363,7 @@ void Hierarchy::TreeView()
 
 		// 닫혀있어도 클릭 되도록
 		if (ImGui::IsItemClicked())
-			Delegates::OnPropertySelected.Notify(id);
+			Delegates::OnPropertySelected.Broadcast(id);
 
 		// 트리 여닫기
 		if (ImGui::IsItemToggledOpen())
@@ -407,7 +407,7 @@ void Hierarchy::PropertyContextMenu(Resource::ID id)
 		return;
 
 	if (!IsSelected(id))
-		Delegates::OnPropertySelected.Notify(id);
+		Delegates::OnPropertySelected.Broadcast(id);
 
 	// 루트 노드 전용 메뉴
 	do

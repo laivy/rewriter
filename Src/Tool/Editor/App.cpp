@@ -70,7 +70,7 @@ LRESULT App::WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 			int height{ GET_Y_LPARAM(lParam) };
 			if (width == 0 && height == 0)
 				assert(false);
-			Delegates::OnWindowResized.Notify(width, height);
+			Delegates::OnWindowResized.Broadcast(width, height);
 		}
 		break;
 	}
@@ -127,7 +127,7 @@ void App::InitApp()
 	// 모듈 초기화
 	Resource::Initialize({ L"Editor", &Graphics::D2D::LoadSprite, &Graphics::D3D::LoadModel });
 	Graphics::Initialize(m_hWnd);
-	Delegates::OnWindowResized.Register(&Graphics::OnWindowResized);
+	Delegates::OnWindowResized.Bind(&Graphics::OnWindowResized);
 
 	// ImGui 초기화
 	ImGui::SetCurrentContext(Graphics::ImGui::GetContext());

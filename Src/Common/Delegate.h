@@ -1,59 +1,139 @@
 #pragma once
 
-// Delegate에 콜백 함수를 등록할 개체의 수명이 무한하지 않을 경우 이 클래스를 상속받는 것이 좋다.
-class IObserver
+class IDelegate
 {
-	template <class... Params>
-	friend class Delegate;
+public:
+	struct Handle
+	{
+		std::weak_ptr<IDelegate> owner;
+		std::uint64_t id;
+	};
 
-private:
-	// Delegate에서 참조할 weak_ptr를 만들기 위한 더미 타입
-	class Reference	{};
+	class IListener
+	{
+		template<class... Params>
+		friend class Delegate;
+
+	public:
+		~IListener()
+		{
+			for (const auto& handle : m_handles)
+			{
+				if (auto owner{ handle.owner.lock() })
+					owner->Unbind(handle);
+			}
+		}
+
+	private:
+		std::vector<Handle> m_handles;
+	};
 
 public:
-	IObserver() : m_reference{ new Reference }
-	{
-	}
-
-private:
-	std::shared_ptr<Reference> m_reference;
+	virtual ~IDelegate() {}
+	virtual void Unbind() {}
+	virtual void Unbind(const Handle& handle) {}
 };
 
 template <class... Params>
 class Delegate
 {
-private:
+public:
 	using Callback = std::function<void(Params...)>;
 
-public:
-	void Register(const Callback& callback)
+private:
+	class Impl :
+		public IDelegate,
+		public std::enable_shared_from_this<IDelegate>
 	{
-		m_rawCallbacks.push_back(callback);
-	}
-
-	void Register(IObserver* observer, const Callback& callback)
-	{
-		m_safeCallbacks.emplace_back(observer->m_reference, callback);
-	}
-
-	void Notify(const Params&... params)
-	{
-		for (const auto& callback : m_rawCallbacks)
-			callback(params...);
-
-		std::erase_if(m_safeCallbacks, [&params...](const auto& elem)
+	private:
+		struct Entry
 		{
-			const auto& [ref, callback] { elem };
-			auto lock{ ref.lock() };
-			if (!lock)
-				return true;
+			Handle handle;
+			Callback callback;
+		};
 
-			callback(params...);
-			return false;
-		});
+	public:
+		Impl() :
+			m_nextHandleID{ 0 }
+		{
+		}
+
+		~Impl() override
+		{
+			Unbind();
+		}
+
+		Handle Bind(const Callback& callback)
+		{
+			Handle handle{ weak_from_this(), m_nextHandleID++ };
+			m_entries.emplace_back(handle, callback);
+			return handle;
+		}
+
+		void Bind(IDelegate::IListener* listener, const Callback& callback)
+		{
+			auto handle{ Bind(callback) };
+			listener->m_handles.push_back(handle);
+		}
+
+		void Unbind() override
+		{
+			m_entries.clear();
+		}
+
+		void Unbind(const Handle& handle) override
+		{
+			auto owner{ handle.owner.lock() };
+			if (owner.get() != this)
+				return;
+
+			auto it{ std::ranges::find(m_entries, handle.id, [](const auto& entry) { return entry.handle.id; }) };
+			if (it != m_entries.end())
+				m_entries.erase(it);
+		}
+
+		void Broadcast(const Params&... params) const
+		{
+			for (const auto& entry : m_entries)
+				entry.callback(params...);
+		}
+
+	private:
+		std::uint64_t m_nextHandleID;
+		std::vector<Entry> m_entries;
+	};
+
+public:
+	Delegate() :
+		m_impl{ std::make_shared<Impl>() }
+	{
+	}
+
+	IDelegate::Handle Bind(const Callback& callback)
+	{
+		return m_impl->Bind(callback);
+	}
+
+	void Bind(IDelegate::IListener* listener, const Callback& callback)
+	{
+		m_impl->Bind(listener, callback);
+	}
+
+	void Unbind()
+	{
+		m_impl->Unbind();
+	}
+
+	void Unbind(const IDelegate::Handle& handle)
+	{
+		m_impl->Unbind(handle);
+	}
+
+	void Broadcast(const Params&... params) const
+	{
+		m_impl->Broadcast(params...);
 	}
 
 private:
-	std::vector<Callback> m_rawCallbacks;
-	std::vector<std::pair<std::weak_ptr<IObserver::Reference>, Callback>> m_safeCallbacks;
+	std::shared_ptr<Impl> m_impl;
 };

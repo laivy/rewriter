@@ -4,7 +4,7 @@
 namespace Resource
 {
 	class Manager :
-		public IObserver,
+		public IDelegate::IListener,
 		public TSingleton<Manager>
 	{
 	private:

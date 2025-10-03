@@ -6,8 +6,8 @@ namespace Resource
 {
 	Manager::Manager()
 	{
-		Delegates::OnInitialize.Register(this, std::bind_front(&Manager::OnInitialize, this));
-		Delegates::OnUninitialize.Register(this, std::bind_front(&Manager::OnUninitialize, this));
+		Delegates::OnInitialize.Bind(this, std::bind_front(&Manager::OnInitialize, this));
+		Delegates::OnUninitialize.Bind(this, std::bind_front(&Manager::OnUninitialize, this));
 	}
 
 	ID Manager::New(const std::wstring& path)
