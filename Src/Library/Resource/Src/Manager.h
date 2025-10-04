@@ -41,6 +41,7 @@ namespace Resource
 		ID GetParent(ID id) const;
 		ID GetChild(ID parentID, std::size_t index) const;
 		std::size_t GetChildCount(ID parentID) const;
+		void Move(ID targetID, ID parentID, std::optional<std::size_t> index);
 
 		void SetName(ID id, const std::wstring& name);
 

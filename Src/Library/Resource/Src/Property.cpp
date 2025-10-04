@@ -188,6 +188,12 @@ namespace Resource
 		return InvalidID;
 	}
 
+	void Move(ID targetID, ID parentID, std::optional<std::size_t> index)
+	{
+		if (auto manager{ Manager::GetInstance() })
+			manager->Move(targetID, parentID, index);
+	}
+
 	void SetName(ID id, const std::wstring& name)
 	{
 		if (auto manager{ Manager::GetInstance() })

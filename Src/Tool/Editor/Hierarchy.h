@@ -52,11 +52,11 @@ private:
 	void DragDrop();
 	void MenuBar();
 	void TreeView();
-	void PropertyContextMenu(Resource::ID id);
+	void ContextMenu(Resource::ID id);
 	void RenderModal();
 
 	void LoadDataFile(const std::filesystem::path& path);
-	void Add(Resource::ID parentID, Resource::ID childID);
+	Resource::ID New(Resource::ID parentID);
 	void Delete(Resource::ID id);
 	void SetModified(Resource::ID id, bool modified);
 
@@ -68,4 +68,6 @@ private:
 private:
 	std::vector<Root> m_roots;
 	std::unordered_map<Resource::ID, Context> m_contexts;
+
+	bool m_isAnyPropertySelected;
 };

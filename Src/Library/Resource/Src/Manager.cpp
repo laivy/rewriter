@@ -86,12 +86,11 @@ namespace Resource
 			assert(false && "invalid id");
 			return;
 		}
+
 		auto& prop{ m_properties.at(id) };
 		if (!prop)
-		{
-			assert(false && "not exists");
 			return;
-		}
+
 		if (!m_idToEntry.contains(id))
 		{
 			assert(false && "invalid id");
@@ -99,7 +98,7 @@ namespace Resource
 		}
 
 		auto& entry{ m_idToEntry.at(id) };
-		if (const ID parentID{ entry.parentID }; parentID != InvalidID)
+		if (const ID parentID{ entry.parentID }; parentID != InvalidID && m_idToEntry.contains(parentID))
 			std::erase(m_idToEntry.at(parentID).children, id);
 
 		for (ID childID : entry.children)
@@ -162,6 +161,43 @@ namespace Resource
 		if (!m_idToEntry.contains(parentID))
 			return 0;
 		return m_idToEntry.at(parentID).children.size();
+	}
+
+	void Manager::Move(ID targetID, ID parentID, std::optional<std::size_t> index)
+	{
+		if (targetID >= m_properties.size() || parentID >= m_properties.size())
+		{
+			assert(false && "invalid id");
+			return;
+		}
+		auto& target{ m_properties.at(targetID) };
+		auto& parent{ m_properties.at(parentID) };
+		if (!target || !parent)
+		{
+			assert(false && "not exists");
+			return;
+		}
+		if (!m_idToEntry.contains(targetID) || !m_idToEntry.contains(parentID))
+		{
+			assert(false && "invalid id");
+			return;
+		}
+
+		// 현재 부모의 자식 목록에서 삭제
+		if (const ID oldParentID{ GetParent(targetID) }; oldParentID != InvalidID)
+		{
+			if (m_idToEntry.contains(oldParentID))
+				std::erase(m_idToEntry.at(oldParentID).children, targetID);
+		}
+
+		auto& childEntry{ m_idToEntry.at(targetID) };
+		auto& parentEntry{ m_idToEntry.at(parentID) };
+		childEntry.path = std::format(L"{}/{}", parentEntry.path, target->name);
+		childEntry.parentID = parentID;
+		if (index >= parentEntry.children.size())
+			parentEntry.children.push_back(targetID);
+		else
+			parentEntry.children.insert(parentEntry.children.begin() + *index, targetID);
 	}
 
 	void Manager::SetName(ID id, const std::wstring& name)

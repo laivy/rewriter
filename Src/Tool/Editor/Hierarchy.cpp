@@ -15,7 +15,8 @@ namespace
 	constexpr auto DefaultPropertyName{ L"Property" };
 }
 
-Hierarchy::Hierarchy()
+Hierarchy::Hierarchy() :
+	m_isAnyPropertySelected{ false }
 {
 	Delegates::OnPropertyAdded.Bind(this, std::bind_front(&Hierarchy::OnPropertyAdded, this));
 	Delegates::OnPropertyDeleted.Bind(this, std::bind_front(&Hierarchy::OnPropertyDeleted, this));
@@ -31,26 +32,23 @@ void Hierarchy::Update(float deltaTime)
 			return false;
 
 		const Resource::ID id{ elem.first };
-		Resource::Delete(id);
 		std::erase_if(m_roots, [id](const auto& root) { return root.id == id; });
+		Resource::Delete(id);
 		return true;
 	});
+	m_isAnyPropertySelected = false;
 }
 
 void Hierarchy::Render()
 {
-	if (!ImGui::Begin(WindowName, nullptr, ImGuiWindowFlags_MenuBar))
+	if (ImGui::Begin(WindowName, nullptr, ImGuiWindowFlags_MenuBar))
 	{
-		ImGui::End();
-		return;
+		Shortcut();
+		DragDrop();
+		MenuBar();
+		TreeView();
 	}
-
-	Shortcut();
-	DragDrop();
-	MenuBar();
-	TreeView();
 	ImGui::End();
-
 	RenderModal();
 }
 
@@ -91,6 +89,8 @@ void Hierarchy::OnPropertyModified(Resource::ID id)
 
 void Hierarchy::OnPropertySelected(Resource::ID id)
 {
+	m_isAnyPropertySelected = true;
+
 	// 이미 선택된 노드를 선택한 경우 선택 해제 안함
 	// 그리고 이미 선택된 노드이기 때문에 컨테이너에 추가 안함
 	if (IsSelected(id))
@@ -107,19 +107,8 @@ void Hierarchy::OnPropertySelected(Resource::ID id)
 
 void Hierarchy::OnMenuFileNew()
 {
-	std::wstring name{ std::format(L"{}{}", DefaultFileName, Stringtable::DATA_FILE_EXT) };
-	std::size_t index{ 0 };
-	Resource::ID id{ Resource::InvalidID };
-	while (true)
-	{
-		if (Resource::Get(name) == Resource::InvalidID)
-		{
-			id = Resource::New(name);
-			break;
-		}
-		name = std::format(L"{}{}{}", DefaultFileName, ++index, Stringtable::DATA_FILE_EXT);
-	}
-	m_roots.emplace_back(id, name);
+	const Resource::ID id{ New(Resource::InvalidID) };
+	m_roots.emplace_back(id, Resource::GetName(id));
 	m_contexts[id] = { .isModified = true };
 }
 
@@ -168,7 +157,7 @@ void Hierarchy::OnMenuFileOpen()
 
 void Hierarchy::OnMenuFileSave()
 {
-	for (const auto& [id, context] : m_contexts)
+	for (const auto& [id, _] : m_contexts)
 	{
 		if (!IsSelected(id))
 			continue;
@@ -270,12 +259,12 @@ void Hierarchy::Shortcut()
 	}
 	if (ImGui::IsKeyDown(ImGuiKey_F2))
 	{
-		auto window{ ImGui::FindWindowByName("Inspector") };
-		ImGui::ActivateItemByID(window->GetID("##INSPECTOR/NAME"));
+		if (auto window{ ImGui::FindWindowByName("Inspector") })
+			ImGui::ActivateItemByID(window->GetID("##INSPECTOR/NAME"));
 	}
 	if (ImGui::IsKeyDown(ImGuiKey_Delete))
 	{
-		for (const auto& [id, context] : m_contexts)
+		for (const auto& [id, _] : m_contexts)
 		{
 			if (IsSelected(id))
 				Delete(id);
@@ -333,7 +322,8 @@ void Hierarchy::MenuBar()
 
 void Hierarchy::TreeView()
 {
-	auto render = [this](this auto self, Resource::ID id) -> void
+	std::vector<std::tuple<Resource::ID, Resource::ID, std::size_t>> moveList;
+	auto render = [this, &moveList](this auto self, Resource::ID id, std::size_t index) -> void
 	{
 		ImGui::PushID(std::to_string(id).c_str());
 
@@ -355,7 +345,10 @@ void Hierarchy::TreeView()
 		ImGuiTreeNodeFlags flag{ ImGuiTreeNodeFlags_OpenOnDoubleClick | ImGuiTreeNodeFlags_FramePadding | ImGuiTreeNodeFlags_SpanFullWidth | ImGuiTreeNodeFlags_DrawLinesToNodes };
 		if (IsSelected(id))
 			flag |= ImGuiTreeNodeFlags_Selected;
+		ImGui::PushStyleVarY(ImGuiStyleVar_ItemSpacing, 0.0f);
 		const bool isTreeNodeOpened{ ImGui::TreeNodeEx(name.c_str(), flag) };
+		ImGui::PopStyleVar();
+		//ImGui::DebugDrawItemRect();
 
 		// 폰트 크기 원복
 		if (isRoot)
@@ -368,28 +361,64 @@ void Hierarchy::TreeView()
 		// 트리 여닫기
 		if (ImGui::IsItemToggledOpen())
 		{
-			if (isOpened)
+			if (IsOpened(id))
 				CloseTree(id);
 			else
 				OpenTree(id);
 		}
 
 		// 드래그 드랍
-		if (ImGui::BeginDragDropSource())
+		if (!isRoot && ImGui::BeginDragDropSource())
 		{
-			ImGui::SetDragDropPayload("HIERARCHY/PROPERTY", &id, sizeof(id));
+			ImGui::SetDragDropPayload("Hierarchy/Property", &id, sizeof(id));
 			ImGui::TextUnformatted(name.c_str());
 			ImGui::EndDragDropSource();
 		}
 
 		// 컨텍스트 메뉴
-		PropertyContextMenu(id);
+		ContextMenu(id);
+
+		// 순서 변경을 위한 중간 영역
+		const ImVec2 cursorPos{ ImGui::GetCursorPos() };
+		const ImVec2 lt{ ImGui::GetItemRectMin() };
+		const ImVec2 rb{ ImGui::GetItemRectMax() };
+		const float y{ ImGui::GetStyle().ItemSpacing.y };
+		ImGui::PushStyleVarY(ImGuiStyleVar_ItemSpacing, 0.0f);
+		ImGui::InvisibleButton("Between", ImVec2{ rb.x - lt.x - cursorPos.x + ImGui::GetStyle().ItemSpacing.x, y });
+		ImGui::PopStyleVar();
+
+		if (ImGui::BeginDragDropTarget())
+		{
+			constexpr float Thickness{ 1.0f };
+
+			ImRect rect{};
+			rect.Min = ImGui::GetItemRectMin();
+			rect.Max = ImGui::GetItemRectMax();
+
+			const ImVec2 center{ rect.GetCenter() };
+			rect.Min.y = center.y - Thickness / 2.0f;
+			rect.Max.y = center.y + Thickness / 2.0f;
+
+			ImDrawList* drawList{ ImGui::GetWindowDrawList() };
+			drawList->AddRectFilled(rect.Min, rect.Max, ImGui::GetColorU32(ImGuiCol_DragDropTarget));
+
+			if (auto payload{ ImGui::AcceptDragDropPayload("Hierarchy/Property", ImGuiDragDropFlags_AcceptNoDrawDefaultRect) })
+			{
+				const Resource::ID targetID{ *static_cast<Resource::ID*>(payload->Data) };
+				moveList.emplace_back(
+					targetID,
+					isOpened ? id : Resource::GetParent(id),
+					isOpened ? 0 : index + 1
+				);
+			}
+			ImGui::EndDragDropTarget();
+		}
 
 		// 하위 트리
 		if (isTreeNodeOpened)
 		{
-			for (const auto& child : Resource::Iterator{ id } | std::views::values)
-				self(child);
+			for (const auto& [index, child] : Resource::Iterator{ id } | std::views::values | std::views::enumerate)
+				self(child, index);
 			ImGui::TreePop();
 		}
 		ImGui::PopID();
@@ -397,13 +426,24 @@ void Hierarchy::TreeView()
 
 	ImGui::PushID("TreeView");
 	for (const auto& root : m_roots)
-		render(root.id);
+		render(root.id, 0);
 	ImGui::PopID();
+
+	// 프로퍼티 이동
+	for (const auto& [targetID, parentID, index] : moveList)
+		Resource::Move(targetID, parentID, index);
+
+	// 클릭을 했는데 선택된 프로퍼티가 없으면 이미 선택되어 있는 프로퍼티 선택 해제
+	if (!m_isAnyPropertySelected && ImGui::IsWindowHovered() && ImGui::IsMouseClicked(ImGuiMouseButton_Left))
+	{
+		for (auto& [_, context] : m_contexts)
+			context.isSelected = false;
+	}
 }
 
-void Hierarchy::PropertyContextMenu(Resource::ID id)
+void Hierarchy::ContextMenu(Resource::ID id)
 {
-	if (!ImGui::BeginPopupContextItem("PropertyContextMenu"))
+	if (!ImGui::BeginPopupContextItem("ContextMenu"))
 		return;
 
 	if (!IsSelected(id))
@@ -441,23 +481,10 @@ void Hierarchy::PropertyContextMenu(Resource::ID id)
 		if (auto window{ ImGui::FindWindowByName("Inspector") })
 			ImGui::ActivateItemByID(window->GetID("##INSPECTOR/NAME"));
 	}
-	if (ImGui::MenuItem("Add", "A") || ImGui::IsKeyPressed(ImGuiKey_A))
+	if (ImGui::MenuItem("New", "N") || ImGui::IsKeyPressed(ImGuiKey_N))
 	{
 		ImGui::CloseCurrentPopup();
-
-		std::size_t index{ 0 };
-		std::wstring name{ DefaultPropertyName };
-		Resource::ID childID{ Resource::InvalidID };
-		while (true)
-		{
-			if (Resource::Get(id, name) == Resource::InvalidID)
-			{
-				childID = Resource::New(id, name);
-				break;
-			}
-			name = std::format(L"{}{}", DefaultPropertyName, ++index);
-		}
-		Delegates::OnPropertyAdded.Notify(childID);
+		New(id);
 	}
 	if (ImGui::MenuItem("Delete", "D") || ImGui::IsKeyPressed(ImGuiKey_D))
 	{
@@ -487,9 +514,41 @@ void Hierarchy::LoadDataFile(const std::filesystem::path& path)
 	m_roots.emplace_back(rootID, path);
 }
 
-void Hierarchy::Add(Resource::ID parentID, Resource::ID childID)
+Resource::ID Hierarchy::New(Resource::ID parentID)
 {
-	assert(false && "Not implemented");
+	Resource::ID id{ Resource::InvalidID };
+	// 새로운 파일
+	if (parentID == Resource::InvalidID)
+	{
+		std::wstring name{ std::format(L"{}{}", DefaultFileName, Stringtable::DATA_FILE_EXT) };
+		std::size_t index{ 0 };
+		while (true)
+		{
+			if (Resource::Get(name) == Resource::InvalidID)
+			{
+				id = Resource::New(name);
+				break;
+			}
+			name = std::format(L"{}{}{}", DefaultFileName, ++index, Stringtable::DATA_FILE_EXT);
+		}
+	}
+	// 새로운 프로퍼티
+	else
+	{
+		std::wstring name{ DefaultPropertyName };
+		std::size_t index{ 0 };
+		while (true)
+		{
+			if (Resource::Get(parentID, name) == Resource::InvalidID)
+			{
+				id = Resource::New(parentID, name);
+				break;
+			}
+			name = std::format(L"{}{}", DefaultPropertyName, ++index);
+		}
+		Delegates::OnPropertyAdded.Broadcast(id);
+	}
+	return id;
 }
 
 void Hierarchy::Delete(Resource::ID id)
