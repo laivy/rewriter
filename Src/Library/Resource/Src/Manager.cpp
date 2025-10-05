@@ -170,11 +170,9 @@ namespace Resource
 			assert(false && "invalid id");
 			return;
 		}
-		auto& target{ m_properties.at(targetID) };
-		auto& parent{ m_properties.at(parentID) };
-		if (!target || !parent)
+		if (!m_properties.at(targetID) || !m_properties.at(parentID))
 		{
-			assert(false && "not exists");
+			assert(false && "invalid id");
 			return;
 		}
 		if (!m_idToEntry.contains(targetID) || !m_idToEntry.contains(parentID))
@@ -182,6 +180,11 @@ namespace Resource
 			assert(false && "invalid id");
 			return;
 		}
+
+		// 이름이 중복되는지 확인
+		const std::wstring targetName{ GetName(targetID) };
+		if (std::ranges::any_of(Iterator{ parentID }, [&targetName](const auto& kv) { return targetName == kv.first; }))
+			return;
 
 		// 현재 부모의 자식 목록에서 삭제
 		if (const ID oldParentID{ GetParent(targetID) }; oldParentID != InvalidID)
@@ -192,7 +195,7 @@ namespace Resource
 
 		auto& childEntry{ m_idToEntry.at(targetID) };
 		auto& parentEntry{ m_idToEntry.at(parentID) };
-		childEntry.path = std::format(L"{}/{}", parentEntry.path, target->name);
+		childEntry.path = std::format(L"{}/{}", parentEntry.path, targetName);
 		childEntry.parentID = parentID;
 		if (index >= parentEntry.children.size())
 			parentEntry.children.push_back(targetID);
