@@ -1,4 +1,4 @@
-#include "Stdafx.h"
+#include "Pch.h"
 #include "Delegates.h"
 #include "Manager.h"
 
@@ -113,14 +113,14 @@ namespace Resource
 		m_idToEntry.erase(id);
 	}
 
-	ID Manager::Get(const std::wstring& path) const
+	ID Manager::Get(const std::wstring& path)
 	{
 		if (m_pathToID.contains(path))
 			return m_pathToID.at(path);
 		return InvalidID;
 	}
 
-	ID Manager::Get(ID parentID, const std::wstring& path) const
+	ID Manager::Get(ID parentID, const std::wstring& path)
 	{
 		if (!m_idToEntry.contains(parentID))
 		{
@@ -374,36 +374,21 @@ namespace Resource
 			if (const auto& child{ m_properties.at(childID) })
 				recurse(childID, *child);
 		}
+		tempFile.close();
 
-		if (!std::filesystem::remove(path))
+		if (std::filesystem::exists(path) && !std::filesystem::remove(path))
 		{
 			assert(false && "failed to remove existing file");
 			return false;
 		}
+
 		std::filesystem::rename(tempFilePath, path);
 		return true;
 	}
 
-	void Manager::OnInitialize(const Initializer& initializer)
+	ID Manager::LoadFromFile(const std::filesystem::path& filePath, const std::wstring& subPath)
 	{
-		m_mountPath = initializer.mountPath;
-		m_loadSprite = initializer.loadSprite;
-		m_loadModel = initializer.loadModel;
-	}
-
-	void Manager::OnUninitialize()
-	{
-		m_mountPath.clear();
-		m_loadSprite = nullptr;
-		m_loadModel = nullptr;
-		m_properties.clear();
-		m_idToEntry.clear();
-		m_pathToID.clear();
-	}
-
-	ID Manager::LoadFromFile(const std::filesystem::path& path, const std::wstring& subPath)
-	{
-		std::ifstream file{ path, std::ios::binary };
+		std::ifstream file{ filePath, std::ios::binary };
 		if (!file)
 		{
 			assert(false && "failed to open file");
@@ -508,15 +493,34 @@ namespace Resource
 			return id;
 		};
 
+		const ID rootID{ New(filePath) };
+
 		std::uint32_t childCount{};
 		file.read(reinterpret_cast<char*>(&childCount), sizeof(childCount));
 		for (std::uint32_t i{ 0 }; i < childCount; ++i)
 		{
-			const ID id{ recurse(InvalidID) };
+			const ID id{ recurse(rootID) };
 			if (id == InvalidID)
 				continue;
 		}
 
-		return m_pathToID.at(path / subPath);
+		return m_pathToID.at(subPath.empty() ? filePath : filePath / subPath);
+	}
+
+	void Manager::OnInitialize(const Initializer& initializer)
+	{
+		m_mountPath = initializer.mountPath;
+		m_loadSprite = initializer.loadSprite;
+		m_loadModel = initializer.loadModel;
+	}
+
+	void Manager::OnUninitialize()
+	{
+		m_mountPath.clear();
+		m_loadSprite = nullptr;
+		m_loadModel = nullptr;
+		m_properties.clear();
+		m_idToEntry.clear();
+		m_pathToID.clear();
 	}
 }

@@ -36,8 +36,8 @@ namespace Resource
 		ID New(const std::wstring& path);
 		ID New(ID parentID, const std::wstring& path);
 		void Delete(ID id);
-		ID Get(const std::wstring& path) const;
-		ID Get(ID parentID, const std::wstring& path) const;
+		ID Get(const std::wstring& path);
+		ID Get(ID parentID, const std::wstring& path);
 		ID GetParent(ID id) const;
 		ID GetChild(ID parentID, std::size_t index) const;
 		std::size_t GetChildCount(ID parentID) const;
@@ -89,12 +89,11 @@ namespace Resource
 		}
 
 		bool SaveToFile(ID id, const std::filesystem::path& path) const;
+		ID LoadFromFile(const std::filesystem::path& filePath, const std::wstring& subPath);
 
 	private:
 		void OnInitialize(const Initializer& initializer);
 		void OnUninitialize();
-
-		ID LoadFromFile(const std::filesystem::path& path, const std::wstring& subPath);
 
 	private:
 		std::filesystem::path m_mountPath;

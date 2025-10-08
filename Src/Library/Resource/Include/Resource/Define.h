@@ -1,11 +1,5 @@
 #pragma once
 
-#ifdef _RESOURCE
-#define RESOURCE_API __declspec(dllexport)
-#else
-#define RESOURCE_API __declspec(dllimport)
-#endif
-
 namespace Resource
 {
 	using ID = std::size_t;

@@ -1,4 +1,5 @@
 #pragma once
+#include "Export.h"
 #include "Model.h"
 #include "Property.h"
 #include "Sprite.h"

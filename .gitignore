@@ -436,9 +436,10 @@ FodyWeavers.xsd
 
 # End of https://www.toptal.com/developers/gitignore/api/visualstudio,c++
 
+# CMake
+Build/
+Export.h
+
 # Rewriter
-Asset/
 Data/
 Src/Library/Graphics/Src/Shader/*.h
-/Src/Library/Graphics/Src/Shader/Model.ps.h
-/Src/Library/Graphics/Src/Shader/Model.vs.h
