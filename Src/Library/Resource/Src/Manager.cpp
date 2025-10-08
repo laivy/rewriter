@@ -181,14 +181,26 @@ namespace Resource
 			return;
 		}
 
-		// 이름이 중복되는지 확인
 		const std::wstring targetName{ GetName(targetID) };
-		if (std::ranges::any_of(Iterator{ parentID }, [&targetName](const auto& kv) { return targetName == kv.first; }))
-			return;
-
-		// 현재 부모의 자식 목록에서 삭제
 		if (const ID oldParentID{ GetParent(targetID) }; oldParentID != InvalidID)
 		{
+			if (parentID != oldParentID)
+			{
+				// 이름 중복 확인
+				if (std::ranges::any_of(Iterator{ parentID }, [&targetName](const auto& kv) { return targetName == kv.first; }))
+					return;
+
+				// 자신의 자식 밑으로 이동할 수 없음
+				ID temp{ parentID };
+				do
+				{
+					if (temp == targetID)
+						return;
+					temp = GetParent(temp);
+				} while (temp != InvalidID);
+			}
+
+			// 현재 부모의 자식 목록에서 삭제
 			if (m_idToEntry.contains(oldParentID))
 				std::erase(m_idToEntry.at(oldParentID).children, targetID);
 		}
