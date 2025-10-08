@@ -147,6 +147,59 @@ namespace Resource
 		return it;
 	}
 
+	RecursiveIterator::RecursiveIterator(ID id)
+	{
+		m_stacks.emplace_back(id);
+	}
+
+	RecursiveIterator::RecursiveIterator(const std::wstring& path)
+	{
+		m_stacks.emplace_back(path);
+	}
+
+	RecursiveIterator::value_type RecursiveIterator::operator*() const
+	{
+		return *m_stacks.back();
+	}
+
+	RecursiveIterator& RecursiveIterator::operator++()
+	{
+		auto& last{ m_stacks.back() };
+		const auto& [_, id] { *last };
+		++last;
+
+		// 자식이 있으면 자식을 순회
+		if (auto manager{ Manager::GetInstance() }; manager && manager->GetChildCount(id) > 0)
+		{
+			m_stacks.emplace_back(id);
+			return *this;
+		}
+
+		while (last == last.end())
+		{
+			m_stacks.pop_back();
+			if (m_stacks.empty())
+				break;
+			last = m_stacks.back();
+		}
+		return *this;
+	}
+
+	bool RecursiveIterator::operator==(const RecursiveIterator& other) const
+	{
+		return m_stacks == other.m_stacks;
+	}
+
+	RecursiveIterator RecursiveIterator::begin() const
+	{
+		return *this;
+	}
+
+	RecursiveIterator RecursiveIterator::end() const
+	{
+		return RecursiveIterator{};
+	}
+
 	ID New(const std::wstring& name)
 	{
 		if (auto manager{ Manager::GetInstance() })
