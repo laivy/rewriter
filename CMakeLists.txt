@@ -14,7 +14,11 @@ if (MSVC)
     add_compile_options("/utf-8")
 endif()
 
+# 유니코드 매크로 정의
+add_definitions(-DUNICODE -D_UNICODE)
+
 # 모든 하위 프로젝트에 ${CMAKE_SOURCE_DIR}/Src 디렉토리를 포함
 include_directories(${CMAKE_SOURCE_DIR}/Src)
 
+add_subdirectory(Src/Library/Database)
 add_subdirectory(Src/Library/Resource)

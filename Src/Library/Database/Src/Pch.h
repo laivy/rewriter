@@ -9,13 +9,8 @@
 #include <sqlext.h>
 #include <sqltypes.h>
 
-// Library
-#include "Library/Resource/Include/Lib.h"
+// Project - Library
+#include <Resource/Resource.h>
 
 // Project
-#include "Types.h"
-
-#ifdef DLL_API
-#undef DLL_API
-#endif
-#define DLL_API __declspec(dllexport)
+#include "Type.h"

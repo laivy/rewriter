@@ -1,8 +1,18 @@
 cmake_minimum_required(VERSION 3.12)
 
-add_library(Resource SHARED)
+set(TARGET Resource)
+string(TOUPPER ${TARGET} TARGET_NAME_UPPER)
 
-target_sources(Resource
+add_library(${TARGET} SHARED)
+
+# 내보내기 매크로 생성
+include(GenerateExportHeader)
+generate_export_header(${TARGET}
+    EXPORT_FILE_NAME ${CMAKE_CURRENT_SOURCE_DIR}/Include/${TARGET}/Export.h
+    EXPORT_MACRO_NAME ${TARGET_NAME_UPPER}_API
+)
+
+target_sources(${TARGET}
     PRIVATE
         ${CMAKE_SOURCE_DIR}/Src/Common/Delegate.h
         ${CMAKE_SOURCE_DIR}/Src/Common/Singleton.h
@@ -18,20 +28,14 @@ target_sources(Resource
         ${CMAKE_CURRENT_SOURCE_DIR}/Src/Resource.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/Src/Sprite.cpp
     PUBLIC
-        ${CMAKE_CURRENT_SOURCE_DIR}/Include/Resource/Define.h
-        ${CMAKE_CURRENT_SOURCE_DIR}/Include/Resource/Model.h
-        ${CMAKE_CURRENT_SOURCE_DIR}/Include/Resource/Property.h
-        ${CMAKE_CURRENT_SOURCE_DIR}/Include/Resource/Resource.h
-        ${CMAKE_CURRENT_SOURCE_DIR}/Include/Resource/Sprite.h
+        ${CMAKE_CURRENT_SOURCE_DIR}/Include/${TARGET}/Define.h
+        ${CMAKE_CURRENT_SOURCE_DIR}/Include/${TARGET}/Model.h
+        ${CMAKE_CURRENT_SOURCE_DIR}/Include/${TARGET}/Property.h
+        ${CMAKE_CURRENT_SOURCE_DIR}/Include/${TARGET}/Resource.h
+        ${CMAKE_CURRENT_SOURCE_DIR}/Include/${TARGET}/Sprite.h
 )
 
-# 내보내기 매크로 생성
-include(GenerateExportHeader)
-generate_export_header(Resource
-    EXPORT_FILE_NAME ${CMAKE_CURRENT_SOURCE_DIR}/Include/Resource/Export.h
-    EXPORT_MACRO_NAME RESOURCE_API
-)
+target_precompile_headers(${TARGET} PRIVATE Src/Pch.h)
 
-target_precompile_headers(Resource PRIVATE Src/Pch.h)
-
-target_include_directories(Resource PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/Include/Resource)
+target_include_directories(${TARGET} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/Include/${TARGET})
+target_include_directories(${TARGET} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/Include)

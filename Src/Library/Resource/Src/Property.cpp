@@ -276,11 +276,24 @@ namespace Resource
 	//	Manager::GetInstance().Set(id, value);
 	//}
 
-	std::wstring GetName(const ID id)
+	std::optional<std::wstring> GetName(const ID id)
 	{
 		if (auto manager{ Manager::GetInstance() })
 			return manager->GetName(id);
-		return L"";
+		return std::nullopt;
+	}
+
+	std::optional<std::wstring> GetName(ID id, const std::wstring &path)
+	{
+		auto manager{ Manager::GetInstance() };
+		if (!manager)
+			return std::nullopt;
+
+		const ID targetID{ manager->Get(id, path) };
+		if (targetID == InvalidID)
+			return std::nullopt;
+
+		return manager->GetName(targetID);
 	}
 
 	std::optional<std::int32_t> GetInt(const ID id)
@@ -290,6 +303,19 @@ namespace Resource
 		return std::nullopt;
 	}
 
+	std::optional<std::int32_t> GetInt(const ID id, const std::wstring& path)
+	{
+		auto manager{ Manager::GetInstance() };
+		if (!manager)
+			return std::nullopt;
+
+		const ID targetID{ manager->Get(id, path) };
+		if (targetID == InvalidID)
+			return std::nullopt;
+
+		return manager->Get<std::int32_t>(targetID);
+	}
+
 	std::optional<float> GetFloat(const ID id)
 	{
 		if (auto manager{ Manager::GetInstance() })
@@ -297,11 +323,37 @@ namespace Resource
 		return std::nullopt;
 	}
 
+	std::optional<float> GetFloat(const ID id, const std::wstring& path)
+	{
+		auto manager{ Manager::GetInstance() };
+		if (!manager)
+			return std::nullopt;
+
+		const ID targetID{ manager->Get(id, path) };
+		if (targetID == InvalidID)
+			return std::nullopt;
+
+		return manager->Get<float>(targetID);
+	}
+
 	std::optional<std::wstring> GetString(const ID id)
 	{
 		if (auto manager{ Manager::GetInstance() })
 			return manager->Get<std::wstring>(id);
 		return std::nullopt;
+	}
+
+	std::optional<std::wstring> GetString(const ID id, const std::wstring& path)
+	{
+		auto manager{ Manager::GetInstance() };
+		if (!manager)
+			return std::nullopt;
+
+		const ID targetID{ manager->Get(id, path) };
+		if (targetID == InvalidID)
+			return std::nullopt;
+
+		return manager->Get<std::wstring>(targetID);
 	}
 
 	//std::optional<Sprite> GetSprite(const ID id)

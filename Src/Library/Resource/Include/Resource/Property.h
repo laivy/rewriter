@@ -77,10 +77,14 @@ namespace Resource
 	RESOURCE_API void Set(ID id, const std::wstring& value);
 	//RESOURCE_API void Set(const ID id, const Sprite& value);
 
-	RESOURCE_API std::wstring GetName(ID id);
+	RESOURCE_API std::optional<std::wstring> GetName(ID id);
+	RESOURCE_API std::optional<std::wstring> GetName(ID id, const std::wstring& path);
 	RESOURCE_API std::optional<std::int32_t> GetInt(const ID id);
+	RESOURCE_API std::optional<std::int32_t> GetInt(const ID id, const std::wstring& path);
 	RESOURCE_API std::optional<float> GetFloat(const ID id);
+	RESOURCE_API std::optional<float> GetFloat(const ID id, const std::wstring& path);
 	RESOURCE_API std::optional<std::wstring> GetString(const ID id);
+	RESOURCE_API std::optional<std::wstring> GetString(const ID id, const std::wstring& path);
 	//RESOURCE_API std::optional<Sprite> GetSprite(const ID id);
 
 	//RESOURCE_API void Unload(const ID id);

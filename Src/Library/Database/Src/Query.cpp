@@ -1,4 +1,4 @@
-#include "Stdafx.h"
+#include "Pch.h"
 #include "Query.h"
 #include "Session.h"
 
@@ -26,7 +26,7 @@ namespace
 
 namespace Database
 {
-	DLL_API Query::Query(Type type)
+	Query::Query(Type type)
 	{
 		m_session = GetSession(type);
 		if (!m_session)
@@ -44,41 +44,41 @@ namespace Database
 		m_stmt = unique_stmt{ new SQLHSTMT{ stmt }, FreeHandle };
 	}
 
-	DLL_API Query::Query(Query& query) :
+	Query::Query(Query& query) :
 		m_session{ query.m_session },
 		m_stmt{ std::move(query.m_stmt) }
 	{
 	}
 
-	DLL_API Query& Query::Statement(std::wstring_view statement)
+	Query& Query::Statement(std::wstring_view statement)
 	{
 		if (!SQL_SUCCEEDED(::SQLPrepare(*m_stmt, const_cast<wchar_t*>(statement.data()), SQL_NTS)))
 			assert(false);
 		return *this;
 	}
 
-	DLL_API Query& Query::Param(unsigned short number, int32_t param)
+	Query& Query::Param(unsigned short number, int32_t param)
 	{
 		if (!SQL_SUCCEEDED(::SQLBindParameter(*m_stmt, static_cast<SQLUSMALLINT>(number), SQL_PARAM_INPUT, SQL_C_LONG, SQL_INTEGER, 0, 0, &param, 0, nullptr)))
 			assert(false);
 		return *this;
 	}
 
-	DLL_API Query& Query::Param(unsigned short number, int64_t param)
+	Query& Query::Param(unsigned short number, int64_t param)
 	{
 		if (!SQL_SUCCEEDED(::SQLBindParameter(*m_stmt, static_cast<SQLUSMALLINT>(number), SQL_PARAM_INPUT, SQL_C_SBIGINT, SQL_BIGINT, 0, 0, &param, 0, nullptr)))
 			assert(false);
 		return *this;
 	}
 
-	DLL_API Query& Query::Param(unsigned short number, std::wstring_view param)
+	Query& Query::Param(unsigned short number, std::wstring_view param)
 	{
 		if (!SQL_SUCCEEDED(::SQLBindParameter(*m_stmt, static_cast<SQLUSMALLINT>(number), SQL_PARAM_INPUT, SQL_C_WCHAR, SQL_WCHAR, param.size(), 0, const_cast<wchar_t*>(param.data()), param.size(), nullptr)))
 			assert(false);
 		return *this;
 	}
 
-	DLL_API Query& Query::Param(unsigned short number, const Time& param)
+	Query& Query::Param(unsigned short number, const Time& param)
 	{
 		SQL_TIMESTAMP_STRUCT timeStamp{};
 		timeStamp.year = param.Year();
@@ -92,7 +92,7 @@ namespace Database
 		return *this;
 	}
 
-	DLL_API Query::Result Query::Execute()
+	Query::Result Query::Execute()
 	{
 		if (!m_stmt)
 		{
@@ -115,40 +115,40 @@ namespace Database
 		m_stmt.swap(stmt);
 	}
 
-	DLL_API int64_t Query::Result::Return()
+	std::int64_t Query::Result::Return()
 	{
 		SQLLEN len{};
 		if (!SQL_SUCCEEDED(::SQLRowCount(*m_stmt, &len)))
 			return 0;
-		return static_cast<int64_t>(len);
+		return static_cast<std::int64_t>(len);
 	}
 
-	DLL_API Query::Result& Query::Result::Bind(unsigned short number, int32_t* param)
+	Query::Result& Query::Result::Bind(unsigned short number, int32_t* param)
 	{
 		::SQLBindCol(*m_stmt, static_cast<SQLUSMALLINT>(number), SQL_C_LONG, param, 0, nullptr);
 		return *this;
 	}
 
-	DLL_API Query::Result& Query::Result::Bind(unsigned short number, int64_t* param)
+	Query::Result& Query::Result::Bind(unsigned short number, int64_t* param)
 	{
 		::SQLBindCol(*m_stmt, static_cast<SQLUSMALLINT>(number), SQL_C_SBIGINT, param, 0, nullptr);
 		return *this;
 	}
 
-	DLL_API Query::Result& Query::Result::Bind(unsigned short number, std::wstring* param)
+	Query::Result& Query::Result::Bind(unsigned short number, std::wstring* param)
 	{
 		::SQLBindCol(*m_stmt, static_cast<SQLUSMALLINT>(number), SQL_C_WCHAR, param->data(), param->size(), nullptr);
 		return *this;
 	}
 
-	DLL_API Query::Result& Query::Result::Bind(unsigned short number, Time* param)
+	Query::Result& Query::Result::Bind(unsigned short number, Time* param)
 	{
 		m_datetimes.emplace(param, datetime2{});
 		::SQLBindCol(*m_stmt, number, SQL_C_TIMESTAMP, &m_datetimes[param], 0, nullptr);
 		return *this;
 	}
 
-	DLL_API bool Query::Result::Fetch()
+	bool Query::Result::Fetch()
 	{
 		auto result{ ::SQLFetch(*m_stmt) };
 		for (auto& [time, datetime] : m_datetimes)
@@ -166,7 +166,7 @@ namespace Database
 		return SQL_SUCCEEDED(result);
 	}
 
-	DLL_API StoredProcedure::StoredProcedure(Type type)
+	StoredProcedure::StoredProcedure(Type type)
 	{
 		m_session = GetSession(type);
 		if (!m_session)
@@ -184,41 +184,41 @@ namespace Database
 		m_stmt = unique_stmt{ new SQLHSTMT{ stmt }, FreeHandle };
 	}
 
-	DLL_API StoredProcedure::StoredProcedure(StoredProcedure& sp) :
+	StoredProcedure::StoredProcedure(StoredProcedure& sp) :
 		m_session{ sp.m_session },
 		m_stmt{ std::move(sp.m_stmt) }
 	{
 	}
 
-	DLL_API StoredProcedure& StoredProcedure::Statement(std::wstring_view statement)
+	StoredProcedure& StoredProcedure::Statement(std::wstring_view statement)
 	{
 		if (!SQL_SUCCEEDED(::SQLPrepare(*m_stmt, const_cast<wchar_t*>(statement.data()), SQL_NTS)))
 			assert(false);
 		return *this;
 	}
 
-	DLL_API StoredProcedure& StoredProcedure::In(unsigned short number, int64_t param)
+	StoredProcedure& StoredProcedure::In(unsigned short number, int64_t param)
 	{
 		if (!SQL_SUCCEEDED(::SQLBindParameter(*m_stmt, static_cast<SQLUSMALLINT>(number), SQL_PARAM_INPUT, SQL_C_SBIGINT, SQL_BIGINT, 0, 0, &param, 0, nullptr)))
 			assert(false);
 		return *this;
 	}
 
-	DLL_API StoredProcedure& StoredProcedure::In(unsigned short number, std::wstring_view param)
+	DATABASE_API StoredProcedure& StoredProcedure::In(unsigned short number, std::wstring_view param)
 	{
 		if (!SQL_SUCCEEDED(::SQLBindParameter(*m_stmt, static_cast<SQLUSMALLINT>(number), SQL_PARAM_INPUT, SQL_C_WCHAR, SQL_WCHAR, param.size(), 0, const_cast<wchar_t*>(param.data()), param.size(), nullptr)))
 			assert(false);
 		return *this;
 	}
 
-	DLL_API StoredProcedure& StoredProcedure::Out(unsigned short number, int32_t* param)
+	DATABASE_API StoredProcedure& StoredProcedure::Out(unsigned short number, int32_t* param)
 	{
 		if (!SQL_SUCCEEDED(::SQLBindParameter(*m_stmt, static_cast<SQLUSMALLINT>(number), SQL_PARAM_OUTPUT, SQL_C_LONG, SQL_INTEGER, 0, 0, param, 0, nullptr)))
 			assert(false);
 		return *this;
 	}
 
-	DLL_API StoredProcedure::Result StoredProcedure::Execute()
+	DATABASE_API StoredProcedure::Result StoredProcedure::Execute()
 	{
 		if (!m_stmt)
 		{
@@ -248,26 +248,26 @@ namespace Database
 		m_stmt.swap(stmt);
 	}
 
-	DLL_API StoredProcedure::Result& StoredProcedure::Result::Bind(unsigned short number, int64_t* param)
+	DATABASE_API StoredProcedure::Result& StoredProcedure::Result::Bind(unsigned short number, int64_t* param)
 	{
 		::SQLBindCol(*m_stmt, static_cast<SQLUSMALLINT>(number), SQL_C_SBIGINT, param, 0, nullptr);
 		return *this;
 	}
 
-	DLL_API StoredProcedure::Result& StoredProcedure::Result::Bind(unsigned short number, std::wstring* param)
+	DATABASE_API StoredProcedure::Result& StoredProcedure::Result::Bind(unsigned short number, std::wstring* param)
 	{
 		::SQLBindCol(*m_stmt, static_cast<SQLUSMALLINT>(number), SQL_C_WCHAR, param->data(), param->size(), nullptr);
 		return *this;
 	}
 
-	DLL_API StoredProcedure::Result& StoredProcedure::Result::Bind(unsigned short number, Time* param)
+	DATABASE_API StoredProcedure::Result& StoredProcedure::Result::Bind(unsigned short number, Time* param)
 	{
 		m_datetimes.emplace(param, datetime2{});
 		::SQLBindCol(*m_stmt, number, SQL_C_TIMESTAMP, &m_datetimes[param], 0, nullptr);
 		return *this;
 	}
 
-	DLL_API bool StoredProcedure::Result::Fetch()
+	DATABASE_API bool StoredProcedure::Result::Fetch()
 	{
 		auto result{ ::SQLFetch(*m_stmt) };
 		for (auto& [time, datetime] : m_datetimes)

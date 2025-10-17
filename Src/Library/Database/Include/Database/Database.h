@@ -1,4 +1,5 @@
 #pragma once
+#include "Export.h"
 
 namespace Resource
 {
@@ -7,5 +8,5 @@ namespace Resource
 
 namespace Database
 {
-	DLL_API void Initialize(const Resource::Property::ID id);
+	DATABASE_API void Initialize(const Resource::ID id);
 }
