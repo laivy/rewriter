@@ -1,4 +1,4 @@
-#include "Stdafx.h"
+#include "Pch.h"
 #include "Descriptor.h"
 #include "DescriptorManager.h"
 #include "Global.h"
@@ -120,7 +120,9 @@ namespace Graphics::D3D
 		}
 
 		g_commandList->SetGraphicsRootSignature(g_rootSignature.Get());
-		g_commandList->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(m_frameResources[m_frameIndex].backBuffer.Get(), D3D12_RESOURCE_STATE_PRESENT, D3D12_RESOURCE_STATE_RENDER_TARGET));
+
+		const auto barrier{ CD3DX12_RESOURCE_BARRIER::Transition(m_frameResources[m_frameIndex].backBuffer.Get(), D3D12_RESOURCE_STATE_PRESENT, D3D12_RESOURCE_STATE_RENDER_TARGET) };
+		g_commandList->ResourceBarrier(1, &barrier);
 
 		auto rtvHandle{ m_frameResources[m_frameIndex].rtvDesc->GetCpuHandle() };
 		auto dsvHandle{ m_dsvDesc->GetCpuHandle() };
@@ -139,7 +141,8 @@ namespace Graphics::D3D
 	void SwapChain::End3D()
 	{
 #ifndef _DIRECT2D
-		g_commandList->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(m_frameResources[m_frameIndex].backBuffer.Get(), D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PRESENT));
+		const auto barrier{ CD3DX12_RESOURCE_BARRIER::Transition(m_frameResources[m_frameIndex].backBuffer.Get(), D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PRESENT) };
+		g_commandList->ResourceBarrier(1, &barrier);
 #endif
 		if (FAILED(g_commandList->Close()))
 		{
@@ -188,7 +191,8 @@ namespace Graphics::D3D
 	static std::vector<std::shared_ptr<RenderTarget>> g_renderTargets;
 	void SwapChain::PushRenderTarget(const std::shared_ptr<RenderTarget>& renderTarget)
 	{
-		g_commandList->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(renderTarget->GetResource().Get(), D3D12_RESOURCE_STATE_COMMON, D3D12_RESOURCE_STATE_RENDER_TARGET));
+		const auto barrier{ CD3DX12_RESOURCE_BARRIER::Transition(renderTarget->GetResource().Get(), D3D12_RESOURCE_STATE_COMMON, D3D12_RESOURCE_STATE_RENDER_TARGET) };
+		g_commandList->ResourceBarrier(1, &barrier);
 
 		auto rtvHandle{ renderTarget->GetRenderTargetCpuHandle() };
 		auto dsvHandle{ renderTarget->GetDepthStencilCpuHandle() };
@@ -203,7 +207,8 @@ namespace Graphics::D3D
 
 	void SwapChain::PopRenderTarget()
 	{
-		g_commandList->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(g_renderTargets.back()->GetResource().Get(), D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_COMMON));
+		const auto barrier{ CD3DX12_RESOURCE_BARRIER::Transition(g_renderTargets.back()->GetResource().Get(), D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_COMMON) };
+		g_commandList->ResourceBarrier(1, &barrier);
 		g_renderTargets.pop_back();
 		if (g_renderTargets.empty())
 		{

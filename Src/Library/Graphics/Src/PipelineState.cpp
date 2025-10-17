@@ -1,4 +1,4 @@
-﻿#include "Stdafx.h"
+#include "Pch.h"
 #include "Global.h"
 #include "PipelineState.h"
 #include "Shader/Model.vs.h"

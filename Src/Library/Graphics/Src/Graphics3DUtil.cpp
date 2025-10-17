@@ -1,4 +1,4 @@
-#include "Stdafx.h"
+#include "Pch.h"
 #include "Global.h"
 #include "Graphics3DUtil.h"
 
@@ -8,11 +8,14 @@ namespace Graphics::D3D
 	{
 		ComPtr<ID3D12Resource> buffer;
 
+		const CD3DX12_HEAP_PROPERTIES heapProperties{ type };
+		const auto desc{ CD3DX12_RESOURCE_DESC::Buffer(size) };
+
 		HRESULT hr{ E_FAIL };
 		hr = g_d3dDevice->CreateCommittedResource(
-			&CD3DX12_HEAP_PROPERTIES{ type },
+			&heapProperties,
 			D3D12_HEAP_FLAG_NONE,
-			&CD3DX12_RESOURCE_DESC::Buffer(size),
+			&desc,
 			state,
 			nullptr,
 			IID_PPV_ARGS(&buffer)

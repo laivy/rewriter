@@ -35,5 +35,4 @@ target_include_directories(${TARGET} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/Include)
 # 종속성
 find_package(ODBC)
 target_link_libraries(${TARGET} PRIVATE ODBC::ODBC)
-
 target_link_libraries(${TARGET} PUBLIC Resource)

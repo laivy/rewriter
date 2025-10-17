@@ -19,7 +19,7 @@ enum class Pivot
 class Int2
 {
 public:
-	Int2(int32_t x = 0, int32_t y = 0);
+	Int2(std::int32_t x = 0, std::int32_t y = 0);
 	Int2(float x, float y);
 	Int2(const Float2& float2);
 
@@ -29,15 +29,15 @@ public:
 	friend void operator-=(Int2& lhs, const Int2& rhs);
 
 public:
-	int32_t x;
-	int32_t y;
+	std::int32_t x;
+	std::int32_t y;
 };
 
 class Float2
 {
 public:
 	Float2(float x = 0.0f, float y = 0.0f);
-	Float2(int32_t x, int32_t y);
+	Float2(std::int32_t x, std::int32_t y);
 	Float2(const Int2& int2);
 
 	friend Float2 operator+(const Float2& lhs, const Float2& rhs);
@@ -75,16 +75,16 @@ public:
 class Rect
 {
 public:
-	Rect(int32_t left = 0, int32_t top = 0, int32_t right = 0, int32_t bottom = 0);
+	Rect(std::int32_t left = 0, std::int32_t top = 0, std::int32_t right = 0, std::int32_t bottom = 0);
 
 	Rect& Offset(const Int2& offset);
 	bool Contains(const Int2& point) const;
 
 public:
-	int32_t left;
-	int32_t top;
-	int32_t right;
-	int32_t bottom;
+	std::int32_t left;
+	std::int32_t top;
+	std::int32_t right;
+	std::int32_t bottom;
 };
 
 class RectF

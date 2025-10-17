@@ -1,5 +1,5 @@
 #pragma once
-#include "Common/Stdafx.h"
+#include "Common/Pch.h"
 
 // Windows
 #include <wincodec.h>
@@ -21,23 +21,16 @@
 #include <dxgidebug.h>
 #endif
 
-#include "DirectX/d3dx12.h"
-#include "DirectX/WICTextureLoader12.h"
+#include <DirectX/d3dx12.h>
+#include <DirectX/WICTextureLoader12.h>
 
 // ImGui
 #ifdef _IMGUI
-#include "Imgui/imgui.h"
-#include "Imgui/imgui_impl_dx12.h"
-#include "Imgui/imgui_impl_win32.h"
+#include <Imgui/imgui.h>
+#include <Imgui/imgui_impl_dx12.h>
+#include <Imgui/imgui_impl_win32.h>
 extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
 #endif
 
-// Library
-#include "Resource/Resource.h"
-
-// Project
-#ifdef _GRAPHICS
-#define GRAPHICS_API __declspec(dllexport)
-#else
-#define GRAPHICS_API __declspec(dllimport)
-#endif
+// Project Library
+#include <Resource/Resource.h>

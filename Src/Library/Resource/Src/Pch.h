@@ -1,5 +1,5 @@
 #pragma once
-#include "Common/Stdafx.h"
+#include "Common/Pch.h"
 
 // C++
 #include <condition_variable>

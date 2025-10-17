@@ -1,4 +1,4 @@
-#include "Stdafx.h"
+#include "Pch.h"
 #ifdef _DIRECT2D
 #include "Global.h"
 #include "Graphics2D.h"

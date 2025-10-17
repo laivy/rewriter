@@ -21,4 +21,5 @@ add_definitions(-DUNICODE -D_UNICODE)
 include_directories(${CMAKE_SOURCE_DIR}/Src)
 
 add_subdirectory(Src/Library/Database)
+add_subdirectory(Src/Library/Graphics)
 add_subdirectory(Src/Library/Resource)

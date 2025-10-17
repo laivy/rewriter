@@ -49,9 +49,9 @@ EXTERN_C IMAGE_DOS_HEADER __ImageBase;
 
 // Imgui
 #ifdef _IMGUI
-#include "Imgui/imgui.h"
-#include "Imgui/imgui_internal.h"
-#include "Imgui/imgui_stdlib.h"
+#include <Imgui/imgui.h>
+#include <Imgui/imgui_internal.h>
+#include <Imgui/imgui_stdlib.h>
 #endif
 
 // Project

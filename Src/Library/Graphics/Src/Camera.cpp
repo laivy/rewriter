@@ -1,4 +1,4 @@
-#include "Stdafx.h"
+#include "Pch.h"
 #include "Camera.h"
 #include "ConstantBuffer.h"
 #include "Global.h"

@@ -1,4 +1,4 @@
-#include "Stdafx.h"
+#include "Pch.h"
 #include "Camera.h"
 #include "SwapChain.h"
 
