@@ -1,4 +1,4 @@
-#include "Stdafx.h"
+#include "Pch.h"
 #include "Explorer.h"
 #include "Common/Util.h"
 

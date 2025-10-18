@@ -8,7 +8,7 @@ private:
 	struct Root
 	{
 		Resource::ID id;
-		std::filesystem::path path;
+		std::filesystem::path filePath;
 	};
 
 	struct Context
@@ -52,10 +52,9 @@ private:
 	void DragDrop();
 	void MenuBar();
 	void TreeView();
-	void ContextMenu(Resource::ID id);
 	void RenderModal();
 
-	void LoadDataFile(const std::filesystem::path& path);
+	void LoadFromFile(const std::filesystem::path& filePath);
 	Resource::ID New(Resource::ID parentID);
 	void Delete(Resource::ID id);
 	void SetModified(Resource::ID id, bool modified);

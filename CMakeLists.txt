@@ -17,8 +17,9 @@ endif()
 # 유니코드 매크로 정의
 add_definitions(-DUNICODE -D_UNICODE)
 
-# 모든 하위 프로젝트에 ${CMAKE_SOURCE_DIR}/Src 디렉토리를 포함
+# 모든 하위 프로젝트에 ${CMAKE_SOURCE_DIR}/Src, External 디렉토리를 포함
 include_directories(${CMAKE_SOURCE_DIR}/Src)
+include_directories(${CMAKE_SOURCE_DIR}/External)
 
 add_subdirectory(Src/Library)
 add_subdirectory(Src/Tool)

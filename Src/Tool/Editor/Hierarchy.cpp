@@ -1,4 +1,4 @@
-#include "Stdafx.h"
+#include "Pch.h"
 #include "Delegates.h"
 #include "Hierarchy.h"
 #include "Common/Util.h"
@@ -90,16 +90,17 @@ void Hierarchy::OnPropertyModified(Resource::ID id)
 void Hierarchy::OnPropertySelected(Resource::ID id)
 {
 	m_isAnyPropertySelected = true;
-
-	// 이미 선택된 노드를 선택한 경우 선택 해제 안함
-	// 그리고 이미 선택된 노드이기 때문에 컨테이너에 추가 안함
-	if (IsSelected(id))
-		return;
-
-	// Ctrl키를 누르고 있을 때는 선택 해제 안함
-	if (!ImGui::IsKeyDown(ImGuiKey_LeftCtrl))
+	if (ImGui::IsKeyDown(ImGuiKey_LeftCtrl))
 	{
-		for (auto& [id, context] : m_contexts)
+		if (IsSelected(id))
+		{
+			m_contexts[id].isSelected = false;
+			return;
+		}
+	}
+	else
+	{
+		for (auto& context : m_contexts | std::views::values)
 			context.isSelected = false;
 	}
 	m_contexts[id].isSelected = true;
@@ -108,17 +109,13 @@ void Hierarchy::OnPropertySelected(Resource::ID id)
 void Hierarchy::OnMenuFileNew()
 {
 	const Resource::ID id{ New(Resource::InvalidID) };
-	m_roots.emplace_back(id, Resource::GetName(id));
+	m_roots.emplace_back(id, *Resource::GetName(id));
 	m_contexts[id] = { .isModified = true };
 }
 
 void Hierarchy::OnMenuFileOpen()
 {
-	// TODO
-	//Graphics::ImGui::OpenFileDialog("Open File");
-
-	/*
-	std::array<wchar_t, MAX_PATH> filePath{};
+	std::wstring filePath(MAX_PATH, L'\0');
 
 	OPENFILENAME ofn{};
 	ofn.lStructSize = sizeof(ofn);
@@ -133,31 +130,29 @@ void Hierarchy::OnMenuFileOpen()
 	// 경로 및 파일 이름들 추출
 	std::filesystem::path path{ ofn.lpstrFile };
 	std::vector<std::wstring> fileNames;
-	auto ptr{ ofn.lpstrFile };
-	ptr[ofn.nFileOffset - 1] = L'\0';
-	ptr += ofn.nFileOffset;
-	while (*ptr)
+	const wchar_t* temp{ ofn.lpstrFile + ofn.nFileOffset };
+	do
 	{
-		fileNames.emplace_back(ptr);
-		ptr += ::lstrlen(ptr) + 1;
-	}
+		std::wstring_view fileName{ temp };
+		fileNames.emplace_back(fileName);
+		temp += fileName.size() + 1;
+	} while (*temp);
 
 	// 로드
 	if (fileNames.size() == 1)
 	{
-		LoadDataFile(path);
+		LoadFromFile(path);
 	}
 	else
 	{
-		for (const auto& file : fileNames)
-			LoadDataFile(path / file);
+		for (const auto& fileName : fileNames)
+			LoadFromFile(path / fileName);
 	}
-	*/
 }
 
 void Hierarchy::OnMenuFileSave()
 {
-	for (const auto& [id, _] : m_contexts)
+	for (Resource::ID id : m_contexts | std::views::keys)
 	{
 		if (!IsSelected(id))
 			continue;
@@ -167,7 +162,7 @@ void Hierarchy::OnMenuFileSave()
 			continue;
 
 		SetModified(root.id, false);
-		Resource::SaveToFile(root.id, root.path);
+		Resource::SaveToFile(root.id, root.filePath);
 	}
 }
 
@@ -207,56 +202,6 @@ void Hierarchy::Shortcut()
 		OnCopy();
 	if (ImGui::IsKeyDown(ImGuiMod_Ctrl) && ImGui::IsKeyDown(ImGuiKey_V))
 		OnPaste();
-	if (ImGui::IsKeyDown(ImGuiMod_Alt) && ImGui::IsKeyPressed(ImGuiKey_UpArrow, false))
-	{
-		do
-		{
-			/*
-			if (m_selects.size() != 1)
-				break;
-
-			auto selected{ m_selects.front().lock() };
-			if (!selected)
-				break;
-
-			auto parent{ selected->GetParent() };
-			if (!parent)
-				break;
-
-			auto& children{ parent->GetChildren() };
-			auto it{ std::ranges::find(children, selected) };
-			if (it == children.begin() || it == children.end())
-				break;
-
-			std::iter_swap(it, it - 1);
-			*/
-		} while (false);
-	}
-	if (ImGui::IsKeyDown(ImGuiMod_Alt) && ImGui::IsKeyPressed(ImGuiKey_DownArrow, false))
-	{
-		do
-		{
-			/*
-			if (m_selects.size() != 1)
-				break;
-
-			auto selected{ m_selects.front().lock() };
-			if (!selected)
-				break;
-
-			auto parent{ selected->GetParent() };
-			if (!parent)
-				break;
-
-			auto& children{ parent->GetChildren() };
-			auto it{ std::ranges::find(children, selected) };
-			if (it == children.end() || it == children.end() - 1)
-				break;
-
-			std::iter_swap(it, it + 1);
-			*/
-		} while (false);
-	}
 	if (ImGui::IsKeyDown(ImGuiKey_F2))
 	{
 		if (auto window{ ImGui::FindWindowByName("Inspector") })
@@ -264,7 +209,7 @@ void Hierarchy::Shortcut()
 	}
 	if (ImGui::IsKeyDown(ImGuiKey_Delete))
 	{
-		for (const auto& [id, _] : m_contexts)
+		for (Resource::ID id : m_contexts | std::views::keys)
 		{
 			if (IsSelected(id))
 				Delete(id);
@@ -282,7 +227,7 @@ void Hierarchy::DragDrop()
 	{
 		std::filesystem::path filePath{ static_cast<const wchar_t*>(payload->Data) };
 		if (filePath.extension() == Stringtable::DATA_FILE_EXT)
-			LoadDataFile(filePath);
+			LoadFromFile(filePath);
 	}
 
 	ImGui::EndDragDropTarget();
@@ -322,13 +267,113 @@ void Hierarchy::MenuBar()
 
 void Hierarchy::TreeView()
 {
-	std::vector<std::tuple<Resource::ID, Resource::ID, std::size_t>> moveList;
-	auto render = [this, &moveList](this auto self, Resource::ID id, std::size_t index) -> void
+	struct MoveInfo
+	{
+		std::vector<Resource::ID> targetIDs;
+		Resource::ID destID;
+		std::size_t destIndex;
+	};
+	MoveInfo moveInfo{};
+
+	auto popup = [this](Resource::ID id)
+	{
+		if (!ImGui::BeginPopupContextItem("PopupMenu"))
+			return;
+
+		if (!IsSelected(id))
+			Delegates::OnPropertySelected.Broadcast(id);
+
+		// 루트 노드 전용 메뉴
+		do
+		{
+			auto selected{ m_contexts | std::views::keys | std::views::filter([this](auto id) { return IsSelected(id); }) };
+			if (std::ranges::all_of(selected, [this](auto id) { return !IsRoot(id); }))
+				break;
+
+			if (ImGui::MenuItem("Save", "S") || ImGui::IsKeyPressed(ImGuiKey_S))
+			{
+				ImGui::CloseCurrentPopup();
+				OnMenuFileSave();
+			}
+			if (ImGui::MenuItem("Save As"))
+			{
+				ImGui::CloseCurrentPopup();
+				OnMenuFileSaveAs();
+			}
+			if (ImGui::MenuItem("Close", "C") || ImGui::IsKeyPressed(ImGuiKey_C))
+			{
+				ImGui::CloseCurrentPopup();
+			}
+			ImGui::Separator();
+		} while (false);
+
+		// 공통 메뉴
+		if (ImGui::MenuItem("Rename", "F2") || ImGui::IsKeyPressed(ImGuiKey_F2))
+		{
+			ImGui::CloseCurrentPopup();
+
+			if (auto window{ ImGui::FindWindowByName("Inspector") })
+				ImGui::ActivateItemByID(window->GetID("##INSPECTOR/NAME"));
+		}
+		if (ImGui::MenuItem("New", "N") || ImGui::IsKeyPressed(ImGuiKey_N))
+		{
+			ImGui::CloseCurrentPopup();
+			New(id);
+		}
+		if (ImGui::MenuItem("Delete", "D") || ImGui::IsKeyPressed(ImGuiKey_D))
+		{
+			ImGui::CloseCurrentPopup();
+			for (const auto id : m_contexts | std::views::keys)
+			{
+				if (IsSelected(id))
+					Delete(id);
+			}
+		}
+		ImGui::EndPopup();
+	};
+	auto reorder = [this, &moveInfo](Resource::ID id, std::size_t index, bool isOpened)
+	{
+		const ImVec2 lt{ ImGui::GetItemRectMin() };
+		const ImVec2 rb{ ImGui::GetItemRectMax() };
+		const ImVec2 cursorPos{ ImGui::GetCursorPos() };
+		const ImVec2 itemSpacing{ ImGui::GetStyle().ItemSpacing };
+		ImGui::PushStyleVarY(ImGuiStyleVar_ItemSpacing, 0.0f);
+		ImGui::InvisibleButton("Between", ImVec2{ rb.x - lt.x - cursorPos.x + itemSpacing.x, itemSpacing.y });
+		ImGui::PopStyleVar();
+
+		if (!ImGui::BeginDragDropTarget())
+			return;
+
+		constexpr float Thickness{ 1.0f };
+
+		ImRect rect{};
+		rect.Min = ImGui::GetItemRectMin();
+		rect.Max = ImGui::GetItemRectMax();
+
+		const ImVec2 center{ rect.GetCenter() };
+		rect.Min.y = center.y - Thickness / 2.0f;
+		rect.Max.y = center.y + Thickness / 2.0f;
+
+		ImDrawList* drawList{ ImGui::GetWindowDrawList() };
+		drawList->AddRectFilled(rect.Min, rect.Max, ImGui::GetColorU32(ImGuiCol_DragDropTarget));
+
+		if (auto payload{ ImGui::AcceptDragDropPayload("Hierarchy/Property", ImGuiDragDropFlags_AcceptNoDrawDefaultRect) })
+		{
+			std::ranges::copy_if(m_contexts | std::views::keys, std::back_inserter(moveInfo.targetIDs), [this](Resource::ID id)
+			{
+				return IsSelected(id);
+			});
+			moveInfo.destID = isOpened ? id : Resource::GetParent(id);
+			moveInfo.destIndex = isOpened ? 0 : index + 1;
+		}
+		ImGui::EndDragDropTarget();
+	};
+	auto render = [this, &popup, &reorder](this auto self, Resource::ID id, std::size_t index) -> void
 	{
 		ImGui::PushID(std::to_string(id).c_str());
 
 		const bool isRoot{ IsRoot(id) };
-		std::string name{ Util::ToU8String(Resource::GetName(id)) };
+		std::string name{ Util::ToU8String(*Resource::GetName(id)) };
 		if (isRoot)
 		{
 			// 루트 노드는 폰트 키움
@@ -348,24 +393,23 @@ void Hierarchy::TreeView()
 		ImGui::PushStyleVarY(ImGuiStyleVar_ItemSpacing, 0.0f);
 		const bool isTreeNodeOpened{ ImGui::TreeNodeEx(name.c_str(), flag) };
 		ImGui::PopStyleVar();
-		//ImGui::DebugDrawItemRect();
 
 		// 폰트 크기 원복
 		if (isRoot)
 			ImGui::PopFont();
 
-		// 닫혀있어도 클릭 되도록
-		if (ImGui::IsItemClicked())
-			Delegates::OnPropertySelected.Broadcast(id);
-
 		// 트리 여닫기
 		if (ImGui::IsItemToggledOpen())
 		{
-			if (IsOpened(id))
+			if (isOpened)
 				CloseTree(id);
 			else
 				OpenTree(id);
 		}
+
+		// 닫혀있어도 클릭 되도록
+		if (ImGui::IsItemClicked())
+			Delegates::OnPropertySelected.Broadcast(id);
 
 		// 드래그 드랍
 		if (!isRoot && ImGui::BeginDragDropSource())
@@ -376,49 +420,16 @@ void Hierarchy::TreeView()
 		}
 
 		// 컨텍스트 메뉴
-		ContextMenu(id);
+		popup(id);
 
 		// 순서 변경을 위한 중간 영역
-		const ImVec2 cursorPos{ ImGui::GetCursorPos() };
-		const ImVec2 lt{ ImGui::GetItemRectMin() };
-		const ImVec2 rb{ ImGui::GetItemRectMax() };
-		const float y{ ImGui::GetStyle().ItemSpacing.y };
-		ImGui::PushStyleVarY(ImGuiStyleVar_ItemSpacing, 0.0f);
-		ImGui::InvisibleButton("Between", ImVec2{ rb.x - lt.x - cursorPos.x + ImGui::GetStyle().ItemSpacing.x, y });
-		ImGui::PopStyleVar();
-
-		if (ImGui::BeginDragDropTarget())
-		{
-			constexpr float Thickness{ 1.0f };
-
-			ImRect rect{};
-			rect.Min = ImGui::GetItemRectMin();
-			rect.Max = ImGui::GetItemRectMax();
-
-			const ImVec2 center{ rect.GetCenter() };
-			rect.Min.y = center.y - Thickness / 2.0f;
-			rect.Max.y = center.y + Thickness / 2.0f;
-
-			ImDrawList* drawList{ ImGui::GetWindowDrawList() };
-			drawList->AddRectFilled(rect.Min, rect.Max, ImGui::GetColorU32(ImGuiCol_DragDropTarget));
-
-			if (auto payload{ ImGui::AcceptDragDropPayload("Hierarchy/Property", ImGuiDragDropFlags_AcceptNoDrawDefaultRect) })
-			{
-				const Resource::ID targetID{ *static_cast<Resource::ID*>(payload->Data) };
-				moveList.emplace_back(
-					targetID,
-					isOpened ? id : Resource::GetParent(id),
-					isOpened ? 0 : index + 1
-				);
-			}
-			ImGui::EndDragDropTarget();
-		}
+		reorder(id, index, isOpened);
 
 		// 하위 트리
 		if (isTreeNodeOpened)
 		{
-			for (const auto& [index, child] : Resource::Iterator{ id } | std::views::values | std::views::enumerate)
-				self(child, index);
+			for (const auto& [i, child] : Resource::Iterator{ id } | std::views::values | std::views::enumerate)
+				self(child, i);
 			ImGui::TreePop();
 		}
 		ImGui::PopID();
@@ -430,88 +441,31 @@ void Hierarchy::TreeView()
 	ImGui::PopID();
 
 	// 프로퍼티 이동
-	for (const auto& [targetID, parentID, index] : moveList)
-		Resource::Move(targetID, parentID, index);
+	for (auto targetID : moveInfo.targetIDs | std::views::reverse)
+		Resource::Move(targetID, moveInfo.destID, moveInfo.destIndex);
 
 	// 클릭을 했는데 선택된 프로퍼티가 없으면 이미 선택되어 있는 프로퍼티 선택 해제
 	if (!m_isAnyPropertySelected && ImGui::IsWindowHovered() && ImGui::IsMouseClicked(ImGuiMouseButton_Left))
 	{
-		for (auto& [_, context] : m_contexts)
-			context.isSelected = false;
+		for (auto& ctx : m_contexts | std::views::values)
+			ctx.isSelected = false;
 	}
-}
-
-void Hierarchy::ContextMenu(Resource::ID id)
-{
-	if (!ImGui::BeginPopupContextItem("ContextMenu"))
-		return;
-
-	if (!IsSelected(id))
-		Delegates::OnPropertySelected.Broadcast(id);
-
-	// 루트 노드 전용 메뉴
-	do
-	{
-		auto selected{ m_contexts | std::views::filter([](const auto& elem) { return elem.second.isSelected; }) };
-		if (std::ranges::all_of(selected, [this](const auto& elem) { return !IsRoot(elem.first); }))
-			break;
-
-		if (ImGui::MenuItem("Save", "S") || ImGui::IsKeyPressed(ImGuiKey_S))
-		{
-			ImGui::CloseCurrentPopup();
-			OnMenuFileSave();
-		}
-		if (ImGui::MenuItem("Save As"))
-		{
-			ImGui::CloseCurrentPopup();
-			OnMenuFileSaveAs();
-		}
-		if (ImGui::MenuItem("Close", "C") || ImGui::IsKeyPressed(ImGuiKey_C))
-		{
-			ImGui::CloseCurrentPopup();
-		}
-		ImGui::Separator();
-	} while (false);
-
-	// 공통 메뉴
-	if (ImGui::MenuItem("Rename", "F2") || ImGui::IsKeyPressed(ImGuiKey_F2))
-	{
-		ImGui::CloseCurrentPopup();
-
-		if (auto window{ ImGui::FindWindowByName("Inspector") })
-			ImGui::ActivateItemByID(window->GetID("##INSPECTOR/NAME"));
-	}
-	if (ImGui::MenuItem("New", "N") || ImGui::IsKeyPressed(ImGuiKey_N))
-	{
-		ImGui::CloseCurrentPopup();
-		New(id);
-	}
-	if (ImGui::MenuItem("Delete", "D") || ImGui::IsKeyPressed(ImGuiKey_D))
-	{
-		ImGui::CloseCurrentPopup();
-		for (const auto id : m_contexts | std::views::keys)
-		{
-			if (IsSelected(id))
-				Delete(id);
-		}
-	}
-	ImGui::EndPopup();
 }
 
 void Hierarchy::RenderModal()
 {
 }
 
-void Hierarchy::LoadDataFile(const std::filesystem::path& path)
+void Hierarchy::LoadFromFile(const std::filesystem::path& filePath)
 {
-	const auto rootID{ Resource::Get(path.wstring()) };
-	if (rootID == Resource::InvalidID)
+	const auto id{ Resource::LoadFromFile(filePath, L"")};
+	if (id == Resource::InvalidID)
 	{
 		assert(false && "failed to load data file");
 		return;
 	}
-	Resource::SetName(rootID, path.filename().wstring());
-	m_roots.emplace_back(rootID, path);
+	m_roots.emplace_back(id, filePath);
+	Resource::SetName(id, filePath.filename());
 }
 
 Resource::ID Hierarchy::New(Resource::ID parentID)
@@ -558,23 +512,37 @@ void Hierarchy::Delete(Resource::ID id)
 
 void Hierarchy::SetModified(Resource::ID id, bool modified)
 {
+	id = GetRoot(id).id;
 	m_contexts[id].isModified = modified;
 }
 
 Hierarchy::Root Hierarchy::GetRoot(Resource::ID id) const
 {
-	Resource::ID rootID{ Resource::InvalidID };
-	Resource::ID parentID{ Resource::GetParent(id) };
-	do
+	const Root Invalid{ .id = Resource::InvalidID };
+	if (IsRoot(id))
 	{
-		rootID = parentID;
-		parentID = Resource::GetParent(parentID);
-	} while (parentID != Resource::InvalidID);
+		auto it{ std::ranges::find(m_roots, id, &Root::id) };
+		if (it == m_roots.end())
+			return Invalid;
+		return *it;
+	}
 
-	auto it{ std::ranges::find_if(m_roots, [rootID](const auto& root) { return root.id == rootID; }) };
-	if (it == m_roots.end())
-		return Root{ .id = Resource::InvalidID };
-	return *it;
+	Resource::ID rootID{ Resource::GetParent(id) };
+	while (true)
+	{
+		const Resource::ID temp{ Resource::GetParent(rootID) };
+		if (temp == Resource::InvalidID)
+			break;
+		rootID = temp;
+	}
+	if (IsRoot(rootID))
+	{
+		auto it{ std::ranges::find(m_roots, rootID, &Root::id) };
+		if (it == m_roots.end())
+			return Invalid;
+		return *it;
+	}
+	return Invalid;
 }
 
 bool Hierarchy::IsModified(Resource::ID id) const

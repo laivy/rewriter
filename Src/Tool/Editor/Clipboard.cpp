@@ -1,4 +1,4 @@
-#include "Stdafx.h"
+#include "Pch.h"
 #include "App.h"
 #include "Clipboard.h"
 #include "Delegates.h"

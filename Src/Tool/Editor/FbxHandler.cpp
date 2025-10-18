@@ -1,4 +1,4 @@
-#include "Stdafx.h"
+#include "Pch.h"
 #include "FbxHandler.h"
 #include "External/FBXSDK/include/fbxsdk.h"
 
