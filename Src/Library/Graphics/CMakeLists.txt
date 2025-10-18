@@ -5,6 +5,14 @@ string(TOUPPER ${TARGET} TARGET_NAME_UPPER)
 
 add_library(${TARGET} SHARED)
 
+# 셰이더 컴파일
+include(${CMAKE_CURRENT_SOURCE_DIR}/Src/Shader/Compile.cmake)
+set(SHADER_FILES
+	${CMAKE_CURRENT_SOURCE_DIR}/Src/Shader/Model.vs
+	${CMAKE_CURRENT_SOURCE_DIR}/Src/Shader/Model.ps
+)
+compile_shader(${TARGET} SHADER_FILES)
+
 # 내보내기 매크로 생성
 include(GenerateExportHeader)
 generate_export_header(${TARGET}
