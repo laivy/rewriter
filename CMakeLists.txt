@@ -14,8 +14,8 @@ if (MSVC)
     add_compile_options("/utf-8")
 endif()
 
-# 유니코드 매크로 정의
-add_definitions(-DUNICODE -D_UNICODE)
+# 매크로 정의
+add_compile_definitions(UNICODE _UNICODE _WINDOWS -DNOMINMAX)
 
 # 모든 하위 프로젝트에 ${CMAKE_SOURCE_DIR}/Src, External 디렉토리를 포함
 include_directories(${CMAKE_SOURCE_DIR}/Src)

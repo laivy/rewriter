@@ -1,4 +1,5 @@
 #pragma once
+#include "Export.h"
 
 #ifdef _DIRECT2D
 namespace Resource

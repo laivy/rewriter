@@ -20,10 +20,37 @@ generate_export_header(${TARGET}
     EXPORT_MACRO_NAME ${TARGET_NAME_UPPER}_API
 )
 
+# Imgui
+target_sources(${TARGET}
+	PUBLIC
+		${CMAKE_SOURCE_DIR}/External/Imgui/imconfig.h
+		${CMAKE_SOURCE_DIR}/External/Imgui/imgui.cpp
+		${CMAKE_SOURCE_DIR}/External/Imgui/imgui.h
+		${CMAKE_SOURCE_DIR}/External/Imgui/imgui_demo.cpp
+		${CMAKE_SOURCE_DIR}/External/Imgui/imgui_draw.cpp
+		${CMAKE_SOURCE_DIR}/External/Imgui/imgui_impl_dx12.cpp
+		${CMAKE_SOURCE_DIR}/External/Imgui/imgui_impl_dx12.h
+		${CMAKE_SOURCE_DIR}/External/Imgui/imgui_impl_win32.cpp
+		${CMAKE_SOURCE_DIR}/External/Imgui/imgui_impl_win32.h
+		${CMAKE_SOURCE_DIR}/External/Imgui/imgui_internal.h
+		${CMAKE_SOURCE_DIR}/External/Imgui/imgui_stdlib.cpp
+		${CMAKE_SOURCE_DIR}/External/Imgui/imgui_stdlib.h
+		${CMAKE_SOURCE_DIR}/External/Imgui/imgui_tables.cpp
+		${CMAKE_SOURCE_DIR}/External/Imgui/imgui_widgets.cpp
+		${CMAKE_SOURCE_DIR}/External/Imgui/imstb_rectpack.h
+		${CMAKE_SOURCE_DIR}/External/Imgui/imstb_textedit.h
+		${CMAKE_SOURCE_DIR}/External/Imgui/imstb_truetype.h
+)
+
 target_sources(${TARGET}
     PRIVATE
 		${CMAKE_SOURCE_DIR}/Src/Common/Type.cpp
 		${CMAKE_SOURCE_DIR}/Src/Common/Type.h
+		${CMAKE_SOURCE_DIR}/External/DirectX/d3dx12.h
+		${CMAKE_SOURCE_DIR}/External/DirectX/DDSTextureLoader12.cpp
+		${CMAKE_SOURCE_DIR}/External/DirectX/DDSTextureLoader12.h
+		${CMAKE_SOURCE_DIR}/External/DirectX/WICTextureLoader12.cpp
+		${CMAKE_SOURCE_DIR}/External/DirectX/WICTextureLoader12.h
         ${CMAKE_CURRENT_SOURCE_DIR}/Src/Camera.cpp
 		${CMAKE_CURRENT_SOURCE_DIR}/Src/ConstantBuffer.cpp
 		${CMAKE_CURRENT_SOURCE_DIR}/Src/ConstantBuffer.h
@@ -58,11 +85,10 @@ target_sources(${TARGET}
 target_precompile_headers(${TARGET} PRIVATE Src/Pch.h)
 
 target_include_directories(${TARGET} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/Include/${TARGET})
-target_include_directories(${TARGET} PRIVATE ${CMAKE_SOURCE_DIR}/External)
 target_include_directories(${TARGET} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/Include)
 
 # 종속성
-target_link_libraries(${TARGET} PRIVATE
+target_link_libraries(${TARGET} PUBLIC
 	d2d1 d3d11 d3d12 d3dcompiler dwrite dxgi
 )
 target_link_libraries(${TARGET} PUBLIC Resource)

@@ -1,4 +1,5 @@
 #pragma once
+#include "Export.h"
 
 #ifdef _IMGUI
 namespace Graphics::D3D
