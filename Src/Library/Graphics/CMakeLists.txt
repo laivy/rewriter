@@ -13,11 +13,11 @@ set(SHADER_FILES
 )
 compile_shader(${TARGET} SHADER_FILES)
 
-# 내보내기 매크로 생성
+# 내보내기 매크로
 include(GenerateExportHeader)
 generate_export_header(${TARGET}
-    EXPORT_FILE_NAME ${CMAKE_CURRENT_SOURCE_DIR}/Include/${TARGET}/Export.h
-    EXPORT_MACRO_NAME ${TARGET_NAME_UPPER}_API
+	EXPORT_FILE_NAME ${CMAKE_CURRENT_SOURCE_DIR}/Include/${TARGET}/Export.h
+	EXPORT_MACRO_NAME ${TARGET_NAME_UPPER}_API
 )
 
 # Imgui
@@ -28,10 +28,6 @@ target_sources(${TARGET}
 		${CMAKE_SOURCE_DIR}/External/Imgui/imgui.h
 		${CMAKE_SOURCE_DIR}/External/Imgui/imgui_demo.cpp
 		${CMAKE_SOURCE_DIR}/External/Imgui/imgui_draw.cpp
-		${CMAKE_SOURCE_DIR}/External/Imgui/imgui_impl_dx12.cpp
-		${CMAKE_SOURCE_DIR}/External/Imgui/imgui_impl_dx12.h
-		${CMAKE_SOURCE_DIR}/External/Imgui/imgui_impl_win32.cpp
-		${CMAKE_SOURCE_DIR}/External/Imgui/imgui_impl_win32.h
 		${CMAKE_SOURCE_DIR}/External/Imgui/imgui_internal.h
 		${CMAKE_SOURCE_DIR}/External/Imgui/imgui_stdlib.cpp
 		${CMAKE_SOURCE_DIR}/External/Imgui/imgui_stdlib.h
@@ -40,10 +36,21 @@ target_sources(${TARGET}
 		${CMAKE_SOURCE_DIR}/External/Imgui/imstb_rectpack.h
 		${CMAKE_SOURCE_DIR}/External/Imgui/imstb_textedit.h
 		${CMAKE_SOURCE_DIR}/External/Imgui/imstb_truetype.h
+	PRIVATE
+		${CMAKE_SOURCE_DIR}/External/Imgui/imgui_impl_dx12.cpp
+		${CMAKE_SOURCE_DIR}/External/Imgui/imgui_impl_dx12.h
+		${CMAKE_SOURCE_DIR}/External/Imgui/imgui_impl_win32.cpp
+		${CMAKE_SOURCE_DIR}/External/Imgui/imgui_impl_win32.h
 )
 
 target_sources(${TARGET}
-    PRIVATE
+	PUBLIC
+		${CMAKE_CURRENT_SOURCE_DIR}/Include/${TARGET}/Camera.h
+		${CMAKE_CURRENT_SOURCE_DIR}/Include/${TARGET}/Graphics.h
+		${CMAKE_CURRENT_SOURCE_DIR}/Include/${TARGET}/GraphicsImGui.h
+		${CMAKE_CURRENT_SOURCE_DIR}/Include/${TARGET}/Graphics2D.h
+		${CMAKE_CURRENT_SOURCE_DIR}/Include/${TARGET}/Graphics3D.h
+	PRIVATE
 		${CMAKE_SOURCE_DIR}/Src/Common/Type.cpp
 		${CMAKE_SOURCE_DIR}/Src/Common/Type.h
 		${CMAKE_SOURCE_DIR}/External/DirectX/d3dx12.h
@@ -51,7 +58,7 @@ target_sources(${TARGET}
 		${CMAKE_SOURCE_DIR}/External/DirectX/DDSTextureLoader12.h
 		${CMAKE_SOURCE_DIR}/External/DirectX/WICTextureLoader12.cpp
 		${CMAKE_SOURCE_DIR}/External/DirectX/WICTextureLoader12.h
-        ${CMAKE_CURRENT_SOURCE_DIR}/Src/Camera.cpp
+		${CMAKE_CURRENT_SOURCE_DIR}/Src/Camera.cpp
 		${CMAKE_CURRENT_SOURCE_DIR}/Src/ConstantBuffer.cpp
 		${CMAKE_CURRENT_SOURCE_DIR}/Src/ConstantBuffer.h
 		${CMAKE_CURRENT_SOURCE_DIR}/Src/Descriptor.cpp
@@ -74,12 +81,6 @@ target_sources(${TARGET}
 		${CMAKE_CURRENT_SOURCE_DIR}/Src/RenderTarget.h
 		${CMAKE_CURRENT_SOURCE_DIR}/Src/SwapChain.cpp
 		${CMAKE_CURRENT_SOURCE_DIR}/Src/SwapChain.h
-    PUBLIC
-        ${CMAKE_CURRENT_SOURCE_DIR}/Include/${TARGET}/Camera.h
-		${CMAKE_CURRENT_SOURCE_DIR}/Include/${TARGET}/Graphics.h
-		${CMAKE_CURRENT_SOURCE_DIR}/Include/${TARGET}/GraphicsImGui.h
-		${CMAKE_CURRENT_SOURCE_DIR}/Include/${TARGET}/Graphics2D.h
-		${CMAKE_CURRENT_SOURCE_DIR}/Include/${TARGET}/Graphics3D.h
 )
 
 target_precompile_headers(${TARGET} PRIVATE Src/Pch.h)

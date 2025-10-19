@@ -1,25 +1,23 @@
-cmake_minimum_required(VERSION 3.10)
+cmake_minimum_required(VERSION 3.12)
 
 project(Rewriter)
 
 set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/bin/$<CONFIG>)
-set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/bin/$<CONFIG>)
-set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/bin/$<CONFIG>)
-
 # 소스 파일 UTF-8 인코딩 설정
 if (MSVC)
-    add_compile_options("/utf-8")
+	add_compile_options("/utf-8")
 endif()
 
-# 매크로 정의
-add_compile_definitions(UNICODE _UNICODE _WINDOWS -DNOMINMAX)
+# 모든 프로젝트에 정의할 매크로
+add_compile_definitions(_UNICODE UNICODE NOMINMAX)
 
-# 모든 하위 프로젝트에 ${CMAKE_SOURCE_DIR}/Src, External 디렉토리를 포함
-include_directories(${CMAKE_SOURCE_DIR}/Src)
-include_directories(${CMAKE_SOURCE_DIR}/External)
+# 모든 프로젝트에 포함할 디렉토리
+include_directories(
+	${CMAKE_SOURCE_DIR}/Src
+	${CMAKE_SOURCE_DIR}/External
+)
 
 add_subdirectory(Src/Library)
 add_subdirectory(Src/Tool)

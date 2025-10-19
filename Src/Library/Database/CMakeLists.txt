@@ -5,26 +5,26 @@ string(TOUPPER ${TARGET} TARGET_NAME_UPPER)
 
 add_library(${TARGET} SHARED)
 
-# 내보내기 매크로 생성
+# 내보내기 매크로
 include(GenerateExportHeader)
 generate_export_header(${TARGET}
-    EXPORT_FILE_NAME ${CMAKE_CURRENT_SOURCE_DIR}/Include/${TARGET}/Export.h
-    EXPORT_MACRO_NAME ${TARGET_NAME_UPPER}_API
+	EXPORT_FILE_NAME ${CMAKE_CURRENT_SOURCE_DIR}/Include/${TARGET}/Export.h
+	EXPORT_MACRO_NAME ${TARGET_NAME_UPPER}_API
 )
 
 target_sources(${TARGET}
-    PRIVATE
-        ${CMAKE_SOURCE_DIR}/Src/Common/Time.cpp
-        ${CMAKE_SOURCE_DIR}/Src/Common/Time.h
-        ${CMAKE_CURRENT_SOURCE_DIR}/Src/Database.cpp
-        ${CMAKE_CURRENT_SOURCE_DIR}/Src/DllMain.cpp
-        ${CMAKE_CURRENT_SOURCE_DIR}/Src/Query.cpp
-        ${CMAKE_CURRENT_SOURCE_DIR}/Src/Session.cpp
-        ${CMAKE_CURRENT_SOURCE_DIR}/Src/Session.h
-    PUBLIC
-        ${CMAKE_CURRENT_SOURCE_DIR}/Include/${TARGET}/Database.h
-        ${CMAKE_CURRENT_SOURCE_DIR}/Include/${TARGET}/Query.h
-        ${CMAKE_CURRENT_SOURCE_DIR}/Include/${TARGET}/Type.h
+	PUBLIC
+		${CMAKE_CURRENT_SOURCE_DIR}/Include/${TARGET}/Database.h
+		${CMAKE_CURRENT_SOURCE_DIR}/Include/${TARGET}/Query.h
+		${CMAKE_CURRENT_SOURCE_DIR}/Include/${TARGET}/Type.h
+	PRIVATE
+		${CMAKE_SOURCE_DIR}/Src/Common/Time.cpp
+		${CMAKE_SOURCE_DIR}/Src/Common/Time.h
+		${CMAKE_CURRENT_SOURCE_DIR}/Src/Database.cpp
+		${CMAKE_CURRENT_SOURCE_DIR}/Src/DllMain.cpp
+		${CMAKE_CURRENT_SOURCE_DIR}/Src/Query.cpp
+		${CMAKE_CURRENT_SOURCE_DIR}/Src/Session.cpp
+		${CMAKE_CURRENT_SOURCE_DIR}/Src/Session.h
 )
 
 target_precompile_headers(${TARGET} PRIVATE Src/Pch.h)
