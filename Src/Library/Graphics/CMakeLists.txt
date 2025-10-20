@@ -1,9 +1,14 @@
-cmake_minimum_required(VERSION 3.12)
+cmake_minimum_required(VERSION 3.30)
 
 set(TARGET Graphics)
 string(TOUPPER ${TARGET} TARGET_NAME_UPPER)
 
 add_library(${TARGET} SHARED)
+
+# 빌드 구성 확인
+# if (BUILD_CONFIG STREQUAL NONE)
+# 	message(FATAL_ERROR "BUILD_CONFIG가 설정되지 않았습니다. (CLIENT, SERVER, TOOL)")
+# endif()
 
 # 셰이더 컴파일
 include(${CMAKE_CURRENT_SOURCE_DIR}/Src/Shader/Compile.cmake)

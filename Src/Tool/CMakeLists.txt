@@ -1,5 +1,3 @@
-cmake_minimum_required(VERSION 3.12)
-
-add_compile_definitions(_TOOL)
+cmake_minimum_required(VERSION 3.30)
 
 add_subdirectory(Editor)

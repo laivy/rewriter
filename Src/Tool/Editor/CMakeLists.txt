@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.12)
+cmake_minimum_required(VERSION 3.30)
 
 set(TARGET Editor)
 set(COMMON ${CMAKE_SOURCE_DIR}/Src/Common)
@@ -36,15 +36,6 @@ add_executable(${TARGET} WIN32
 )
 
 target_precompile_headers(${TARGET} PRIVATE Pch.h)
-
-# 출력 디렉토리
-foreach(T Graphics Resource ${TARGET})
-	set_target_properties(${T} PROPERTIES
-		RUNTIME_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/Bin/$<CONFIG>_Tool
-		LIBRARY_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/Bin/$<CONFIG>_Tool
-		ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/Bin/$<CONFIG>_Tool
-	)
-endforeach()
 
 # 데이터 링크
 get_target_property(OUT_DIR ${TARGET} RUNTIME_OUTPUT_DIRECTORY)

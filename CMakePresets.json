@@ -1,0 +1,38 @@
+{
+	"version": 9,
+	"cmakeMinimumRequired": {
+		"major": 3,
+		"minor": 30
+	},
+	"configurePresets": [
+		{
+			"name": "x64-base",
+			"hidden": true,
+			"architecture": {
+				"value": "x64",
+				"strategy": "external"
+			},
+			"binaryDir": "${sourceDir}/Build/${presetName}",
+			"installDir": "${sourceDir}/Install/${presetName}",
+			"cacheVariables": {
+				"TARGET_CATEGORY": "None"
+			}
+		},
+		{
+			"name": "x64-debug-base",
+			"hidden": true,
+			"inherits": "x64-base",
+			"cacheVariables": {
+				"CMAKE_BUILD_TYPE": "Debug"
+			}
+		},
+		{
+			"name": "debug-tool",
+			"inherits": "x64-debug-base",
+			"displayName": "Tool x64 Debug",
+			"cacheVariables": {
+				"TARGET_CATEGORY": "Tool"
+			}
+		}
+	]
+}
