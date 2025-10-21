@@ -2,6 +2,7 @@ cmake_minimum_required(VERSION 3.30)
 
 project(Rewriter)
 
+# C++23 표준 사용
 set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
@@ -18,18 +19,24 @@ endif()
 # 모든 프로젝트에 정의할 매크로
 add_compile_definitions(_UNICODE UNICODE NOMINMAX)
 
+# 프로젝트 소스 경로 단축
+set(COMMON_SOURCE_DIR ${CMAKE_SOURCE_DIR}/Src/Common)
+set(EXTERNAL_SOURCE_DIR ${CMAKE_SOURCE_DIR}/External)
+
 # 모든 프로젝트에 포함할 디렉토리
 include_directories(
 	${CMAKE_SOURCE_DIR}/Src
-	${CMAKE_SOURCE_DIR}/External
+	${EXTERNAL_SOURCE_DIR}
 )
 
+# 카테고리에 따른 타겟 설정
 if (TARGET_CATEGORY STREQUAL "Client")
 	add_compile_definitions(_CLIENT)
 elseif (TARGET_CATEGORY STREQUAL "Server")
 	add_compile_definitions(_SERVER)
 elseif (TARGET_CATEGORY STREQUAL "Tool")
 	add_compile_definitions(_TOOL)
+	add_compile_definitions(_IMGUI _DIRECT2D)
 	add_subdirectory(Src/Library)
 	add_subdirectory(Src/Tool)
 else()

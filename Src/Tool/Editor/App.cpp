@@ -143,7 +143,7 @@ void App::InitApp()
 
 	// 싱글톤 초기화
 	Hierarchy::Instantiate();
-	
+
 	// 타이머 초기화
 	m_timer.Tick();
 }

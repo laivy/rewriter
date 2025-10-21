@@ -1,3 +1,4 @@
+#include "Pch.h"
 #include "Type.h"
 
 Int2::Int2(int32_t x, int32_t y) :
