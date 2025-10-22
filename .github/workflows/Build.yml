@@ -11,23 +11,14 @@ jobs:
       - name: Check out repository
         uses: actions/checkout@v4
 
-      - name: Setup MSBuild
-        uses: microsoft/setup-msbuild@v2
-      
-      - name: Build Debug Client
-        run: msbuild Rewriter.sln /t:build /p:configuration=Debug_Client /p:platform=x64
+      - name: Setup CMake
+        uses: lukka/get-cmake@latest
 
-      - name: Build Debug Server
-        run: msbuild Rewriter.sln /t:build /p:configuration=Debug_Server /p:platform=x64
+      - name: Setup MSVC
+        uses: ilammy/msvc-dev-cmd@v1
 
-      - name: Build Debug Tool
-        run: msbuild Rewriter.sln /t:build /p:configuration=Debug_Tool /p:platform=x64
+      - name: Configure CMake - debug-tool
+        run: cmake --preset debug-tool
 
-      - name: Build Release Client
-        run: msbuild Rewriter.sln /t:build /p:configuration=Release_Client /p:platform=x64
-
-      - name: Build Release Server
-        run: msbuild Rewriter.sln /t:build /p:configuration=Release_Server /p:platform=x64
-
-      - name: Build Release Tool
-        run: msbuild Rewriter.sln /t:build /p:configuration=Debug_Tool /p:platform=x64
+      - name: Build - debug-tool
+        run: cmake --build Build/debug-tool
