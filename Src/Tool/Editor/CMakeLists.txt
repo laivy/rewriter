@@ -38,6 +38,8 @@ set(SOURCES
 	${COMMON_SOURCE_DIR}/Type.cpp
 	${COMMON_SOURCE_DIR}/Util.cpp
 )
+source_group(Header FILES ${HEADERS})
+source_group(Source FILES ${SOURCES})
 target_sources(${TARGET}
 	PRIVATE
 		${HEADERS}
@@ -48,7 +50,7 @@ target_sources(${TARGET}
 target_precompile_headers(${TARGET} PRIVATE Pch.h)
 
 # 종속성
-target_link_libraries(${TARGET} PUBLIC Graphics Resource)
+target_link_libraries(${TARGET} PRIVATE Graphics Resource)
 
 # 데이터 링크
 add_custom_command(

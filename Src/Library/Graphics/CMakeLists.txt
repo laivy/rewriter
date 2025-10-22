@@ -84,9 +84,9 @@ set(SOURCES
 	${CMAKE_CURRENT_SOURCE_DIR}/Src/RenderTarget.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/Src/SwapChain.cpp
 )
-source_group(External ${PUBLIC_EXTERNALS} ${PRIVATE_EXTERNALS})
-source_group(Header ${PUBLIC_HEADERS} ${PRIVATE_HEADERS})
-source_group(Source ${SOURCES})
+source_group(External FILES ${PUBLIC_EXTERNALS} ${PRIVATE_EXTERNALS})
+source_group(Header FILES ${PUBLIC_HEADERS} ${PRIVATE_HEADERS})
+source_group(Source FILES ${SOURCES})
 target_sources(${TARGET}
 	PUBLIC
 		${PUBLIC_EXTERNALS}
@@ -109,7 +109,13 @@ target_include_directories(${TARGET}
 )
 
 # 종속성
-target_link_libraries(${TARGET} PUBLIC
-	d2d1 d3d11 d3d12 d3dcompiler dwrite dxgi
+target_link_libraries(${TARGET}
+	PRIVATE
+		d2d1
+		d3d11
+		d3d12
+		d3dcompiler
+		dwrite
+		dxgi
+		Resource
 )
-target_link_libraries(${TARGET} PUBLIC Resource)
