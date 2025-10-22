@@ -1,7 +1,7 @@
 #pragma once
 
-// 이 헤더 파일은 모든 프로젝트의 Stdafx.h에서 가장 첫번째로 포함한다.
-// 모든 프로젝트에서 공통으로 사용하는 헤더들을 포함한다.
+// 이 헤더 파일은 모든 미리 컴파일된 헤더에서 가장 첫번째로 포함된다.
+// 모든 프로젝트에서 공통으로 사용하는 헤더 파일들을 포함한다.
 
 // C++
 #include <algorithm>
@@ -31,7 +31,7 @@ using namespace std::chrono_literals;
 #include <MSWSock.h>
 #include <WS2tcpip.h>
 #endif
-#include <wrl.h>
+#include <wrl/client.h>
 using Microsoft::WRL::ComPtr;
 
 #ifndef HINST_THISCOMPONENT
