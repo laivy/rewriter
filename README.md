@@ -4,37 +4,54 @@
 	<p>2D 횡스크롤 플랫포머 기반의 도트 감성 RPG</p>
 </div>
 
-# ⚙️ 빌드 및 실행
-<div>
-	<img src="https://img.shields.io/badge/Visual%20Studio%202022-5C2D91.svg?style=for-the-badge&logo=visual-studio&logoColor=white"/>
-	<img src="https://img.shields.io/badge/c++%2023-%2300599C.svg?style=for-the-badge&logo=c%2B%2B&logoColor=white"/>
-	<img src="https://img.shields.io/badge/DirectX12-0078D6?style=for-the-badge&logo=windows&logoColor=white"/>
-	<img src="https://img.shields.io/badge/Direct2D-0078D6?style=for-the-badge&logo=windows&logoColor=white"/>
-</div>
+# ⚙️ 빌드
+1. CMake 원하는 프리셋으로 프로젝트 구성
+```powershell
+cmake --preset debug-tool
+```
 
-1. `Rewriter.sln` 를 Visual Studio 2022로 엶
-2. 원하는 구성 선택
-	- ex. `Debug_Client`
-3. 빌드
-4. `Bin` 폴더 아래에 있는 바이너리 파일 실행
-	- ex. `Bin/Debug_Client/Client.exe`
+2. 빌드
+```powershell
+cmake --build Build/debug-tool
+```
+
+3. 실행
+```powershell
+.\Bin\Tool\Debug\Editor.exe
+```
+
+## 사용 가능한 프리셋
+- `debug-client`: 클라이언트 디버그 빌드
+- `release-client`: 클라이언트 릴리즈 빌드
+- `debug-server`: 서버 디버그 빌드
+- `release-server`: 서버 릴리즈 빌드
+- `debug-tool`: 개발 툴 디버그 빌드
+- `release-tool`: 개발 툴 릴리즈 빌드
 
 # 📁 프로젝트 폴더 구조
 ## Bin/
-바이너리가 출력되는 폴더. 빌드 구성에 따라 다음과 같이 6가지 폴더로 나뉘어서 저장
-`Debug_Client`, `Debug_Server`, `Debug_Tool`, `Release_Client`, `Release_Server`, `Release_Tool`
+바이너리가 출력되는 폴더. 아래와 같이 바이너리 종류와 빌드 구성으로 나뉘어 저장됨.
+```
+Bin/
+	Client/
+		Debug/
+		Release/
+	Server/
+		Debug/
+		Release/
+	Tool/
+		Debug/
+		Release/
+```
 
 ## Data/
-클라이언트, 서버, 툴 구동에 필요한 데이터 파일이 모여있는 폴더. 빌드 후 이벤트로 실행되는 `Scripts/MakeDataSymlink.py` 스크립트를 통해 `Bin/XXX/Data` 폴더로 링크됨
+클라이언트, 서버, 툴 구동에 필요한 데이터 파일이 모여있는 폴더. 빌드 후 이벤트로 Bin 폴더 아래에 링크됨.
 
 ## Database/
 데이터베이스 테이블 생성 쿼리와 SP 생성 쿼리가 모여있는 폴더
 
 ## External/
 외부 라이브러리가 모여있는 폴더
-
-## Script/
-빌드 할 때 실행되는 스크립트가 모여있는 폴더
 
 ## Src/
 소스 코드가 모여있는 폴더
@@ -57,8 +74,30 @@
 |--|--|--|--|
 | 파일 | `PascalCase` | `App.h`, `App.cpp` | 헤더 파일은 `.h`, 소스 파일은 `.cpp` 확장자를 사용
 | 타입 | `PascalCase` | `class App` | -
-| 변수 | `camelCase` | `float deltaTime`, `Timer m_timer` | 클래스 멤버 변수는 `m_` 접두사를 붙임
+| 변수 | `camelCase` | `float deltaTime`, `Timer m_timer` | 클래스의 `private` 멤버 변수는 `m_`, 전역 변수는 `g_` 접두사를 붙임
 | 상수 | `PascalCase` | `constexpr auto WindowHeight{ 1080 }` | `enum`, `enum class` 도 이와 동일
 | 함수 | `PascalCase` | `Update`, `Render` | 람다 함수는 변수이므로 `camelCase` 를 따름
 | 네임스페이스 | `PascalCase` | `namespace Graphics::D3D` | -
 | 매크로 | `SCREAMING_SNAKE_CASE` | `#define RESOURCE_API __declspec(dllexport)` | -
+
+## 헤더 파일 포함 규칙
+### 순서
+헤더 파일을 포함할 때는 아래 순서로 한다.
+그 안에서의 순서는 가능하면 알파벳 순서로 한다.
+1. C++ 표준 라이브러리
+2. 외부 라이브러리(`Windows.h`, `d3d12.h`, `External/Imgui/imgui.h`)
+3. 내부 라이브러리(`Src/Library`)
+4. 프로젝트 헤더 파일(`App.h`)
+### 큰 따옴표와 꺾쇠 괄호
+큰 따옴표는 현재 파일 기준으로 포함할 때, 꺾쇠 괄호는 추가 포함 디렉토리를 기준으로 포함할 때 사용한다.
+```cpp
+// 꺾쇠 괄호를 사용하는 경우
+#include <string>
+#include <Windows.h>
+#include <Common/Delegate.h>
+#include <External/DirectX/d3dx12.h>
+#include <Resource/Resource.h>
+
+// 큰 따옴표를 사용하는 경우
+#include "App.h" // 현재 디렉토리에 있는 파일은 큰 따옴표 사용
+```
