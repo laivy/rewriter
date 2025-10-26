@@ -18,50 +18,46 @@ namespace Resource
 			return m_pathToID.at(path);
 		}
 
-		auto create = [this](const std::wstring& path, ID parentID)
+		std::wstring name;
+		ID parentID{ InvalidID };
+		if (const auto pos{ path.rfind(Stringtable::DataPathSeperator) }; pos == std::wstring::npos)
 		{
-			if (m_pathToID.contains(path))
-				return;
-
-			std::wstring name;
-			if (const auto pos{ path.rfind(L'/') }; pos == std::wstring::npos)
-				name = path;
-			else
-				name = path.substr(pos + 1);
-
-			auto it{ std::ranges::find_if(m_properties, [](const auto& prop) { return !prop.has_value(); }) };
-			if (it == m_properties.end())
-				it = m_properties.emplace(m_properties.end());
-			it->emplace(name, std::monostate{});
-
-			const ID id{ static_cast<ID>(std::distance(m_properties.begin(), it)) };
-			m_pathToID.emplace(path, id);
-			m_idToEntry.emplace(id, Entry{ .path = path, .parentID = InvalidID });
-
-			// 부모, 자식 관계 설정
-			if (parentID != InvalidID)
-			{
-				m_idToEntry.at(id).parentID = parentID;
-				if (!std::ranges::contains(m_idToEntry.at(parentID).children, id))
-					m_idToEntry.at(parentID).children.push_back(id);
-			}
-		};
-
-		// 상위 경로 프로퍼티가 없으면 생성
-		for (std::wstring subPath; const auto part : std::views::split(path, L'/'))
+			name = path;
+		}
+		else
 		{
-			ID parentID{ InvalidID };
-			if (subPath.empty())
+			name = path.substr(pos + 1);
+
+			if (!path.ends_with(Stringtable::DataFileExtension))
 			{
-				subPath = std::wstring_view{ part };
+				std::wstring parentPath{ path.substr(0, pos) };
+				if (m_pathToID.contains(parentPath))
+				{
+					parentID = m_pathToID.at(parentPath);
+				}
+				else
+				{
+					assert(false && "parent does not exist");
+					return InvalidID;
+				}
 			}
-			else
-			{
-				if (m_pathToID.contains(subPath))
-					parentID = m_pathToID.at(subPath);
-				subPath = std::format(L"{}/{}", subPath, std::wstring_view{ part });
-			}
-			create(subPath, parentID);
+		}
+
+		auto it{ std::ranges::find_if(m_properties, [](const auto& prop) { return !prop.has_value(); }) };
+		if (it == m_properties.end())
+			it = m_properties.emplace(m_properties.end());
+		it->emplace(name, std::monostate{});
+
+		const ID id{ static_cast<ID>(std::distance(m_properties.begin(), it)) };
+		m_pathToID.emplace(path, id);
+		m_idToEntry.emplace(id, Entry{ .path = path, .parentID = InvalidID });
+
+		// 부모, 자식 관계 설정
+		if (parentID != InvalidID)
+		{
+			m_idToEntry.at(id).parentID = parentID;
+			if (!std::ranges::contains(m_idToEntry.at(parentID).children, id))
+				m_idToEntry.at(parentID).children.push_back(id);
 		}
 
 		return m_pathToID.at(path);
@@ -74,7 +70,7 @@ namespace Resource
 			assert(false && "invalid parent id");
 			return InvalidID;
 		}
-		const auto fullPath{ std::format(L"{}/{}", m_idToEntry.at(parentID).path, path) };
+		const auto fullPath{ std::format(L"{}{}{}", m_idToEntry.at(parentID).path, Stringtable::DataPathSeperator, path) };
 		const ID id{ New(fullPath) };
 		return id;
 	}
@@ -127,7 +123,7 @@ namespace Resource
 			assert(false && "invalid parent id");
 			return InvalidID;
 		}
-		const auto fullPath{ std::format(L"{}/{}", m_idToEntry.at(parentID).path, path) };
+		const auto fullPath{ std::format(L"{}{}{}", m_idToEntry.at(parentID).path, Stringtable::DataPathSeperator, path) };
 		return Get(fullPath);
 	}
 
@@ -207,7 +203,7 @@ namespace Resource
 
 		auto& childEntry{ m_idToEntry.at(targetID) };
 		auto& parentEntry{ m_idToEntry.at(parentID) };
-		childEntry.path = std::format(L"{}/{}", parentEntry.path, targetName);
+		childEntry.path = std::format(L"{}{}{}", parentEntry.path, Stringtable::DataPathSeperator, targetName);
 		childEntry.parentID = parentID;
 		if (index >= parentEntry.children.size())
 			parentEntry.children.push_back(targetID);
@@ -233,7 +229,7 @@ namespace Resource
 			assert(false && "invalid id");
 			return;
 		}
-		if (name.find(L'/') != std::wstring::npos)
+		if (name.find(Stringtable::DataPathSeperator) != std::wstring::npos)
 		{
 			assert(false && "invalid name");
 			return;
@@ -243,7 +239,7 @@ namespace Resource
 		const std::wstring newPath{ [&]()
 		{
 			if (const auto parentID{ GetParent(id) }; parentID != InvalidID)
-				return std::format(L"{}/{}", m_idToEntry.at(parentID).path, name);
+				return std::format(L"{}{}{}", m_idToEntry.at(parentID).path, Stringtable::DataPathSeperator, name);
 			return name;
 		}() };
 
@@ -298,7 +294,7 @@ namespace Resource
 		}
 
 		const auto tempFilePath{ std::filesystem::temp_directory_path() / path.filename() };
-		std::ofstream tempFile{ tempFilePath , std::ios::binary };
+		std::ofstream tempFile{ tempFilePath, std::ios::binary };
 		if (!tempFile)
 		{
 			assert(false && "failed to open file");
@@ -493,7 +489,8 @@ namespace Resource
 			return id;
 		};
 
-		const ID rootID{ New(filePath) };
+		const auto normalizedFilePath{ NormalizePath(filePath) };
+		const ID rootID{ New(normalizedFilePath) };
 
 		std::uint32_t childCount{};
 		file.read(reinterpret_cast<char*>(&childCount), sizeof(childCount));
@@ -504,7 +501,11 @@ namespace Resource
 				continue;
 		}
 
-		return m_pathToID.at(subPath.empty() ? filePath : filePath / subPath);
+		if (subPath.empty())
+			return m_pathToID.at(normalizedFilePath);
+
+		const auto path{ std::format(L"{}{}{}", normalizedFilePath, Stringtable::DataPathSeperator, subPath) };
+		return m_pathToID.at(path);
 	}
 
 	void Manager::OnInitialize(const Initializer& initializer)
@@ -522,5 +523,16 @@ namespace Resource
 		m_properties.clear();
 		m_idToEntry.clear();
 		m_pathToID.clear();
+	}
+
+	std::wstring Manager::NormalizePath(const std::wstring& path) const
+	{
+		constexpr auto separator{ Stringtable::DataPathSeperator.front() };
+		if (std::filesystem::path::preferred_separator == separator)
+			return path;
+
+		std::wstring result{ path };
+		std::ranges::replace(result, std::filesystem::path::preferred_separator, separator);
+		return result;
 	}
 }

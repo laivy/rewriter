@@ -95,6 +95,8 @@ namespace Resource
 		void OnInitialize(const Initializer& initializer);
 		void OnUninitialize();
 
+		std::wstring NormalizePath(const std::wstring& path) const;
+
 	private:
 		std::filesystem::path m_mountPath;
 		std::function<Sprite(std::span<std::byte>)> m_loadSprite;
