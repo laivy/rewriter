@@ -1,7 +1,7 @@
 #pragma once
 
 class Hierarchy :
-	public IDelegate::IListener,
+	public IDelegate::Listener,
 	public TSingleton<Hierarchy>
 {
 private:

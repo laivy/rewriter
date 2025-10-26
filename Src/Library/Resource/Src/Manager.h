@@ -4,7 +4,7 @@
 namespace Resource
 {
 	class Manager :
-		public IDelegate::IListener,
+		public IDelegate::Listener,
 		public TSingleton<Manager>
 	{
 	private:

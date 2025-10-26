@@ -9,13 +9,13 @@ public:
 		std::uint64_t id;
 	};
 
-	class IListener
+	class Listener
 	{
 		template<class... Params>
 		friend class Delegate;
 
 	public:
-		~IListener()
+		~Listener()
 		{
 			for (const auto& handle : m_handles)
 			{
@@ -70,7 +70,7 @@ private:
 			return handle;
 		}
 
-		void Bind(IDelegate::IListener* listener, const Callback& callback)
+		void Bind(IDelegate::Listener* listener, const Callback& callback)
 		{
 			auto handle{ Bind(callback) };
 			listener->m_handles.push_back(handle);
@@ -114,7 +114,7 @@ public:
 		return m_impl->Bind(callback);
 	}
 
-	void Bind(IDelegate::IListener* listener, const Callback& callback)
+	void Bind(IDelegate::Listener* listener, const Callback& callback)
 	{
 		m_impl->Bind(listener, callback);
 	}
