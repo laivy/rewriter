@@ -43,7 +43,7 @@ namespace Resource
 		std::size_t GetChildCount(ID parentID) const;
 		void Move(ID targetID, ID parentID, std::optional<std::size_t> index);
 
-		void SetName(ID id, const std::wstring& name);
+		bool SetName(ID id, const std::wstring& name);
 
 		template<class T>
 		requires std::is_constructible_v<Value, T>

@@ -247,10 +247,11 @@ namespace Resource
 			manager->Move(targetID, parentID, index);
 	}
 
-	void SetName(ID id, const std::wstring& name)
+	bool SetName(ID id, const std::wstring& name)
 	{
 		if (auto manager{ Manager::GetInstance() })
-			manager->SetName(id, name);
+			return manager->SetName(id, name);
+		return false;
 	}
 
 	void Set(ID id, std::int32_t value)

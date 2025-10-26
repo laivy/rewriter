@@ -80,17 +80,12 @@ void Hierarchy::OnPropertySelected(Resource::ID id)
 	m_isAnyPropertySelected = true;
 	if (ImGui::IsKeyDown(ImGuiKey_LeftCtrl))
 	{
-		if (IsSelected(id))
-		{
-			m_contexts[id].isSelected = false;
-			return;
-		}
+		m_contexts[id].isSelected = !IsSelected(id);
+		return;
 	}
-	else
-	{
-		for (auto& context : m_contexts | std::views::values)
-			context.isSelected = false;
-	}
+
+	for (auto& context : m_contexts | std::views::values)
+		context.isSelected = false;
 	m_contexts[id].isSelected = true;
 }
 
@@ -202,10 +197,11 @@ void Hierarchy::Shortcut()
 		OnCopy();
 	if (ImGui::IsKeyDown(ImGuiMod_Ctrl) && ImGui::IsKeyDown(ImGuiKey_V))
 		OnPaste();
-	if (ImGui::IsKeyDown(ImGuiKey_F2))
+	if (ImGui::Shortcut(ImGuiKey_F2))
 	{
-		if (auto window{ ImGui::FindWindowByName("Inspector") })
-			ImGui::ActivateItemByID(window->GetID("##INSPECTOR/NAME"));
+		auto selecteds{ m_contexts | std::views::keys | std::views::filter([this](auto id) { return !IsRoot(id) && IsSelected(id); }) };
+		if (!selecteds.empty())
+			SetRenamePopup(selecteds.back(), true);
 	}
 	if (ImGui::IsKeyDown(ImGuiKey_Delete))
 	{
@@ -359,9 +355,10 @@ void Hierarchy::TreeView()
 				New(id);
 			}
 			ImGui::Separator();
-			if (ImGui::MenuItem("이름 바꾸기", "F2") || ImGui::IsKeyPressed(ImGuiKey_F2))
+			if (ImGui::MenuItem("이름 바꾸기", "F2") || ImGui::Shortcut(ImGuiKey_F2))
 			{
 				ImGui::CloseCurrentPopup();
+				SetRenamePopup(id, true);
 			}
 			if (ImGui::MenuItem("삭제", "D") || ImGui::IsKeyPressed(ImGuiKey_D))
 			{
@@ -436,8 +433,21 @@ void Hierarchy::TreeView()
 		if (IsSelected(id))
 			flag |= ImGuiTreeNodeFlags_Selected;
 		ImGui::PushStyleVarY(ImGuiStyleVar_ItemSpacing, 0.0f);
+
+		const bool setNavCursorVisible{ std::ranges::count_if(m_contexts | std::views::values, [](const auto& ctx) { return ctx.isSelected; }) > 1 };
+		ImGui::SetNavCursorVisible(setNavCursorVisible);
 		const bool isTreeNodeOpened{ ImGui::TreeNodeEx(name.c_str(), flag) };
+		ImGui::SetNavCursorVisible(false);
 		ImGui::PopStyleVar();
+
+		static ImGuiID lastFocusedID{ 0 };
+		const auto currentFocusID{ ImGui::GetFocusID() };
+		if (lastFocusedID != currentFocusID && ImGui::IsItemFocused())
+		{
+			lastFocusedID = currentFocusID;
+			Delegates::OnPropertySelected.Broadcast(id);
+		}
+		ImGui::IsItemFocused();
 
 		// 폰트 크기 원복
 		if (isRoot)
@@ -452,8 +462,7 @@ void Hierarchy::TreeView()
 				OpenTree(id);
 		}
 
-		// 닫혀있어도 클릭 되도록
-		if (ImGui::IsItemClicked())
+		if (ImGui::IsItemClicked() || ImGui::IsItemActivated())
 			Delegates::OnPropertySelected.Broadcast(id);
 
 		// 드래그 드랍
@@ -463,6 +472,31 @@ void Hierarchy::TreeView()
 			ImGui::TextUnformatted(name.c_str());
 			ImGui::EndDragDropSource();
 		}
+
+		// 이름 변경
+		if (IsRenamePopupOpened(id))
+		{
+			ImGui::SetNextWindowPos(ImGui::GetCursorScreenPos());
+			ImGui::OpenPopup("Rename");
+			SetRenamePopup(id, false);
+		}
+		ImGui::SetNavCursorVisible(false);
+		if (ImGui::BeginPopup("Rename"))
+		{
+			ImGui::SetKeyboardFocusHere();
+			std::string buffer;
+			if (ImGui::InputText("##Rename", &buffer, ImGuiInputTextFlags_EnterReturnsTrue))
+			{
+				std::wstring newName{ Util::ToWString(buffer) };
+				if (Resource::SetName(id, newName))
+					Delegates::OnPropertyModified.Broadcast(id);
+				ImGui::CloseCurrentPopup();
+			}
+			if (ImGui::IsKeyDown(ImGuiKey_Escape))
+				ImGui::CloseCurrentPopup();
+			ImGui::EndPopup();
+		}
+		ImGui::SetNavCursorVisible(true);
 
 		// 컨텍스트 메뉴
 		popup(id);
@@ -579,6 +613,11 @@ void Hierarchy::SetModified(Resource::ID id, bool modified)
 		m_contexts[root->id].isModified = modified;
 }
 
+void Hierarchy::SetRenamePopup(Resource::ID id, bool opened)
+{
+	m_contexts[id].openRenamePopup = opened;
+}
+
 Hierarchy::Root* Hierarchy::GetRoot(Resource::ID id)
 {
 	if (IsRoot(id))
@@ -625,5 +664,12 @@ bool Hierarchy::IsSelected(Resource::ID id) const
 {
 	if (m_contexts.contains(id))
 		return m_contexts.at(id).isSelected;
+	return false;
+}
+
+bool Hierarchy::IsRenamePopupOpened(Resource::ID id) const
+{
+	if (m_contexts.contains(id))
+		return m_contexts.at(id).openRenamePopup;
 	return false;
 }

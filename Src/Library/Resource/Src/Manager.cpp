@@ -207,28 +207,28 @@ namespace Resource
 			parentEntry.children.insert(parentEntry.children.begin() + *index, targetID);
 	}
 
-	void Manager::SetName(ID id, const std::wstring& name)
+	bool Manager::SetName(ID id, const std::wstring& name)
 	{
 		if (id >= m_properties.size())
 		{
 			assert(false && "invalid id");
-			return;
+			return false;
 		}
 		auto& prop{ m_properties.at(id) };
 		if (!prop)
 		{
 			assert(false && "not exists");
-			return;
+			return false;
 		}
 		if (!m_idToEntry.contains(id))
 		{
 			assert(false && "invalid id");
-			return;
+			return false;
 		}
 		if (name.find(Stringtable::DataPathSeperator) != std::wstring::npos)
 		{
 			assert(false && "invalid name");
-			return;
+			return false;
 		}
 
 		const std::wstring oldPath{ m_idToEntry.at(id).path };
@@ -242,12 +242,13 @@ namespace Resource
 		if (m_pathToID.contains(newPath))
 		{
 			assert(false && "already exists");
-			return;
+			return false;
 		}
 		prop->name = name;
 		m_idToEntry.at(id).path = newPath;
 		m_pathToID.erase(oldPath);
 		m_pathToID.emplace(newPath, id);
+		return true;
 	}
 
 	std::wstring Manager::GetName(ID id) const

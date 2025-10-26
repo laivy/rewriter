@@ -17,6 +17,7 @@ private:
 		bool isModified;
 		bool isOpened;
 		bool isSelected;
+		bool openRenamePopup;
 	};
 
 public:
@@ -58,11 +59,13 @@ private:
 	Resource::ID New(Resource::ID parentID);
 	void Delete(Resource::ID id);
 	void SetModified(Resource::ID id, bool modified);
+	void SetRenamePopup(Resource::ID id, bool opened);
 
 	Root* GetRoot(Resource::ID id);
 	bool IsModified(Resource::ID id) const;
 	bool IsOpened(Resource::ID id) const;
 	bool IsSelected(Resource::ID id) const;
+	bool IsRenamePopupOpened(Resource::ID id) const;
 
 private:
 	std::vector<Root> m_roots;
