@@ -59,7 +59,7 @@ private:
 	void Delete(Resource::ID id);
 	void SetModified(Resource::ID id, bool modified);
 
-	Root GetRoot(Resource::ID id) const;
+	Root* GetRoot(Resource::ID id);
 	bool IsModified(Resource::ID id) const;
 	bool IsOpened(Resource::ID id) const;
 	bool IsSelected(Resource::ID id) const;

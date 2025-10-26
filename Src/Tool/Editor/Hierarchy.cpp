@@ -3,18 +3,6 @@
 #include "Hierarchy.h"
 #include "Common/Util.h"
 
-namespace
-{
-	constexpr auto WindowName{ "Hierarchy" };
-	constexpr auto MenuFile{ "File" };
-	constexpr auto MenuFileNew{ "New" };
-	constexpr auto MenuFileOpen{ "Open" };
-	constexpr auto MenuFileSave{ "Save" };
-	constexpr auto MenuFileSaveAs{ "Save As" };
-	constexpr auto DefaultFileName{ L"File" };
-	constexpr auto DefaultPropertyName{ L"Property" };
-}
-
 Hierarchy::Hierarchy() :
 	m_isAnyPropertySelected{ false }
 {
@@ -41,7 +29,7 @@ void Hierarchy::Update(float deltaTime)
 
 void Hierarchy::Render()
 {
-	if (ImGui::Begin(WindowName, nullptr, ImGuiWindowFlags_MenuBar))
+	if (ImGui::Begin("편집기", nullptr, ImGuiWindowFlags_MenuBar))
 	{
 		Shortcut();
 		DragDrop();
@@ -108,15 +96,12 @@ void Hierarchy::OnPropertySelected(Resource::ID id)
 
 void Hierarchy::OnMenuFileNew()
 {
-	const Resource::ID id{ New(Resource::InvalidID) };
-	m_roots.emplace_back(id, *Resource::GetName(id));
-	m_contexts[id] = { .isModified = true };
+	New(Resource::InvalidID);
 }
 
 void Hierarchy::OnMenuFileOpen()
 {
 	std::wstring filePath(MAX_PATH, L'\0');
-
 	OPENFILENAME ofn{};
 	ofn.lStructSize = sizeof(ofn);
 	ofn.lpstrFilter = L"Data Files (*.dat)\0*.dat\0";
@@ -157,12 +142,27 @@ void Hierarchy::OnMenuFileSave()
 		if (!IsSelected(id))
 			continue;
 
-		const auto root{ GetRoot(id) };
-		if (!IsModified(root.id))
+		auto root{ GetRoot(id) };
+		if (!IsModified(root->id))
 			continue;
 
-		SetModified(root.id, false);
-		Resource::SaveToFile(root.id, root.filePath);
+		if (root->filePath.empty())
+		{
+			std::wstring filePath(MAX_PATH, L'\0');
+			OPENFILENAME ofn{};
+			ofn.lStructSize = sizeof(ofn);
+			ofn.lpstrFilter = L"Data Files (*.dat)\0*.dat\0";
+			ofn.lpstrFile = filePath.data();
+			ofn.nMaxFile = MAX_PATH;
+			ofn.Flags = OFN_OVERWRITEPROMPT | OFN_EXPLORER;
+			ofn.lpstrDefExt = L"dat";
+			if (!::GetSaveFileName(&ofn))
+				continue;
+			root->filePath = ofn.lpstrFile;
+		}
+
+		Resource::SaveToFile(root->id, root->filePath);
+		SetModified(root->id, false);
 	}
 }
 
@@ -226,10 +226,9 @@ void Hierarchy::DragDrop()
 	if (auto payload{ ImGui::AcceptDragDropPayload("EXPLORER/OPENFILE") })
 	{
 		std::filesystem::path filePath{ static_cast<const wchar_t*>(payload->Data) };
-		if (filePath.extension() == Stringtable::DATA_FILE_EXT)
+		if (filePath.extension() == Stringtable::DataFileExtension)
 			LoadFromFile(filePath);
 	}
-
 	ImGui::EndDragDropTarget();
 }
 
@@ -238,27 +237,61 @@ void Hierarchy::MenuBar()
 	if (!ImGui::BeginMenuBar())
 		return;
 
-	if (ImGui::BeginMenu(MenuFile))
+	if (ImGui::BeginMenu("파일"))
 	{
-		if (ImGui::MenuItem(MenuFileNew, "Ctrl+N") || (ImGui::IsKeyPressed(ImGuiMod_Ctrl) && ImGui::IsKeyPressed(ImGuiKey_N)))
+		if (ImGui::MenuItem("새 파일", "Ctrl+N") || (ImGui::IsKeyPressed(ImGuiMod_Ctrl) && ImGui::IsKeyPressed(ImGuiKey_N)))
 		{
 			ImGui::CloseCurrentPopup();
 			OnMenuFileNew();
 		}
-		if (ImGui::MenuItem(MenuFileOpen, "Ctrl+O") || ImGui::Shortcut(ImGuiMod_Ctrl | ImGuiKey_O))
+		ImGui::Separator();
+		if (ImGui::MenuItem("파일 열기", "Ctrl+O") || ImGui::Shortcut(ImGuiMod_Ctrl | ImGuiKey_O))
 		{
 			ImGui::CloseCurrentPopup();
 			OnMenuFileOpen();
 		}
-		if (ImGui::MenuItem(MenuFileSave, "Ctrl+S") || ImGui::Shortcut(ImGuiMod_Ctrl | ImGuiKey_S))
+		ImGui::Separator();
+		if (ImGui::MenuItem("저장", "Ctrl+S") || ImGui::Shortcut(ImGuiMod_Ctrl | ImGuiKey_S))
 		{
 			ImGui::CloseCurrentPopup();
 			OnMenuFileSave();
 		}
-		if (ImGui::MenuItem(MenuFileSaveAs, "Ctrl+Shift+S") || ImGui::Shortcut(ImGuiMod_Ctrl | ImGuiMod_Shift | ImGuiKey_S))
+		if (ImGui::MenuItem("다른 이름으로 저장", "Ctrl+Shift+S") || ImGui::Shortcut(ImGuiMod_Ctrl | ImGuiMod_Shift | ImGuiKey_S))
 		{
 			ImGui::CloseCurrentPopup();
 			OnMenuFileSaveAs();
+		}
+		if (ImGui::MenuItem("모두 저장", "Ctrl+Alt+S") || ImGui::Shortcut(ImGuiMod_Ctrl | ImGuiMod_Alt | ImGuiKey_S))
+		{
+			ImGui::CloseCurrentPopup();
+		}
+		ImGui::EndMenu();
+	}
+	if (ImGui::BeginMenu("편집"))
+	{
+		if (ImGui::MenuItem("잘라내기", "Ctrl+X") || ImGui::Shortcut(ImGuiMod_Ctrl | ImGuiKey_X))
+		{
+			ImGui::CloseCurrentPopup();
+			OnCut();
+		}
+		if (ImGui::MenuItem("복사", "Ctrl+C") || ImGui::Shortcut(ImGuiMod_Ctrl | ImGuiKey_C))
+		{
+			ImGui::CloseCurrentPopup();
+			OnCopy();
+		}
+		if (ImGui::MenuItem("붙여넣기", "Ctrl+V") || ImGui::Shortcut(ImGuiMod_Ctrl | ImGuiKey_V))
+		{
+			ImGui::CloseCurrentPopup();
+			OnPaste();
+		}
+		ImGui::Separator();
+		if (ImGui::MenuItem("찾기", "Ctrl+F") || ImGui::Shortcut(ImGuiMod_Ctrl | ImGuiKey_F))
+		{
+			ImGui::CloseCurrentPopup();
+		}
+		if (ImGui::MenuItem("바꾸기", "Ctrl+H") || ImGui::Shortcut(ImGuiMod_Ctrl | ImGuiKey_H))
+		{
+			ImGui::CloseCurrentPopup();
 		}
 		ImGui::EndMenu();
 	}
@@ -273,7 +306,7 @@ void Hierarchy::TreeView()
 		Resource::ID destID;
 		std::size_t destIndex;
 	};
-	MoveInfo moveInfo{};
+	std::optional<MoveInfo> moveInfo;
 
 	auto popup = [this](Resource::ID id)
 	{
@@ -283,52 +316,63 @@ void Hierarchy::TreeView()
 		if (!IsSelected(id))
 			Delegates::OnPropertySelected.Broadcast(id);
 
-		// 루트 노드 전용 메뉴
+		// 파일 메뉴
 		do
 		{
 			auto selected{ m_contexts | std::views::keys | std::views::filter([this](auto id) { return IsSelected(id); }) };
-			if (std::ranges::all_of(selected, [this](auto id) { return !IsRoot(id); }))
+			if (std::ranges::any_of(selected, [this](auto id) { return !IsRoot(id); }))
 				break;
 
-			if (ImGui::MenuItem("Save", "S") || ImGui::IsKeyPressed(ImGuiKey_S))
+			if (ImGui::MenuItem("새 프로퍼티", "N") || ImGui::IsKeyPressed(ImGuiKey_N))
+			{
+				ImGui::CloseCurrentPopup();
+				New(id);
+			}
+			ImGui::Separator();
+			if (ImGui::MenuItem("저장", "S") || ImGui::IsKeyPressed(ImGuiKey_S))
 			{
 				ImGui::CloseCurrentPopup();
 				OnMenuFileSave();
 			}
-			if (ImGui::MenuItem("Save As"))
+			if (ImGui::MenuItem("다른 이름으로 저장"))
 			{
 				ImGui::CloseCurrentPopup();
 				OnMenuFileSaveAs();
 			}
-			if (ImGui::MenuItem("Close", "C") || ImGui::IsKeyPressed(ImGuiKey_C))
+			ImGui::Separator();
+			if (ImGui::MenuItem("닫기", "C") || ImGui::IsKeyPressed(ImGuiKey_C))
 			{
 				ImGui::CloseCurrentPopup();
 			}
-			ImGui::Separator();
 		} while (false);
 
-		// 공통 메뉴
-		if (ImGui::MenuItem("Rename", "F2") || ImGui::IsKeyPressed(ImGuiKey_F2))
+		// 프로퍼티 메뉴
+		do
 		{
-			ImGui::CloseCurrentPopup();
+			auto selected{ m_contexts | std::views::keys | std::views::filter([this](auto id) { return IsSelected(id); }) };
+			if (std::ranges::any_of(selected, [this](auto id) { return IsRoot(id); }))
+				break;
 
-			if (auto window{ ImGui::FindWindowByName("Inspector") })
-				ImGui::ActivateItemByID(window->GetID("##INSPECTOR/NAME"));
-		}
-		if (ImGui::MenuItem("New", "N") || ImGui::IsKeyPressed(ImGuiKey_N))
-		{
-			ImGui::CloseCurrentPopup();
-			New(id);
-		}
-		if (ImGui::MenuItem("Delete", "D") || ImGui::IsKeyPressed(ImGuiKey_D))
-		{
-			ImGui::CloseCurrentPopup();
-			for (const auto id : m_contexts | std::views::keys)
+			if (ImGui::MenuItem("새 프로퍼티", "N") || ImGui::IsKeyPressed(ImGuiKey_N))
 			{
-				if (IsSelected(id))
-					Delete(id);
+				ImGui::CloseCurrentPopup();
+				New(id);
 			}
-		}
+			ImGui::Separator();
+			if (ImGui::MenuItem("이름 바꾸기", "F2") || ImGui::IsKeyPressed(ImGuiKey_F2))
+			{
+				ImGui::CloseCurrentPopup();
+			}
+			if (ImGui::MenuItem("삭제", "D") || ImGui::IsKeyPressed(ImGuiKey_D))
+			{
+				ImGui::CloseCurrentPopup();
+				for (const auto id : m_contexts | std::views::keys)
+				{
+					if (IsSelected(id))
+						Delete(id);
+				}
+			}
+		} while (false);
 		ImGui::EndPopup();
 	};
 	auto reorder = [this, &moveInfo](Resource::ID id, std::size_t index, bool isOpened)
@@ -359,12 +403,13 @@ void Hierarchy::TreeView()
 
 		if (auto payload{ ImGui::AcceptDragDropPayload("Hierarchy/Property", ImGuiDragDropFlags_AcceptNoDrawDefaultRect) })
 		{
-			std::ranges::copy_if(m_contexts | std::views::keys, std::back_inserter(moveInfo.targetIDs), [this](Resource::ID id)
+			moveInfo.emplace();
+			std::ranges::copy_if(m_contexts | std::views::keys, std::back_inserter(moveInfo->targetIDs), [this](Resource::ID id)
 			{
 				return IsSelected(id);
 			});
-			moveInfo.destID = isOpened ? id : Resource::GetParent(id);
-			moveInfo.destIndex = isOpened ? 0 : index + 1;
+			moveInfo->destID = isOpened ? id : Resource::GetParent(id);
+			moveInfo->destIndex = isOpened ? 0 : index + 1;
 		}
 		ImGui::EndDragDropTarget();
 	};
@@ -441,15 +486,26 @@ void Hierarchy::TreeView()
 	ImGui::PopID();
 
 	// 프로퍼티 이동
-	for (auto targetID : moveInfo.targetIDs | std::views::reverse)
-		Resource::Move(targetID, moveInfo.destID, moveInfo.destIndex);
+	if (moveInfo)
+	{
+		for (auto targetID : moveInfo->targetIDs | std::views::reverse)
+			Resource::Move(targetID, moveInfo->destID, moveInfo->destIndex);
+	}
 
 	// 클릭을 했는데 선택된 프로퍼티가 없으면 이미 선택되어 있는 프로퍼티 선택 해제
-	if (!m_isAnyPropertySelected && ImGui::IsWindowHovered() && ImGui::IsMouseClicked(ImGuiMouseButton_Left))
+	do
 	{
+		if (m_isAnyPropertySelected)
+			break;
+		if (!ImGui::IsWindowHovered())
+			break;
+		if (!ImGui::GetCurrentWindowRead()->InnerRect.Contains(ImGui::GetMousePos())) // 메뉴바 영역 제외
+			break;
+		if (!ImGui::IsMouseClicked(ImGuiMouseButton_Left))
+			break;
 		for (auto& ctx : m_contexts | std::views::values)
 			ctx.isSelected = false;
-	}
+	} while (false);
 }
 
 void Hierarchy::RenderModal()
@@ -458,14 +514,14 @@ void Hierarchy::RenderModal()
 
 void Hierarchy::LoadFromFile(const std::filesystem::path& filePath)
 {
-	const auto id{ Resource::LoadFromFile(filePath, L"")};
+	const auto id{ Resource::LoadFromFile(filePath, L"") };
 	if (id == Resource::InvalidID)
 	{
 		assert(false && "failed to load data file");
 		return;
 	}
 	m_roots.emplace_back(id, filePath);
-	Resource::SetName(id, filePath.filename());
+	OpenTree(id);
 }
 
 Resource::ID Hierarchy::New(Resource::ID parentID)
@@ -474,21 +530,28 @@ Resource::ID Hierarchy::New(Resource::ID parentID)
 	// 새로운 파일
 	if (parentID == Resource::InvalidID)
 	{
-		std::wstring name{ std::format(L"{}{}", DefaultFileName, Stringtable::DATA_FILE_EXT) };
-		std::size_t index{ 0 };
-		while (true)
-		{
-			if (Resource::Get(name) == Resource::InvalidID)
-			{
-				id = Resource::New(name);
-				break;
-			}
-			name = std::format(L"{}{}{}", DefaultFileName, ++index, Stringtable::DATA_FILE_EXT);
-		}
+		std::wstring filePath(MAX_PATH, L'\0');
+		OPENFILENAME ofn{};
+		ofn.lStructSize = sizeof(ofn);
+		ofn.lpstrFilter = L"Data Files (*.dat)\0*.dat\0";
+		ofn.lpstrFile = filePath.data();
+		ofn.nMaxFile = MAX_PATH;
+		ofn.Flags = OFN_OVERWRITEPROMPT | OFN_EXPLORER;
+		ofn.lpstrDefExt = L"dat";
+		if (!::GetSaveFileName(&ofn))
+			return Resource::InvalidID;
+
+		std::ranges::replace(filePath, std::filesystem::path::preferred_separator, Stringtable::DataPathSeperator.front());
+		std::wstring name{ filePath.substr(filePath.rfind(Stringtable::DataPathSeperator) + 1) };
+		id = Resource::New(name);
+		m_roots.emplace_back(id, filePath);
+		SetModified(id, false);
+		OpenTree(id);
 	}
 	// 새로운 프로퍼티
 	else
 	{
+		constexpr auto DefaultPropertyName{ L"Property" };
 		std::wstring name{ DefaultPropertyName };
 		std::size_t index{ 0 };
 		while (true)
@@ -512,19 +575,18 @@ void Hierarchy::Delete(Resource::ID id)
 
 void Hierarchy::SetModified(Resource::ID id, bool modified)
 {
-	id = GetRoot(id).id;
-	m_contexts[id].isModified = modified;
+	if (auto root{ GetRoot(id) })
+		m_contexts[root->id].isModified = modified;
 }
 
-Hierarchy::Root Hierarchy::GetRoot(Resource::ID id) const
+Hierarchy::Root* Hierarchy::GetRoot(Resource::ID id)
 {
-	const Root Invalid{ .id = Resource::InvalidID };
 	if (IsRoot(id))
 	{
 		auto it{ std::ranges::find(m_roots, id, &Root::id) };
 		if (it == m_roots.end())
-			return Invalid;
-		return *it;
+			return nullptr;
+		return &*it;
 	}
 
 	Resource::ID rootID{ Resource::GetParent(id) };
@@ -539,10 +601,10 @@ Hierarchy::Root Hierarchy::GetRoot(Resource::ID id) const
 	{
 		auto it{ std::ranges::find(m_roots, rootID, &Root::id) };
 		if (it == m_roots.end())
-			return Invalid;
-		return *it;
+			return nullptr;
+		return &*it;
 	}
-	return Invalid;
+	return nullptr;
 }
 
 bool Hierarchy::IsModified(Resource::ID id) const
