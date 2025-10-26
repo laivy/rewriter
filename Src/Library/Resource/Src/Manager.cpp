@@ -98,11 +98,7 @@ namespace Resource
 			std::erase(m_idToEntry.at(parentID).children, id);
 
 		for (ID childID : entry.children)
-		{
-			m_properties.at(childID).reset();
-			m_pathToID.erase(m_idToEntry.at(childID).path);
-			m_idToEntry.erase(childID);
-		}
+			Delete(childID);
 
 		prop.reset();
 		m_pathToID.erase(entry.path);
