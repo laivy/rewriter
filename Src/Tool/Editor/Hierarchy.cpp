@@ -40,14 +40,26 @@ void Hierarchy::Render()
 	RenderModal();
 }
 
-void Hierarchy::OpenTree(Resource::ID id)
+void Hierarchy::Delete(Resource::ID id)
 {
-	m_contexts[id].isOpened = true;
+	m_contexts[id].isInvalid = true;
+	Delegates::OnPropertyDeleted.Broadcast(id);
 }
 
-void Hierarchy::CloseTree(Resource::ID id)
+void Hierarchy::SetModified(Resource::ID id, bool modified)
 {
-	m_contexts[id].isOpened = false;
+	if (auto root{ GetRoot(id) })
+		m_contexts[root->id].isModified = modified;
+}
+
+void Hierarchy::SetOpened(Resource::ID id, bool opened)
+{
+	m_contexts[id].isOpened = opened;
+}
+
+void Hierarchy::SetSelected(Resource::ID id, bool selected)
+{
+	m_contexts[id].isSelected = selected;
 }
 
 bool Hierarchy::IsRoot(Resource::ID id) const
@@ -55,13 +67,36 @@ bool Hierarchy::IsRoot(Resource::ID id) const
 	return std::ranges::contains(m_roots, id, &Root::id);
 }
 
+bool Hierarchy::IsModified(Resource::ID id) const
+{
+	if (m_contexts.contains(id))
+		return m_contexts.at(id).isModified;
+	return false;
+}
+
+bool Hierarchy::IsOpened(Resource::ID id) const
+{
+	if (m_contexts.contains(id))
+		return m_contexts.at(id).isOpened;
+	return false;
+}
+
+bool Hierarchy::IsSelected(Resource::ID id) const
+{
+	if (m_contexts.contains(id))
+		return m_contexts.at(id).isSelected;
+	return false;
+}
+
 void Hierarchy::OnPropertyAdded(Resource::ID id)
 {
-	const auto parentID{ Resource::GetParent(id) };
-	if (parentID == Resource::InvalidID)
-		return;
-
-	OpenTree(parentID);
+	Resource::ID parentID{ Resource::GetParent(id) };
+	while (parentID != Resource::InvalidID)
+	{
+		SetOpened(parentID, true);
+		parentID = Resource::GetParent(parentID);
+	}
+	SetOpened(id, true);
 	SetModified(id, true);
 }
 
@@ -78,15 +113,35 @@ void Hierarchy::OnPropertyModified(Resource::ID id)
 void Hierarchy::OnPropertySelected(Resource::ID id)
 {
 	m_isAnyPropertySelected = true;
-	if (ImGui::IsKeyDown(ImGuiKey_LeftCtrl))
-	{
-		m_contexts[id].isSelected = !IsSelected(id);
-		return;
-	}
 
-	for (auto& context : m_contexts | std::views::values)
-		context.isSelected = false;
-	m_contexts[id].isSelected = true;
+	// 키보드로 선택된 경우
+	if (ImGui::IsKeyDown(ImGuiKey_UpArrow) || ImGui::IsKeyDown(ImGuiKey_DownArrow))
+	{
+		if (ImGui::IsKeyDown(ImGuiKey_LeftShift))
+		{
+			SetSelected(id, true);
+		}
+		else
+		{
+			for (auto _id : m_contexts | std::views::keys)
+				SetSelected(_id, false);
+			SetSelected(id, true);
+		}
+	}
+	// 마우스로 선택된 경우
+	else
+	{
+		if (ImGui::IsKeyDown(ImGuiKey_LeftCtrl))
+		{
+			SetSelected(id, !IsSelected(id));
+		}
+		else
+		{
+			for (auto _id : m_contexts | std::views::keys)
+				SetSelected(_id, false);
+			SetSelected(id, true);
+		}
+	}
 }
 
 void Hierarchy::OnMenuFileNew()
@@ -104,7 +159,9 @@ void Hierarchy::OnMenuFileOpen()
 	ofn.nMaxFile = MAX_PATH;
 	ofn.Flags = OFN_ALLOWMULTISELECT | OFN_FILEMUSTEXIST | OFN_EXPLORER;
 	ofn.lpstrDefExt = L"dat";
-	if (!::GetOpenFileName(&ofn))
+	const BOOL isSuccess{ ::GetOpenFileName(&ofn) };
+	ImGui::GetIO().ClearInputKeys();
+	if (!isSuccess)
 		return;
 
 	// 경로 및 파일 이름들 추출
@@ -151,7 +208,9 @@ void Hierarchy::OnMenuFileSave()
 			ofn.nMaxFile = MAX_PATH;
 			ofn.Flags = OFN_OVERWRITEPROMPT | OFN_EXPLORER;
 			ofn.lpstrDefExt = L"dat";
-			if (!::GetSaveFileName(&ofn))
+			const BOOL isSuccess{ ::GetSaveFileName(&ofn) };
+			ImGui::GetIO().ClearInputKeys();
+			if (!isSuccess)
 				continue;
 			root->filePath = ofn.lpstrFile;
 		}
@@ -185,17 +244,18 @@ void Hierarchy::Shortcut()
 	if (!ImGui::IsWindowFocused())
 		return;
 
-	if (ImGui::IsKeyDown(ImGuiMod_Ctrl) && ImGui::IsKeyDown(ImGuiKey_N))
+	//if (ImGui::IsKeyDown(ImGuiMod_Ctrl) && ImGui::IsKeyDown(ImGuiKey_N))
+	if (ImGui::Shortcut(ImGuiMod_Ctrl | ImGuiKey_N))
 		OnMenuFileNew();
-	if (ImGui::IsKeyDown(ImGuiMod_Ctrl) && ImGui::IsKeyDown(ImGuiKey_O))
+	if (ImGui::Shortcut(ImGuiMod_Ctrl | ImGuiKey_O))
 		OnMenuFileOpen();
-	if (ImGui::IsKeyDown(ImGuiMod_Ctrl) && ImGui::IsKeyDown(ImGuiKey_S))
+	if (ImGui::Shortcut(ImGuiMod_Ctrl | ImGuiKey_S))
 		OnMenuFileSave();
-	if (ImGui::IsKeyDown(ImGuiMod_Ctrl) && ImGui::IsKeyDown(ImGuiKey_X))
+	if (ImGui::Shortcut(ImGuiMod_Ctrl | ImGuiKey_X))
 		OnCut();
-	if (ImGui::IsKeyDown(ImGuiMod_Ctrl) && ImGui::IsKeyDown(ImGuiKey_C))
+	if (ImGui::Shortcut(ImGuiMod_Ctrl | ImGuiKey_C))
 		OnCopy();
-	if (ImGui::IsKeyDown(ImGuiMod_Ctrl) && ImGui::IsKeyDown(ImGuiKey_V))
+	if (ImGui::Shortcut(ImGuiMod_Ctrl | ImGuiKey_V))
 		OnPaste();
 	if (ImGui::Shortcut(ImGuiKey_F2))
 	{
@@ -455,12 +515,7 @@ void Hierarchy::TreeView()
 
 		// 트리 여닫기
 		if (ImGui::IsItemToggledOpen())
-		{
-			if (isOpened)
-				CloseTree(id);
-			else
-				OpenTree(id);
-		}
+			SetOpened(id, !isOpened);
 
 		if (ImGui::IsItemClicked() || ImGui::IsItemActivated())
 			Delegates::OnPropertySelected.Broadcast(id);
@@ -555,15 +610,15 @@ void Hierarchy::LoadFromFile(const std::filesystem::path& filePath)
 		return;
 	}
 	m_roots.emplace_back(id, filePath);
-	OpenTree(id);
+	SetOpened(id, true);
 }
 
 Resource::ID Hierarchy::New(Resource::ID parentID)
 {
 	Resource::ID id{ Resource::InvalidID };
-	// 새로운 파일
 	if (parentID == Resource::InvalidID)
 	{
+		// 새로운 파일
 		std::wstring filePath(MAX_PATH, L'\0');
 		OPENFILENAME ofn{};
 		ofn.lStructSize = sizeof(ofn);
@@ -572,7 +627,9 @@ Resource::ID Hierarchy::New(Resource::ID parentID)
 		ofn.nMaxFile = MAX_PATH;
 		ofn.Flags = OFN_OVERWRITEPROMPT | OFN_EXPLORER;
 		ofn.lpstrDefExt = L"dat";
-		if (!::GetSaveFileName(&ofn))
+		const BOOL isSuccess{ ::GetSaveFileName(&ofn) };
+		ImGui::GetIO().ClearInputKeys();
+		if (!isSuccess)
 			return Resource::InvalidID;
 
 		std::ranges::replace(filePath, std::filesystem::path::preferred_separator, Stringtable::DataPathSeperator.front());
@@ -580,11 +637,12 @@ Resource::ID Hierarchy::New(Resource::ID parentID)
 		id = Resource::New(name);
 		m_roots.emplace_back(id, filePath);
 		SetModified(id, false);
-		OpenTree(id);
+		SetOpened(id, true);
+		Delegates::OnPropertyAdded.Broadcast(id);
 	}
-	// 새로운 프로퍼티
 	else
 	{
+		// 새로운 프로퍼티
 		constexpr auto DefaultPropertyName{ L"Property" };
 		std::wstring name{ DefaultPropertyName };
 		std::size_t index{ 0 };
@@ -600,17 +658,6 @@ Resource::ID Hierarchy::New(Resource::ID parentID)
 		Delegates::OnPropertyAdded.Broadcast(id);
 	}
 	return id;
-}
-
-void Hierarchy::Delete(Resource::ID id)
-{
-	m_contexts[id].isInvalid = true;
-}
-
-void Hierarchy::SetModified(Resource::ID id, bool modified)
-{
-	if (auto root{ GetRoot(id) })
-		m_contexts[root->id].isModified = modified;
 }
 
 void Hierarchy::SetRenamePopup(Resource::ID id, bool opened)
@@ -644,27 +691,6 @@ Hierarchy::Root* Hierarchy::GetRoot(Resource::ID id)
 		return &*it;
 	}
 	return nullptr;
-}
-
-bool Hierarchy::IsModified(Resource::ID id) const
-{
-	if (m_contexts.contains(id))
-		return m_contexts.at(id).isModified;
-	return false;
-}
-
-bool Hierarchy::IsOpened(Resource::ID id) const
-{
-	if (m_contexts.contains(id))
-		return m_contexts.at(id).isOpened;
-	return false;
-}
-
-bool Hierarchy::IsSelected(Resource::ID id) const
-{
-	if (m_contexts.contains(id))
-		return m_contexts.at(id).isSelected;
-	return false;
 }
 
 bool Hierarchy::IsRenamePopupOpened(Resource::ID id) const

@@ -27,9 +27,14 @@ public:
 	void Update(float deltaTime);
 	void Render();
 
-	void OpenTree(Resource::ID id);
-	void CloseTree(Resource::ID id);
+	void Delete(Resource::ID id);
+	void SetModified(Resource::ID id, bool modified);
+	void SetOpened(Resource::ID id, bool opened);
+	void SetSelected(Resource::ID id, bool selected);
 	bool IsRoot(Resource::ID id) const;
+	bool IsModified(Resource::ID id) const;
+	bool IsOpened(Resource::ID id) const;
+	bool IsSelected(Resource::ID id) const;
 
 private:
 	// 델리게이트
@@ -57,14 +62,9 @@ private:
 
 	void LoadFromFile(const std::filesystem::path& filePath);
 	Resource::ID New(Resource::ID parentID);
-	void Delete(Resource::ID id);
-	void SetModified(Resource::ID id, bool modified);
 	void SetRenamePopup(Resource::ID id, bool opened);
 
 	Root* GetRoot(Resource::ID id);
-	bool IsModified(Resource::ID id) const;
-	bool IsOpened(Resource::ID id) const;
-	bool IsSelected(Resource::ID id) const;
 	bool IsRenamePopupOpened(Resource::ID id) const;
 
 private:
