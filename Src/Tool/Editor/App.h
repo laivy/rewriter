@@ -16,6 +16,7 @@ private:
 
 	void InitWindow();
 	void InitApp();
+	void InitImGui();
 
 	void Update();
 	void Render();
