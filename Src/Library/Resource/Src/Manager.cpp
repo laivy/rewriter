@@ -94,9 +94,6 @@ namespace Resource
 		}
 
 		auto& entry{ m_idToEntry.at(id) };
-		if (const ID parentID{ entry.parentID }; parentID != InvalidID && m_idToEntry.contains(parentID))
-			std::erase(m_idToEntry.at(parentID).children, id);
-
 		for (ID childID : entry.children)
 			Delete(childID);
 
@@ -280,11 +277,6 @@ namespace Resource
 			return false;
 		}
 		if (!m_idToEntry.contains(id))
-		{
-			assert(false && "there is nothing to save");
-			return false;
-		}
-		if (m_idToEntry.at(id).children.empty())
 		{
 			assert(false && "there is nothing to save");
 			return false;
