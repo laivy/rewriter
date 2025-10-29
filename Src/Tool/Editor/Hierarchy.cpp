@@ -72,15 +72,11 @@ void Hierarchy::SetSelected(Resource::ID id, bool selected)
 
 Hierarchy::Root* Hierarchy::GetRoot(Resource::ID id)
 {
-	if (IsRoot(id))
-	{
-		auto it{ std::ranges::find(m_roots, id, &Root::id) };
-		if (it == m_roots.end())
-			return nullptr;
+	auto it{ std::ranges::find(m_roots, id, &Root::id) };
+	if (it != m_roots.end())
 		return &*it;
-	}
 
-	Resource::ID rootID{ Resource::GetParent(id) };
+	Resource::ID rootID{ id };
 	while (true)
 	{
 		const Resource::ID temp{ Resource::GetParent(rootID) };
@@ -88,7 +84,10 @@ Hierarchy::Root* Hierarchy::GetRoot(Resource::ID id)
 			break;
 		rootID = temp;
 	}
-	return GetRoot(rootID);
+	it = std::ranges::find(m_roots, rootID, &Root::id);
+	if (it != m_roots.end())
+		return &*it;
+	return nullptr;
 }
 
 bool Hierarchy::IsRoot(Resource::ID id) const
@@ -290,11 +289,8 @@ void Hierarchy::Shortcut()
 	}
 	if (ImGui::IsKeyDown(ImGuiKey_Delete))
 	{
-		for (Resource::ID id : m_contexts | std::views::keys)
-		{
-			if (IsSelected(id))
-				Delete(id);
-		}
+		for (Resource::ID id : m_selectedIDs)
+			Delete(id);
 	}
 }
 
@@ -545,6 +541,7 @@ void Hierarchy::TreeView()
 		{
 			const ImGuiID currentID{ ImGui::GetItemID() };
 			ImGui::SetFocusID(currentID, ImGui::GetCurrentWindow());
+			ImGui::SetNavCursorVisibleAfterMove();
 			lastFocusID = currentID;
 			Delegates::OnPropertySelected.Broadcast(id);
 		}

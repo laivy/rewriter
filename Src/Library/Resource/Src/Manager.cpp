@@ -77,29 +77,36 @@ namespace Resource
 
 	void Manager::Delete(ID id)
 	{
-		if (id >= m_properties.size())
+		auto recurse = [this](this auto self, ID id)
 		{
-			assert(false && "invalid id");
-			return;
-		}
+			if (id >= m_properties.size())
+			{
+				assert(false && "invalid id");
+				return;
+			}
 
-		auto& prop{ m_properties.at(id) };
-		if (!prop)
-			return;
+			auto& prop{ m_properties.at(id) };
+			if (!prop)
+				return;
 
-		if (!m_idToEntry.contains(id))
-		{
-			assert(false && "invalid id");
-			return;
-		}
+			if (!m_idToEntry.contains(id))
+			{
+				assert(false && "invalid id");
+				return;
+			}
 
-		auto& entry{ m_idToEntry.at(id) };
-		for (ID childID : entry.children)
-			Delete(childID);
+			auto& entry{ m_idToEntry.at(id) };
+			for (ID childID : entry.children)
+				self(childID);
 
-		prop.reset();
-		m_pathToID.erase(entry.path);
-		m_idToEntry.erase(id);
+			prop.reset();
+			m_pathToID.erase(entry.path);
+			m_idToEntry.erase(id);
+		};
+		recurse(id);
+
+		if (ID parentID{ GetParent(id) }; parentID != InvalidID)
+			std::erase(m_idToEntry.at(parentID).children, id);
 	}
 
 	ID Manager::Get(const std::wstring& path)
@@ -122,12 +129,7 @@ namespace Resource
 
 	ID Manager::GetParent(ID id) const
 	{
-		if (!m_idToEntry.contains(id))
-		{
-			assert(false && "invalid id");
-			return InvalidID;
-		}
-		return m_idToEntry.at(id).parentID;
+		return m_idToEntry.contains(id) ? m_idToEntry.at(id).parentID : InvalidID;
 	}
 
 	ID Manager::GetChild(ID parentID, std::size_t index) const
