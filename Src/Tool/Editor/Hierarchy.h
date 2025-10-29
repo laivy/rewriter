@@ -16,7 +16,7 @@ private:
 		bool isInvalid;
 		bool isModified;
 		bool isOpened;
-		bool isSelected;
+		bool openWarningModal;
 		bool openRenamePopup;
 	};
 
@@ -31,6 +31,7 @@ public:
 	void SetModified(Resource::ID id, bool modified);
 	void SetOpened(Resource::ID id, bool opened);
 	void SetSelected(Resource::ID id, bool selected);
+	Root* GetRoot(Resource::ID id);
 	bool IsRoot(Resource::ID id) const;
 	bool IsModified(Resource::ID id) const;
 	bool IsOpened(Resource::ID id) const;
@@ -62,13 +63,16 @@ private:
 
 	void LoadFromFile(const std::filesystem::path& filePath);
 	Resource::ID New(Resource::ID parentID);
+
+	void SetWarningModal(Resource::ID id, bool opened);
 	void SetRenamePopup(Resource::ID id, bool opened);
 
-	Root* GetRoot(Resource::ID id);
+	bool IsWarningModalOpened(Resource::ID id) const;
 	bool IsRenamePopupOpened(Resource::ID id) const;
 
 private:
 	std::vector<Root> m_roots;
+	std::vector<Resource::ID> m_selectedIDs;
 	std::unordered_map<Resource::ID, Context> m_contexts;
 
 	bool m_isAnyPropertySelected;

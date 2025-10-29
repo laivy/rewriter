@@ -59,7 +59,36 @@ void Hierarchy::SetOpened(Resource::ID id, bool opened)
 
 void Hierarchy::SetSelected(Resource::ID id, bool selected)
 {
-	m_contexts[id].isSelected = selected;
+	if (selected)
+	{
+		if (!std::ranges::contains(m_selectedIDs, id))
+			m_selectedIDs.push_back(id);
+	}
+	else
+	{
+		std::erase(m_selectedIDs, id);
+	}
+}
+
+Hierarchy::Root* Hierarchy::GetRoot(Resource::ID id)
+{
+	if (IsRoot(id))
+	{
+		auto it{ std::ranges::find(m_roots, id, &Root::id) };
+		if (it == m_roots.end())
+			return nullptr;
+		return &*it;
+	}
+
+	Resource::ID rootID{ Resource::GetParent(id) };
+	while (true)
+	{
+		const Resource::ID temp{ Resource::GetParent(rootID) };
+		if (temp == Resource::InvalidID)
+			break;
+		rootID = temp;
+	}
+	return GetRoot(rootID);
 }
 
 bool Hierarchy::IsRoot(Resource::ID id) const
@@ -83,9 +112,7 @@ bool Hierarchy::IsOpened(Resource::ID id) const
 
 bool Hierarchy::IsSelected(Resource::ID id) const
 {
-	if (m_contexts.contains(id))
-		return m_contexts.at(id).isSelected;
-	return false;
+	return std::ranges::contains(m_selectedIDs, id);
 }
 
 void Hierarchy::OnPropertyAdded(Resource::ID id)
@@ -123,8 +150,7 @@ void Hierarchy::OnPropertySelected(Resource::ID id)
 		}
 		else
 		{
-			for (auto _id : m_contexts | std::views::keys)
-				SetSelected(_id, false);
+			m_selectedIDs.clear();
 			SetSelected(id, true);
 		}
 	}
@@ -137,8 +163,7 @@ void Hierarchy::OnPropertySelected(Resource::ID id)
 		}
 		else
 		{
-			for (auto _id : m_contexts | std::views::keys)
-				SetSelected(_id, false);
+			m_selectedIDs.clear();
 			SetSelected(id, true);
 		}
 	}
@@ -375,8 +400,7 @@ void Hierarchy::TreeView()
 		// 파일 메뉴
 		do
 		{
-			auto selected{ m_contexts | std::views::keys | std::views::filter([this](auto id) { return IsSelected(id); }) };
-			if (std::ranges::any_of(selected, [this](auto id) { return !IsRoot(id); }))
+			if (std::ranges::any_of(m_selectedIDs, [this](auto id) { return !IsRoot(id); }))
 				break;
 
 			if (ImGui::MenuItem("새 프로퍼티", "N") || ImGui::IsKeyPressed(ImGuiKey_N))
@@ -405,8 +429,7 @@ void Hierarchy::TreeView()
 		// 프로퍼티 메뉴
 		do
 		{
-			auto selected{ m_contexts | std::views::keys | std::views::filter([this](auto id) { return IsSelected(id); }) };
-			if (std::ranges::any_of(selected, [this](auto id) { return IsRoot(id); }))
+			if (std::ranges::any_of(m_selectedIDs, [this](auto id) { return IsRoot(id); }))
 				break;
 
 			if (ImGui::MenuItem("새 프로퍼티", "N") || ImGui::IsKeyPressed(ImGuiKey_N))
@@ -489,25 +512,18 @@ void Hierarchy::TreeView()
 		const bool isOpened{ IsOpened(id) };
 		ImGui::SetNextItemOpen(isOpened);
 
-		ImGuiTreeNodeFlags flag{ ImGuiTreeNodeFlags_OpenOnDoubleClick | ImGuiTreeNodeFlags_FramePadding | ImGuiTreeNodeFlags_SpanFullWidth | ImGuiTreeNodeFlags_DrawLinesToNodes };
+		ImGuiTreeNodeFlags flag{
+			ImGuiTreeNodeFlags_OpenOnDoubleClick |
+			ImGuiTreeNodeFlags_FramePadding |
+			ImGuiTreeNodeFlags_SpanFullWidth |
+			ImGuiTreeNodeFlags_DrawLinesToNodes |
+			ImGuiTreeNodeFlags_NavLeftJumpsToParent
+		};
 		if (IsSelected(id))
 			flag |= ImGuiTreeNodeFlags_Selected;
 		ImGui::PushStyleVarY(ImGuiStyleVar_ItemSpacing, 0.0f);
-
-		const bool setNavCursorVisible{ std::ranges::count_if(m_contexts | std::views::values, [](const auto& ctx) { return ctx.isSelected; }) > 1 };
-		ImGui::SetNavCursorVisible(setNavCursorVisible);
 		const bool isTreeNodeOpened{ ImGui::TreeNodeEx(name.c_str(), flag) };
-		ImGui::SetNavCursorVisible(false);
 		ImGui::PopStyleVar();
-
-		static ImGuiID lastFocusedID{ 0 };
-		const auto currentFocusID{ ImGui::GetFocusID() };
-		if (lastFocusedID != currentFocusID && ImGui::IsItemFocused())
-		{
-			lastFocusedID = currentFocusID;
-			Delegates::OnPropertySelected.Broadcast(id);
-		}
-		ImGui::IsItemFocused();
 
 		// 폰트 크기 원복
 		if (isRoot)
@@ -517,8 +533,21 @@ void Hierarchy::TreeView()
 		if (ImGui::IsItemToggledOpen())
 			SetOpened(id, !isOpened);
 
-		if (ImGui::IsItemClicked() || ImGui::IsItemActivated())
+		// 키보드, 마우스로 노드 선택 처리
+		static ImGuiID lastFocusID{ 0 };
+		const ImGuiID currentFocusID{ ImGui::GetFocusID() };
+		if (lastFocusID != currentFocusID && ImGui::IsItemFocused())
+		{
+			lastFocusID = currentFocusID;
 			Delegates::OnPropertySelected.Broadcast(id);
+		}
+		if (ImGui::IsItemClicked() || ImGui::IsItemActivated())
+		{
+			const ImGuiID currentID{ ImGui::GetItemID() };
+			ImGui::SetFocusID(currentID, ImGui::GetCurrentWindow());
+			lastFocusID = currentID;
+			Delegates::OnPropertySelected.Broadcast(id);
+		}
 
 		// 드래그 드랍
 		if (!isRoot && ImGui::BeginDragDropSource())
@@ -531,15 +560,18 @@ void Hierarchy::TreeView()
 		// 이름 변경
 		if (IsRenamePopupOpened(id))
 		{
+			if (!isTreeNodeOpened)
+				ImGui::Indent();
 			ImGui::SetNextWindowPos(ImGui::GetCursorScreenPos());
+			if (!isTreeNodeOpened)
+				ImGui::Unindent();
 			ImGui::OpenPopup("Rename");
 			SetRenamePopup(id, false);
 		}
-		ImGui::SetNavCursorVisible(false);
-		if (ImGui::BeginPopup("Rename"))
+		if (ImGui::BeginPopup("Rename", ImGuiWindowFlags_NoNav))
 		{
 			ImGui::SetKeyboardFocusHere();
-			std::string buffer;
+			std::string buffer{ name };
 			if (ImGui::InputText("##Rename", &buffer, ImGuiInputTextFlags_EnterReturnsTrue))
 			{
 				std::wstring newName{ Util::ToWString(buffer) };
@@ -551,7 +583,6 @@ void Hierarchy::TreeView()
 				ImGui::CloseCurrentPopup();
 			ImGui::EndPopup();
 		}
-		ImGui::SetNavCursorVisible(true);
 
 		// 컨텍스트 메뉴
 		popup(id);
@@ -592,8 +623,7 @@ void Hierarchy::TreeView()
 			break;
 		if (!ImGui::IsMouseClicked(ImGuiMouseButton_Left))
 			break;
-		for (auto& ctx : m_contexts | std::views::values)
-			ctx.isSelected = false;
+		m_selectedIDs.clear();
 	} while (false);
 }
 
@@ -660,37 +690,21 @@ Resource::ID Hierarchy::New(Resource::ID parentID)
 	return id;
 }
 
+void Hierarchy::SetWarningModal(Resource::ID id, bool opened)
+{
+	m_contexts[id].openWarningModal = opened;
+}
+
 void Hierarchy::SetRenamePopup(Resource::ID id, bool opened)
 {
 	m_contexts[id].openRenamePopup = opened;
 }
 
-Hierarchy::Root* Hierarchy::GetRoot(Resource::ID id)
+bool Hierarchy::IsWarningModalOpened(Resource::ID id) const
 {
-	if (IsRoot(id))
-	{
-		auto it{ std::ranges::find(m_roots, id, &Root::id) };
-		if (it == m_roots.end())
-			return nullptr;
-		return &*it;
-	}
-
-	Resource::ID rootID{ Resource::GetParent(id) };
-	while (true)
-	{
-		const Resource::ID temp{ Resource::GetParent(rootID) };
-		if (temp == Resource::InvalidID)
-			break;
-		rootID = temp;
-	}
-	if (IsRoot(rootID))
-	{
-		auto it{ std::ranges::find(m_roots, rootID, &Root::id) };
-		if (it == m_roots.end())
-			return nullptr;
-		return &*it;
-	}
-	return nullptr;
+	if (m_contexts.contains(id))
+		return m_contexts.at(id).openWarningModal;
+	return false;
 }
 
 bool Hierarchy::IsRenamePopupOpened(Resource::ID id) const
