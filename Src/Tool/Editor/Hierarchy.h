@@ -49,6 +49,7 @@ private:
 	void OnMenuFileOpen();
 	void OnMenuFileSave();
 	void OnMenuFileSaveAs();
+	void OnMenuFileSaveAll();
 
 	// 단축키
 	void OnCut();

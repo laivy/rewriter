@@ -43,7 +43,8 @@ void Hierarchy::Render()
 void Hierarchy::Delete(Resource::ID id)
 {
 	m_contexts[id].isInvalid = true;
-	Delegates::OnPropertyDeleted.Broadcast(id);
+	if (!IsRoot(id))
+		Delegates::OnPropertyDeleted.Broadcast(id);
 }
 
 void Hierarchy::SetModified(Resource::ID id, bool modified)
@@ -213,11 +214,8 @@ void Hierarchy::OnMenuFileOpen()
 
 void Hierarchy::OnMenuFileSave()
 {
-	for (Resource::ID id : m_contexts | std::views::keys)
+	for (Resource::ID id : m_selectedIDs)
 	{
-		if (!IsSelected(id))
-			continue;
-
 		auto root{ GetRoot(id) };
 		if (!IsModified(root->id))
 			continue;
@@ -246,6 +244,56 @@ void Hierarchy::OnMenuFileSave()
 
 void Hierarchy::OnMenuFileSaveAs()
 {
+	if (m_selectedIDs.empty())
+		return;
+
+	auto root{ GetRoot(m_selectedIDs.back()) };
+	if (!root)
+		return;
+
+	std::wstring filePath(MAX_PATH, L'\0');
+	OPENFILENAME ofn{};
+	ofn.lStructSize = sizeof(ofn);
+	ofn.lpstrFilter = L"Data Files (*.dat)\0*.dat\0";
+	ofn.lpstrFile = filePath.data();
+	ofn.nMaxFile = MAX_PATH;
+	ofn.Flags = OFN_OVERWRITEPROMPT | OFN_EXPLORER;
+	ofn.lpstrDefExt = L"dat";
+	const BOOL isSuccess{ ::GetSaveFileName(&ofn) };
+	ImGui::GetIO().ClearInputKeys();
+	if (!isSuccess)
+		return;
+
+	Resource::SaveToFile(root->id, filePath);
+}
+
+void Hierarchy::OnMenuFileSaveAll()
+{
+	for (auto& root : m_roots)
+	{
+		if (!IsModified(root.id))
+			continue;
+
+		if (root.filePath.empty())
+		{
+			std::wstring filePath(MAX_PATH, L'\0');
+			OPENFILENAME ofn{};
+			ofn.lStructSize = sizeof(ofn);
+			ofn.lpstrFilter = L"Data Files (*.dat)\0*.dat\0";
+			ofn.lpstrFile = filePath.data();
+			ofn.nMaxFile = MAX_PATH;
+			ofn.Flags = OFN_OVERWRITEPROMPT | OFN_EXPLORER;
+			ofn.lpstrDefExt = L"dat";
+			const BOOL isSuccess{ ::GetSaveFileName(&ofn) };
+			ImGui::GetIO().ClearInputKeys();
+			if (!isSuccess)
+				continue;
+			root.filePath = ofn.lpstrFile;
+		}
+
+		Resource::SaveToFile(root.id, root.filePath);
+		SetModified(root.id, false);
+	}
 }
 
 void Hierarchy::OnCut()
@@ -283,9 +331,9 @@ void Hierarchy::Shortcut()
 		OnPaste();
 	if (ImGui::Shortcut(ImGuiKey_F2))
 	{
-		auto selecteds{ m_contexts | std::views::keys | std::views::filter([this](auto id) { return !IsRoot(id) && IsSelected(id); }) };
-		if (!selecteds.empty())
-			SetRenamePopup(selecteds.back(), true);
+		auto selectedIDs{ m_selectedIDs | std::views::filter([this](auto id) { return !IsRoot(id); }) };
+		if (!selectedIDs.empty())
+			SetRenamePopup(selectedIDs.back(), true);
 	}
 	if (ImGui::IsKeyDown(ImGuiKey_Delete))
 	{
@@ -419,6 +467,10 @@ void Hierarchy::TreeView()
 			if (ImGui::MenuItem("닫기", "C") || ImGui::IsKeyPressed(ImGuiKey_C))
 			{
 				ImGui::CloseCurrentPopup();
+				if (IsModified(id))
+					SetWarningModal(id, true);
+				else
+					Delete(id);
 			}
 		} while (false);
 
@@ -580,6 +632,31 @@ void Hierarchy::TreeView()
 				ImGui::CloseCurrentPopup();
 			ImGui::EndPopup();
 		}
+
+		// 파일 닫기 경고
+		if (IsWarningModalOpened(id))
+		{
+			ImGui::OpenPopup("경고");
+			SetWarningModal(id, false);
+		}
+		if (ImGui::BeginPopupModal("경고", nullptr, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove))
+		{
+			ImGui::TextUnformatted("변경 사항이 저장되지 않았습니다.\n파일을 닫으시겠습니까?");
+			ImGui::Separator();
+			if (ImGui::Button("예", ImVec2{ 80.0f, 0.0f }) || ImGui::IsKeyDown(ImGuiKey_Enter))
+			{
+				ImGui::CloseCurrentPopup();
+				Delete(id);
+			}
+			ImGui::SetItemDefaultFocus();
+			ImGui::SameLine();
+			if (ImGui::Button("아니요", ImVec2{ 80.0f, 0.0f }) || ImGui::IsKeyDown(ImGuiKey_Escape))
+			{
+				ImGui::CloseCurrentPopup();
+			}
+			ImGui::EndPopup();
+		}
+
 
 		// 컨텍스트 메뉴
 		popup(id);
