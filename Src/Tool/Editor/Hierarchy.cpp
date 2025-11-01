@@ -16,11 +16,12 @@ void Hierarchy::Update(float deltaTime)
 {
 	std::erase_if(m_contexts, [this](const auto& elem)
 	{
-		if (!elem.second.isInvalid)
+		const auto& [id, context] { elem };
+		if (!context.isInvalid)
 			return false;
 
-		const Resource::ID id{ elem.first };
 		std::erase_if(m_roots, [id](const auto& root) { return root.id == id; });
+		std::erase(m_selectedIDs, id);
 		Resource::Delete(id);
 		return true;
 	});
@@ -163,6 +164,8 @@ void Hierarchy::OnPropertySelected(Resource::ID id)
 		}
 		else
 		{
+			if (IsSelected(id))
+				return;
 			m_selectedIDs.clear();
 			SetSelected(id, true);
 		}
@@ -389,6 +392,7 @@ void Hierarchy::MenuBar()
 		if (ImGui::MenuItem("모두 저장", "Ctrl+Alt+S") || ImGui::Shortcut(ImGuiMod_Ctrl | ImGuiMod_Alt | ImGuiKey_S))
 		{
 			ImGui::CloseCurrentPopup();
+			OnMenuFileSaveAll();
 		}
 		ImGui::EndMenu();
 	}
@@ -494,11 +498,8 @@ void Hierarchy::TreeView()
 			if (ImGui::MenuItem("삭제", "D") || ImGui::IsKeyPressed(ImGuiKey_D))
 			{
 				ImGui::CloseCurrentPopup();
-				for (const auto id : m_contexts | std::views::keys)
-				{
-					if (IsSelected(id))
-						Delete(id);
-				}
+				for (const auto id : m_selectedIDs)
+					Delete(id);
 			}
 		} while (false);
 		ImGui::EndPopup();
@@ -516,12 +517,11 @@ void Hierarchy::TreeView()
 		if (!ImGui::BeginDragDropTarget())
 			return;
 
-		constexpr float Thickness{ 1.0f };
-
 		ImRect rect{};
 		rect.Min = ImGui::GetItemRectMin();
 		rect.Max = ImGui::GetItemRectMax();
 
+		constexpr float Thickness{ 1.0f };
 		const ImVec2 center{ rect.GetCenter() };
 		rect.Min.y = center.y - Thickness / 2.0f;
 		rect.Max.y = center.y + Thickness / 2.0f;
@@ -531,13 +531,18 @@ void Hierarchy::TreeView()
 
 		if (auto payload{ ImGui::AcceptDragDropPayload("Hierarchy/Property", ImGuiDragDropFlags_AcceptNoDrawDefaultRect) })
 		{
-			moveInfo.emplace();
-			std::ranges::copy_if(m_contexts | std::views::keys, std::back_inserter(moveInfo->targetIDs), [this](Resource::ID id)
+			auto& value{ moveInfo.emplace() };
+			std::ranges::copy(m_selectedIDs, std::back_inserter(value.targetIDs));
+			if (isOpened)
 			{
-				return IsSelected(id);
-			});
-			moveInfo->destID = isOpened ? id : Resource::GetParent(id);
-			moveInfo->destIndex = isOpened ? 0 : index + 1;
+				value.destID = id;
+				value.destIndex = 0;
+			}
+			else
+			{
+				value.destID = Resource::GetParent(id);
+				value.destIndex = index + 1;
+			}
 		}
 		ImGui::EndDragDropTarget();
 	};
@@ -651,9 +656,7 @@ void Hierarchy::TreeView()
 			ImGui::SetItemDefaultFocus();
 			ImGui::SameLine();
 			if (ImGui::Button("아니요", ImVec2{ 80.0f, 0.0f }) || ImGui::IsKeyDown(ImGuiKey_Escape))
-			{
 				ImGui::CloseCurrentPopup();
-			}
 			ImGui::EndPopup();
 		}
 
@@ -707,6 +710,9 @@ void Hierarchy::RenderModal()
 
 void Hierarchy::LoadFromFile(const std::filesystem::path& filePath)
 {
+	if (std::ranges::contains(m_roots, filePath, &Root::filePath))
+		return;
+
 	const auto id{ Resource::LoadFromFile(filePath, L"") };
 	if (id == Resource::InvalidID)
 	{
