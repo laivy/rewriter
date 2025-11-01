@@ -77,7 +77,10 @@ namespace Resource
 
 	void Manager::Delete(ID id)
 	{
-		auto recurse = [this](this auto self, ID id)
+		if (ID parentID{ GetParent(id) }; parentID != InvalidID)
+			std::erase(m_idToEntry.at(parentID).children, id);
+
+		[this](this auto self, ID id)
 		{
 			if (id >= m_properties.size())
 			{
@@ -102,11 +105,7 @@ namespace Resource
 			prop.reset();
 			m_pathToID.erase(entry.path);
 			m_idToEntry.erase(id);
-		};
-		recurse(id);
-
-		if (ID parentID{ GetParent(id) }; parentID != InvalidID)
-			std::erase(m_idToEntry.at(parentID).children, id);
+		}(id);
 	}
 
 	ID Manager::Get(const std::wstring& path)
