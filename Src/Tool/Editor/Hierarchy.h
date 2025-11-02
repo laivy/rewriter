@@ -24,7 +24,7 @@ public:
 	Hierarchy();
 	~Hierarchy() = default;
 
-	void Update(float deltaTime);
+	void Update(float deltaSeconds);
 	void Render();
 
 	void Delete(Resource::ID id);

@@ -12,7 +12,7 @@ Hierarchy::Hierarchy() :
 	Delegates::OnPropertySelected.Bind(this, std::bind_front(&Hierarchy::OnPropertySelected, this));
 }
 
-void Hierarchy::Update(float deltaTime)
+void Hierarchy::Update(float deltaSeconds)
 {
 	std::erase_if(m_contexts, [this](const auto& elem)
 	{

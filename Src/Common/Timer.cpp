@@ -1,4 +1,4 @@
-﻿#include "Pch.h"
+#include "Pch.h"
 #include "Timer.h"
 
 Timer::Timer() :
@@ -12,6 +12,6 @@ float Timer::Tick()
 	auto last{ m_lastTimePoint };
 	m_lastTimePoint = now;
 
-	std::chrono::duration<float> deltaTime{ now - last };
-	return deltaTime.count();
+	std::chrono::duration<float> deltaSeconds{ now - last };
+	return deltaSeconds.count();
 }

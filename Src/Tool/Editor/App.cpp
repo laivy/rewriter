@@ -249,9 +249,9 @@ void App::InitImGui()
 
 void App::Update()
 {
-	float deltaTime{ m_timer.Tick() };
+	float deltaSeconds{ m_timer.Tick() };
 	if (auto hierarchy{ Hierarchy::GetInstance() })
-		hierarchy->Update(deltaTime);
+		hierarchy->Update(deltaSeconds);
 }
 
 void App::Render()
