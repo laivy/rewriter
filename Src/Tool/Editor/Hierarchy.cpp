@@ -38,7 +38,6 @@ void Hierarchy::Render()
 		TreeView();
 	}
 	ImGui::End();
-	RenderModal();
 }
 
 void Hierarchy::Delete(Resource::ID id)
@@ -429,13 +428,23 @@ void Hierarchy::MenuBar()
 
 void Hierarchy::TreeView()
 {
-	struct MoveInfo
+	struct ReorderInfo
 	{
 		std::vector<Resource::ID> targetIDs;
-		Resource::ID destID;
-		std::size_t destIndex;
+		Resource::ID destID{ Resource::InvalidID };
+		std::size_t destIndex{ 0 };
 	};
-	std::optional<MoveInfo> moveInfo;
+
+	struct MultiSelectInfo
+	{
+		Resource::ID from{ Resource::InvalidID };
+		Resource::ID to{ Resource::InvalidID };
+	};
+
+	std::vector<Resource::ID> treeIDs;
+	ReorderInfo reorderInfo;
+	MultiSelectInfo multiSelectInfo;
+	multiSelectInfo.from = m_selectedIDs.empty() ? Resource::InvalidID : m_selectedIDs.back();
 
 	auto popup = [this](Resource::ID id)
 	{
@@ -504,7 +513,7 @@ void Hierarchy::TreeView()
 		} while (false);
 		ImGui::EndPopup();
 	};
-	auto reorder = [this, &moveInfo](Resource::ID id, std::size_t index, bool isOpened)
+	auto reorder = [this, &reorderInfo](Resource::ID id, std::size_t index, bool isOpened)
 	{
 		const ImVec2 lt{ ImGui::GetItemRectMin() };
 		const ImVec2 rb{ ImGui::GetItemRectMax() };
@@ -531,24 +540,24 @@ void Hierarchy::TreeView()
 
 		if (auto payload{ ImGui::AcceptDragDropPayload("Hierarchy/Property", ImGuiDragDropFlags_AcceptNoDrawDefaultRect) })
 		{
-			auto& value{ moveInfo.emplace() };
-			std::ranges::copy(m_selectedIDs, std::back_inserter(value.targetIDs));
+			std::ranges::copy(m_selectedIDs, std::back_inserter(reorderInfo.targetIDs));
 			if (isOpened)
 			{
-				value.destID = id;
-				value.destIndex = 0;
+				reorderInfo.destID = id;
+				reorderInfo.destIndex = 0;
 			}
 			else
 			{
-				value.destID = Resource::GetParent(id);
-				value.destIndex = index + 1;
+				reorderInfo.destID = Resource::GetParent(id);
+				reorderInfo.destIndex = index + 1;
 			}
 		}
 		ImGui::EndDragDropTarget();
 	};
-	auto render = [this, &popup, &reorder](this auto self, Resource::ID id, std::size_t index) -> void
+	auto render = [this, &treeIDs, &multiSelectInfo, &popup, &reorder](this auto self, Resource::ID id, std::size_t index) -> void
 	{
 		ImGui::PushID(std::to_string(id).c_str());
+		treeIDs.push_back(id);
 
 		const bool isRoot{ IsRoot(id) };
 		std::string name{ Util::ToU8String(*Resource::GetName(id)) };
@@ -594,8 +603,11 @@ void Hierarchy::TreeView()
 			lastFocusID = currentFocusID;
 			Delegates::OnPropertySelected.Broadcast(id);
 		}
-		if (ImGui::IsItemClicked() || ImGui::IsItemActivated())
+		if (ImGui::IsItemClicked())
 		{
+			if (ImGui::IsKeyDown(ImGuiKey_LeftShift))
+				multiSelectInfo.to = id;
+
 			const ImGuiID currentID{ ImGui::GetItemID() };
 			ImGui::SetFocusID(currentID, ImGui::GetCurrentWindow());
 			ImGui::SetNavCursorVisibleAfterMove();
@@ -683,11 +695,33 @@ void Hierarchy::TreeView()
 	ImGui::PopID();
 
 	// 프로퍼티 이동
-	if (moveInfo)
+	if (!reorderInfo.targetIDs.empty())
 	{
-		for (auto targetID : moveInfo->targetIDs | std::views::reverse)
-			Resource::Move(targetID, moveInfo->destID, moveInfo->destIndex);
+		std::ranges::sort(reorderInfo.targetIDs, [&treeIDs](auto lhs, auto rhs)
+		{
+			return
+				std::distance(treeIDs.begin(), std::ranges::find(treeIDs, lhs)) <
+				std::distance(treeIDs.begin(), std::ranges::find(treeIDs, rhs));
+		});
+		for (auto targetID : reorderInfo.targetIDs | std::views::reverse)
+			Resource::Move(targetID, reorderInfo.destID, reorderInfo.destIndex);
 	}
+
+	// Shift키 다중 선택
+	do
+	{
+		if (multiSelectInfo.from == Resource::InvalidID || multiSelectInfo.to == Resource::InvalidID)
+			break;
+
+		auto from{ std::ranges::find(treeIDs, multiSelectInfo.from) };
+		auto to{ std::ranges::find(treeIDs, multiSelectInfo.to) };
+		if (from == treeIDs.end() || to == treeIDs.end())
+			break;
+
+		auto [begin, end] { std::minmax(from, to) };
+		for (auto it{ begin }; it <= end; ++it)
+			SetSelected(*it, true);
+	} while (false);
 
 	// 클릭을 했는데 선택된 프로퍼티가 없으면 이미 선택되어 있는 프로퍼티 선택 해제
 	do
@@ -702,10 +736,6 @@ void Hierarchy::TreeView()
 			break;
 		m_selectedIDs.clear();
 	} while (false);
-}
-
-void Hierarchy::RenderModal()
-{
 }
 
 void Hierarchy::LoadFromFile(const std::filesystem::path& filePath)
