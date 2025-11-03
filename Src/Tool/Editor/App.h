@@ -16,13 +16,12 @@ private:
 
 	void InitWindow();
 	void InitApp();
-	void InitImGui();
 
 	void Update();
 	void Render();
 
 private:
-	static constexpr auto WINDOW_TITLE_NAME{ L"Editor" };
+	static constexpr auto WindowName{ L"Editor" };
 
 	HWND m_hWnd;
 	Int2 m_windowSize;
