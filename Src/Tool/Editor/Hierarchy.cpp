@@ -3,6 +3,79 @@
 #include "Hierarchy.h"
 #include "Common/Util.h"
 
+namespace
+{
+	constexpr std::wstring_view DataFileFilter{ L"데이터 파일 (.lvy)\0*.lvy\0" };
+
+	std::vector<std::wstring> GetOpenFilePath()
+	{
+		std::wstring workingDirectory(MAX_PATH, L'\0');
+		if (!::GetCurrentDirectory(workingDirectory.size(), workingDirectory.data()))
+			return {};
+
+		std::wstring buffer(MAX_PATH, L'\0');
+		OPENFILENAME ofn{};
+		ofn.lStructSize = sizeof(ofn);
+		ofn.lpstrFilter = DataFileFilter.data();
+		ofn.lpstrFile = buffer.data();
+		ofn.nMaxFile = buffer.size();
+		ofn.Flags = OFN_ALLOWMULTISELECT | OFN_FILEMUSTEXIST | OFN_EXPLORER;
+		ofn.lpstrDefExt = Stringtable::DataFileExtension.substr(1).data();
+		if (!::GetOpenFileName(&ofn))
+		{
+			::SetCurrentDirectory(workingDirectory.c_str());
+			ImGui::GetIO().ClearInputKeys();
+			return {};
+		}
+
+		std::wstring root{ buffer.substr(0, static_cast<std::size_t>(ofn.nFileOffset) - 1) };
+		std::ranges::replace(root, std::filesystem::path::preferred_separator, Stringtable::DataPathSeperator.front());
+
+		std::vector<std::wstring> filePaths;
+		const wchar_t* pos{ buffer.data() + ofn.nFileOffset };
+		do
+		{
+			std::wstring_view fileName{ pos };
+			auto& filePath{ filePaths.emplace_back() };
+			filePath = std::format(L"{}{}{}", root, Stringtable::DataPathSeperator, fileName);
+			pos += fileName.size() + 1;
+		} while (*pos);
+
+		::SetCurrentDirectory(workingDirectory.c_str());
+		ImGui::GetIO().ClearInputKeys();
+		return filePaths;
+	}
+
+	std::filesystem::path GetSaveFilePath()
+	{
+		std::wstring workingDirectory(MAX_PATH, L'\0');
+		if (!::GetCurrentDirectory(workingDirectory.size(), workingDirectory.data()))
+			return {};
+
+		std::wstring filePath(MAX_PATH, L'\0');
+		OPENFILENAME ofn{};
+		ofn.lStructSize = sizeof(ofn);
+		ofn.lpstrFilter = DataFileFilter.data();
+		ofn.lpstrFile = filePath.data();
+		ofn.nMaxFile = filePath.size();
+		ofn.Flags = OFN_OVERWRITEPROMPT | OFN_EXPLORER;
+		ofn.lpstrDefExt = Stringtable::DataFileExtension.substr(1).data();
+		if (!::GetSaveFileName(&ofn))
+		{
+			::SetCurrentDirectory(workingDirectory.c_str());
+			ImGui::GetIO().ClearInputKeys();
+			return L"";
+		}
+
+		std::erase(filePath, L'\0');
+		std::ranges::replace(filePath, std::filesystem::path::preferred_separator, Stringtable::DataPathSeperator.front());
+
+		::SetCurrentDirectory(workingDirectory.c_str());
+		ImGui::GetIO().ClearInputKeys();
+		return filePath;
+	}
+}
+
 Hierarchy::Hierarchy() :
 	m_isAnyPropertySelected{ false }
 {
@@ -178,40 +251,9 @@ void Hierarchy::OnMenuFileNew()
 
 void Hierarchy::OnMenuFileOpen()
 {
-	std::wstring filePath(MAX_PATH, L'\0');
-	OPENFILENAME ofn{};
-	ofn.lStructSize = sizeof(ofn);
-	ofn.lpstrFilter = L"Data Files (*.dat)\0*.dat\0";
-	ofn.lpstrFile = filePath.data();
-	ofn.nMaxFile = MAX_PATH;
-	ofn.Flags = OFN_ALLOWMULTISELECT | OFN_FILEMUSTEXIST | OFN_EXPLORER;
-	ofn.lpstrDefExt = L"dat";
-	const BOOL isSuccess{ ::GetOpenFileName(&ofn) };
-	ImGui::GetIO().ClearInputKeys();
-	if (!isSuccess)
-		return;
-
-	// 경로 및 파일 이름들 추출
-	std::filesystem::path path{ ofn.lpstrFile };
-	std::vector<std::wstring> fileNames;
-	const wchar_t* temp{ ofn.lpstrFile + ofn.nFileOffset };
-	do
-	{
-		std::wstring_view fileName{ temp };
-		fileNames.emplace_back(fileName);
-		temp += fileName.size() + 1;
-	} while (*temp);
-
-	// 로드
-	if (fileNames.size() == 1)
-	{
-		LoadFromFile(path);
-	}
-	else
-	{
-		for (const auto& fileName : fileNames)
-			LoadFromFile(path / fileName);
-	}
+	const auto filePaths{ GetOpenFilePath() };
+	for (const auto& filePath : filePaths)
+		LoadFromFile(filePath);
 }
 
 void Hierarchy::OnMenuFileSave()
@@ -224,19 +266,8 @@ void Hierarchy::OnMenuFileSave()
 
 		if (root->filePath.empty())
 		{
-			std::wstring filePath(MAX_PATH, L'\0');
-			OPENFILENAME ofn{};
-			ofn.lStructSize = sizeof(ofn);
-			ofn.lpstrFilter = L"Data Files (*.dat)\0*.dat\0";
-			ofn.lpstrFile = filePath.data();
-			ofn.nMaxFile = MAX_PATH;
-			ofn.Flags = OFN_OVERWRITEPROMPT | OFN_EXPLORER;
-			ofn.lpstrDefExt = L"dat";
-			const BOOL isSuccess{ ::GetSaveFileName(&ofn) };
+			root->filePath = GetSaveFilePath();
 			ImGui::GetIO().ClearInputKeys();
-			if (!isSuccess)
-				continue;
-			root->filePath = ofn.lpstrFile;
 		}
 
 		Resource::SaveToFile(root->id, root->filePath);
@@ -253,17 +284,8 @@ void Hierarchy::OnMenuFileSaveAs()
 	if (!root)
 		return;
 
-	std::wstring filePath(MAX_PATH, L'\0');
-	OPENFILENAME ofn{};
-	ofn.lStructSize = sizeof(ofn);
-	ofn.lpstrFilter = L"Data Files (*.dat)\0*.dat\0";
-	ofn.lpstrFile = filePath.data();
-	ofn.nMaxFile = MAX_PATH;
-	ofn.Flags = OFN_OVERWRITEPROMPT | OFN_EXPLORER;
-	ofn.lpstrDefExt = L"dat";
-	const BOOL isSuccess{ ::GetSaveFileName(&ofn) };
-	ImGui::GetIO().ClearInputKeys();
-	if (!isSuccess)
+	const std::filesystem::path filePath{ GetSaveFilePath() };
+	if (filePath.empty())
 		return;
 
 	Resource::SaveToFile(root->id, filePath);
@@ -278,19 +300,10 @@ void Hierarchy::OnMenuFileSaveAll()
 
 		if (root.filePath.empty())
 		{
-			std::wstring filePath(MAX_PATH, L'\0');
-			OPENFILENAME ofn{};
-			ofn.lStructSize = sizeof(ofn);
-			ofn.lpstrFilter = L"Data Files (*.dat)\0*.dat\0";
-			ofn.lpstrFile = filePath.data();
-			ofn.nMaxFile = MAX_PATH;
-			ofn.Flags = OFN_OVERWRITEPROMPT | OFN_EXPLORER;
-			ofn.lpstrDefExt = L"dat";
-			const BOOL isSuccess{ ::GetSaveFileName(&ofn) };
-			ImGui::GetIO().ClearInputKeys();
-			if (!isSuccess)
+			const std::filesystem::path filePath{ GetSaveFilePath() };
+			if (filePath.empty())
 				continue;
-			root.filePath = ofn.lpstrFile;
+			root.filePath = filePath;
 		}
 
 		Resource::SaveToFile(root.id, root.filePath);
@@ -759,20 +772,10 @@ Resource::ID Hierarchy::New(Resource::ID parentID)
 	if (parentID == Resource::InvalidID)
 	{
 		// 새로운 파일
-		std::wstring filePath(MAX_PATH, L'\0');
-		OPENFILENAME ofn{};
-		ofn.lStructSize = sizeof(ofn);
-		ofn.lpstrFilter = L"Data Files (*.dat)\0*.dat\0";
-		ofn.lpstrFile = filePath.data();
-		ofn.nMaxFile = MAX_PATH;
-		ofn.Flags = OFN_OVERWRITEPROMPT | OFN_EXPLORER;
-		ofn.lpstrDefExt = L"dat";
-		const BOOL isSuccess{ ::GetSaveFileName(&ofn) };
-		ImGui::GetIO().ClearInputKeys();
-		if (!isSuccess)
+		std::wstring filePath{ GetSaveFilePath() };
+		if (filePath.empty())
 			return Resource::InvalidID;
 
-		std::ranges::replace(filePath, std::filesystem::path::preferred_separator, Stringtable::DataPathSeperator.front());
 		std::wstring name{ filePath.substr(filePath.rfind(Stringtable::DataPathSeperator) + 1) };
 		id = Resource::New(name);
 		m_roots.emplace_back(id, filePath);
