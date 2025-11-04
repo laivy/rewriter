@@ -89,5 +89,4 @@ namespace Resource
 
 	//RESOURCE_API void Unload(const ID id);
 	RESOURCE_API bool SaveToFile(const ID id, const std::filesystem::path& path);
-	RESOURCE_API ID LoadFromFile(const std::filesystem::path& filePath, const std::wstring& subPath);
 }

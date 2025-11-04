@@ -89,13 +89,13 @@ namespace Resource
 		}
 
 		bool SaveToFile(ID id, const std::filesystem::path& path) const;
-		ID LoadFromFile(const std::filesystem::path& filePath, const std::wstring& subPath);
 
 	private:
 		void OnInitialize(const Initializer& initializer);
 		void OnUninitialize();
 
 		std::wstring NormalizePath(const std::wstring& path) const;
+		ID LoadFromFile(const std::filesystem::path& filePath, const std::wstring& subPath);
 
 	private:
 		std::filesystem::path m_mountPath;

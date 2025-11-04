@@ -27,7 +27,6 @@ namespace Resource
 		else
 		{
 			name = path.substr(pos + 1);
-
 			if (!path.ends_with(Stringtable::DataFileExtension))
 			{
 				std::wstring parentPath{ path.substr(0, pos) };
@@ -112,7 +111,29 @@ namespace Resource
 	{
 		if (m_pathToID.contains(path))
 			return m_pathToID.at(path);
-		return InvalidID;
+
+		const std::size_t pos{ path.rfind(Stringtable::DataFileExtension) };
+		if (pos == std::wstring::npos)
+			return InvalidID;
+
+		constexpr std::size_t ExtSize{ Stringtable::DataFileExtension.size() };
+		std::filesystem::path filePath;
+		std::wstring subPath;
+		if (pos + ExtSize == path.size())
+		{
+			filePath = path;
+		}
+		else
+		{
+			filePath = path.substr(0, pos + ExtSize);
+			subPath = path.substr(pos + ExtSize + 1);
+		}
+
+		// 파일이 로딩되어 있는데 위에서 찾지 못한 경우는 없는 것임
+		if (m_pathToID.contains(filePath))
+			return InvalidID;
+
+		return LoadFromFile(filePath, subPath);
 	}
 
 	ID Manager::Get(ID parentID, const std::wstring& path)
@@ -372,6 +393,34 @@ namespace Resource
 		return true;
 	}
 
+	void Manager::OnInitialize(const Initializer& initializer)
+	{
+		m_mountPath = initializer.mountPath;
+		m_loadSprite = initializer.loadSprite;
+		m_loadModel = initializer.loadModel;
+	}
+
+	void Manager::OnUninitialize()
+	{
+		m_mountPath.clear();
+		m_loadSprite = nullptr;
+		m_loadModel = nullptr;
+		m_properties.clear();
+		m_idToEntry.clear();
+		m_pathToID.clear();
+	}
+
+	std::wstring Manager::NormalizePath(const std::wstring& path) const
+	{
+		constexpr auto separator{ Stringtable::DataPathSeperator.front() };
+		if (std::filesystem::path::preferred_separator == separator)
+			return path;
+
+		std::wstring result{ path };
+		std::ranges::replace(result, std::filesystem::path::preferred_separator, separator);
+		return result;
+	}
+
 	ID Manager::LoadFromFile(const std::filesystem::path& filePath, const std::wstring& subPath)
 	{
 		std::ifstream file{ filePath, std::ios::binary };
@@ -496,33 +545,5 @@ namespace Resource
 
 		const auto path{ std::format(L"{}{}{}", normalizedFilePath, Stringtable::DataPathSeperator, subPath) };
 		return m_pathToID.at(path);
-	}
-
-	void Manager::OnInitialize(const Initializer& initializer)
-	{
-		m_mountPath = initializer.mountPath;
-		m_loadSprite = initializer.loadSprite;
-		m_loadModel = initializer.loadModel;
-	}
-
-	void Manager::OnUninitialize()
-	{
-		m_mountPath.clear();
-		m_loadSprite = nullptr;
-		m_loadModel = nullptr;
-		m_properties.clear();
-		m_idToEntry.clear();
-		m_pathToID.clear();
-	}
-
-	std::wstring Manager::NormalizePath(const std::wstring& path) const
-	{
-		constexpr auto separator{ Stringtable::DataPathSeperator.front() };
-		if (std::filesystem::path::preferred_separator == separator)
-			return path;
-
-		std::wstring result{ path };
-		std::ranges::replace(result, std::filesystem::path::preferred_separator, separator);
-		return result;
 	}
 }

@@ -373,11 +373,4 @@ namespace Resource
 			return manager->SaveToFile(id, path);
 		return false;
 	}
-
-	ID LoadFromFile(const std::filesystem::path& filePath, const std::wstring& subPath)
-	{
-		if (auto manager{ Manager::GetInstance() })
-			return manager->LoadFromFile(filePath, subPath);
-		return InvalidID;
-	}
 }

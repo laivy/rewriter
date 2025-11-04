@@ -94,7 +94,7 @@ void Desktop::SaveConfig()
 		return id;
 	};
 
-	Resource::ID root{ GetOrNew(Resource::InvalidID, L"Config") };
+	Resource::ID root{ GetOrNew(Resource::InvalidID, L"Editor/Config.lvy") };
 	Resource::ID theme{ GetOrNew(root, L"Theme") };
 	Resource::Set(theme, Util::ToWString(m_config.theme));
 	Resource::ID font{ GetOrNew(root, L"FontName") };

@@ -756,7 +756,7 @@ void Hierarchy::LoadFromFile(const std::filesystem::path& filePath)
 	if (std::ranges::contains(m_roots, filePath, &Root::filePath))
 		return;
 
-	const auto id{ Resource::LoadFromFile(filePath, L"") };
+	const auto id{ Resource::Get(filePath) };
 	if (id == Resource::InvalidID)
 	{
 		assert(false && "failed to load data file");
