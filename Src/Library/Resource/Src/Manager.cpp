@@ -167,11 +167,11 @@ namespace Resource
 		return m_idToEntry.at(parentID).children.at(index);
 	}
 
-	std::size_t Manager::GetChildCount(ID parentID) const
+	std::size_t Manager::Size(ID parentID) const
 	{
-		if (!m_idToEntry.contains(parentID))
-			return 0;
-		return m_idToEntry.at(parentID).children.size();
+		if (m_idToEntry.contains(parentID))
+			return m_idToEntry.at(parentID).children.size();
+		return 0;
 	}
 
 	void Manager::Move(ID targetID, ID parentID, std::optional<std::size_t> index)

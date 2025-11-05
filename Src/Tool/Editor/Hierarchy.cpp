@@ -596,6 +596,8 @@ void Hierarchy::TreeView()
 		};
 		if (IsSelected(id))
 			flag |= ImGuiTreeNodeFlags_Selected;
+		if (Resource::Size(id) == 0)
+			flag |= ImGuiTreeNodeFlags_Bullet;
 		ImGui::PushStyleVarY(ImGuiStyleVar_ItemSpacing, 0.0f);
 		const bool isTreeNodeOpened{ ImGui::TreeNodeEx(name.c_str(), flag) };
 		ImGui::PopStyleVar();

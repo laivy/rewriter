@@ -2,6 +2,7 @@
 #include "App.h"
 #include "Delegates.h"
 #include "Desktop.h"
+#include "Explorer.h"
 #include "Hierarchy.h"
 
 App::App() :
@@ -143,6 +144,7 @@ void App::InitApp()
 
 	// 싱글톤 초기화
 	Desktop::Instantiate();
+	Explorer::Instantiate();
 	Hierarchy::Instantiate();
 
 	// 타이머 초기화
@@ -154,6 +156,8 @@ void App::Update()
 	float deltaSeconds{ m_timer.Tick() };
 	if (auto desktop{ Desktop::GetInstance() })
 		desktop->Update(deltaSeconds);
+	if (auto explorer{ Explorer::GetInstance() })
+		explorer->Update(deltaSeconds);
 	if (auto hierarchy{ Hierarchy::GetInstance() })
 		hierarchy->Update(deltaSeconds);
 }
@@ -166,6 +170,8 @@ void App::Render()
 		{
 			if (auto desktop{ Desktop::GetInstance() })
 				desktop->Render();
+			if (auto explorer{ Explorer::GetInstance() })
+				explorer->Render();
 			if (auto hierarchy{ Hierarchy::GetInstance() })
 				hierarchy->Render();
 			ImGui::ShowDemoWindow();

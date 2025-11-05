@@ -2,23 +2,34 @@
 
 class Explorer : public TSingleton<Explorer>
 {
+private:
+	struct FileViewerSelectedItem
+	{
+		ImGuiID id;
+		ImRect rect;
+	};
+
 public:
 	Explorer();
 	~Explorer() = default;
 
-	void Update(float deltaTime);
+	void Update(float deltaSeconds);
 	void Render();
 
 private:
-	void RenderFileTree();
-	void RenderAddressBar();
-	void RenderFileViewer();
+	void FileTree();
+	void AddressBar();
+	void FileViewer();
+
+	std::vector<std::string> FileViewerSplitString(std::string_view string, const float width);
+	bool FileViewerIconButton(const std::shared_ptr<Graphics::ImGui::Texture>& icon, std::string_view label, std::wstring dragDropPayload = L"");
 
 	void SetPath(const std::filesystem::path& path);
 
 private:
-	static constexpr auto WINDOW_NAME{ "Explorer" };
+	static constexpr auto WindowName{ "Explorer" };
 
 	std::filesystem::path m_path;
-	bool m_scrollAddressBarToRight;
+	bool m_addressBarScrollToRight;
+	FileViewerSelectedItem m_fileViewerSelectedItem;
 };

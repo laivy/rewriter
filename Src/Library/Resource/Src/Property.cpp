@@ -1,3 +1,4 @@
+#include "Property.h"
 #include "Pch.h"
 #include "Manager.h"
 #include "Property.h"
@@ -17,7 +18,7 @@ namespace Resource
 		m_end{ 0 }
 	{
 		if (auto manager{ Manager::GetInstance() })
-			m_end = manager->GetChildCount(m_parentID);
+			m_end = manager->Size(m_parentID);
 	}
 
 	Iterator::Iterator(const std::wstring& path) :
@@ -169,7 +170,7 @@ namespace Resource
 		++last;
 
 		// 자식이 있으면 자식을 순회
-		if (auto manager{ Manager::GetInstance() }; manager && manager->GetChildCount(id) > 0)
+		if (auto manager{ Manager::GetInstance() }; manager && manager->Size(id) > 0)
 		{
 			m_stacks.emplace_back(id);
 			return *this;
@@ -239,6 +240,13 @@ namespace Resource
 		if (auto manager{ Manager::GetInstance() })
 			return manager->GetParent(id);
 		return InvalidID;
+	}
+
+	std::size_t Size(ID id)
+	{
+		if (auto manager{ Manager::GetInstance() })
+			return manager->Size(id);
+		return 0;
 	}
 
 	void Move(ID targetID, ID parentID, std::optional<std::size_t> index)

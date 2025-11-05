@@ -213,7 +213,7 @@ void Desktop::SetTheme(std::string_view theme)
 		colors[ImGuiCol_Header] = colors[ImGuiCol_ChildBg];
 		colors[ImGuiCol_HeaderHovered] = ToRGBA(0xFF353941);
 		colors[ImGuiCol_HeaderActive] = colors[ImGuiCol_FrameBgActive];
-		colors[ImGuiCol_Separator] = colors[ImGuiCol_WindowBg];
+		colors[ImGuiCol_Separator] = colors[ImGuiCol_FrameBgActive];
 		colors[ImGuiCol_SeparatorHovered] = ToRGBA(0xFF3E4452);
 		colors[ImGuiCol_SeparatorActive] = colors[ImGuiCol_SeparatorHovered];
 		colors[ImGuiCol_ResizeGrip] = colors[ImGuiCol_Separator];

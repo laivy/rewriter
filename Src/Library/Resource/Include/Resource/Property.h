@@ -69,6 +69,7 @@ namespace Resource
 	RESOURCE_API ID Get(const std::wstring& path);
 	RESOURCE_API ID Get(ID parentID, const std::wstring& path);
 	RESOURCE_API ID GetParent(ID id);
+	RESOURCE_API std::size_t Size(ID id);
 	RESOURCE_API void Move(ID targetID, ID parentID, std::optional<std::size_t> index = std::nullopt);
 
 	RESOURCE_API bool SetName(ID id, const std::wstring& name);

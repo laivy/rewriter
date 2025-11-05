@@ -5,132 +5,11 @@
 namespace
 {
 	// 파일, 폴더 이름 텍스트 최대 줄 수
-	constexpr size_t LineMax{ 3 };
-
-	std::vector<std::string> SplitString(std::string_view string, const float width)
-	{
-		std::vector<std::string> lines;
-		size_t i{ 1 };
-		while (!string.empty())
-		{
-			if (ImGui::CalcTextSize(string.data(), string.data() + i).x > width)
-			{
-				std::string_view line{ string.substr(0, i - 1) };
-				lines.emplace_back(line);
-				string = string.substr(i - 1);
-				i = 1;
-
-				if (lines.size() >= LineMax - 1)
-				{
-					// 남은 문자열의 길이가 길이 제한에 걸리지 않으면 줄 추가하고 끝
-					if (ImGui::CalcTextSize(string.data(), string.data() + string.size()).x <= width)
-					{
-						lines.emplace_back(string);
-						return lines;
-					}
-
-					// 말줄임표를 표시할 수 있을만큼 문자열 뒷부분을 자르고 줄 추가
-					const ImVec2 ellipsisTextSize{ ImGui::CalcTextSize("...") };
-					size_t j{ string.size() };
-					while (true)
-					{
-						if (ImGui::CalcTextSize(string.data(), string.data() + j).x + ellipsisTextSize.x <= width)
-						{
-							std::string ellipsized{ string.substr(0, j) };
-							ellipsized += "...";
-							lines.emplace_back(std::move(ellipsized));
-							break;
-						}
-						if (j == 0)
-						{
-							break;
-						}
-						--j;
-					}
-					return lines;
-				}
-				continue;
-			}
-			if (i == string.size())
-			{
-				lines.emplace_back(string);
-				break;
-			}
-			++i;
-		}
-		return lines;
-	}
-
-	bool IconButton(const std::shared_ptr<Graphics::ImGui::Texture>& icon, std::string_view label)
-	{
-		// wrapWidth를 기준으로 줄로 나눔
-		constexpr float wrapWidth{ 80.0f };
-		const std::vector<std::string> lines{ SplitString(label, wrapWidth) };
-
-		// 너비는 고정, 높이는 가변
-		constexpr float itemWidth{ 100.0f };
-		constexpr ImVec2 iconSize{ 60.0f, 60.0f };
-		const ImVec2 itemSpacing{ ImGui::GetStyle().ItemSpacing };
-		const float fontHeight{ ImGui::GetFontSize() };
-		const ImVec2 itemSize{ itemWidth, iconSize.y + itemSpacing.y * (LineMax + 1) + fontHeight * LineMax };
-
-		// 줄바꿈
-		if (ImGui::GetContentRegionMax().x < ImGui::GetCursorPosX() + itemSpacing.x + itemSize.x)
-			ImGui::Spacing();
-
-		// 선택된 아이템 하이라이트
-		static ImGuiID selectedItemID{ 0 };
-		if (selectedItemID == ImGui::GetID(label.data()))
-		{
-			const ImVec2 startCursorScreenPos{ ImGui::GetCursorScreenPos() };
-			const ImVec2 size{ itemWidth, iconSize.y + itemSpacing.y * (lines.size() + 1) + fontHeight * lines.size() };
-			const ImVec2 lt{ startCursorScreenPos };
-			const ImVec2 rb{ startCursorScreenPos.x + size.x, startCursorScreenPos.y + size.y };
-			ImDrawList* drawList{ ImGui::GetWindowDrawList() };
-			drawList->AddRectFilled(lt, rb, IM_COL32(80, 80, 80, 255));
-			drawList->AddRect(lt, rb, IM_COL32(195, 195, 195, 255));
-		}
-
-		ImGui::BeginGroup();
-
-		// 아이콘
-		const ImVec2 startCursorPos{ ImGui::GetCursorPos() };
-		ImGui::SetCursorPosX(startCursorPos.x + (itemWidth - iconSize.x) / 2.0f);
-		ImGui::SetCursorPosY(ImGui::GetCursorPosY() + itemSpacing.y);
-		Graphics::ImGui::Image(icon, iconSize);
-		ImGui::SetCursorPosY(ImGui::GetCursorPosY() - itemSpacing.y);
-
-		// 파일 또는 폴더 이름
-		for (const auto& line : lines)
-		{
-			ImVec2 textSize{ ImGui::CalcTextSize(line.data(), line.data() + line.size()) };
-			ImGui::SetCursorPosX(startCursorPos.x + (itemWidth - textSize.x) / 2.0f);
-			ImGui::TextUnformatted(line.data(), line.data() + line.size());
-		}
-		ImGui::EndGroup();
-
-		// 전체를 덮는 투명 버튼
-		bool isClicked{ false };
-		ImGui::SetCursorPos(startCursorPos);
-		if (ImGui::InvisibleButton(label.data(), itemSize))
-		{
-			ImGuiID itemID{ ImGui::GetItemID() };
-			if (selectedItemID == itemID)
-			{
-				selectedItemID = 0;
-				isClicked = true;
-			}
-			else
-			{
-				selectedItemID = itemID;
-			}
-		}
-		return isClicked;
-	}
+	constexpr std::size_t FileViewerTextLineMax{ 3 };
 
 	// ImGui::TreeNodeBehavior 함수 기반
 	// <펼침 버튼이 눌렸는지, 이름 부분이 눌렸는지>
-	std::pair<bool, bool> IconTreeNode(const std::shared_ptr<Graphics::ImGui::Texture>& icon, std::string_view label, ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_None)
+	std::pair<bool, bool> IconTreeNode(const std::shared_ptr<Graphics::ImGui::Texture>& icon, const ImVec2& icon_size, std::string_view label, ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_None)
 	{
 		ImGuiID id = ImGui::GetID(label.data());
 
@@ -144,7 +23,6 @@ namespace
 		const ImVec2 padding = (display_frame || (flags & ImGuiTreeNodeFlags_FramePadding)) ? style.FramePadding : ImVec2(style.FramePadding.x, ImMin(window->DC.CurrLineTextBaseOffset, style.FramePadding.y));
 		const ImVec2 label_size = ImGui::CalcTextSize(label.data());
 
-		constexpr ImVec2 icon_size{ 16.0f, 16.0f };
 		const float text_offset_x = g.FontSize + (display_frame ? padding.x * 3 : padding.x * 2) + (icon ? icon_size.x + padding.x : 0.0f); // Collapser arrow width + Spacing + icon
 		const float text_offset_y = ImMax(padding.y, window->DC.CurrLineTextBaseOffset); // Latch before ItemSize changes it
 		const float text_width = g.FontSize + (label_size.x > 0.0f ? label_size.x + padding.x * 2 : 0.0f) + (icon ? icon_size.x + padding.x * 2 : 0.0f); // Include collapser and icon
@@ -298,7 +176,7 @@ namespace
 			{
 				//if ((flags & ImGuiTreeNodeFlags_OpenOnMask_) == 0 || (g.NavActivateId == id && !is_multi_select))
 				//	toggled = true; // Single click
-				//if (flags & ImGuiTreeNodeFlags_OpenOnArrow)
+				if (flags & ImGuiTreeNodeFlags_OpenOnArrow)
 					toggled |= is_mouse_x_over_arrow && !g.NavHighlightItemUnderNav; // Lightweight equivalent of IsMouseHoveringRect() since ButtonBehavior() already did the job
 				//if ((flags & ImGuiTreeNodeFlags_OpenOnDoubleClick) && g.IO.MouseClickedCount[0] == 2)
 				//	toggled = true; // Double click
@@ -388,8 +266,8 @@ namespace
 					ImGui::RenderArrow(window->DrawList, ImVec2(text_pos.x - text_offset_x + padding.x, text_pos.y + g.FontSize * 0.15f), text_col, is_open ? ((flags & ImGuiTreeNodeFlags_UpsideDownArrow) ? ImGuiDir_Up : ImGuiDir_Down) : ImGuiDir_Right, 0.70f);
 				if (icon)
 				{
-					ImVec2 lt{ text_pos.x - padding.x - icon_size.x, text_pos.y };
-					ImVec2 rb{ text_pos.x - padding.x, text_pos.y + icon_size.y };
+					ImVec2 lt{ text_pos.x - padding.x - icon_size.x, text_pos.y + (label_size.y - icon_size.y) / 2.0f };
+					ImVec2 rb{ text_pos.x - padding.x, lt.y + icon_size.y };
 					ImDrawList* drawList{ ImGui::GetWindowDrawList() };
 					drawList->AddImage(Graphics::ImGui::GetTextureRef(icon), lt, rb);
 				}
@@ -422,30 +300,30 @@ namespace
 }
 
 Explorer::Explorer() :
-	m_scrollAddressBarToRight{ false }
+	m_addressBarScrollToRight{ false },
+	m_fileViewerSelectedItem{}
 {
 	SetPath(std::filesystem::current_path());
 }
 
-void Explorer::Update(float deltaTime)
+void Explorer::Update(float deltaSeconds)
 {
 }
 
 void Explorer::Render()
 {
-	if (ImGui::Begin(WINDOW_NAME))
+	if (ImGui::Begin(WindowName))
 	{
-		RenderFileTree();
+		FileTree();
 		ImGui::BeginGroup();
-		RenderAddressBar();
-		ImGui::Separator();
-		RenderFileViewer();
+		AddressBar();
+		FileViewer();
 		ImGui::EndGroup();
 	}
 	ImGui::End();
 }
 
-void Explorer::RenderFileTree()
+void Explorer::FileTree()
 {
 	if (!ImGui::BeginChild("FileTree", ImVec2{ 175.0f, 0.0f }, ImGuiChildFlags_ResizeX, ImGuiWindowFlags_HorizontalScrollbar))
 	{
@@ -475,72 +353,59 @@ void Explorer::RenderFileTree()
 	for (int i{ 0 }; const auto& drive : drives)
 	{
 		ImGui::PushID(i++);
-		std::function<void(const std::filesystem::path&)> recrusive = [this, &recrusive](const std::filesystem::path& path)
+		ImGui::PushStyleVar(ImGuiStyleVar_IndentSpacing, ImGui::GetFontSize() / 2.0f);
+		[this](this auto self, const std::filesystem::path& path) -> void
 		{
-			static const auto folderIcon{ Graphics::ImGui::LoadTexture(L"Engine/Icon/Folder.png") };
-			static const auto fileIcon{ Graphics::ImGui::LoadTexture(L"Engine/Icon/File.png") };
+			static const auto FolderIcon{ Graphics::ImGui::LoadTexture(L"Editor/Icon/Folder.png") };
 
-			const bool isDirectory{ std::filesystem::is_directory(path) };
-			const auto icon{ isDirectory ? folderIcon : fileIcon };
-			const std::string label{ (path == path.root_path()) ? Util::u8stou8s(path.root_name().u8string()) : Util::u8stou8s(path.filename().u8string()) };
-			const ImGuiTreeNodeFlags flags{ ImGuiTreeNodeFlags_SpanFullWidth | (isDirectory ? ImGuiTreeNodeFlags_None : ImGuiTreeNodeFlags_Leaf) };
-
-			const auto [isOpened, isPressed] { IconTreeNode(icon, label, flags) };
-			if (isDirectory)
+			bool hasSubFolder{ false };
+			for (const auto& entry : std::filesystem::directory_iterator{ path, std::filesystem::directory_options::skip_permission_denied })
 			{
-				if (isOpened)
+				if (entry.is_directory())
 				{
-					for (const auto& entry : std::filesystem::directory_iterator{ path, std::filesystem::directory_options::skip_permission_denied })
-					{
-						if (entry.is_directory())
-							recrusive(entry);
-					}
-					for (const auto& entry : std::filesystem::directory_iterator{ path, std::filesystem::directory_options::skip_permission_denied })
-					{
-						if (entry.is_regular_file())
-							recrusive(entry);
-					}
-					ImGui::TreePop();
-				}
-				if (isPressed)
-				{
-					SetPath(path);
+					hasSubFolder = true;
+					break;
 				}
 			}
-			else
+
+			const std::u8string label{ path == path.root_path() ? path.root_name().u8string() : path.filename().u8string() };
+			ImGuiTreeNodeFlags flags{ ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_SpanFullWidth };
+			if (!hasSubFolder)
+				flags |= ImGuiTreeNodeFlags_Leaf;
+			const auto [isOpened, isClicked] { IconTreeNode(FolderIcon, ImVec2{ ImGui::GetFontSize(), ImGui::GetFontSize() }, reinterpret_cast<const char*>(label.c_str()), flags) };
+			if (isOpened)
 			{
-				if (isOpened)
+				for (const auto& entry : std::filesystem::directory_iterator{ path, std::filesystem::directory_options::skip_permission_denied })
 				{
-					ImGui::TreePop();
+					if (entry.is_directory())
+						self(entry);
 				}
-				if (isPressed)
-				{
-					auto log{ std::format(L"File: {}\n", path.wstring()) };
-					::OutputDebugString(log.c_str());
-				}
+				ImGui::TreePop();
 			}
-		};
-		recrusive(drive);
+			if (isClicked)
+			{
+				SetPath(path);
+			}
+		}(drive);
+		ImGui::PopStyleVar();
 		ImGui::PopID();
 	}
 
 	ImGui::EndChild();
 	ImGui::SameLine();
-	ImGui::SeparatorEx(ImGuiSeparatorFlags_Vertical);
-	ImGui::SameLine();
 }
 
-void Explorer::RenderAddressBar()
+void Explorer::AddressBar()
 {
-	if (!ImGui::BeginChild("AddressBar", ImVec2{ 0.0f, 23.0f }))
+	if (!ImGui::BeginChild("AddressBar", ImVec2{ 0.0f, ImGui::GetFrameHeight() }))
 	{
 		ImGui::EndChild();
 		return;
 	}
 
 	// 디스크 드라이브 콤보 박스
-	ImGui::SetNextItemWidth(50.0f);
-	if (ImGui::BeginCombo("##DiskDrive", reinterpret_cast<const char*>(m_path.root_name().u8string().c_str())))
+	ImGui::SetNextItemWidth(ImGui::GetFrameHeight() + ImGui::CalcTextSize("AAA").x);
+	if (ImGui::BeginCombo("##DiskDrive", reinterpret_cast<const char*>(m_path.root_name().string().c_str())))
 	{
 		DWORD bufferSize{ ::GetLogicalDriveStrings(0, nullptr) };
 		std::wstring buffer(bufferSize, L'\0');
@@ -563,7 +428,7 @@ void Explorer::RenderAddressBar()
 
 		for (const auto& drive : drives)
 		{
-			if (ImGui::Selectable(reinterpret_cast<const char*>(drive.root_name().u8string().c_str())))
+			if (ImGui::Selectable(reinterpret_cast<const char*>(drive.root_name().string().c_str())))
 			{
 				SetPath(drive);
 				break;
@@ -572,47 +437,45 @@ void Explorer::RenderAddressBar()
 		ImGui::EndCombo();
 	}
 
-	ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2{ 3.0f, ImGui::GetStyle().ItemSpacing.y });
-	std::filesystem::path newPath;
-	std::filesystem::path temp{ m_path.root_path() };
-	for (const auto& entry : m_path)
+	ImGui::PushStyleVarX(ImGuiStyleVar_ItemSpacing, 3.0f);
+	std::filesystem::path path;
+	std::filesystem::path currentPath;
+	for (std::size_t i{ 0 }; const auto& entry : m_path)
 	{
+		currentPath /= entry;
 		if (entry.has_root_name() || entry.has_root_directory())
 			continue;
 
-		ImGui::PushID(reinterpret_cast<const char*>(temp.u8string().c_str()));
-		temp /= entry;
+		ImGui::PushID(i++);
 
+		// 폴더 이름 버튼
 		ImGui::SameLine();
-		if (ImGui::Button(entry))
+		if (ImGui::Button(reinterpret_cast<const char*>(entry.u8string().c_str())))
 		{
-			newPath = temp;
+			path = currentPath;
 			ImGui::PopID();
 			break;
 		}
 
 		// 하위 폴더가 있으면 ">" 버튼 표시
-		bool hasSubfolder{ false };
-		std::vector<std::filesystem::path> subfolders;
-		for (const auto& e : std::filesystem::directory_iterator{ temp, std::filesystem::directory_options::skip_permission_denied })
+		std::vector<std::filesystem::path> subFolders;
+		for (const auto& subPath : std::filesystem::directory_iterator{ currentPath, std::filesystem::directory_options::skip_permission_denied })
 		{
-			if (!e.is_directory())
-				continue;
-			hasSubfolder = true;
-			subfolders.push_back(e);
+			if (subPath.is_directory())
+				subFolders.push_back(subPath);
 		}
-		if (hasSubfolder)
+		if (!subFolders.empty())
 		{
 			ImGui::SameLine();
 			if (ImGui::Button(">"))
 				ImGui::OpenPopup("FolderList");
 			if (ImGui::BeginPopup("FolderList"))
 			{
-				for (const auto& e : subfolders)
+				for (const auto& subFolder : subFolders)
 				{
-					if (ImGui::Selectable(e.filename().u8string()))
+					if (ImGui::Selectable(reinterpret_cast<const char*>(subFolder.filename().u8string().c_str())))
 					{
-						newPath = e;
+						path = subFolder;
 						break;
 					}
 				}
@@ -623,36 +486,50 @@ void Explorer::RenderAddressBar()
 	}
 	ImGui::PopStyleVar();
 
-	if (!newPath.empty())
-		SetPath(newPath);
+	if (!path.empty())
+		SetPath(path);
 
 	// 경로가 바뀌지 않았을 때 갱신해야 제대로 작동함
-	if (newPath.empty() && m_scrollAddressBarToRight)
+	if (path.empty() && m_addressBarScrollToRight)
 	{
+		m_addressBarScrollToRight = false;
 		ImGui::SetScrollHereX(1.0f);
-		m_scrollAddressBarToRight = false;
 	}
 	ImGui::EndChild();
 }
 
-void Explorer::RenderFileViewer()
+void Explorer::FileViewer()
 {
-	if (!ImGui::BeginChild("FILE_VIEWER", ImVec2{}, false, ImGuiWindowFlags_HorizontalScrollbar))
+	if (!ImGui::BeginChild("FileViewer", ImVec2{}, false, ImGuiWindowFlags_HorizontalScrollbar))
 	{
 		ImGui::EndChild();
 		return;
 	}
 
+	if (ImGui::IsWindowHovered() && ImGui::IsMouseClicked(ImGuiMouseButton_Left))
+	{
+		auto window{ ImGui::GetCurrentWindow() };
+		const ImVec2 screenMousePos{ ImGui::GetMousePos() };
+		const ImVec2 localMousePos{ screenMousePos - window->Pos - window->Scroll };
+		if (!m_fileViewerSelectedItem.rect.Contains(localMousePos))
+			m_fileViewerSelectedItem = {};
+	}
+
+	// 상단 여백
+	const float itemSpacingY{ ImGui::GetStyle().ItemSpacing.y };
+	ImGui::PushStyleVarY(ImGuiStyleVar_ItemSpacing, 0.0f);
+	ImGui::Dummy(ImVec2{ 0.0f, itemSpacingY });
+	ImGui::PopStyleVar();
+
 	// 폴더
-	ImGui::Dummy({ 0.0f, 1.0f });
 	for (const auto& entry : std::filesystem::directory_iterator{ m_path, std::filesystem::directory_options::skip_permission_denied })
 	{
 		if (!entry.is_directory())
 			continue;
 
 		static const auto icon{ Graphics::ImGui::LoadTexture(L"Editor/Icon/Folder.png") };
-		std::wstring name{ entry.path().filename() };
-		if (IconButton(icon, Util::wstou8s(name)))
+		std::wstring name{ entry.path().filename().wstring() };
+		if (FileViewerIconButton(icon, Util::ToU8String(name)))
 			SetPath(std::filesystem::canonical(m_path / name));
 		ImGui::SameLine();
 	}
@@ -664,23 +541,199 @@ void Explorer::RenderFileViewer()
 			continue;
 
 		static const auto icon{ Graphics::ImGui::LoadTexture(L"Editor/Icon/File.png") };
-		std::string name{ Util::u8stou8s(entry.path().filename().u8string()) };
-		IconButton(icon, name);
-		if (ImGui::BeginDragDropSource())
-		{
-			std::wstring fullPath{ entry.path() };
-			fullPath.push_back(L'\0');
-			ImGui::SetDragDropPayload("EXPLORER/OPENFILE", fullPath.data(), fullPath.size() * sizeof(std::wstring::value_type));
-			ImGui::Text(name.c_str());
-			ImGui::EndDragDropSource();
-		}
+		std::u8string name{ entry.path().filename().u8string() };
+		FileViewerIconButton(icon, reinterpret_cast<const char*>(name.c_str()), entry.path().wstring());
 		ImGui::SameLine();
 	}
+	ImGui::Spacing();
+
+	// 하단 여백
+	ImGui::PushStyleVarY(ImGuiStyleVar_ItemSpacing, 0.0f);
+	ImGui::Dummy(ImVec2{ itemSpacingY, 0.0f });
+	ImGui::PopStyleVar();
 	ImGui::EndChild();
+}
+
+std::vector<std::string> Explorer::FileViewerSplitString(std::string_view string, const float width)
+{
+	auto GetPrevCharIndex = [](std::string_view s, std::size_t i)
+	{
+		if (i == 0)
+			return i;
+
+		std::size_t j{ i - 1 };
+		while (j > 0 && (static_cast<unsigned char>(s[j]) & 0xC0) == 0x80)
+			--j;
+		return j;
+	};
+	auto GetNextCharIndex = [](std::string_view s, std::size_t i)
+	{
+		unsigned char c{ static_cast<unsigned char>(s[i]) };
+		if (c < 0x80)
+			return i + 1;
+		else if ((c & 0xE0) == 0xC0)
+			return i + 2;
+		else if ((c & 0xF0) == 0xE0)
+			return i + 3;
+		else if ((c & 0xF8) == 0xF0)
+			return i + 4;
+		return i + 1;
+	};
+
+	std::vector<std::string> lines;
+	std::size_t i{ GetNextCharIndex(string, 0) };
+	while (!string.empty())
+	{
+		if (width < ImGui::CalcTextSize(string.data(), string.data() + i).x)
+		{
+			// 줄 바꿈
+			std::size_t prev{ GetPrevCharIndex(string, i) };
+			std::string_view line{ string.substr(0, prev) };
+			lines.emplace_back(line);
+
+			// 남은 문자열 설정
+			string = string.substr(prev);
+			i = 0;
+
+			if (FileViewerTextLineMax - 1 <= lines.size())
+			{
+				// 남은 문자열의 길이가 길이 제한에 걸리지 않으면 줄 추가하고 끝
+				if (width >= ImGui::CalcTextSize(string.data(), string.data() + string.size()).x)
+				{
+					lines.emplace_back(string);
+					return lines;
+				}
+
+				// 말줄임표를 표시할 수 있을만큼 문자열 뒷부분을 자르고 줄 추가
+				const ImVec2 ellipsisTextSize{ ImGui::CalcTextSize("...") };
+				std::size_t j{ GetPrevCharIndex(string, string.size()) };
+				while (true)
+				{
+					if (width >= ImGui::CalcTextSize(string.data(), string.data() + j).x + ellipsisTextSize.x)
+					{
+						std::string ellipsized{ string.substr(0, j) };
+						ellipsized += "...";
+						lines.emplace_back(std::move(ellipsized));
+						break;
+					}
+					if (j == 0)
+						break;
+					j = GetPrevCharIndex(string, j);
+				}
+				return lines;
+			}
+			continue;
+		}
+		if (i == string.size())
+		{
+			lines.emplace_back(string);
+			break;
+		}
+		i = GetNextCharIndex(string, i);
+	}
+	return lines;
+}
+
+bool Explorer::FileViewerIconButton(const std::shared_ptr<Graphics::ImGui::Texture>& icon, std::string_view label, std::wstring dragDropPayload)
+{
+	constexpr float ItemWidth{ 100.0f };
+	constexpr ImVec2 IconSize{ 64.0f, 64.0f };
+	constexpr float TextSpacingY{ -3.0f };
+
+	const float fontSize{ ImGui::GetFontSize() };
+	const ImVec2 itemSpacing{ ImGui::GetStyle().ItemSpacing };
+	const ImVec2 itemSize
+	{
+		ItemWidth,
+		itemSpacing.y +
+		IconSize.y +
+		itemSpacing.y +
+		fontSize * FileViewerTextLineMax +
+		TextSpacingY * (FileViewerTextLineMax - 1) +
+		itemSpacing.y
+	};
+
+	// 줄바꿈
+	if (ImGui::GetCursorPosX() + ItemWidth + itemSpacing.x > ImGui::GetContentRegionMax().x)
+		ImGui::Spacing();
+
+	ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2{ 0.0f, 0.0f });
+
+	// 줄의 첫번째인 경우 외부 좌측 여백 추가
+	const float cursorX{ ImGui::GetCursorPosX() };
+	if (cursorX == 0.0f)
+	{
+		ImGui::Dummy(ImVec2{ itemSpacing.x, itemSize.y });
+		ImGui::SameLine();
+	}
+
+	// 선택된 경우 하이라이트
+	if (m_fileViewerSelectedItem.id == ImGui::GetID(label.data()))
+	{
+		const ImVec2 cursor{ ImGui::GetCursorScreenPos() };
+		const ImVec2 lt{ cursor };
+		const ImVec2 rb{ cursor + m_fileViewerSelectedItem.rect.GetSize() };
+		ImDrawList* drawList{ ImGui::GetWindowDrawList() };
+		drawList->AddRectFilled(lt, rb, IM_COL32(80, 80, 80, 128));
+		drawList->AddRect(lt, rb, ImGui::ColorConvertFloat4ToU32(ImGui::GetStyle().Colors[ImGuiCol_Text]));
+	}
+
+	const ImVec2 startCursorPos{ ImGui::GetCursorPos() };
+	ImVec2 endCursorPos{};
+	ImGui::BeginGroup();
+	{
+		// 내부 상단 여백
+		ImGui::Dummy(ImVec2{ itemSize.x, itemSpacing.y });
+
+		// 아이콘
+		ImGui::Dummy(ImVec2{ (ItemWidth - IconSize.x) / 2.0f, IconSize.y });
+		ImGui::SameLine();
+		Graphics::ImGui::Image(icon, IconSize);
+		ImGui::Spacing();
+
+		// 폴더 또는 파일 이름
+		constexpr float TextWrapWidth{ ItemWidth * 0.9f };
+		for (const auto& line : FileViewerSplitString(label, TextWrapWidth))
+		{
+			const ImVec2 textSize{ ImGui::CalcTextSize(line.data(), line.data() + line.size()) };
+			ImGui::Dummy(ImVec2{ (ItemWidth - textSize.x) / 2.0f, textSize.y });
+			ImGui::SameLine();
+			ImGui::TextUnformatted(line.data(), line.data() + line.size());
+		}
+
+		endCursorPos.x = startCursorPos.x + ItemWidth;
+		endCursorPos.y = ImGui::GetCursorPosY();
+	}
+	ImGui::EndGroup();
+
+	// 버튼
+	bool pressed{ false };
+	ImGui::SetCursorPos(startCursorPos);
+	if (ImGui::InvisibleButton(label.data(), endCursorPos - startCursorPos))
+	{
+		ImGuiID itemID{ ImGui::GetItemID() };
+		if (m_fileViewerSelectedItem.id == itemID)
+		{
+			pressed = true;
+			m_fileViewerSelectedItem.id = 0;
+		}
+		else
+		{
+			m_fileViewerSelectedItem.id = itemID;
+			m_fileViewerSelectedItem.rect = ImRect{ startCursorPos, endCursorPos };
+		}
+	}
+
+	// 아이템 크기 차지
+	ImGui::SetCursorPos(startCursorPos);
+	ImGui::Dummy(itemSize);
+
+	ImGui::PopStyleVar();
+	return pressed;
 }
 
 void Explorer::SetPath(const std::filesystem::path& path)
 {
 	m_path = path;
-	m_scrollAddressBarToRight = true;
+	m_addressBarScrollToRight = true;
 }

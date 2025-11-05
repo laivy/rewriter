@@ -9,7 +9,7 @@ set(HEADERS
 	# ${CMAKE_CURRENT_SOURCE_DIR}/Clipboard.h
 	${CMAKE_CURRENT_SOURCE_DIR}/Delegates.h
 	${CMAKE_CURRENT_SOURCE_DIR}/Desktop.h
-	# ${CMAKE_CURRENT_SOURCE_DIR}/Explorer.h
+	${CMAKE_CURRENT_SOURCE_DIR}/Explorer.h
 	# ${CMAKE_CURRENT_SOURCE_DIR}/FbxHandler.h
 	${CMAKE_CURRENT_SOURCE_DIR}/Hierarchy.h
 	# ${CMAKE_CURRENT_SOURCE_DIR}/Inspector.h
@@ -27,7 +27,7 @@ set(SOURCES
 	# ${CMAKE_CURRENT_SOURCE_DIR}/Clipboard.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/Delegates.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/Desktop.cpp
-	# ${CMAKE_CURRENT_SOURCE_DIR}/Explorer.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/Explorer.cpp
 	# ${CMAKE_CURRENT_SOURCE_DIR}/FbxHandler.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/Hierarchy.cpp
 	# ${CMAKE_CURRENT_SOURCE_DIR}/Inspector.cpp
