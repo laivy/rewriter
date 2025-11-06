@@ -6,7 +6,7 @@
 	},
 	"configurePresets": [
 		{
-			"name": "x64-base",
+			"name": "default",
 			"hidden": true,
 			"architecture": {
 				"value": "x64",
@@ -15,24 +15,32 @@
 			"binaryDir": "${sourceDir}/Build/${presetName}",
 			"installDir": "${sourceDir}/Install/${presetName}",
 			"cacheVariables": {
-				"TARGET_CATEGORY": "None"
+				"RWT_TARGET_CATEGORY": "None"
 			}
 		},
 		{
-			"name": "x64-debug-base",
-			"hidden": true,
-			"inherits": "x64-base",
+			"name": "tool",
+			"inherits": "default",
+			"displayName": "Tool",
 			"cacheVariables": {
-				"CMAKE_BUILD_TYPE": "Debug"
+				"RWT_TARGET_CATEGORY": "Tool"
 			}
-		},
+		}
+	],
+	"buildPresets": [
 		{
 			"name": "debug-tool",
-			"inherits": "x64-debug-base",
 			"displayName": "Tool x64 Debug",
-			"cacheVariables": {
-				"TARGET_CATEGORY": "Tool"
-			}
+			"configurePreset": "tool",
+			"targets": [ "Editor" ],
+			"configuration": "Debug"
+		},
+		{
+			"name": "release-tool",
+			"displayName": "Tool x64 Release",
+			"configurePreset": "tool",
+			"targets": [ "Editor" ],
+			"configuration": "Release"
 		}
 	]
 }

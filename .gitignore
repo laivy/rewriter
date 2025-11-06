@@ -443,4 +443,5 @@ Export.h
 
 # Rewriter
 Data/
+External/
 Src/Library/Graphics/Src/Shader/*.h

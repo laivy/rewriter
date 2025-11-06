@@ -8,7 +8,6 @@
 #include "PipelineState.h"
 #include "RenderTarget.h"
 #include "SwapChain.h"
-#include "DirectX/DDSTextureLoader12.h"
 
 namespace Graphics::D3D
 {

@@ -23,7 +23,6 @@
 using namespace std::chrono_literals;
 
 // Windows
-#define WIN32_LEAN_AND_MEAN
 #include <Windows.h>
 #include <windowsx.h>
 #if defined _CLIENT || defined _SERVER
@@ -45,13 +44,6 @@ EXTERN_C IMAGE_DOS_HEADER __ImageBase;
 
 #ifdef GetTextMetrics
 #undef GetTextMetrics
-#endif
-
-// Imgui
-#ifdef _IMGUI
-#include <Imgui/imgui.h>
-#include <Imgui/imgui_internal.h>
-#include <Imgui/imgui_stdlib.h>
 #endif
 
 // Project

@@ -5,10 +5,8 @@
 #include <wincodec.h>
 
 // DirectX
-#include <d3d12.h>
-#include <d3dcompiler.h>
+#include <directx/d3dx12.h> // 가장 먼저 포함해야 함
 #include <DirectXMath.h>
-#include <dwrite.h>
 #include <dwrite_3.h>
 #include <dxgi1_6.h>
 
@@ -21,14 +19,11 @@
 #include <dxgidebug.h>
 #endif
 
-#include <DirectX/d3dx12.h>
-#include <DirectX/WICTextureLoader12.h>
-
 // ImGui
 #ifdef _IMGUI
-#include <Imgui/imgui.h>
-#include <Imgui/imgui_impl_dx12.h>
-#include <Imgui/imgui_impl_win32.h>
+#include <imgui.h>
+#include <imgui_impl_dx12.h>
+#include <imgui_impl_win32.h>
 extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
 #endif
 
