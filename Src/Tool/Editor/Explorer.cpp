@@ -668,7 +668,8 @@ bool Explorer::FileViewerIconButton(const std::shared_ptr<Graphics::ImGui::Textu
 	}
 
 	// 선택된 경우 하이라이트
-	if (m_fileViewerSelectedItem.id == ImGui::GetID(label.data()))
+	const bool isSelectedItem{ m_fileViewerSelectedItem.id == ImGui::GetID(label.data()) };
+	if (isSelectedItem)
 	{
 		const ImVec2 cursor{ ImGui::GetCursorScreenPos() };
 		const ImVec2 lt{ cursor };
@@ -706,6 +707,10 @@ bool Explorer::FileViewerIconButton(const std::shared_ptr<Graphics::ImGui::Textu
 	}
 	ImGui::EndGroup();
 
+	// 하이라이트 영역 갱신
+	if (isSelectedItem)
+		m_fileViewerSelectedItem.rect = ImRect{ startCursorPos, endCursorPos };
+
 	// 버튼
 	bool pressed{ false };
 	ImGui::SetCursorPos(startCursorPos);
@@ -722,6 +727,13 @@ bool Explorer::FileViewerIconButton(const std::shared_ptr<Graphics::ImGui::Textu
 			m_fileViewerSelectedItem.id = itemID;
 			m_fileViewerSelectedItem.rect = ImRect{ startCursorPos, endCursorPos };
 		}
+	}
+	if (ImGui::BeginDragDropSource())
+	{
+		dragDropPayload.push_back(L'\0');
+		ImGui::SetDragDropPayload("EXPLORER/OPENFILE", dragDropPayload.data(), dragDropPayload.size() * sizeof(std::wstring::value_type));
+		ImGui::Text(label.data());
+		ImGui::EndDragDropSource();
 	}
 
 	// 아이템 크기 차지
