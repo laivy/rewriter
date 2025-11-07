@@ -17,8 +17,8 @@ jobs:
       - name: Setup MSVC
         uses: ilammy/msvc-dev-cmd@v1
 
-      - name: Configure CMake - debug-tool
-        run: cmake --preset debug-tool
+      - name: Configure CMake - tool
+        run: cmake --preset tool
 
       - name: Build - debug-tool
-        run: cmake --build Build/debug-tool
+        run: cmake --build --preset debug-tool
