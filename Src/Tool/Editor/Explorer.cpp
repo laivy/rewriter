@@ -636,7 +636,7 @@ std::vector<std::string> Explorer::FileViewerSplitString(std::string_view string
 
 bool Explorer::FileViewerIconButton(const std::shared_ptr<Graphics::ImGui::Texture>& icon, std::string_view label, std::wstring dragDropPayload)
 {
-	constexpr float ItemWidth{ 100.0f };
+	constexpr float ItemWidth{ 101.0f };
 	constexpr ImVec2 IconSize{ 64.0f, 64.0f };
 	constexpr float TextSpacingY{ -3.0f };
 
@@ -702,6 +702,7 @@ bool Explorer::FileViewerIconButton(const std::shared_ptr<Graphics::ImGui::Textu
 			ImGui::TextUnformatted(line.data(), line.data() + line.size());
 		}
 
+		ImGui::Dummy(ImVec2{ ItemWidth, itemSpacing.y });
 		endCursorPos.x = startCursorPos.x + ItemWidth;
 		endCursorPos.y = ImGui::GetCursorPosY();
 	}
