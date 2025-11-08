@@ -10,15 +10,13 @@ jobs:
     steps:
       - name: Check out repository
         uses: actions/checkout@v4
-
       - name: Setup CMake
         uses: lukka/get-cmake@latest
-
       - name: Setup MSVC
         uses: ilammy/msvc-dev-cmd@v1
-
       - name: Configure CMake - tool
         run: cmake --preset tool
-
-      - name: Build - debug-tool
-        run: cmake --build --preset debug-tool
+      - name: Build - tool-debug
+        run: cmake --build --preset tool-debug
+      - name: Build - tool-release
+        run: cmake --build --preset tool-release

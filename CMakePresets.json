@@ -29,17 +29,21 @@
 	],
 	"buildPresets": [
 		{
-			"name": "debug-tool",
+			"name": "tool-debug",
 			"displayName": "Tool x64 Debug",
 			"configurePreset": "tool",
-			"targets": [ "Editor" ],
+			"targets": [
+				"Editor"
+			],
 			"configuration": "Debug"
 		},
 		{
-			"name": "release-tool",
+			"name": "tool-release",
 			"displayName": "Tool x64 Release",
 			"configurePreset": "tool",
-			"targets": [ "Editor" ],
+			"targets": [
+				"Editor"
+			],
 			"configuration": "Release"
 		}
 	]
