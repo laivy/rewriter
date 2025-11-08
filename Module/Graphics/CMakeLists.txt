@@ -8,7 +8,7 @@ set(shaders
 	${CMAKE_CURRENT_SOURCE_DIR}/Src/Shader/Model.vs
 	${CMAKE_CURRENT_SOURCE_DIR}/Src/Shader/Model.ps
 )
-target_compile_shader(${target_name} shaders)
+target_compile_shader(${target_name} ${shaders})
 
 include(GenerateExportHeader)
 string(TOUPPER ${target_name} target_name_upper)

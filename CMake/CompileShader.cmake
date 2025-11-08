@@ -1,6 +1,6 @@
 
-# - TARGET: 타겟 이름
-# - ...: 셰이더 파일들
+# <target_name>: 타겟 이름
+# <shader>...: 셰이더 파일들
 function(target_compile_shader target_name)
     include(FetchContent)
     FetchContent_Populate(
@@ -12,7 +12,7 @@ function(target_compile_shader target_name)
     )
 
     set(shader_version 6_0)
-    foreach(shader IN LISTS ${ARGV})
+    foreach(shader IN LISTS ARGN)
         # 확장자로 셰이더 타입 구분
         if(shader MATCHES ".vs$")
             set(shader_profile vs_${shader_version})

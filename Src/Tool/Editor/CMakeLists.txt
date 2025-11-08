@@ -96,11 +96,8 @@ source_group("Gen" FILES
 	"${CMAKE_CURRENT_BINARY_DIR}/CMakeFiles/${target_name}.dir/cmake_pch.hxx"
 )
 
-# include(${RWT_CMAKE_DIR}/Module.cmake)
-# target_add_modules(${target_name} "Graphics" "Resource")
-target_link_libraries(${target_name} PRIVATE "Graphics" "Resource")
-source_group("Module/Graphics" "${RWT_MODULE_DIR}/Graphics/Include/Graphics/.*\\.h$")
-source_group("Module/Resource" "${RWT_MODULE_DIR}/Resource/Include/Resource/.*\\.h$")
+include(${RWT_CMAKE_DIR}/Module.cmake)
+target_link_modules(${target_name} "Graphics" "Resource")
 
 add_custom_command(
 	TARGET ${target_name} POST_BUILD
