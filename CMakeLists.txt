@@ -5,13 +5,13 @@ project(${project_name})
 
 set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
-
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/Bin/${RWT_TARGET_CATEGORY}/$<CONFIG>)
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/Bin/${RWT_TARGET_CATEGORY}/$<CONFIG>)
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/Bin/${RWT_TARGET_CATEGORY}/$<CONFIG>)
 
 set(RWT_CMAKE_DIR ${CMAKE_SOURCE_DIR}/CMake)
 set(RWT_EXTERNAL_DIR ${CMAKE_SOURCE_DIR}/External)
+set(RWT_MODULE_DIR ${CMAKE_SOURCE_DIR}/Module)
 set(RWT_SOURCE_DIR ${CMAKE_SOURCE_DIR}/Src)
 set(RWT_COMMON_SOURCE_DIR ${RWT_SOURCE_DIR}/Common)
 
@@ -40,7 +40,7 @@ elseif(${RWT_TARGET_CATEGORY} STREQUAL "Server")
 elseif(${RWT_TARGET_CATEGORY} STREQUAL "Tool")
 	add_compile_definitions(_TOOL)
 	add_compile_definitions(_DIRECT2D _IMGUI)
-	add_subdirectory(Src/Library)
+	add_subdirectory(Module EXCLUDE_FROM_ALL)
 	add_subdirectory(Src/Tool)
 else()
 	message(FATAL_ERROR "invalid target category: ${RWT_TARGET_CATEGORY}")

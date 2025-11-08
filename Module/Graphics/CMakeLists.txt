@@ -143,6 +143,6 @@ target_include_directories(${target_name}
 )
 
 target_link_libraries(${target_name}
-	PRIVATE "d2d1" "d3d11" "d3d12" "d3dcompiler" "dwrite" "dxgi" "dxguid" "Resource"
+	PRIVATE "d2d1" "d3d11" "d3d12" "dwrite" "dxgi" "dxguid" "Resource"
 )
 source_group("Library/Resource" "${RWT_SOURCE_DIR}/Library/Resource/Include/Resource/.*\\.h$")

@@ -43,6 +43,7 @@ set(common_sources
 source_group("Src/Common" FILES ${common_sources})
 target_sources(${target_name} PRIVATE ${common_sources})
 
+include(FetchContent)
 FetchContent_Populate(
 	imgui
 	GIT_REPOSITORY https://github.com/ocornut/imgui.git
@@ -95,9 +96,11 @@ source_group("Gen" FILES
 	"${CMAKE_CURRENT_BINARY_DIR}/CMakeFiles/${target_name}.dir/cmake_pch.hxx"
 )
 
+# include(${RWT_CMAKE_DIR}/Module.cmake)
+# target_add_modules(${target_name} "Graphics" "Resource")
 target_link_libraries(${target_name} PRIVATE "Graphics" "Resource")
-source_group("Library/Graphics" "${RWT_SOURCE_DIR}/Library/Graphics/Include/Graphics/.*\\.h$")
-source_group("Library/Resource" "${RWT_SOURCE_DIR}/Library/Resource/Include/Resource/.*\\.h$")
+source_group("Module/Graphics" "${RWT_MODULE_DIR}/Graphics/Include/Graphics/.*\\.h$")
+source_group("Module/Resource" "${RWT_MODULE_DIR}/Resource/Include/Resource/.*\\.h$")
 
 add_custom_command(
 	TARGET ${target_name} POST_BUILD
