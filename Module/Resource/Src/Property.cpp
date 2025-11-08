@@ -1,4 +1,3 @@
-#include "Property.h"
 #include "Pch.h"
 #include "Manager.h"
 #include "Property.h"
@@ -260,6 +259,12 @@ namespace Resource
 		if (auto manager{ Manager::GetInstance() })
 			return manager->SetName(id, name);
 		return false;
+	}
+
+	void Set(ID id, std::monostate value)
+	{
+		if (auto manager{ Manager::GetInstance() })
+			manager->Set(id, value);
 	}
 
 	void Set(ID id, std::int32_t value)

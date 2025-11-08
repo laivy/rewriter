@@ -4,6 +4,7 @@
 #include "Desktop.h"
 #include "Explorer.h"
 #include "Hierarchy.h"
+#include "Inspector.h"
 
 App::App() :
 	m_hWnd{ NULL },
@@ -16,7 +17,9 @@ App::App() :
 App::~App()
 {
 	Desktop::Destroy();
+	Explorer::Destroy();
 	Hierarchy::Destroy();
+	Inspector::Destroy();
 	Resource::Uninitialize();
 	Graphics::Uninitialize();
 }
@@ -146,6 +149,7 @@ void App::InitApp()
 	Desktop::Instantiate();
 	Explorer::Instantiate();
 	Hierarchy::Instantiate();
+	Inspector::Instantiate();
 
 	// 타이머 초기화
 	m_timer.Tick();
@@ -160,6 +164,8 @@ void App::Update()
 		explorer->Update(deltaSeconds);
 	if (auto hierarchy{ Hierarchy::GetInstance() })
 		hierarchy->Update(deltaSeconds);
+	if (auto inspector{ Inspector::GetInstance() })
+		inspector->Update(deltaSeconds);
 }
 
 void App::Render()
@@ -174,6 +180,8 @@ void App::Render()
 				explorer->Render();
 			if (auto hierarchy{ Hierarchy::GetInstance() })
 				hierarchy->Render();
+			if (auto inspector{ Inspector::GetInstance() })
+				inspector->Render();
 			ImGui::ShowDemoWindow();
 		}
 		Graphics::ImGui::End();

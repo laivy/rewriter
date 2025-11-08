@@ -116,8 +116,7 @@ void Hierarchy::Render()
 void Hierarchy::Delete(Resource::ID id)
 {
 	m_contexts[id].isInvalid = true;
-	if (!IsRoot(id))
-		Delegates::OnPropertyDeleted.Broadcast(id);
+	Delegates::OnPropertyDeleted.Broadcast(id);
 }
 
 void Hierarchy::SetModified(Resource::ID id, bool modified)
@@ -212,6 +211,9 @@ void Hierarchy::OnPropertyModified(Resource::ID id)
 
 void Hierarchy::OnPropertySelected(Resource::ID id)
 {
+	if (id == Resource::InvalidID)
+		return;
+
 	m_isAnyPropertySelected = true;
 
 	// 키보드로 선택된 경우
@@ -596,7 +598,7 @@ void Hierarchy::TreeView()
 		};
 		if (IsSelected(id))
 			flag |= ImGuiTreeNodeFlags_Selected;
-		if (Resource::Size(id) == 0)
+		if (!isRoot && Resource::Size(id) == 0)
 			flag |= ImGuiTreeNodeFlags_Bullet;
 		ImGui::PushStyleVarY(ImGuiStyleVar_ItemSpacing, 0.0f);
 		const bool isTreeNodeOpened{ ImGui::TreeNodeEx(name.c_str(), flag) };
@@ -750,6 +752,7 @@ void Hierarchy::TreeView()
 		if (!ImGui::IsMouseClicked(ImGuiMouseButton_Left))
 			break;
 		m_selectedIDs.clear();
+		Delegates::OnPropertySelected.Broadcast(Resource::InvalidID);
 	} while (false);
 }
 

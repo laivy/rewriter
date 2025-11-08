@@ -81,10 +81,7 @@ namespace Resource
 				return std::nullopt;
 			}
 			if (!std::holds_alternative<T>(prop->value))
-			{
-				assert(false && "invalid type");
 				return std::nullopt;
-			}
 			return std::get<T>(prop->value);
 		}
 

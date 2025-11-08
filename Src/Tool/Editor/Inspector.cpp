@@ -1,278 +1,139 @@
 #include "Pch.h"
-#include "App.h"
 #include "Delegates.h"
-#include "FbxHandler.h"
-#include "Hierarchy.h"
 #include "Inspector.h"
-#include "Common/Util.h"
+#include <Common/Util.h>
 
-const std::map<Resource::Type, std::string_view> PROPERTY_TYPES
+namespace
 {
-	{ Resource::Type::Folder, "Folder" },
-	{ Resource::Type::Int, "Int" },
-	{ Resource::Type::Int2, "Int2" },
-	{ Resource::Type::Float, "Float" },
-	{ Resource::Type::String, "String" },
-	{ Resource::Type::Sprite, "Sprite" },
-	//{ Resource::Type::Texture, "Texture" },
-	{ Resource::Type::Model, "Model" }
-};
+	enum class Type
+	{
+		Folder,
+		Int32,
+		Float,
+		String
+	};
 
-Inspector::Inspector()
-{
-	Delegates::OnPropertySelected.Register(this, std::bind_front(&Inspector::OnPropertySelected, this));
-	Delegates::OnPropertyDeleted.Register(this, std::bind_front(&Inspector::OnPropertyDeleted, this));
+	const std::unordered_map<Type, std::string_view> Types{
+		{ Type::Folder, "폴더" },
+		{ Type::Int32, "int32" },
+		{ Type::Float, "float" },
+		{ Type::String, "string" },
+	};
+
+	Type GetType(Resource::ID id)
+	{
+		if (Resource::GetInt(id))
+			return Type::Int32;
+		if (Resource::GetFloat(id))
+			return Type::Float;
+		if (Resource::GetString(id))
+			return Type::String;
+		return Type::Folder;
+	}
 }
 
-void Inspector::Update(float deltaTime)
+Inspector::Inspector() :
+	m_targetID{ Resource::InvalidID }
+{
+	Delegates::OnPropertyDeleted.Bind(this, [this](Resource::ID id)
+	{
+		if (m_targetID == id)
+			m_targetID = Resource::InvalidID;
+	});
+	Delegates::OnPropertySelected.Bind(this, [this](Resource::ID id)
+	{
+		m_targetID = id;
+	});
+}
+
+void Inspector::Update(float deltaSeconds)
 {
 }
 
 void Inspector::Render()
 {
-	ImGui::PushID(WINDOW_NAME);
-	if (ImGui::Begin(WINDOW_NAME))
+	if (ImGui::Begin("속성"))
 	{
-		RenderNode();
-	}
-	ImGui::End();
-	ImGui::PopID();
-}
-
-void Inspector::OnPropertyDeleted(const std::shared_ptr<Resource::Property>& prop)
-{
-	if (m_prop.lock() == prop)
-		m_prop.reset();
-}
-
-void Inspector::OnPropertySelected(const std::shared_ptr<Resource::Property>& prop)
-{
-	m_prop = prop;
-}
-
-void Inspector::RenderNode()
-{
-	auto prop{ m_prop.lock() };
-	if (!prop)
-		return;
-
-	ImGui::AlignTextToFramePadding();
-	ImGui::SeparatorText("Property Info");
-
-	RenderNodeName(prop);
-	RenderNodeType(prop);
-	RenderNodeValue(prop);
-}
-
-void Inspector::RenderNodeName(const std::shared_ptr<Resource::Property>& prop)
-{
-	ImGui::Text("Name");
-	ImGui::SameLine(100);
-	ImGui::SetNextItemWidth(-1.0f);
-	auto name{ Util::wstou8s(Resource::GetName(prop)) };
-	if (ImGui::InputText("##INSPECTOR/NAME", &name, ImGuiInputTextFlags_EnterReturnsTrue))
-	{
-		auto newName{ Util::u8stows(name) };
-		auto parent{ Resource::GetParent(prop) };
-		if (!parent || !Resource::Get(newName))
+		const Resource::ID id{ m_targetID };
+		if (id == Resource::InvalidID)
 		{
-			Resource::SetName(prop, newName);
-			Delegates::OnPropertyModified.Notify(prop);
+			ImGui::End();
+			return;
 		}
-	}
-}
 
-void Inspector::RenderNodeType(const std::shared_ptr<Resource::Property>& prop)
-{
-	ImGui::Text("Type");
-	ImGui::SameLine(100);
-	ImGui::SetNextItemWidth(-1.0f);
-	if (auto hierarchy{ Hierarchy::GetInstance() }; hierarchy && hierarchy->IsRoot(prop))
-	{
-		if (ImGui::BeginCombo("##INSPECTOR/TYPE", "File"))
+		const Type type{ GetType(id) };
+		ImGui::AlignTextToFramePadding();
+
+		const float labelWidth{ ImGui::CalcTextSize("타입").x + ImGui::GetStyle().ItemSpacing.x * 2.0f };
+		ImGui::TextUnformatted("이름");
+		ImGui::SameLine(labelWidth);
+		if (auto name{ Resource::GetName(id) })
 		{
-			ImGui::Selectable("File");
+			ImGui::SetNextItemWidth(-ImGui::GetStyle().WindowPadding.x);
+			std::string str{ Util::ToU8String(*name) };
+			if (ImGui::InputText("##name", &str, ImGuiInputTextFlags_EnterReturnsTrue))
+				Resource::SetName(id, Util::ToWString(str));
+		}
+
+		ImGui::AlignTextToFramePadding();
+		ImGui::TextUnformatted("타입");
+		ImGui::SameLine(labelWidth);
+		ImGui::SetNextItemWidth(-ImGui::GetStyle().WindowPadding.x);
+		if (ImGui::BeginCombo("##타입", Types.at(type).data()))
+		{
+			for (const auto& [key, value] : Types)
+			{
+				if (!ImGui::Selectable(value.data(), key == type))
+					continue;
+
+				switch (key)
+				{
+					case Type::Folder:
+						Resource::Set(id, std::monostate{});
+						break;
+					case Type::Int32:
+						Resource::Set(id, 0);
+						break;
+					case Type::Float:
+						Resource::Set(id, 0.0f);
+						break;
+					case Type::String:
+						Resource::Set(id, L"");
+						break;
+					default:
+						break;
+				}
+			}
 			ImGui::EndCombo();
 		}
-		return;
-	}
 
-	if (ImGui::BeginCombo("##INSPECTOR/TYPE", PROPERTY_TYPES.at( Resource::GetType(prop)).data()))
-	{
-		for (const auto& [type, label] : PROPERTY_TYPES)
+		ImGui::AlignTextToFramePadding();
+		ImGui::TextUnformatted("값");
+		ImGui::SameLine(labelWidth);
+		ImGui::SetNextItemWidth(-ImGui::GetStyle().WindowPadding.x);
+		if (auto value{ Resource::GetInt(id) })
 		{
-			if (ImGui::Selectable(label.data()))
-			{
-				Resource::SetType(prop, type);
-				Delegates::OnPropertyModified.Notify(prop);
-			}
+			if (ImGui::InputInt("##int", &(*value)))
+				Resource::Set(id, *value);
 		}
-		ImGui::EndCombo();
-	}
-}
-
-void Inspector::RenderNodeValue(const std::shared_ptr<Resource::Property>& prop)
-{
-	auto type{ Resource::GetType(prop) };
-	if (type == Resource::Type::Folder)
-		return;
-
-	ImGui::Text("Value");
-	ImGui::SameLine(100);
-	switch (type)
-	{
-	case Resource::Type::Int:
-	{
-		ImGui::SetNextItemWidth(-1.0f);
-		auto data{ Resource::GetInt(prop) };
-		if (ImGui::InputInt("##INSPECTOR/INT", &data))
+		else if (auto value{ Resource::GetFloat(id) })
 		{
-			Resource::Set(prop, data);
-			Delegates::OnPropertyModified.Notify(prop);
+			if (ImGui::InputFloat("##float", &(*value), 0.1f, 1.0f, "%.3f"))
+				Resource::Set(id, *value);
 		}
-
-		auto cursorPosition{ ImGui::GetCursorScreenPos() };
-		if (ImGui::BeginPopupContextItem("##INSPECTOR/INT/COLOR"))
+		else if (auto value{ Resource::GetString(id) })
 		{
-			// ImGui는 0xAABBGGRR, 데이터는 0xAARRGGBB
-			ImVec4 color{};
-			color.x = ((data & 0x00FF0000) >> 16) / static_cast<float>(0xFF);
-			color.y = ((data & 0x0000FF00) >> 8) / static_cast<float>(0xFF);
-			color.z = ((data & 0x000000FF) >> 0) / static_cast<float>(0xFF);
-			color.w = ((data & 0xFF000000) >> 24) / static_cast<float>(0xFF);
-
-			ImGui::SetWindowPos(cursorPosition);
-			if (ImGui::ColorPicker4("##NONE", reinterpret_cast<float*>(&color), ImGuiColorEditFlags_AlphaPreview | ImGuiColorEditFlags_DisplayRGB | ImGuiColorEditFlags_DisplayHex | ImGuiColorEditFlags_Uint8))
-			{
-				auto r{ static_cast<uint32_t>(color.x * 255.0f) & 0xFF };
-				auto g{ static_cast<uint32_t>(color.y * 255.0f) & 0xFF };
-				auto b{ static_cast<uint32_t>(color.z * 255.0f) & 0xFF };
-				auto a{ static_cast<uint32_t>(color.w * 255.0f) & 0xFF };
-				data = (a << 24) | (r << 16) | (g << 8) | b;
-				Resource::Set(prop, data);
-				Delegates::OnPropertyModified.Notify(prop);
-			}
-			ImGui::EndPopup();
+			std::string str{ Util::ToU8String(*value) };
+			if (ImGui::InputText("##string", &str))
+				Resource::Set(id, Util::ToWString(str));
 		}
-		break;
-	}
-	case Resource::Type::Int2:
-	{
-		ImGui::SetNextItemWidth(-1.0f);
-		auto data{ Resource::GetInt2(prop) };
-		if (ImGui::InputInt2("##INSPECTOR/INT2", reinterpret_cast<int*>(&data)))
+		else
 		{
-			Resource::Set(prop, data);
-			Delegates::OnPropertyModified.Notify(prop);
+			std::array<char, 2> dummy{ "-" };
+			ImGui::BeginDisabled();
+			ImGui::InputText("##folder", dummy.data(), dummy.size(), ImGuiInputTextFlags_ReadOnly);
+			ImGui::EndDisabled();
 		}
-		break;
 	}
-	case Resource::Type::Float:
-	{
-		ImGui::SetNextItemWidth(-1.0f);
-		auto data{ Resource::GetFloat(prop) };
-		if (ImGui::InputFloat("##INSPECTOR/FLOAT", &data))
-		{
-			Resource::Set(prop, data);
-			Delegates::OnPropertyModified.Notify(prop);
-		}
-		break;
-	}
-	case Resource::Type::String:
-	{
-		ImGui::SetNextItemWidth(-1.0f);
-		auto data{ Util::wstou8s(Resource::GetString(prop)) };
-		if (ImGui::InputTextMultiline("##INSPECTOR/STRING", &data))
-		{
-			Resource::Set(prop, Util::u8stows(data));
-			Delegates::OnPropertyModified.Notify(prop);
-		}
-		break;
-	}
-	case Resource::Type::Sprite:
-	{
-		ImGui::SetNextItemWidth(50.0f);
-		if (!ImGui::Button("..."))
-			break;
-
-		std::array<wchar_t, MAX_PATH> filePath{};
-		OPENFILENAME ofn{};
-		ofn.lStructSize = sizeof(ofn);
-		ofn.lpstrFilter = L"PNG Files (*.png)\0*.png\0";
-		ofn.lpstrFile = filePath.data();
-		ofn.nMaxFile = MAX_PATH;
-		ofn.Flags = OFN_FILEMUSTEXIST | OFN_EXPLORER;
-		if (!::GetOpenFileName(&ofn))
-			break;
-
-		std::ifstream file{ filePath.data(), std::ios::binary };
-		if (!file)
-			break;
-
-		file.seekg(0, std::ios::end);
-		auto size{ static_cast<uint32_t>(file.tellg()) };
-		file.seekg(0, std::ios::beg);
-
-		std::unique_ptr<std::byte[]> buffer{ new std::byte[size]{} };
-		file.read(reinterpret_cast<char*>(buffer.get()), size);
-
-		std::span<std::byte> binary{ buffer.release(), size };
-		auto sprite{ Graphics::D2D::LoadSprite(binary) };
-		Resource::Set(prop, sprite);
-		Delegates::OnPropertyModified.Notify(prop);
-		break;
-	}
-	/*
-	case Resource::Type::Texture:
-	{
-		ImGui::SetNextItemWidth(50.0f);
-		if (!ImGui::Button("..."))
-			break;
-
-		std::array<wchar_t, MAX_PATH> filePath{};
-		OPENFILENAME ofn{};
-		ofn.lStructSize = sizeof(ofn);
-		ofn.lpstrFilter = L"DDS Files (*.dds)\0*.dds\0";
-		ofn.lpstrFile = filePath.data();
-		ofn.nMaxFile = MAX_PATH;
-		ofn.Flags = OFN_FILEMUSTEXIST | OFN_EXPLORER;
-		if (!::GetOpenFileName(&ofn))
-			break;
-
-		std::ifstream file{ filePath.data(), std::ios::binary };
-		if (!file)
-			break;
-
-		break;
-	}
-	*/
-	case Resource::Type::Model:
-	{
-		ImGui::SetNextItemWidth(50.0f);
-		if (!ImGui::Button("..."))
-			break;
-
-		std::array<wchar_t, MAX_PATH> filePath{};
-		OPENFILENAME ofn{};
-		ofn.lStructSize = sizeof(ofn);
-		ofn.lpstrFilter = L"FBX Files (*.fbx)\0*.fbx\0";
-		ofn.lpstrFile = filePath.data();
-		ofn.nMaxFile = MAX_PATH;
-		ofn.Flags = OFN_FILEMUSTEXIST | OFN_EXPLORER;
-		if (!::GetOpenFileName(&ofn))
-			break;
-
-		auto fbxHandler{ FbxHandler::GetInstance() };
-		if (!fbxHandler)
-			break;
-
-		auto model{ fbxHandler->Load(filePath.data()) };
-		Resource::Set(prop, model);
-		Delegates::OnPropertyModified.Notify(prop);
-		break;
-	}
-	default:
-		assert(false && "INVALID TYPE");
-		break;
-	}
+	ImGui::End();
 }

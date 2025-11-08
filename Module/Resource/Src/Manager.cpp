@@ -228,6 +228,9 @@ namespace Resource
 
 	bool Manager::SetName(ID id, const std::wstring& name)
 	{
+		if (name.empty())
+			return false;
+
 		if (id >= m_properties.size())
 		{
 			assert(false && "invalid id");
