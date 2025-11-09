@@ -64,10 +64,20 @@ namespace Graphics::ImGui
 
 	std::shared_ptr<Texture> LoadTexture(const std::filesystem::path& path)
 	{
+		std::ifstream file{ path, std::ios::binary };
+		if (!file)
+			return nullptr;
+
+		std::vector<char> binary{ std::istreambuf_iterator<char>(file), {} };
+		return LoadTexture(binary);
+	}
+
+	std::shared_ptr<Texture> LoadTexture(std::span<char> binary)
+	{
 		ComPtr<ID3D12Resource> resource;
 		std::unique_ptr<uint8_t[]> decodedData;
 		D3D12_SUBRESOURCE_DATA subresource{};
-		if (FAILED(DirectX::LoadWICTextureFromFileEx(g_d3dDevice.Get(), path.c_str(), 0, D3D12_RESOURCE_FLAG_NONE, DirectX::WIC_LOADER_IGNORE_SRGB | DirectX::WIC_LOADER_FORCE_RGBA32, &resource, decodedData, subresource)))
+		if (FAILED(DirectX::LoadWICTextureFromMemoryEx(g_d3dDevice.Get(), reinterpret_cast<std::uint8_t*>(binary.data()), binary.size(), 0, D3D12_RESOURCE_FLAG_NONE, DirectX::WIC_LOADER_IGNORE_SRGB | DirectX::WIC_LOADER_FORCE_RGBA32, &resource, decodedData, subresource)))
 			return nullptr;
 		if (!D3D::CopyResource(resource, subresource))
 			return nullptr;
@@ -96,9 +106,21 @@ namespace Graphics::ImGui
 		return ImTextureRef{ texture->descriptor->GetGpuHandle().ptr };
 	}
 
+	ImVec2 GetTextureSize(const Resource::Sprite& sprite)
+	{
+		auto texture{ std::static_pointer_cast<Texture>(sprite.imguiTexture) };
+		return GetTextureSize(texture);
+	}
+
 	ImVec2 GetTextureSize(const std::shared_ptr<Texture>& texture)
 	{
 		return texture->size;
+	}
+
+	void Image(const Resource::Sprite& sprite, const ImVec2& size, const ImVec2& uv0, const ImVec2& uv1)
+	{
+		auto texture{ std::static_pointer_cast<Texture>(sprite.imguiTexture) };
+		Image(texture, size, uv0, uv1);
 	}
 
 	void Image(const std::shared_ptr<Texture>& texture, const ImVec2& size, const ImVec2& uv0, const ImVec2& uv1)

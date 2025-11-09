@@ -2,6 +2,7 @@
 #ifdef _DIRECT2D
 #include "Global.h"
 #include "Graphics2D.h"
+#include "GraphicsImGui.h"
 #include "SwapChain.h"
 
 namespace
@@ -160,6 +161,9 @@ namespace Graphics::D2D
 		sprite.bitmap.Swap(bitmap);
 		sprite.width = size.width;
 		sprite.height = size.height;
+#ifdef _IMGUI
+		sprite.imguiTexture = ImGui::LoadTexture(binary);
+#endif
 #ifdef _TOOL
 		sprite.binary.assign(binary.begin(), binary.end());
 #endif

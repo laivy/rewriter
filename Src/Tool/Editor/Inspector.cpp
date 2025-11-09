@@ -169,11 +169,6 @@ void Inspector::Render()
 		}
 		else if (auto value{ Resource::GetSprite(id) })
 		{
-			static std::unordered_map<Resource::ID, std::shared_ptr<Graphics::ImGui::Texture>> s_textures;
-
-			std::shared_ptr<Graphics::ImGui::Texture> texture;
-			if (s_textures.contains(id))
-				texture = s_textures.at(id);
 			if (ImGui::Button("파일 열기(*.png)", ImVec2{ -ImGui::GetStyle().WindowPadding.x, 0.0f }))
 			{
 				const std::wstring filePaths{ GetOpenFilePath(L"이미지 파일 (*.png)\0*.png\0") };
@@ -182,80 +177,68 @@ void Inspector::Render()
 					std::ifstream file{ filePaths, std::ios::binary };
 					std::vector<char> buffer{ std::istreambuf_iterator(file), {} };
 					isModified = Resource::Set(id, Resource::Sprite{ .binary = std::move(buffer) });
-
-					if (s_textures.contains(id))
-					{
-						s_textures[id] = Graphics::ImGui::LoadTexture(filePaths);
-						texture = s_textures[id];
-					}
-					else
-					{
-						texture = s_textures.emplace(id, Graphics::ImGui::LoadTexture(filePaths)).first->second;
-					}
 				}
 			}
-			if (texture)
+
+			static float scale{ 100.0f };
+			const auto& style{ ImGui::GetStyle() };
+			ImVec2 region{ ImGui::GetContentRegionAvail() - style.WindowPadding };
+			region.y -= ImGui::GetFrameHeight();
+			if (ImGui::BeginChild("preview", region, ImGuiChildFlags_None, ImGuiWindowFlags_HorizontalScrollbar))
 			{
-				static float scale{ 100.0f };
-				const auto& style{ ImGui::GetStyle() };
-				ImVec2 region{ ImGui::GetContentRegionAvail() - style.WindowPadding };
-				region.y -= ImGui::GetFrameHeight();
-				if (ImGui::BeginChild("preview", region, ImGuiChildFlags_None, ImGuiWindowFlags_HorizontalScrollbar))
+				ImVec2 imageSize{ Graphics::ImGui::GetTextureSize(*value) };
+				imageSize *= scale / 100.0f;
+
+				ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2{});
+				if (imageSize.x < region.x && imageSize.y < region.y)
 				{
-					ImVec2 imageSize{ Graphics::ImGui::GetTextureSize(texture) };
-					imageSize *= scale / 100.0f;
+					ImGui::Dummy(ImVec2{ 0.0f, (region.y - imageSize.y) / 2.0f });
+					ImGui::Dummy(ImVec2{ (region.x - imageSize.x) / 2.0f, 0.0f });
+					ImGui::SameLine();
 
-					ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2{});
-					if (imageSize.x < region.x && imageSize.y < region.y)
-					{
-						ImGui::Dummy(ImVec2{ 0.0f, (region.y - imageSize.y) / 2.0f });
-						ImGui::Dummy(ImVec2{ (region.x - imageSize.x) / 2.0f, 0.0f });
-						ImGui::SameLine();
-
-						const ImVec2 cursor{ ImGui::GetCursorScreenPos() };
-						auto drawList{ ImGui::GetWindowDrawList() };
-						drawList->AddRect(cursor, cursor + imageSize, ImGui::ColorConvertFloat4ToU32(style.Colors[ImGuiCol_Text]));
-					}
-					else if (imageSize.x < region.x - style.ScrollbarSize)
-					{
-						ImGui::Dummy(ImVec2{ (region.x - style.ScrollbarSize - imageSize.x) / 2.0f, 0.0f });
-						ImGui::SameLine();
-
-						const ImVec2 cursor{ ImGui::GetCursorScreenPos() };
-						auto drawList{ ImGui::GetWindowDrawList() };
-						drawList->AddLine(cursor, cursor + ImVec2{ 0.0f, imageSize.y }, ImGui::ColorConvertFloat4ToU32(style.Colors[ImGuiCol_Text]));
-						drawList->AddLine(cursor + ImVec2{ imageSize.x, 0.0f }, cursor + imageSize, ImGui::ColorConvertFloat4ToU32(style.Colors[ImGuiCol_Text]));
-					}
-					else if (imageSize.y < region.y - style.ScrollbarSize)
-					{
-						ImGui::Dummy(ImVec2{ 0.0f, (region.y - style.ScrollbarSize - imageSize.y) / 2.0f });
-
-						const ImVec2 cursor{ ImGui::GetCursorScreenPos() };
-						auto drawList{ ImGui::GetWindowDrawList() };
-						drawList->AddLine(cursor, cursor + ImVec2{ imageSize.x, 0.0f }, ImGui::ColorConvertFloat4ToU32(style.Colors[ImGuiCol_Text]));
-						drawList->AddLine(cursor + ImVec2{ 0.0f, imageSize.y }, cursor + imageSize, ImGui::ColorConvertFloat4ToU32(style.Colors[ImGuiCol_Text]));
-					}
-					Graphics::ImGui::Image(texture, imageSize);
-					ImGui::PopStyleVar();
+					const ImVec2 cursor{ ImGui::GetCursorScreenPos() };
+					auto drawList{ ImGui::GetWindowDrawList() };
+					drawList->AddRect(cursor, cursor + imageSize, ImGui::ColorConvertFloat4ToU32(style.Colors[ImGuiCol_Text]));
 				}
-				ImGui::EndChild();
-
-				if (ImGui::BeginChild("scale", ImVec2{ -style.WindowPadding.x, ImGui::GetFrameHeight() }))
+				else if (imageSize.x < region.x - style.ScrollbarSize)
 				{
-					const ImVec2 size{ Graphics::ImGui::GetTextureSize(texture) };
+					ImGui::Dummy(ImVec2{ (region.x - style.ScrollbarSize - imageSize.x) / 2.0f, 0.0f });
 					ImGui::SameLine();
-					ImGui::AlignTextToFramePadding();
-					ImGui::Text("%.0f x %.0f", size.x, size.y);
-					ImGui::SameLine();
-					ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2{});
-					ImGui::SeparatorEx(ImGuiSeparatorFlags_Vertical);
-					ImGui::SameLine();
-					ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x);
-					ImGui::DragFloat("##scale", &scale, 1.0f, 0.1f, 500.0f, "%.0f%%");
-					ImGui::PopStyleVar();
+
+					const ImVec2 cursor{ ImGui::GetCursorScreenPos() };
+					auto drawList{ ImGui::GetWindowDrawList() };
+					drawList->AddLine(cursor, cursor + ImVec2{ 0.0f, imageSize.y }, ImGui::ColorConvertFloat4ToU32(style.Colors[ImGuiCol_Text]));
+					drawList->AddLine(cursor + ImVec2{ imageSize.x, 0.0f }, cursor + imageSize, ImGui::ColorConvertFloat4ToU32(style.Colors[ImGuiCol_Text]));
 				}
-				ImGui::EndChild();
+				else if (imageSize.y < region.y - style.ScrollbarSize)
+				{
+					ImGui::Dummy(ImVec2{ 0.0f, (region.y - style.ScrollbarSize - imageSize.y) / 2.0f });
+
+					const ImVec2 cursor{ ImGui::GetCursorScreenPos() };
+					auto drawList{ ImGui::GetWindowDrawList() };
+					drawList->AddLine(cursor, cursor + ImVec2{ imageSize.x, 0.0f }, ImGui::ColorConvertFloat4ToU32(style.Colors[ImGuiCol_Text]));
+					drawList->AddLine(cursor + ImVec2{ 0.0f, imageSize.y }, cursor + imageSize, ImGui::ColorConvertFloat4ToU32(style.Colors[ImGuiCol_Text]));
+				}
+				Graphics::ImGui::Image(*value, imageSize);
+				ImGui::PopStyleVar();
 			}
+			ImGui::EndChild();
+
+			if (ImGui::BeginChild("scale", ImVec2{ -style.WindowPadding.x, ImGui::GetFrameHeight() }))
+			{
+				const ImVec2 size{ Graphics::ImGui::GetTextureSize(*value) };
+				ImGui::SameLine();
+				ImGui::AlignTextToFramePadding();
+				ImGui::Text("%.0f x %.0f", size.x, size.y);
+				ImGui::SameLine();
+				ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2{});
+				ImGui::SeparatorEx(ImGuiSeparatorFlags_Vertical);
+				ImGui::SameLine();
+				ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x);
+				ImGui::DragFloat("##scale", &scale, 1.0f, 0.1f, 500.0f, "%.0f%%");
+				ImGui::PopStyleVar();
+			}
+			ImGui::EndChild();
 		}
 		else
 		{
