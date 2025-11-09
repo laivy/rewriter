@@ -289,10 +289,12 @@ namespace Resource
 		return false;
 	}
 
-	//void Set(const ID id, const Sprite& value)
-	//{
-	//	Manager::GetInstance().Set(id, value);
-	//}
+	bool Set(const ID id, const Sprite& value)
+	{
+		if (auto manager{ Manager::GetInstance() })
+			return manager->Set(id, value);
+		return false;
+	}
 
 	std::optional<std::wstring> GetName(const ID id)
 	{
@@ -314,14 +316,14 @@ namespace Resource
 		return manager->GetName(targetID);
 	}
 
-	std::optional<std::int32_t> GetInt(const ID id)
+	std::optional<std::int32_t> GetInt(ID id)
 	{
 		if (auto manager{ Manager::GetInstance() })
 			return manager->Get<std::int32_t>(id);
 		return std::nullopt;
 	}
 
-	std::optional<std::int32_t> GetInt(const ID id, const std::wstring& path)
+	std::optional<std::int32_t> GetInt(ID id, const std::wstring& path)
 	{
 		auto manager{ Manager::GetInstance() };
 		if (!manager)
@@ -334,14 +336,14 @@ namespace Resource
 		return manager->Get<std::int32_t>(targetID);
 	}
 
-	std::optional<float> GetFloat(const ID id)
+	std::optional<float> GetFloat(ID id)
 	{
 		if (auto manager{ Manager::GetInstance() })
 			return manager->Get<float>(id);
 		return std::nullopt;
 	}
 
-	std::optional<float> GetFloat(const ID id, const std::wstring& path)
+	std::optional<float> GetFloat(ID id, const std::wstring& path)
 	{
 		auto manager{ Manager::GetInstance() };
 		if (!manager)
@@ -354,14 +356,14 @@ namespace Resource
 		return manager->Get<float>(targetID);
 	}
 
-	std::optional<std::wstring> GetString(const ID id)
+	std::optional<std::wstring> GetString(ID id)
 	{
 		if (auto manager{ Manager::GetInstance() })
 			return manager->Get<std::wstring>(id);
 		return std::nullopt;
 	}
 
-	std::optional<std::wstring> GetString(const ID id, const std::wstring& path)
+	std::optional<std::wstring> GetString(ID id, const std::wstring& path)
 	{
 		auto manager{ Manager::GetInstance() };
 		if (!manager)
@@ -374,10 +376,25 @@ namespace Resource
 		return manager->Get<std::wstring>(targetID);
 	}
 
-	//std::optional<Sprite> GetSprite(const ID id)
-	//{
-	//	return Manager::GetInstance().Get<Sprite>(id);
-	//}
+	std::optional<Sprite> GetSprite(ID id)
+	{
+		if (auto manager{ Manager::GetInstance() })
+			return manager->Get<Sprite>(id);
+		return std::nullopt;
+	}
+
+	std::optional<Sprite> GetSprite(ID id, const std::wstring& path)
+	{
+		auto manager{ Manager::GetInstance() };
+		if (!manager)
+			return std::nullopt;
+
+		const ID targetID{ manager->Get(id, path) };
+		if (targetID == InvalidID)
+			return std::nullopt;
+
+		return manager->Get<Sprite>(targetID);
+	}
 
 	//void Unload(const ID id)
 	//{

@@ -96,6 +96,11 @@ namespace Graphics::ImGui
 		return ImTextureRef{ texture->descriptor->GetGpuHandle().ptr };
 	}
 
+	ImVec2 GetTextureSize(const std::shared_ptr<Texture>& texture)
+	{
+		return texture->size;
+	}
+
 	void Image(const std::shared_ptr<Texture>& texture, const ImVec2& size, const ImVec2& uv0, const ImVec2& uv1)
 	{
 		::ImGui::Image(texture->descriptor->GetGpuHandle().ptr, (size.x == 0.0f && size.y == 0.0f) ? texture->size : size, uv0, uv1);

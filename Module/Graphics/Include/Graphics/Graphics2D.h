@@ -59,7 +59,7 @@ namespace Graphics::D2D
 	GRAPHICS_API void Begin();
 	GRAPHICS_API void End();
 
-	GRAPHICS_API Resource::Sprite LoadSprite(std::span<std::byte> binary);
+	GRAPHICS_API Resource::Sprite LoadSprite(std::span<char> binary);
 	GRAPHICS_API std::shared_ptr<Layer> CreateLayer(const Float2& size);
 
 	GRAPHICS_API void SetTransform(const Transform& transform);

@@ -20,7 +20,7 @@ namespace Graphics::D3D
 	/*
 	GRAPHICS_API std::shared_ptr<Resource::Texture> LoadTexture(std::span<std::byte> binary);
 	*/
-	GRAPHICS_API std::shared_ptr<Resource::Model> LoadModel(std::span<std::byte> binary);
+	GRAPHICS_API std::shared_ptr<Resource::Model> LoadModel(std::span<char> binary);
 
 	GRAPHICS_API std::shared_ptr<RenderTarget> CreateRenderTarget(std::uint32_t width, std::uint32_t height);
 	GRAPHICS_API void PushRenderTarget(const std::shared_ptr<RenderTarget>& renderTarget);

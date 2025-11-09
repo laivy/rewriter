@@ -1,6 +1,7 @@
 #pragma once
 #include "Define.h"
 #include "Export.h"
+#include "Sprite.h"
 
 namespace Resource
 {
@@ -77,17 +78,18 @@ namespace Resource
 	RESOURCE_API bool Set(ID id, std::int32_t value);
 	RESOURCE_API bool Set(ID id, float value);
 	RESOURCE_API bool Set(ID id, const std::wstring& value);
-	//RESOURCE_API void Set(const ID id, const Sprite& value);
+	RESOURCE_API bool Set(ID id, const Sprite& value);
 
 	RESOURCE_API std::optional<std::wstring> GetName(ID id);
 	RESOURCE_API std::optional<std::wstring> GetName(ID id, const std::wstring& path);
-	RESOURCE_API std::optional<std::int32_t> GetInt(const ID id);
-	RESOURCE_API std::optional<std::int32_t> GetInt(const ID id, const std::wstring& path);
-	RESOURCE_API std::optional<float> GetFloat(const ID id);
-	RESOURCE_API std::optional<float> GetFloat(const ID id, const std::wstring& path);
-	RESOURCE_API std::optional<std::wstring> GetString(const ID id);
-	RESOURCE_API std::optional<std::wstring> GetString(const ID id, const std::wstring& path);
-	//RESOURCE_API std::optional<Sprite> GetSprite(const ID id);
+	RESOURCE_API std::optional<std::int32_t> GetInt(ID id);
+	RESOURCE_API std::optional<std::int32_t> GetInt(ID id, const std::wstring& path);
+	RESOURCE_API std::optional<float> GetFloat(ID id);
+	RESOURCE_API std::optional<float> GetFloat(ID id, const std::wstring& path);
+	RESOURCE_API std::optional<std::wstring> GetString(ID id);
+	RESOURCE_API std::optional<std::wstring> GetString(ID id, const std::wstring& path);
+	RESOURCE_API std::optional<Sprite> GetSprite(ID id);
+	RESOURCE_API std::optional<Sprite> GetSprite(ID id, const std::wstring& path);
 
 	//RESOURCE_API void Unload(const ID id);
 	RESOURCE_API bool SaveToFile(const ID id, const std::filesystem::path& path);

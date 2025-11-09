@@ -126,7 +126,7 @@ namespace Graphics::D2D
 		g_swapChain->End2D();
 	}
 
-	Resource::Sprite LoadSprite(std::span<std::byte> binary)
+	Resource::Sprite LoadSprite(std::span<char> binary)
 	{
 		static const Resource::Sprite InvalidSprite{};
 

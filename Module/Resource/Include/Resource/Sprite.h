@@ -5,10 +5,10 @@ namespace Resource
 	struct Sprite
 	{
 		ComPtr<IUnknown> bitmap; // ID2D1Bitmap;
-		float width{ 0 };
-		float height{ 0 };
+		std::uint32_t width{ 0 };
+		std::uint32_t height{ 0 };
 #ifdef _TOOL
-		std::vector<std::byte> binary;
+		std::vector<char> binary;
 #endif
 	};
 }

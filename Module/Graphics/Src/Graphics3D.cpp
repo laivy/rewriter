@@ -358,7 +358,7 @@ namespace Graphics::D3D
 	}
 	*/
 
-	std::shared_ptr<Resource::Model> LoadModel(std::span<std::byte> binary)
+	std::shared_ptr<Resource::Model> LoadModel(std::span<char> binary)
 	{
 		size_t pos{ 0 };
 		auto readBytes = [&binary, &pos](auto* dest, size_t size)

@@ -14,7 +14,8 @@ namespace Resource
 			std::monostate,
 			std::int32_t,
 			float,
-			std::wstring
+			std::wstring,
+			Sprite
 		>;
 
 		struct Property
@@ -60,13 +61,15 @@ namespace Resource
 				assert(false && "not exists");
 				return false;
 			}
-			if (!std::visit([&value](auto&& arg)
+			if (!std::visit([this, &value](auto&& arg)
 			{
 				using U = std::decay_t<decltype(arg)>;
 				if constexpr (!std::is_same_v<U, T>)
 					return true;
 				else if constexpr (std::is_same_v<U, std::monostate>)
 					return false;
+				else if constexpr (std::is_same_v<U, Sprite>)
+					return true;
 				else
 					return arg != value;
 			}, prop->value))
@@ -110,8 +113,8 @@ namespace Resource
 
 	private:
 		std::filesystem::path m_mountPath;
-		std::function<Sprite(std::span<std::byte>)> m_loadSprite;
-		std::function<std::shared_ptr<Model>(std::span<std::byte>)> m_loadModel;
+		std::function<Sprite(std::span<char>)> m_loadSprite;
+		std::function<std::shared_ptr<Model>(std::span<char>)> m_loadModel;
 
 		std::vector<std::optional<Property>> m_properties;
 		std::unordered_map<std::wstring, ID> m_pathToID;

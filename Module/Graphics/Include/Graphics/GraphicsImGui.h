@@ -19,6 +19,7 @@ namespace Graphics::ImGui
 
 	GRAPHICS_API std::shared_ptr<Texture> LoadTexture(const std::filesystem::path& path);
 	GRAPHICS_API ImTextureRef GetTextureRef(const std::shared_ptr<Texture>& texture);
+	GRAPHICS_API ImVec2 GetTextureSize(const std::shared_ptr<Texture>& texture);
 	GRAPHICS_API void Image(const std::shared_ptr<Texture>& texture, const ImVec2& size = ImVec2{ 0, 0 }, const ImVec2& uv0 = ImVec2{ 0, 0 }, const ImVec2& uv1 = ImVec2{ 1, 1 });
 	GRAPHICS_API void Image(const std::shared_ptr<D3D::RenderTarget>& renderTarget, const ImVec2& size = ImVec2{ 0, 0 }, const ImVec2& uv0 = ImVec2{ 0, 0 }, const ImVec2& uv1 = ImVec2{ 1, 1 });
 }

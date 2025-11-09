@@ -2,6 +2,19 @@
 #include "Delegates.h"
 #include "Manager.h"
 
+namespace
+{
+	// Resource::Manager::Value 순서와 동일
+	enum class Type : std::uint8_t
+	{
+		Folder,
+		Int32,
+		Float,
+		String,
+		Sprite
+	};
+}
+
 namespace Resource
 {
 	Manager::Manager()
@@ -472,31 +485,31 @@ namespace Resource
 			}
 
 			// 값 타입
-			std::uint8_t valueType{};
+			Type valueType{};
 			file.read(reinterpret_cast<char*>(&valueType), sizeof(valueType));
 
 			// 값
 			switch (valueType)
 			{
-			case 0: // std::monostate
+			case Type::Folder:
 			{
 				break;
 			}
-			case 1: // std::int32_t
+			case Type::Int32:
 			{
 				std::int32_t value{};
 				file.read(reinterpret_cast<char*>(&value), sizeof(value));
 				Set(id, value);
 				break;
 			}
-			case 2: // float
+			case Type::Float:
 			{
 				float value{};
 				file.read(reinterpret_cast<char*>(&value), sizeof(value));
 				Set(id, value);
 				break;
 			}
-			case 3: // std::wstring
+			case Type::String:
 			{
 				std::uint16_t dataLength{};
 				file.read(reinterpret_cast<char*>(&dataLength), sizeof(dataLength));
@@ -505,14 +518,14 @@ namespace Resource
 				Set(id, value);
 				break;
 			}
-			case 4: // Resource::Sprite
+			case Type::Sprite:
 			{
 				std::uint32_t dataLength{};
 				file.read(reinterpret_cast<char*>(&dataLength), sizeof(dataLength));
-				std::vector<std::byte> binary(dataLength);
-				file.read(reinterpret_cast<char*>(binary.data()), dataLength * sizeof(std::byte));
+				std::vector<char> binary(dataLength);
+				file.read(reinterpret_cast<char*>(binary.data()), dataLength * sizeof(char));
 				const auto sprite{ m_loadSprite(binary) };
-				//Set(id, sprite);
+				Set(id, sprite);
 				break;
 			}
 			default:
