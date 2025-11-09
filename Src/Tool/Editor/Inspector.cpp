@@ -13,7 +13,8 @@ namespace
 		String
 	};
 
-	const std::unordered_map<Type, std::string_view> Types{
+	const std::unordered_map<Type, std::string_view> Types
+	{
 		{ Type::Folder, "폴더" },
 		{ Type::Int32, "int32" },
 		{ Type::Float, "float" },
@@ -52,6 +53,7 @@ void Inspector::Update(float deltaSeconds)
 
 void Inspector::Render()
 {
+	bool isModified{ false };
 	if (ImGui::Begin("속성"))
 	{
 		const Resource::ID id{ m_targetID };
@@ -72,14 +74,14 @@ void Inspector::Render()
 			ImGui::SetNextItemWidth(-ImGui::GetStyle().WindowPadding.x);
 			std::string str{ Util::ToU8String(*name) };
 			if (ImGui::InputText("##name", &str, ImGuiInputTextFlags_EnterReturnsTrue))
-				Resource::SetName(id, Util::ToWString(str));
+				isModified = Resource::SetName(id, Util::ToWString(str));
 		}
 
 		ImGui::AlignTextToFramePadding();
 		ImGui::TextUnformatted("타입");
 		ImGui::SameLine(labelWidth);
 		ImGui::SetNextItemWidth(-ImGui::GetStyle().WindowPadding.x);
-		if (ImGui::BeginCombo("##타입", Types.at(type).data()))
+		if (ImGui::BeginCombo("##type", Types.at(type).data()))
 		{
 			for (const auto& [key, value] : Types)
 			{
@@ -103,6 +105,7 @@ void Inspector::Render()
 					default:
 						break;
 				}
+				isModified = true;
 			}
 			ImGui::EndCombo();
 		}
@@ -113,27 +116,30 @@ void Inspector::Render()
 		ImGui::SetNextItemWidth(-ImGui::GetStyle().WindowPadding.x);
 		if (auto value{ Resource::GetInt(id) })
 		{
-			if (ImGui::InputInt("##int", &(*value)))
-				Resource::Set(id, *value);
+			if (ImGui::InputInt("##value", &(*value)))
+				isModified = Resource::Set(id, *value);
 		}
 		else if (auto value{ Resource::GetFloat(id) })
 		{
-			if (ImGui::InputFloat("##float", &(*value), 0.1f, 1.0f, "%.3f"))
-				Resource::Set(id, *value);
+			if (ImGui::InputFloat("##value", &(*value), 0.0f, 0.0f, "%.6f"))
+				isModified = Resource::Set(id, *value);
 		}
 		else if (auto value{ Resource::GetString(id) })
 		{
 			std::string str{ Util::ToU8String(*value) };
-			if (ImGui::InputText("##string", &str))
-				Resource::Set(id, Util::ToWString(str));
+			if (ImGui::InputText("##value", &str))
+				isModified = Resource::Set(id, Util::ToWString(str));
 		}
 		else
 		{
 			std::array<char, 2> dummy{ "-" };
 			ImGui::BeginDisabled();
-			ImGui::InputText("##folder", dummy.data(), dummy.size(), ImGuiInputTextFlags_ReadOnly);
+			ImGui::InputText("##value", dummy.data(), dummy.size(), ImGuiInputTextFlags_ReadOnly);
 			ImGui::EndDisabled();
 		}
 	}
 	ImGui::End();
+
+	if (isModified)
+		Delegates::OnPropertyModified.Broadcast(m_targetID);
 }

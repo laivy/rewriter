@@ -47,20 +47,34 @@ namespace Resource
 
 		template<class T>
 		requires std::is_constructible_v<Value, T>
-		void Set(ID id, T value)
+		bool Set(ID id, const T& value)
 		{
 			if (id >= m_properties.size())
 			{
 				assert(false && "invalid id");
-				return;
+				return false;
 			}
 			auto& prop{ m_properties.at(id) };
 			if (!prop)
 			{
 				assert(false && "not exists");
-				return;
+				return false;
+			}
+			if (!std::visit([&value](auto&& arg)
+			{
+				using U = std::decay_t<decltype(arg)>;
+				if constexpr (!std::is_same_v<U, T>)
+					return true;
+				else if constexpr (std::is_same_v<U, std::monostate>)
+					return false;
+				else
+					return arg != value;
+			}, prop->value))
+			{
+				return false;
 			}
 			prop->value = value;
+			return true;
 		}
 
 		std::wstring GetName(ID id) const;

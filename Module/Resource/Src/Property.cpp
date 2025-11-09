@@ -261,28 +261,32 @@ namespace Resource
 		return false;
 	}
 
-	void Set(ID id, std::monostate value)
+	bool Set(ID id, std::monostate value)
 	{
 		if (auto manager{ Manager::GetInstance() })
-			manager->Set(id, value);
+			return manager->Set(id, value);
+		return false;
 	}
 
-	void Set(ID id, std::int32_t value)
+	bool Set(ID id, std::int32_t value)
 	{
 		if (auto manager{ Manager::GetInstance() })
-			manager->Set(id, value);
+			return manager->Set(id, value);
+		return false;
 	}
 
-	void Set(ID id, float value)
+	bool Set(ID id, float value)
 	{
 		if (auto manager{ Manager::GetInstance() })
-			manager->Set(id, value);
+			return manager->Set(id, value);
+		return false;
 	}
 
-	void Set(ID id, const std::wstring& value)
+	bool Set(ID id, const std::wstring& value)
 	{
 		if (auto manager{ Manager::GetInstance() })
-			manager->Set(id, value);
+			return manager->Set(id, value);
+		return false;
 	}
 
 	//void Set(const ID id, const Sprite& value)

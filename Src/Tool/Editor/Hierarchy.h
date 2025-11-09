@@ -17,7 +17,6 @@ private:
 		bool isModified;
 		bool isOpened;
 		bool openWarningModal;
-		bool openRenamePopup;
 	};
 
 public:
@@ -65,10 +64,7 @@ private:
 	Resource::ID New(Resource::ID parentID);
 
 	void SetWarningModal(Resource::ID id, bool opened);
-	void SetRenamePopup(Resource::ID id, bool opened);
-
 	bool IsWarningModalOpened(Resource::ID id) const;
-	bool IsRenamePopupOpened(Resource::ID id) const;
 
 private:
 	std::vector<Root> m_roots;

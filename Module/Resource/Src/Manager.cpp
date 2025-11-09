@@ -236,17 +236,23 @@ namespace Resource
 			assert(false && "invalid id");
 			return false;
 		}
+
 		auto& prop{ m_properties.at(id) };
 		if (!prop)
 		{
 			assert(false && "not exists");
 			return false;
 		}
+
+		if (prop->name == name)
+			return true;
+
 		if (!m_idToEntry.contains(id))
 		{
 			assert(false && "invalid id");
 			return false;
 		}
+
 		if (name.find(Stringtable::DataPathSeperator) != std::wstring::npos)
 		{
 			assert(false && "invalid name");
@@ -262,10 +268,8 @@ namespace Resource
 		}() };
 
 		if (m_pathToID.contains(newPath))
-		{
-			assert(false && "already exists");
 			return false;
-		}
+
 		prop->name = name;
 		m_idToEntry.at(id).path = newPath;
 		m_pathToID.erase(oldPath);

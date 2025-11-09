@@ -1,6 +1,7 @@
 #include "Pch.h"
 #include "Delegates.h"
 #include "Hierarchy.h"
+#include "Inspector.h"
 #include "Common/Util.h"
 
 namespace
@@ -350,7 +351,10 @@ void Hierarchy::Shortcut()
 	{
 		auto selectedIDs{ m_selectedIDs | std::views::filter([this](auto id) { return !IsRoot(id); }) };
 		if (!selectedIDs.empty())
-			SetRenamePopup(selectedIDs.back(), true);
+		{
+			if (auto inspector{ ImGui::FindWindowByName("속성") })
+				ImGui::ActivateItemByID(inspector->GetID("##name"));
+		}
 	}
 	if (ImGui::IsKeyDown(ImGuiKey_Delete))
 	{
@@ -517,7 +521,8 @@ void Hierarchy::TreeView()
 			if (ImGui::MenuItem("이름 바꾸기", "F2") || ImGui::Shortcut(ImGuiKey_F2))
 			{
 				ImGui::CloseCurrentPopup();
-				SetRenamePopup(id, true);
+				if (auto inspector{ ImGui::FindWindowByName("속성") })
+					ImGui::ActivateItemByID(inspector->GetID("##name"));
 			}
 			if (ImGui::MenuItem("삭제", "D") || ImGui::IsKeyPressed(ImGuiKey_D))
 			{
@@ -640,33 +645,6 @@ void Hierarchy::TreeView()
 			ImGui::EndDragDropSource();
 		}
 
-		// 이름 변경
-		if (IsRenamePopupOpened(id))
-		{
-			if (!isTreeNodeOpened)
-				ImGui::Indent();
-			ImGui::SetNextWindowPos(ImGui::GetCursorScreenPos());
-			if (!isTreeNodeOpened)
-				ImGui::Unindent();
-			ImGui::OpenPopup("Rename");
-			SetRenamePopup(id, false);
-		}
-		if (ImGui::BeginPopup("Rename", ImGuiWindowFlags_NoNav))
-		{
-			ImGui::SetKeyboardFocusHere();
-			std::string buffer{ name };
-			if (ImGui::InputText("##Rename", &buffer, ImGuiInputTextFlags_EnterReturnsTrue))
-			{
-				std::wstring newName{ Util::ToWString(buffer) };
-				if (Resource::SetName(id, newName))
-					Delegates::OnPropertyModified.Broadcast(id);
-				ImGui::CloseCurrentPopup();
-			}
-			if (ImGui::IsKeyDown(ImGuiKey_Escape))
-				ImGui::CloseCurrentPopup();
-			ImGui::EndPopup();
-		}
-
 		// 파일 닫기 경고
 		if (IsWarningModalOpened(id))
 		{
@@ -735,9 +713,17 @@ void Hierarchy::TreeView()
 		if (from == treeIDs.end() || to == treeIDs.end())
 			break;
 
-		auto [begin, end] { std::minmax(from, to) };
-		for (auto it{ begin }; it <= end; ++it)
-			SetSelected(*it, true);
+		m_selectedIDs.clear();
+		if (from < to)
+		{
+			for (Resource::ID id : std::ranges::subrange{ from, to + 1 })
+				SetSelected(id, true);
+		}
+		else
+		{
+			for (Resource::ID id : std::ranges::subrange{ to, from + 1 } | std::views::reverse)
+				SetSelected(id, true);
+		}
 	} while (false);
 
 	// 클릭을 했는데 선택된 프로퍼티가 없으면 이미 선택되어 있는 프로퍼티 선택 해제
@@ -813,11 +799,6 @@ void Hierarchy::SetWarningModal(Resource::ID id, bool opened)
 	m_contexts[id].openWarningModal = opened;
 }
 
-void Hierarchy::SetRenamePopup(Resource::ID id, bool opened)
-{
-	m_contexts[id].openRenamePopup = opened;
-}
-
 bool Hierarchy::IsWarningModalOpened(Resource::ID id) const
 {
 	if (m_contexts.contains(id))
@@ -825,9 +806,3 @@ bool Hierarchy::IsWarningModalOpened(Resource::ID id) const
 	return false;
 }
 
-bool Hierarchy::IsRenamePopupOpened(Resource::ID id) const
-{
-	if (m_contexts.contains(id))
-		return m_contexts.at(id).openRenamePopup;
-	return false;
-}
