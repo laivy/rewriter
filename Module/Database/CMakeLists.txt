@@ -47,9 +47,6 @@ target_include_directories(${target_name}
 	PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/Include/${target_name}"
 )
 
-find_package(ODBC)
-if(NOT ODBC_FOUND)
-	message(FATAL_ERROR "ODBC library not found")
-endif()
+find_package(ODBC REQUIRED)
 target_link_libraries(${target_name} PRIVATE "ODBC::ODBC" "Resource")
 source_group("Library/Resource" "${RWT_SOURCE_DIR}/Library/Resource/Include/Resource/.*\\.h$")
