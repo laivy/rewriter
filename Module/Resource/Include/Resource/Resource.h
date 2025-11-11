@@ -1,4 +1,10 @@
 #pragma once
+#include <filesystem>
+#include <functional>
+#include <memory>
+#include <span>
+#include <Resource/Resource.h>
+#include <Common/Type.h>
 #include "Export.h"
 #include "Model.h"
 #include "Property.h"
@@ -10,9 +16,8 @@ namespace Resource
 	{
 		std::filesystem::path mountPath;
 		std::function<Sprite(std::span<char>)> loadSprite;
-		std::function<std::shared_ptr<Model>(std::span<char>)> loadModel;
 	};
 
 	RESOURCE_API void Initialize(const Initializer& initializer);
-	RESOURCE_API void Uninitialize();
+	RESOURCE_API void Finalize();
 }

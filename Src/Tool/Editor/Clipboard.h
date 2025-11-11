@@ -1,6 +1,6 @@
 #pragma once
 
-class Clipboard : public TSingleton<Clipboard>
+class Clipboard : public Singleton<Clipboard>
 {
 public:
 	Clipboard() = default;

@@ -1,6 +1,6 @@
 #pragma once
 
-class Viewport : public TSingleton<Viewport>
+class Viewport : public Singleton<Viewport>
 {
 public:
 	Viewport();

@@ -20,7 +20,7 @@ namespace Resource
 	Manager::Manager()
 	{
 		Delegates::OnInitialize.Bind(this, std::bind_front(&Manager::OnInitialize, this));
-		Delegates::OnUninitialize.Bind(this, std::bind_front(&Manager::OnUninitialize, this));
+		Delegates::OnFinalize.Bind(this, std::bind_front(&Manager::OnFinalize, this));
 	}
 
 	ID Manager::New(const std::wstring& path)
@@ -306,6 +306,16 @@ namespace Resource
 		return prop->name;
 	}
 
+	std::wstring Manager::GetPath(ID id) const
+	{
+		if (!m_idToEntry.contains(id))
+		{
+			assert(false && "invalid id");
+			return L"";
+		}
+		return m_idToEntry.at(id).path;
+	}
+
 	bool Manager::SaveToFile(ID id, const std::filesystem::path& path) const
 	{
 		if (id >= m_properties.size())
@@ -417,14 +427,12 @@ namespace Resource
 	{
 		m_mountPath = initializer.mountPath;
 		m_loadSprite = initializer.loadSprite;
-		m_loadModel = initializer.loadModel;
 	}
 
-	void Manager::OnUninitialize()
+	void Manager::OnFinalize()
 	{
 		m_mountPath.clear();
 		m_loadSprite = nullptr;
-		m_loadModel = nullptr;
 		m_properties.clear();
 		m_idToEntry.clear();
 		m_pathToID.clear();

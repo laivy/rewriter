@@ -2,7 +2,7 @@
 
 class ISocket;
 
-class SocketManager : public TSingleton<SocketManager>
+class SocketManager : public Singleton<SocketManager>
 {
 public:
 	SocketManager();

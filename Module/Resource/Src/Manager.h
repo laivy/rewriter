@@ -5,7 +5,7 @@ namespace Resource
 {
 	class Manager :
 		public IDelegate::Listener,
-		public TSingleton<Manager>
+		public Singleton<Manager>
 	{
 	private:
 		static constexpr std::string_view Signature{ "lvy" };
@@ -47,7 +47,7 @@ namespace Resource
 		bool SetName(ID id, const std::wstring& name);
 
 		template<class T>
-		requires std::is_constructible_v<Value, T>
+			requires std::is_constructible_v<Value, T>
 		bool Set(ID id, const T& value)
 		{
 			if (id >= m_properties.size())
@@ -81,9 +81,10 @@ namespace Resource
 		}
 
 		std::wstring GetName(ID id) const;
+		std::wstring GetPath(ID id) const;
 
 		template<class T>
-		requires std::is_constructible_v<Value, T>
+			requires std::is_constructible_v<Value, T>
 		std::optional<T> Get(ID id) const
 		{
 			if (id >= m_properties.size())
@@ -106,7 +107,7 @@ namespace Resource
 
 	private:
 		void OnInitialize(const Initializer& initializer);
-		void OnUninitialize();
+		void OnFinalize();
 
 		std::wstring NormalizePath(const std::wstring& path) const;
 		ID LoadFromFile(const std::filesystem::path& filePath, const std::wstring& subPath);
@@ -114,7 +115,6 @@ namespace Resource
 	private:
 		std::filesystem::path m_mountPath;
 		std::function<Sprite(std::span<char>)> m_loadSprite;
-		std::function<std::shared_ptr<Model>(std::span<char>)> m_loadModel;
 
 		std::vector<std::optional<Property>> m_properties;
 		std::unordered_map<std::wstring, ID> m_pathToID;

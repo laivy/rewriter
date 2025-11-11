@@ -1,7 +1,7 @@
 #pragma once
 #include "Common/Socket.h"
 
-class SocketManager : public TSingleton<SocketManager>
+class SocketManager : public Singleton<SocketManager>
 {
 public:
 	SocketManager();

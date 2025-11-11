@@ -1,6 +1,6 @@
 #pragma once
 
-class Desktop : public TSingleton<Desktop>
+class Desktop : public Singleton<Desktop>
 {
 private:
 	struct Config

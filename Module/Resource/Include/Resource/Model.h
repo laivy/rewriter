@@ -1,4 +1,8 @@
 ﻿#pragma once
+#include <functional>
+#include <memory>
+#include <vector>
+#include <Common/Type.h>
 
 namespace Resource
 {

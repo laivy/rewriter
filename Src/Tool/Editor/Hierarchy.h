@@ -2,7 +2,7 @@
 
 class Hierarchy :
 	public IDelegate::Listener,
-	public TSingleton<Hierarchy>
+	public Singleton<Hierarchy>
 {
 private:
 	struct Root

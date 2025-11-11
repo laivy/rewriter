@@ -4,7 +4,7 @@
 #if 0
 class UIEditor :
 	public IObserver,
-	public TSingleton<UIEditor>
+	public Singleton<UIEditor>
 {
 private:
 	class Window : public IWindow

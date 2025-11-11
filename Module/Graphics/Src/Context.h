@@ -1,0 +1,42 @@
+#pragma once
+#include "Descriptor.h"
+
+namespace Graphics
+{
+	struct Context : Singleton<Context>
+	{
+		void* hWnd;
+		Microsoft::WRL::ComPtr<IDXGIFactory4> dxgiFactory;
+		Microsoft::WRL::ComPtr<ID3D12Device> d3d12Device;
+		Microsoft::WRL::ComPtr<ID3D11On12Device> d3d11On12Device;
+		Microsoft::WRL::ComPtr<ID3D11DeviceContext> d3d11DeviceContext;
+		Microsoft::WRL::ComPtr<ID2D1Factory3> d2dFactory;
+		Microsoft::WRL::ComPtr<ID2D1Device2> d2dDevice;
+		Microsoft::WRL::ComPtr<ID2D1DeviceContext2> d2dContext;
+		Microsoft::WRL::ComPtr<IDWriteFactory5> dwriteFactory;
+		Microsoft::WRL::ComPtr<ID3D12CommandQueue> commandQueue;
+		// std::unique_ptr<SwapChain> swapChain;
+		Microsoft::WRL::ComPtr<ID3D12CommandAllocator> commandAllocator;
+		Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList> commandList;
+		Microsoft::WRL::ComPtr<ID3D12RootSignature> rootSignature;
+		Microsoft::WRL::ComPtr<ID3D12Fence> fence;
+		std::unique_ptr<Descriptor::Manager> descriptorManager;
+	};
+
+#ifdef _IMGUI
+	namespace ImGui
+	{
+		struct ImGuiTexture
+		{
+			ImTextureID id;
+			std::uint32_t width;
+			std::uint32_t height;
+		};
+
+		struct Context : Singleton<Context>
+		{
+			std::unordered_map<std::filesystem::path, ImGuiTexture> textures;
+		};
+	}
+#endif
+}

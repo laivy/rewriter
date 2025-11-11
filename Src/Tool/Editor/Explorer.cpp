@@ -9,7 +9,7 @@ namespace
 
 	// ImGui::TreeNodeBehavior 함수 기반
 	// <펼침 버튼이 눌렸는지, 이름 부분이 눌렸는지>
-	std::pair<bool, bool> IconTreeNode(const std::shared_ptr<Graphics::ImGui::Texture>& icon, const ImVec2& icon_size, std::string_view label, ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_None)
+	std::pair<bool, bool> IconTreeNode(ImTextureID icon, const ImVec2& icon_size, std::string_view label, ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_None)
 	{
 		ImGuiID id = ImGui::GetID(label.data());
 
@@ -269,7 +269,7 @@ namespace
 					ImVec2 lt{ text_pos.x - padding.x - icon_size.x, text_pos.y + (label_size.y - icon_size.y) / 2.0f };
 					ImVec2 rb{ text_pos.x - padding.x, lt.y + icon_size.y };
 					ImDrawList* drawList{ ImGui::GetWindowDrawList() };
-					drawList->AddImage(Graphics::ImGui::GetTextureRef(icon), lt, rb);
+					drawList->AddImage(icon, lt, rb);
 				}
 				if (g.LogEnabled)
 					ImGui::LogSetNextTextDecoration(">", NULL);
@@ -356,7 +356,7 @@ void Explorer::FileTree()
 		ImGui::PushStyleVar(ImGuiStyleVar_IndentSpacing, ImGui::GetFontSize() / 2.0f);
 		[this](this auto self, const std::filesystem::path& path) -> void
 		{
-			static const auto FolderIcon{ Graphics::ImGui::LoadTexture(L"Editor/Icon/Folder.png") };
+			static const auto FolderIcon{ Graphics::ImGui::GetImage(L"Editor/Icon/Folder.png") };
 
 			bool hasSubFolder{ false };
 			for (const auto& entry : std::filesystem::directory_iterator{ path, std::filesystem::directory_options::skip_permission_denied })
@@ -527,7 +527,7 @@ void Explorer::FileViewer()
 		if (!entry.is_directory())
 			continue;
 
-		static const auto icon{ Graphics::ImGui::LoadTexture(L"Editor/Icon/Folder.png") };
+		static const auto icon{ Graphics::ImGui::GetImage(L"Editor/Icon/Folder.png") };
 		std::wstring name{ entry.path().filename().wstring() };
 		if (FileViewerIconButton(icon, Util::ToU8String(name)))
 			SetPath(std::filesystem::canonical(m_path / name));
@@ -540,7 +540,7 @@ void Explorer::FileViewer()
 		if (!entry.is_regular_file())
 			continue;
 
-		static const auto icon{ Graphics::ImGui::LoadTexture(L"Editor/Icon/File.png") };
+		static const auto icon{ Graphics::ImGui::GetImage(L"Editor/Icon/File.png") };
 		std::u8string name{ entry.path().filename().u8string() };
 		FileViewerIconButton(icon, reinterpret_cast<const char*>(name.c_str()), entry.path().wstring());
 		ImGui::SameLine();
@@ -634,7 +634,7 @@ std::vector<std::string> Explorer::FileViewerSplitString(std::string_view string
 	return lines;
 }
 
-bool Explorer::FileViewerIconButton(const std::shared_ptr<Graphics::ImGui::Texture>& icon, std::string_view label, std::wstring dragDropPayload)
+bool Explorer::FileViewerIconButton(ImTextureID icon, std::string_view label, std::wstring dragDropPayload)
 {
 	constexpr float ItemWidth{ 101.0f };
 	constexpr ImVec2 IconSize{ 64.0f, 64.0f };
@@ -689,7 +689,7 @@ bool Explorer::FileViewerIconButton(const std::shared_ptr<Graphics::ImGui::Textu
 		// 아이콘
 		ImGui::Dummy(ImVec2{ (ItemWidth - IconSize.x) / 2.0f, IconSize.y });
 		ImGui::SameLine();
-		Graphics::ImGui::Image(icon, IconSize);
+		ImGui::Image(icon, IconSize);
 		ImGui::Spacing();
 
 		// 폴더 또는 파일 이름

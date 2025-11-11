@@ -9,8 +9,8 @@ namespace Resource
 		Delegates::OnInitialize.Broadcast(initializer);
 	}
 
-	void Uninitialize()
+	void Finalize()
 	{
-		Delegates::OnUninitialize.Broadcast();
+		Delegates::OnFinalize.Broadcast();
 	}
 }

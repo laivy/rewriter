@@ -1,6 +1,6 @@
 #pragma once
 
-class Explorer : public TSingleton<Explorer>
+class Explorer : public Singleton<Explorer>
 {
 private:
 	struct FileViewerSelectedItem
@@ -22,7 +22,7 @@ private:
 	void FileViewer();
 
 	std::vector<std::string> FileViewerSplitString(std::string_view string, const float width);
-	bool FileViewerIconButton(const std::shared_ptr<Graphics::ImGui::Texture>& icon, std::string_view label, std::wstring dragDropPayload = L"");
+	bool FileViewerIconButton(ImTextureID icon, std::string_view label, std::wstring dragDropPayload = L"");
 
 	void SetPath(const std::filesystem::path& path);
 

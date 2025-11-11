@@ -18,40 +18,20 @@ generate_export_header(${target_name}
 )
 
 set(public_sources
-	${CMAKE_CURRENT_SOURCE_DIR}/Include/${target_name}/Camera.h
+	${CMAKE_CURRENT_SOURCE_DIR}/Include/${target_name}/Export.h
 	${CMAKE_CURRENT_SOURCE_DIR}/Include/${target_name}/Graphics.h
-	${CMAKE_CURRENT_SOURCE_DIR}/Include/${target_name}/GraphicsImGui.h
-	${CMAKE_CURRENT_SOURCE_DIR}/Include/${target_name}/Graphics2D.h
-	${CMAKE_CURRENT_SOURCE_DIR}/Include/${target_name}/Graphics3D.h
+	${CMAKE_CURRENT_SOURCE_DIR}/Include/${target_name}/ImGui.h
 )
 source_group("Include/${target_name}" FILES ${public_sources})
 target_sources(${target_name} PUBLIC ${public_sources})
 
 set(sources
-	${CMAKE_CURRENT_SOURCE_DIR}/Src/Camera.cpp
-	${CMAKE_CURRENT_SOURCE_DIR}/Src/ConstantBuffer.cpp
-	${CMAKE_CURRENT_SOURCE_DIR}/Src/ConstantBuffer.h
+	${CMAKE_CURRENT_SOURCE_DIR}/Src/Context.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/Src/Context.h
 	${CMAKE_CURRENT_SOURCE_DIR}/Src/Descriptor.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/Src/Descriptor.h
-	${CMAKE_CURRENT_SOURCE_DIR}/Src/DescriptorManager.cpp
-	${CMAKE_CURRENT_SOURCE_DIR}/Src/DescriptorManager.h
-	${CMAKE_CURRENT_SOURCE_DIR}/Src/DllMain.cpp
-	${CMAKE_CURRENT_SOURCE_DIR}/Src/Global.cpp
-	${CMAKE_CURRENT_SOURCE_DIR}/Src/Global.h
 	${CMAKE_CURRENT_SOURCE_DIR}/Src/Graphics.cpp
-	${CMAKE_CURRENT_SOURCE_DIR}/Src/Graphics.h
-	${CMAKE_CURRENT_SOURCE_DIR}/Src/Graphics2D.cpp
-	${CMAKE_CURRENT_SOURCE_DIR}/Src/Graphics3D.cpp
-	${CMAKE_CURRENT_SOURCE_DIR}/Src/Graphics3DUtil.cpp
-	${CMAKE_CURRENT_SOURCE_DIR}/Src/Graphics3DUtil.h
-	${CMAKE_CURRENT_SOURCE_DIR}/Src/GraphicsImGui.cpp
-	${CMAKE_CURRENT_SOURCE_DIR}/Src/Pch.h
-	${CMAKE_CURRENT_SOURCE_DIR}/Src/PipelineState.cpp
-	${CMAKE_CURRENT_SOURCE_DIR}/Src/PipelineState.h
-	${CMAKE_CURRENT_SOURCE_DIR}/Src/RenderTarget.cpp
-	${CMAKE_CURRENT_SOURCE_DIR}/Src/RenderTarget.h
-	${CMAKE_CURRENT_SOURCE_DIR}/Src/SwapChain.cpp
-	${CMAKE_CURRENT_SOURCE_DIR}/Src/SwapChain.h
+	${CMAKE_CURRENT_SOURCE_DIR}/Src/ImGui.cpp
 )
 target_sources(${target_name} PRIVATE ${sources})
 source_group("Src" FILES ${sources})

@@ -1,20 +1,23 @@
 #pragma once
-#include "Common/Pch.h"
+// C++ 표준 라이브러리
+#include <algorithm>
+#include <array>
+#include <cstdint>
+#include <filesystem>
+#include <optional>
+#include <ranges>
+#include <vector>
+#include <unordered_map>
 
 // Windows
-#include <wincodec.h>
+#include <wrl/client.h>
 
 // DirectX
 #include <directx/d3dx12.h> // 가장 먼저 포함해야 함
-#include <DirectXMath.h>
-#include <dwrite_3.h>
-#include <dxgi1_6.h>
-
-#ifdef _DIRECT2D
 #include <d2d1_3.h>
 #include <d3d11on12.h>
-#endif
-
+#include <dwrite_3.h>
+#include <dxgi1_6.h>
 #ifdef _DEBUG
 #include <dxgidebug.h>
 #endif
@@ -22,10 +25,10 @@
 // ImGui
 #ifdef _IMGUI
 #include <imgui.h>
-#include <imgui_impl_dx12.h>
 #include <imgui_impl_win32.h>
-extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
+#include <imgui_impl_dx12.h>
 #endif
 
-// Project Library
+// 프로젝트
+#include <Common/Singleton.h>
 #include <Resource/Resource.h>

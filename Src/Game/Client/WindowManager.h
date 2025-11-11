@@ -3,9 +3,9 @@
 class IModal;
 class IWindow;
 
-class WindowManager : 
+class WindowManager :
 	public IObserver,
-	public TSingleton<WindowManager>
+	public Singleton<WindowManager>
 {
 public:
 	WindowManager();

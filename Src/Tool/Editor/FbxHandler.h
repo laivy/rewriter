@@ -6,7 +6,7 @@ namespace fbxsdk
 	class FbxScene;
 }
 
-class FbxHandler : public TSingleton<FbxHandler>
+class FbxHandler : public Singleton<FbxHandler>
 {
 public:
 	FbxHandler();

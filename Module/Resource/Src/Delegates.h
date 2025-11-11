@@ -5,5 +5,5 @@
 namespace Delegates
 {
 	extern Delegate<const Resource::Initializer&> OnInitialize;
-	extern Delegate<> OnUninitialize;
+	extern Delegate<> OnFinalize;
 }

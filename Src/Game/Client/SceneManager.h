@@ -2,7 +2,7 @@
 
 class IScene;
 
-class SceneManager : public TSingleton<SceneManager>
+class SceneManager : public Singleton<SceneManager>
 {
 private:
 	struct TransitionData

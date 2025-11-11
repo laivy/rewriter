@@ -1,17 +1,17 @@
 #pragma once
-#include "Camera.h"
+#include <span>
+#include <Resource/Resource.h>
 #include "Export.h"
-#include "Graphics.h"
-#include "Graphics2D.h"
-#include "Graphics3D.h"
-#ifdef _IMGUI
-#include "GraphicsImGui.h"
-#endif
+#include "ImGui.h"
 
 namespace Graphics
 {
 	GRAPHICS_API bool Initialize(void* hWnd);
-	GRAPHICS_API void Uninitialize();
+	GRAPHICS_API void Finalize();
 
-	GRAPHICS_API void OnWindowResized(int width, int height);
+	GRAPHICS_API Resource::Sprite LoadSprite(std::span<char> binary);
+
+	GRAPHICS_API bool Begin();
+	GRAPHICS_API bool End();
+	GRAPHICS_API bool Present();
 }

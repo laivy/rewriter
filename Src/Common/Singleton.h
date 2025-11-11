@@ -1,7 +1,7 @@
 ﻿#pragma once
 
 template <class T>
-class TSingleton
+class Singleton
 {
 public:
 	template <class... Args>
@@ -28,8 +28,8 @@ public:
 	}
 
 protected:
-	TSingleton() = default;
-	virtual ~TSingleton() = default;
+	Singleton() = default;
+	virtual ~Singleton() = default;
 
 private:
 	static inline std::unique_ptr<T> m_instance;

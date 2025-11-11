@@ -24,7 +24,6 @@ target_sources(${target_name} PUBLIC ${public_sources})
 set(sources
 	${CMAKE_CURRENT_SOURCE_DIR}/Src/Delegates.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/Src/Delegates.h
-	${CMAKE_CURRENT_SOURCE_DIR}/Src/DllMain.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/Src/Manager.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/Src/Manager.h
 	${CMAKE_CURRENT_SOURCE_DIR}/Src/Model.cpp

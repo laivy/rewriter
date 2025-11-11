@@ -3,7 +3,7 @@
 
 class CenterServer final :
 	public ServerSocket,
-	public TSingleton<CenterServer>
+	public Singleton<CenterServer>
 {
 public:
 	CenterServer();

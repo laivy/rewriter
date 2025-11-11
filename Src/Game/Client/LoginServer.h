@@ -3,7 +3,7 @@
 
 class LoginServer final :
 	public ISocket,
-	public TSingleton<LoginServer>
+	public Singleton<LoginServer>
 {
 public:
 	LoginServer();

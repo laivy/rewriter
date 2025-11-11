@@ -2,7 +2,7 @@
 
 class User;
 
-class UserManager : public TSingleton<UserManager>
+class UserManager : public Singleton<UserManager>
 {
 public:
 	UserManager() = default;

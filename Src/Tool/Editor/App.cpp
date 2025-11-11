@@ -20,8 +20,8 @@ App::~App()
 	Explorer::Destroy();
 	Hierarchy::Destroy();
 	Inspector::Destroy();
-	Resource::Uninitialize();
-	Graphics::Uninitialize();
+	Resource::Finalize();
+	Graphics::Finalize();
 }
 
 void App::Run()
@@ -56,7 +56,7 @@ Int2 App::GetCursorPosition() const
 
 LRESULT App::WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
-	if (Graphics::ImGui::WndProcHandler(hWnd, message, wParam, lParam))
+	if (Graphics::ImGui::WndProc(hWnd, message, wParam, lParam))
 		return 0;
 
 	App* app{ reinterpret_cast<App*>(::GetWindowLongPtr(hWnd, GWLP_USERDATA)) };
@@ -130,9 +130,9 @@ void App::InitWindow()
 void App::InitApp()
 {
 	// 라이브러리 초기화
-	Resource::Initialize({ L"Editor", &Graphics::D2D::LoadSprite, &Graphics::D3D::LoadModel });
+	Resource::Initialize({ L"Editor", &Graphics::LoadSprite });
 	Graphics::Initialize(m_hWnd);
-	Delegates::OnWindowResized.Bind(&Graphics::OnWindowResized);
+	//Delegates::OnWindowResized.Bind(&Graphics::OnWindowResized);
 
 	// ImGui 초기화
 	ImGui::SetCurrentContext(Graphics::ImGui::GetContext());
@@ -170,7 +170,7 @@ void App::Update()
 
 void App::Render()
 {
-	Graphics::D3D::Begin();
+	Graphics::Begin();
 	{
 		Graphics::ImGui::Begin();
 		{
@@ -186,10 +186,6 @@ void App::Render()
 		}
 		Graphics::ImGui::End();
 	}
-	Graphics::D3D::End();
-	Graphics::D2D::Begin();
-	{
-	}
-	Graphics::D2D::End();
-	Graphics::D3D::Present();
+	Graphics::End();
+	Graphics::Present();
 }

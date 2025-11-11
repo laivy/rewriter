@@ -1,7 +1,7 @@
 #pragma once
 #include "Common/Timer.h"
 
-class App : public TSingleton<App>
+class App : public Singleton<App>
 {
 public:
 	App();

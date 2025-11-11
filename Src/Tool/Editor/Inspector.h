@@ -2,7 +2,7 @@
 
 class Inspector :
 	public IDelegate::Listener,
-	public TSingleton<Inspector>
+	public Singleton<Inspector>
 {
 public:
 	Inspector();

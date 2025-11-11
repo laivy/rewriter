@@ -303,7 +303,7 @@ namespace Resource
 		return std::nullopt;
 	}
 
-	std::optional<std::wstring> GetName(ID id, const std::wstring &path)
+	std::optional<std::wstring> GetName(ID id, const std::wstring& path)
 	{
 		auto manager{ Manager::GetInstance() };
 		if (!manager)
@@ -314,6 +314,13 @@ namespace Resource
 			return std::nullopt;
 
 		return manager->GetName(targetID);
+	}
+
+	std::optional<std::wstring> GetPath(ID id)
+	{
+		if (auto manager{ Manager::GetInstance() })
+			return manager->GetPath(id);
+		return std::nullopt;
 	}
 
 	std::optional<std::int32_t> GetInt(ID id)

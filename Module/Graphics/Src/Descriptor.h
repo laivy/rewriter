@@ -1,29 +1,33 @@
 #pragma once
 
-namespace Graphics::D3D
+namespace Graphics::Descriptor
 {
-	class Descriptor
+	struct Handle
+	{
+		D3D12_DESCRIPTOR_HEAP_TYPE type;
+		D3D12_CPU_DESCRIPTOR_HANDLE cpuHandle;
+		D3D12_GPU_DESCRIPTOR_HANDLE gpuHandle;
+	};
+
+	struct Heap
+	{
+		Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> heap;
+		D3D12_DESCRIPTOR_HEAP_DESC desc;
+		std::vector<std::optional<Handle>> handles;
+	};
+
+	class Manager
 	{
 	public:
-		Descriptor();
-		Descriptor(CD3DX12_CPU_DESCRIPTOR_HANDLE cpuHandle, CD3DX12_GPU_DESCRIPTOR_HANDLE gpuHandle);
-		~Descriptor() = default;
+		Manager();
 
-		Descriptor(const Descriptor&) = delete;
-		Descriptor& operator=(const Descriptor&) = delete;
+		Handle Allocate(D3D12_DESCRIPTOR_HEAP_TYPE type);
+		void Free(const Handle& handle);
 
-		Descriptor(Descriptor&& rhs) noexcept;
-		Descriptor& operator=(Descriptor&& rhs) noexcept;
-
-		void CreateShaderResourceView(const ComPtr<ID3D12Resource>& resource, const D3D12_SHADER_RESOURCE_VIEW_DESC* desc) const;
-		void CreateRenderTargetView(const ComPtr<ID3D12Resource>& resource, const D3D12_RENDER_TARGET_VIEW_DESC* desc) const;
-		void CreateDepthStencilView(const ComPtr<ID3D12Resource>& resource, const D3D12_DEPTH_STENCIL_VIEW_DESC* desc) const;
-
-		CD3DX12_CPU_DESCRIPTOR_HANDLE GetCpuHandle() const;
-		CD3DX12_GPU_DESCRIPTOR_HANDLE GetGpuHandle() const;
+		ID3D12DescriptorHeap* GetHeap(D3D12_DESCRIPTOR_HEAP_TYPE type) const;
 
 	private:
-		CD3DX12_CPU_DESCRIPTOR_HANDLE m_cpuHandle;
-		CD3DX12_GPU_DESCRIPTOR_HANDLE m_gpuHandle;
+		std::array<UINT, D3D12_DESCRIPTOR_HEAP_TYPE_NUM_TYPES> m_descriptorSizes;
+		std::array<Heap, D3D12_DESCRIPTOR_HEAP_TYPE_NUM_TYPES> m_heaps;
 	};
 }

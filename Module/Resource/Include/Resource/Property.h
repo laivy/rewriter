@@ -82,6 +82,7 @@ namespace Resource
 
 	RESOURCE_API std::optional<std::wstring> GetName(ID id);
 	RESOURCE_API std::optional<std::wstring> GetName(ID id, const std::wstring& path);
+	RESOURCE_API std::optional<std::wstring> GetPath(ID id);
 	RESOURCE_API std::optional<std::int32_t> GetInt(ID id);
 	RESOURCE_API std::optional<std::int32_t> GetInt(ID id, const std::wstring& path);
 	RESOURCE_API std::optional<float> GetFloat(ID id);
