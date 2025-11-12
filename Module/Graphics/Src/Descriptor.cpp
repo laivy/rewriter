@@ -19,6 +19,7 @@ namespace Graphics::Descriptor
 		srvHeap.desc.NumDescriptors = 1024;
 		srvHeap.desc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;
 		srvHeap.desc.NodeMask = 0;
+		srvHeap.handles.resize(srvHeap.desc.NumDescriptors);
 		if (FAILED(ctx->d3d12Device->CreateDescriptorHeap(&srvHeap.desc, IID_PPV_ARGS(&srvHeap.heap))))
 			return;
 
@@ -27,6 +28,7 @@ namespace Graphics::Descriptor
 		samplerHeap.desc.NumDescriptors = 1;
 		samplerHeap.desc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;
 		samplerHeap.desc.NodeMask = 0;
+		samplerHeap.handles.resize(samplerHeap.desc.NumDescriptors);
 		if (FAILED(ctx->d3d12Device->CreateDescriptorHeap(&samplerHeap.desc, IID_PPV_ARGS(&samplerHeap.heap))))
 			return;
 
@@ -35,6 +37,7 @@ namespace Graphics::Descriptor
 		rtvHeap.desc.NumDescriptors = 32;
 		rtvHeap.desc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_NONE;
 		rtvHeap.desc.NodeMask = 0;
+		rtvHeap.handles.resize(rtvHeap.desc.NumDescriptors);
 		if (FAILED(ctx->d3d12Device->CreateDescriptorHeap(&rtvHeap.desc, IID_PPV_ARGS(&rtvHeap.heap))))
 			return;
 
@@ -43,13 +46,14 @@ namespace Graphics::Descriptor
 		dsvHeap.desc.NumDescriptors = 32;
 		dsvHeap.desc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_NONE;
 		dsvHeap.desc.NodeMask = 0;
+		dsvHeap.handles.resize(dsvHeap.desc.NumDescriptors);
 		if (FAILED(ctx->d3d12Device->CreateDescriptorHeap(&dsvHeap.desc, IID_PPV_ARGS(&dsvHeap.heap))))
 			return;
 	}
 
 	Handle Manager::Allocate(D3D12_DESCRIPTOR_HEAP_TYPE type)
 	{
-		auto& heap{ m_heaps[type] };
+		auto& heap{ m_heaps.at(type) };
 		auto it{ std::ranges::find_if(heap.handles, [](const auto& handle) { return !handle.has_value(); }) };
 		if (it == heap.handles.end())
 			return {};
@@ -68,7 +72,10 @@ namespace Graphics::Descriptor
 
 	void Manager::Free(const Handle& handle)
 	{
-		auto& heap{ m_heaps[handle.type] };
+		if (handle.cpuHandle.ptr == 0 && handle.gpuHandle.ptr == 0)
+			return;
+
+		auto& heap{ m_heaps.at(handle.type) };
 		const INT index{ static_cast<INT>((handle.cpuHandle.ptr - heap.heap->GetCPUDescriptorHandleForHeapStart().ptr) / m_descriptorSizes.at(handle.type)) };
 		if (index < 0 || index >= static_cast<INT>(heap.handles.size()))
 			return;

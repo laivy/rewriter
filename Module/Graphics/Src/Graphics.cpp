@@ -1,6 +1,8 @@
 #include "Pch.h"
 #include "Context.h"
+#include "Descriptor.h"
 #include "Graphics.h"
+#include "SwapChain.h"
 
 using Microsoft::WRL::ComPtr;
 
@@ -66,6 +68,30 @@ namespace
 		return true;
 	}
 
+	bool CreateCommandAllocator()
+	{
+		auto ctx{ Graphics::Context::GetInstance() };
+		if (!ctx || !ctx->d3d12Device)
+			return false;
+
+		if (FAILED(ctx->d3d12Device->CreateCommandAllocator(D3D12_COMMAND_LIST_TYPE_DIRECT, IID_PPV_ARGS(&ctx->commandAllocator))))
+			return false;
+		return true;
+	}
+
+	bool CreateCommandList()
+	{
+		auto ctx{ Graphics::Context::GetInstance() };
+		if (!ctx || !ctx->d3d12Device || !ctx->commandAllocator)
+			return false;
+
+		if (FAILED(ctx->d3d12Device->CreateCommandList(0, D3D12_COMMAND_LIST_TYPE_DIRECT, ctx->commandAllocator.Get(), nullptr, IID_PPV_ARGS(&ctx->commandList))))
+			return false;
+		if (FAILED(ctx->commandList->Close()))
+			return false;
+		return true;
+	}
+
 	bool CreateD3D11On12Device()
 	{
 		auto ctx{ Graphics::Context::GetInstance() };
@@ -89,7 +115,9 @@ namespace
 			&ctx->d3d11DeviceContext,
 			nullptr
 		)))
+		{
 			return false;
+		}
 		if (FAILED(d3d11Device.As(&ctx->d3d11On12Device)))
 			return false;
 		return true;
@@ -109,6 +137,20 @@ namespace
 		if (FAILED(ctx->d2dFactory->CreateDevice(dxgiDevice.Get(), &ctx->d2dDevice)))
 			return false;
 		if (FAILED(ctx->d2dDevice->CreateDeviceContext(D2D1_DEVICE_CONTEXT_OPTIONS_NONE, &ctx->d2dContext)))
+			return false;
+		return true;
+	}
+
+	bool CreateFence()
+	{
+		auto ctx{ Graphics::Context::GetInstance() };
+		if (!ctx || !ctx->d3d12Device)
+			return false;
+		if (FAILED(ctx->d3d12Device->CreateFence(0, D3D12_FENCE_FLAG_NONE, IID_PPV_ARGS(&ctx->fence))))
+			return false;
+		ctx->fenceValue = 1;
+		ctx->fenceEvent = ::CreateEvent(nullptr, FALSE, FALSE, nullptr);
+		if (!ctx->fenceEvent)
 			return false;
 		return true;
 	}
@@ -161,14 +203,27 @@ namespace
 
 		return true;
 	}
-
-	void CleanUpImGui()
-	{
-		::ImGui_ImplDX12_Shutdown();
-		::ImGui_ImplWin32_Shutdown();
-		ImGui::DestroyContext();
-	}
 #endif
+
+	bool WaitForPreviousFrame()
+	{
+		auto ctx{ Graphics::Context::GetInstance() };
+		if (!ctx || !ctx->commandQueue || !ctx->fence || !ctx->fenceEvent)
+			return false;
+
+		const UINT64 fenceValue{ ctx->fenceValue };
+		if (FAILED(ctx->commandQueue->Signal(ctx->fence.Get(), fenceValue)))
+			return false;
+
+		++ctx->fenceValue;
+		if (ctx->fence->GetCompletedValue() < fenceValue)
+		{
+			if (FAILED(ctx->fence->SetEventOnCompletion(fenceValue, ctx->fenceEvent)))
+				return false;
+			::WaitForSingleObject(ctx->fenceEvent, INFINITE);
+		}
+		return true;
+	}
 }
 
 namespace Graphics
@@ -181,20 +236,38 @@ namespace Graphics
 			return false;
 		if (!CreateD3D12Device())
 			return false;
-		ctx->descriptorManager = std::make_unique<Descriptor::Manager>();
-		if (!ctx->descriptorManager)
-			return false;
 		if (!CreateCommandQueue())
+			return false;
+		if (!CreateCommandAllocator())
+			return false;
+		if (!CreateCommandList())
 			return false;
 		if (!CreateD3D11On12Device())
 			return false;
 		if (!InitializeDirect2D())
 			return false;
+		if (!CreateFence())
+			return false;
+		ctx->descriptorManager = std::make_unique<Descriptor::Manager>();
+		if (!ctx->descriptorManager)
+			return false;
+		ctx->swapChain = std::make_unique<SwapChain>();
+		if (!ctx->swapChain)
+			return false;
+#ifdef _IMGUI
+		if (!InitializeImGui())
+			return false;
+#endif
 		return true;
 	}
 
 	void Finalize()
 	{
+#ifdef _IMGUI
+		::ImGui_ImplDX12_Shutdown();
+		::ImGui_ImplWin32_Shutdown();
+		::ImGui::DestroyContext();
+#endif
 		Context::Destroy();
 	}
 
@@ -205,16 +278,47 @@ namespace Graphics
 
 	bool Begin()
 	{
+		auto ctx{ Context::GetInstance() };
+		if (!ctx)
+			return false;
+
+		if (FAILED(ctx->commandAllocator->Reset()))
+			return false;
+		if (FAILED(ctx->commandList->Reset(ctx->commandAllocator.Get(), nullptr)))
+			return false;
+		if (!ctx->swapChain->Bind(ctx->commandList.Get()))
+			return false;
+
+		const std::array<ID3D12DescriptorHeap*, 2> descriptorHeaps{
+			ctx->descriptorManager->GetHeap(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV),
+			ctx->descriptorManager->GetHeap(D3D12_DESCRIPTOR_HEAP_TYPE_SAMPLER)
+		};
+		ctx->commandList->SetDescriptorHeaps(static_cast<UINT>(descriptorHeaps.size()), descriptorHeaps.data());
 		return true;
 	}
 
 	bool End()
 	{
+		auto ctx{ Context::GetInstance() };
+		if (!ctx)
+			return false;
+		if (FAILED(ctx->commandList->Close()))
+			return false;
+
+		const std::array<ID3D12CommandList*, 1> commandLists{ ctx->commandList.Get() };
+		ctx->commandQueue->ExecuteCommandLists(static_cast<UINT>(commandLists.size()), commandLists.data());
 		return true;
 	}
 
 	bool Present()
 	{
+		auto ctx{ Context::GetInstance() };
+		if (!ctx)
+			return false;
+		if (FAILED(ctx->swapChain->Present()))
+			return false;
+		if (!WaitForPreviousFrame())
+			return false;
 		return true;
 	}
 }

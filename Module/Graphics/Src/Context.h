@@ -1,10 +1,18 @@
 #pragma once
-#include "Descriptor.h"
 
 namespace Graphics
 {
+	namespace Descriptor
+	{
+		class Manager;
+	}
+
+	class SwapChain;
+
 	struct Context : Singleton<Context>
 	{
+		static constexpr UINT FrameCount{ 2 };
+
 		void* hWnd;
 		Microsoft::WRL::ComPtr<IDXGIFactory4> dxgiFactory;
 		Microsoft::WRL::ComPtr<ID3D12Device> d3d12Device;
@@ -14,13 +22,15 @@ namespace Graphics
 		Microsoft::WRL::ComPtr<ID2D1Device2> d2dDevice;
 		Microsoft::WRL::ComPtr<ID2D1DeviceContext2> d2dContext;
 		Microsoft::WRL::ComPtr<IDWriteFactory5> dwriteFactory;
+		std::unique_ptr<Descriptor::Manager> descriptorManager;
+		std::unique_ptr<SwapChain> swapChain;
 		Microsoft::WRL::ComPtr<ID3D12CommandQueue> commandQueue;
-		// std::unique_ptr<SwapChain> swapChain;
 		Microsoft::WRL::ComPtr<ID3D12CommandAllocator> commandAllocator;
 		Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList> commandList;
 		Microsoft::WRL::ComPtr<ID3D12RootSignature> rootSignature;
 		Microsoft::WRL::ComPtr<ID3D12Fence> fence;
-		std::unique_ptr<Descriptor::Manager> descriptorManager;
+		UINT64 fenceValue;
+		HANDLE fenceEvent;
 	};
 
 #ifdef _IMGUI

@@ -32,6 +32,9 @@ set(sources
 	${CMAKE_CURRENT_SOURCE_DIR}/Src/Descriptor.h
 	${CMAKE_CURRENT_SOURCE_DIR}/Src/Graphics.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/Src/ImGui.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/Src/Pch.h
+	${CMAKE_CURRENT_SOURCE_DIR}/Src/SwapChain.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/Src/SwapChain.h
 )
 target_sources(${target_name} PRIVATE ${sources})
 source_group("Src" FILES ${sources})
