@@ -18,14 +18,15 @@ public:
 	void Render();
 
 private:
+	void MainMenuBar();
+	void DockSpace();
+
 	void SaveConfig();
 	void LoadConfig();
 
 	void SetTheme(std::string_view theme);
 	void SetFontName(std::string_view fontName);
 	void SetFontSize(float size);
-
-	void MainMenuBar();
 
 private:
 	Config m_config;

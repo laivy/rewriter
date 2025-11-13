@@ -21,6 +21,7 @@
 #ifdef _DEBUG
 #include <dxgidebug.h>
 #endif
+#include <WICTextureLoader/WICTextureLoader12.h>
 
 // ImGui
 #ifdef _IMGUI

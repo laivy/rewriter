@@ -7,7 +7,7 @@ namespace Graphics
 	class SwapChain
 	{
 	private:
-		struct FrameBuffer
+		struct FrameResource
 		{
 			Microsoft::WRL::ComPtr<ID3D12Resource> backBuffer;
 			Microsoft::WRL::ComPtr<ID3D11Resource> wrappedBackBuffer;
@@ -18,7 +18,9 @@ namespace Graphics
 	public:
 		SwapChain();
 
-		bool Bind(ID3D12GraphicsCommandList* commandList);
+		bool Bind3D(ID3D12GraphicsCommandList* commandList);
+		bool Bind2D();
+		bool Unbind2D();
 		bool Present();
 
 	private:
@@ -32,6 +34,6 @@ namespace Graphics
 		D3D12_VIEWPORT m_viewport;
 		D3D12_RECT m_scissorRect;
 		UINT m_frameIndex;
-		std::array<FrameBuffer, Context::FrameCount> m_frameBuffers;
+		std::array<FrameResource, Context::FrameCount> m_frameResources;
 	};
 }

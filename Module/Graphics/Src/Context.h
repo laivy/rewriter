@@ -38,6 +38,7 @@ namespace Graphics
 	{
 		struct ImGuiTexture
 		{
+			Microsoft::WRL::ComPtr<ID3D12Resource> resource;
 			ImTextureID id;
 			std::uint32_t width;
 			std::uint32_t height;
@@ -45,6 +46,12 @@ namespace Graphics
 
 		struct Context : Singleton<Context>
 		{
+			Microsoft::WRL::ComPtr<ID3D12CommandAllocator> commandAllocator;
+			Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList> commandList;
+			Microsoft::WRL::ComPtr<ID3D12Fence> fence;
+			UINT64 fenceValue;
+			HANDLE fenceEvent;
+
 			std::unordered_map<std::filesystem::path, ImGuiTexture> textures;
 		};
 	}

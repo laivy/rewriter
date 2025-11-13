@@ -24,6 +24,7 @@ void Desktop::Update(float deltaSeconds)
 
 void Desktop::Render()
 {
+	DockSpace();
 	MainMenuBar();
 }
 
@@ -72,6 +73,20 @@ void Desktop::MainMenuBar()
 		ImGui::EndMenu();
 	}
 	ImGui::EndMainMenuBar();
+}
+
+void Desktop::DockSpace()
+{
+	auto viewport{ ::ImGui::GetMainViewport() };
+	ImGui::SetNextWindowPos(viewport->WorkPos);
+	ImGui::SetNextWindowSize(viewport->WorkSize);
+	ImGui::SetNextWindowViewport(viewport->ID);
+	ImGui::Begin("DockSpace", nullptr,
+		ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoSavedSettings |
+		ImGuiWindowFlags_NoFocusOnAppearing | ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_NoDocking
+	);
+	ImGui::DockSpace(ImGui::GetID("DockSpace"), ImVec2{}, ImGuiDockNodeFlags_PassthruCentralNode);
+	ImGui::End();
 }
 
 void Desktop::SaveConfig()

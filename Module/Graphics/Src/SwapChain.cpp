@@ -8,7 +8,7 @@ namespace Graphics
 		m_viewport{},
 		m_scissorRect{},
 		m_frameIndex{ 0 },
-		m_frameBuffers{}
+		m_frameResources{}
 	{
 		auto ctx{ Context::GetInstance() };
 		if (!ctx || !ctx->hWnd || !ctx->dxgiFactory || !ctx->d3d11On12Device)
@@ -53,12 +53,12 @@ namespace Graphics
 			return;
 	}
 
-	bool SwapChain::Bind(ID3D12GraphicsCommandList* commandList)
+	bool SwapChain::Bind3D(ID3D12GraphicsCommandList* commandList)
 	{
-		const auto barrier{ CD3DX12_RESOURCE_BARRIER::Transition(m_frameBuffers[m_frameIndex].backBuffer.Get(), D3D12_RESOURCE_STATE_PRESENT, D3D12_RESOURCE_STATE_RENDER_TARGET) };
+		const auto barrier{ CD3DX12_RESOURCE_BARRIER::Transition(m_frameResources[m_frameIndex].backBuffer.Get(), D3D12_RESOURCE_STATE_PRESENT, D3D12_RESOURCE_STATE_RENDER_TARGET) };
 		commandList->ResourceBarrier(1, &barrier);
 
-		D3D12_CPU_DESCRIPTOR_HANDLE rtvHandle{ m_frameBuffers[m_frameIndex].rtvHandle.cpuHandle };
+		D3D12_CPU_DESCRIPTOR_HANDLE rtvHandle{ m_frameResources[m_frameIndex].rtvHandle.cpuHandle };
 		D3D12_CPU_DESCRIPTOR_HANDLE dsvHandle{ m_dsvHandle.cpuHandle };
 		commandList->OMSetRenderTargets(1, &rtvHandle, FALSE, &dsvHandle);
 		commandList->RSSetViewports(1, &m_viewport);
@@ -70,10 +70,37 @@ namespace Graphics
 		return true;
 	}
 
+	bool SwapChain::Bind2D()
+	{
+		auto ctx{ Context::GetInstance() };
+		if (!ctx)
+			return false;
+
+		auto& frameResource{ m_frameResources[m_frameIndex] };
+		ctx->d3d11On12Device->AcquireWrappedResources(frameResource.wrappedBackBuffer.GetAddressOf(), 1);
+		ctx->d2dContext->SetTarget(frameResource.d2dBitmap.Get());
+		ctx->d2dContext->BeginDraw();
+		return true;
+	}
+
+	bool SwapChain::Unbind2D()
+	{
+		auto ctx{ Context::GetInstance() };
+		if (!ctx)
+			return false;
+		if (FAILED(ctx->d2dContext->EndDraw()))
+			return false;
+		auto& frameResource{ m_frameResources[m_frameIndex] };
+		ctx->d3d11On12Device->ReleaseWrappedResources(frameResource.wrappedBackBuffer.GetAddressOf(), 1);
+		ctx->d3d11DeviceContext->Flush();
+		return true;
+	}
+
 	bool SwapChain::Present()
 	{
 		if (FAILED(m_swapChain->Present(1, 0)))
 			return false;
+		m_frameIndex = m_swapChain->GetCurrentBackBufferIndex();
 		return true;
 	}
 
@@ -85,27 +112,27 @@ namespace Graphics
 
 		for (UINT i{ 0 }; i < Context::FrameCount; ++i)
 		{
-			auto& frameBuffer{ m_frameBuffers.at(i) };
-			if (FAILED(m_swapChain->GetBuffer(i, IID_PPV_ARGS(&frameBuffer.backBuffer))))
+			auto& frameResource{ m_frameResources.at(i) };
+			if (FAILED(m_swapChain->GetBuffer(i, IID_PPV_ARGS(&frameResource.backBuffer))))
 				return false;
 
 			// D3D12
-			ctx->descriptorManager->Free(frameBuffer.rtvHandle);
-			frameBuffer.rtvHandle = ctx->descriptorManager->Allocate(D3D12_DESCRIPTOR_HEAP_TYPE_RTV);
+			ctx->descriptorManager->Free(frameResource.rtvHandle);
+			frameResource.rtvHandle = ctx->descriptorManager->Allocate(D3D12_DESCRIPTOR_HEAP_TYPE_RTV);
 			ctx->d3d12Device->CreateRenderTargetView(
-				frameBuffer.backBuffer.Get(),
+				frameResource.backBuffer.Get(),
 				nullptr,
-				frameBuffer.rtvHandle.cpuHandle
+				frameResource.rtvHandle.cpuHandle
 			);
 
 			// D3D11On12
 			D3D11_RESOURCE_FLAGS flags{ D3D11_BIND_RENDER_TARGET };
 			if (FAILED(ctx->d3d11On12Device->CreateWrappedResource(
-				frameBuffer.backBuffer.Get(),
+				frameResource.backBuffer.Get(),
 				&flags,
 				D3D12_RESOURCE_STATE_RENDER_TARGET,
 				D3D12_RESOURCE_STATE_PRESENT,
-				IID_PPV_ARGS(&frameBuffer.wrappedBackBuffer))))
+				IID_PPV_ARGS(&frameResource.wrappedBackBuffer))))
 			{
 				return false;
 			}
@@ -120,18 +147,18 @@ namespace Graphics
 			) };
 
 			Microsoft::WRL::ComPtr<IDXGISurface> dxgiSurface;
-			if (FAILED(frameBuffer.wrappedBackBuffer.As(&dxgiSurface)))
+			if (FAILED(frameResource.wrappedBackBuffer.As(&dxgiSurface)))
 				return false;
 			if (FAILED(ctx->d2dContext->CreateBitmapFromDxgiSurface(
 				dxgiSurface.Get(),
 				&bitmapProperties,
-				&frameBuffer.d2dBitmap)))
+				&frameResource.d2dBitmap)))
 			{
 				return false;
 			}
 		}
 
-		ctx->d2dContext->SetTarget(m_frameBuffers.at(m_frameIndex).d2dBitmap.Get());
+		ctx->d2dContext->SetTarget(m_frameResources.at(m_frameIndex).d2dBitmap.Get());
 		return true;
 	}
 

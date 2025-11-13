@@ -162,6 +162,22 @@ namespace
 		if (!ctx)
 			return false;
 
+		// ImGui 전용 D3D12 리소스 생성
+		if (auto imguiCtx{ Graphics::ImGui::Context::Instantiate() })
+		{
+			if (FAILED(ctx->d3d12Device->CreateCommandAllocator(D3D12_COMMAND_LIST_TYPE_DIRECT, IID_PPV_ARGS(&imguiCtx->commandAllocator))))
+				return false;
+			if (FAILED(ctx->d3d12Device->CreateCommandList(0, D3D12_COMMAND_LIST_TYPE_DIRECT, imguiCtx->commandAllocator.Get(), nullptr, IID_PPV_ARGS(&imguiCtx->commandList))))
+				return false;
+			imguiCtx->commandList->Close();
+			if (FAILED(ctx->d3d12Device->CreateFence(0, D3D12_FENCE_FLAG_NONE, IID_PPV_ARGS(&imguiCtx->fence))))
+				return false;
+			imguiCtx->fenceValue = 1;
+			imguiCtx->fenceEvent = ::CreateEvent(nullptr, FALSE, FALSE, nullptr);
+			if (!imguiCtx->fenceEvent)
+				return false;
+		}
+
 		IMGUI_CHECKVERSION();
 		ImGui::CreateContext();
 		ImGui::GetIO().ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard | ImGuiConfigFlags_DockingEnable | ImGuiConfigFlags_ViewportsEnable;
@@ -172,7 +188,7 @@ namespace
 		ImGui_ImplDX12_InitInfo info{};
 		info.Device = ctx->d3d12Device.Get();
 		info.CommandQueue = ctx->commandQueue.Get();
-		info.NumFramesInFlight = 2;
+		info.NumFramesInFlight = Graphics::Context::FrameCount;
 		info.RTVFormat = DXGI_FORMAT_R8G8B8A8_UNORM;
 		info.DSVFormat = DXGI_FORMAT_D24_UNORM_S8_UINT;
 		info.SrvDescriptorHeap = ctx->descriptorManager->GetHeap(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
@@ -215,13 +231,14 @@ namespace
 		if (FAILED(ctx->commandQueue->Signal(ctx->fence.Get(), fenceValue)))
 			return false;
 
-		++ctx->fenceValue;
 		if (ctx->fence->GetCompletedValue() < fenceValue)
 		{
 			if (FAILED(ctx->fence->SetEventOnCompletion(fenceValue, ctx->fenceEvent)))
 				return false;
-			::WaitForSingleObject(ctx->fenceEvent, INFINITE);
+			if (::WaitForSingleObject(ctx->fenceEvent, INFINITE) == WAIT_FAILED)
+				return false;
 		}
+		++ctx->fenceValue;
 		return true;
 	}
 }
@@ -267,6 +284,7 @@ namespace Graphics
 		::ImGui_ImplDX12_Shutdown();
 		::ImGui_ImplWin32_Shutdown();
 		::ImGui::DestroyContext();
+		ImGui::Context::Destroy();
 #endif
 		Context::Destroy();
 	}
@@ -276,7 +294,7 @@ namespace Graphics
 		return {};
 	}
 
-	bool Begin()
+	bool Begin3D()
 	{
 		auto ctx{ Context::GetInstance() };
 		if (!ctx)
@@ -286,7 +304,7 @@ namespace Graphics
 			return false;
 		if (FAILED(ctx->commandList->Reset(ctx->commandAllocator.Get(), nullptr)))
 			return false;
-		if (!ctx->swapChain->Bind(ctx->commandList.Get()))
+		if (!ctx->swapChain->Bind3D(ctx->commandList.Get()))
 			return false;
 
 		const std::array<ID3D12DescriptorHeap*, 2> descriptorHeaps{
@@ -297,7 +315,7 @@ namespace Graphics
 		return true;
 	}
 
-	bool End()
+	bool End3D()
 	{
 		auto ctx{ Context::GetInstance() };
 		if (!ctx)
@@ -310,12 +328,32 @@ namespace Graphics
 		return true;
 	}
 
+	bool Begin2D()
+	{
+		auto ctx{ Context::GetInstance() };
+		if (!ctx)
+			return false;
+		if (!ctx->swapChain->Bind2D())
+			return false;
+		return true;
+	}
+
+	bool End2D()
+	{
+		auto ctx{ Context::GetInstance() };
+		if (!ctx)
+			return false;
+		if (!ctx->swapChain->Unbind2D())
+			return false;
+		return true;
+	}
+
 	bool Present()
 	{
 		auto ctx{ Context::GetInstance() };
 		if (!ctx)
 			return false;
-		if (FAILED(ctx->swapChain->Present()))
+		if (!ctx->swapChain->Present())
 			return false;
 		if (!WaitForPreviousFrame())
 			return false;

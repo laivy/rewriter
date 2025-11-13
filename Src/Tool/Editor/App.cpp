@@ -170,7 +170,7 @@ void App::Update()
 
 void App::Render()
 {
-	Graphics::Begin();
+	Graphics::Begin3D();
 	{
 		Graphics::ImGui::Begin();
 		{
@@ -186,6 +186,11 @@ void App::Render()
 		}
 		Graphics::ImGui::End();
 	}
-	Graphics::End();
+	Graphics::End3D();
+	Graphics::Begin2D();
+	{
+		// ...
+	}
+	Graphics::End2D();
 	Graphics::Present();
 }
