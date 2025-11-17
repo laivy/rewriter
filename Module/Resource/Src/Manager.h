@@ -114,7 +114,7 @@ namespace Resource
 
 	private:
 		std::filesystem::path m_mountPath;
-		std::function<Sprite(std::span<char>)> m_loadSprite;
+		std::function<Sprite(ID, std::span<char>)> m_loadSprite;
 
 		std::vector<std::optional<Property>> m_properties;
 		std::unordered_map<std::wstring, ID> m_pathToID;

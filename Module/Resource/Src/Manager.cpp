@@ -379,9 +379,9 @@ namespace Resource
 				}
 				else if constexpr (std::is_same_v<T, Resource::Sprite>)
 				{
-					auto dataLength{ static_cast<std::uint32_t>(arg.binary.size()) };
+					auto dataLength{ static_cast<std::uint32_t>(arg.binary->size()) };
 					tempFile.write(reinterpret_cast<const char*>(&dataLength), sizeof(dataLength));
-					tempFile.write(reinterpret_cast<const char*>(arg.binary.data()), dataLength * sizeof(std::byte));
+					tempFile.write(reinterpret_cast<const char*>(arg.binary->data()), dataLength * sizeof(std::byte));
 				}
 			}, prop.value);
 
@@ -532,7 +532,7 @@ namespace Resource
 				file.read(reinterpret_cast<char*>(&dataLength), sizeof(dataLength));
 				std::vector<char> binary(dataLength);
 				file.read(reinterpret_cast<char*>(binary.data()), dataLength * sizeof(char));
-				const auto sprite{ m_loadSprite(binary) };
+				const auto sprite{ m_loadSprite(id, binary) };
 				Set(id, sprite);
 				break;
 			}

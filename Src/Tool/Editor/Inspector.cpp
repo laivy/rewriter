@@ -175,7 +175,9 @@ void Inspector::Render()
 				if (!filePaths.empty())
 				{
 					std::ifstream file{ filePaths, std::ios::binary };
-					std::vector<char> buffer{ std::istreambuf_iterator(file), {} };
+					auto buffer{ std::make_shared<std::vector<char>>() };
+					buffer->assign(std::istreambuf_iterator<char>(file), {});
+					Graphics::ImGui::CreateTexture(*Resource::GetPath(id), *buffer);
 					isModified = Resource::Set(id, Resource::Sprite{ .binary = std::move(buffer) });
 				}
 			}
@@ -186,8 +188,8 @@ void Inspector::Render()
 			region.y -= ImGui::GetFrameHeight();
 			if (ImGui::BeginChild("preview", region, ImGuiChildFlags_None, ImGuiWindowFlags_HorizontalScrollbar))
 			{
-				ImTextureID image{ Graphics::ImGui::GetImage(id) };
-				ImVec2 imageSize{ Graphics::ImGui::GetImageSize(id) };
+				ImTextureID textureID{ Graphics::ImGui::GetTexture(id) };
+				ImVec2 imageSize{ Graphics::ImGui::GetTextureSize(textureID) };
 				imageSize *= scale / 100.0f;
 
 				ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2{});
@@ -220,14 +222,18 @@ void Inspector::Render()
 					drawList->AddLine(cursor, cursor + ImVec2{ imageSize.x, 0.0f }, ImGui::ColorConvertFloat4ToU32(style.Colors[ImGuiCol_Text]));
 					drawList->AddLine(cursor + ImVec2{ 0.0f, imageSize.y }, cursor + imageSize, ImGui::ColorConvertFloat4ToU32(style.Colors[ImGuiCol_Text]));
 				}
-				ImGui::Image(id, imageSize);
+				if (textureID == 0)
+					ImGui::Dummy(imageSize);
+				else
+					ImGui::Image(textureID, imageSize);
 				ImGui::PopStyleVar();
 			}
 			ImGui::EndChild();
 
 			if (ImGui::BeginChild("scale", ImVec2{ -style.WindowPadding.x, ImGui::GetFrameHeight() }))
 			{
-				const ImVec2 size{ Graphics::ImGui::GetImageSize(id) };
+				ImTextureID textureID{ Graphics::ImGui::GetTexture(id) };
+				const ImVec2 size{ Graphics::ImGui::GetTextureSize(textureID) };
 				ImGui::SameLine();
 				ImGui::AlignTextToFramePadding();
 				ImGui::Text("%.0f x %.0f", size.x, size.y);

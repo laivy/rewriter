@@ -36,7 +36,7 @@ namespace Graphics
 #ifdef _IMGUI
 	namespace ImGui
 	{
-		struct ImGuiTexture
+		struct Texture
 		{
 			Microsoft::WRL::ComPtr<ID3D12Resource> resource;
 			ImTextureID id;
@@ -52,7 +52,7 @@ namespace Graphics
 			UINT64 fenceValue;
 			HANDLE fenceEvent;
 
-			std::unordered_map<std::filesystem::path, ImGuiTexture> textures;
+			std::unordered_map<std::wstring, Texture> textures;
 		};
 	}
 #endif

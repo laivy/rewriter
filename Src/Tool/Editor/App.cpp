@@ -130,8 +130,8 @@ void App::InitWindow()
 void App::InitApp()
 {
 	// 라이브러리 초기화
-	Resource::Initialize({ L"Editor", &Graphics::LoadSprite });
 	Graphics::Initialize(m_hWnd);
+	Resource::Initialize({ L"Editor", &Graphics::LoadSprite });
 	//Delegates::OnWindowResized.Bind(&Graphics::OnWindowResized);
 
 	// ImGui 초기화

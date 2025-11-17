@@ -356,7 +356,7 @@ void Explorer::FileTree()
 		ImGui::PushStyleVar(ImGuiStyleVar_IndentSpacing, ImGui::GetFontSize() / 2.0f);
 		[this](this auto self, const std::filesystem::path& path) -> void
 		{
-			static const auto FolderIcon{ Graphics::ImGui::GetImage(L"Editor/Icon/Folder.png") };
+			static const auto FolderIcon{ Graphics::ImGui::CreateTexture(L"Editor/Icon/Folder.png") };
 
 			bool hasSubFolder{ false };
 			for (const auto& entry : std::filesystem::directory_iterator{ path, std::filesystem::directory_options::skip_permission_denied })
@@ -527,7 +527,7 @@ void Explorer::FileViewer()
 		if (!entry.is_directory())
 			continue;
 
-		static const auto icon{ Graphics::ImGui::GetImage(L"Editor/Icon/Folder.png") };
+		static const auto icon{ Graphics::ImGui::CreateTexture(L"Editor/Icon/Folder.png") };
 		std::wstring name{ entry.path().filename().wstring() };
 		if (FileViewerIconButton(icon, Util::ToU8String(name)))
 			SetPath(std::filesystem::canonical(m_path / name));
@@ -540,7 +540,7 @@ void Explorer::FileViewer()
 		if (!entry.is_regular_file())
 			continue;
 
-		static const auto icon{ Graphics::ImGui::GetImage(L"Editor/Icon/File.png") };
+		static const auto icon{ Graphics::ImGui::CreateTexture(L"Editor/Icon/File.png") };
 		std::u8string name{ entry.path().filename().u8string() };
 		FileViewerIconButton(icon, reinterpret_cast<const char*>(name.c_str()), entry.path().wstring());
 		ImGui::SameLine();

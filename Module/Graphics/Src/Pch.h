@@ -10,6 +10,7 @@
 #include <unordered_map>
 
 // Windows
+#include <wincodec.h>
 #include <wrl/client.h>
 
 // DirectX

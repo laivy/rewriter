@@ -15,7 +15,7 @@ namespace Resource
 	struct Initializer
 	{
 		std::filesystem::path mountPath;
-		std::function<Sprite(std::span<char>)> loadSprite;
+		std::function<Sprite(ID, std::span<char>)> loadSprite;
 	};
 
 	RESOURCE_API void Initialize(const Initializer& initializer);
