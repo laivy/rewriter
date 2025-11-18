@@ -45,34 +45,6 @@ target_sources(${target_name} PRIVATE ${common_sources})
 
 include(FetchContent)
 FetchContent_Populate(
-	imgui
-	GIT_REPOSITORY https://github.com/ocornut/imgui.git
-	GIT_TAG e7d2d636affeeac1fc7175fb13472ca02d1bc0d1 # v1.92.4-docking
-	SOURCE_DIR ${RWT_EXTERNAL_DIR}/imgui
-)
-target_compile_definitions(${target_name} PRIVATE IMGUI_DEFINE_MATH_OPERATORS)
-target_sources(${target_name} PRIVATE
-	${imgui_SOURCE_DIR}/imconfig.h
-	${imgui_SOURCE_DIR}/imgui.cpp
-	${imgui_SOURCE_DIR}/imgui.h
-	${imgui_SOURCE_DIR}/imgui_demo.cpp
-	${imgui_SOURCE_DIR}/imgui_draw.cpp
-	${imgui_SOURCE_DIR}/imgui_internal.h
-	${imgui_SOURCE_DIR}/imgui_tables.cpp
-	${imgui_SOURCE_DIR}/imgui_widgets.cpp
-	${imgui_SOURCE_DIR}/imstb_rectpack.h
-	${imgui_SOURCE_DIR}/imstb_textedit.h
-	${imgui_SOURCE_DIR}/imstb_truetype.h
-	${imgui_SOURCE_DIR}/misc/cpp/imgui_stdlib.cpp
-	${imgui_SOURCE_DIR}/misc/cpp/imgui_stdlib.h
-)
-target_include_directories(${target_name} PRIVATE
-	${imgui_SOURCE_DIR}
-	${imgui_SOURCE_DIR}/backends
-	${imgui_SOURCE_DIR}/misc/cpp
-)
-
-FetchContent_Populate(
 	ufbx
 	GIT_REPOSITORY https://github.com/ufbx/ufbx.git
 	GIT_TAG 6ecd6177af59c82ec363356ac36c3a4245b85321 # v0.21.2

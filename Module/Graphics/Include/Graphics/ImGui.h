@@ -1,9 +1,21 @@
 #pragma once
 #ifdef _IMGUI
+// C++ 표준 라이브러리
+#include <filesystem>
+#include <span>
+#include <string>
+
+// Windows
+#include <Windows.h>
+
+// ImGui
 #include <imgui.h>
-#include <imgui_impl_win32.h>
-#include <imgui_impl_dx12.h>
+#include <misc/cpp/imgui_stdlib.h>
+
+// 프로젝트 모듈
 #include <Resource/Resource.h>
+
+// 프로젝트
 #include "Export.h"
 
 namespace Graphics::ImGui

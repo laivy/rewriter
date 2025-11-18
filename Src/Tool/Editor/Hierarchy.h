@@ -59,6 +59,7 @@ private:
 	void DragDrop();
 	void MenuBar();
 	void TreeView();
+	void FileDialog();
 
 	void LoadFromFile(const std::filesystem::path& filePath);
 	Resource::ID New(Resource::ID parentID);

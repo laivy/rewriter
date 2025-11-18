@@ -21,6 +21,7 @@ set(public_sources
 	${CMAKE_CURRENT_SOURCE_DIR}/Include/${target_name}/Export.h
 	${CMAKE_CURRENT_SOURCE_DIR}/Include/${target_name}/Graphics.h
 	${CMAKE_CURRENT_SOURCE_DIR}/Include/${target_name}/ImGui.h
+	${CMAKE_CURRENT_SOURCE_DIR}/Include/${target_name}/ImGuiFileDialog.h
 )
 source_group("Include/${target_name}" FILES ${public_sources})
 target_sources(${target_name} PUBLIC ${public_sources})
@@ -32,6 +33,7 @@ set(sources
 	${CMAKE_CURRENT_SOURCE_DIR}/Src/Descriptor.h
 	${CMAKE_CURRENT_SOURCE_DIR}/Src/Graphics.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/Src/ImGui.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/Src/ImGuiFileDialog.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/Src/Pch.h
 	${CMAKE_CURRENT_SOURCE_DIR}/Src/SwapChain.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/Src/SwapChain.h
@@ -92,27 +94,34 @@ FetchContent_Populate(
 	GIT_TAG e7d2d636affeeac1fc7175fb13472ca02d1bc0d1 # v1.92.4-docking
 	SOURCE_DIR ${RWT_EXTERNAL_DIR}/imgui
 )
-target_compile_definitions(${target_name} PRIVATE IMGUI_DEFINE_MATH_OPERATORS)
-target_sources(${target_name} PRIVATE
-	${imgui_SOURCE_DIR}/imconfig.h
-	${imgui_SOURCE_DIR}/imgui.cpp
-	${imgui_SOURCE_DIR}/imgui.h
-	${imgui_SOURCE_DIR}/imgui_demo.cpp
-	${imgui_SOURCE_DIR}/imgui_draw.cpp
-	${imgui_SOURCE_DIR}/imgui_internal.h
-	${imgui_SOURCE_DIR}/imgui_tables.cpp
-	${imgui_SOURCE_DIR}/imgui_widgets.cpp
-	${imgui_SOURCE_DIR}/imstb_rectpack.h
-	${imgui_SOURCE_DIR}/imstb_textedit.h
-	${imgui_SOURCE_DIR}/imstb_truetype.h
-	${imgui_SOURCE_DIR}/backends/imgui_impl_dx12.cpp
-	${imgui_SOURCE_DIR}/backends/imgui_impl_dx12.h
-	${imgui_SOURCE_DIR}/backends/imgui_impl_win32.cpp
-	${imgui_SOURCE_DIR}/backends/imgui_impl_win32.h
+target_compile_definitions(${target_name} PUBLIC IMGUI_DEFINE_MATH_OPERATORS)
+target_sources(${target_name}
+	PUBLIC
+		${imgui_SOURCE_DIR}/imconfig.h
+		${imgui_SOURCE_DIR}/imgui.cpp
+		${imgui_SOURCE_DIR}/imgui.h
+		${imgui_SOURCE_DIR}/imgui_demo.cpp
+		${imgui_SOURCE_DIR}/imgui_draw.cpp
+		${imgui_SOURCE_DIR}/imgui_internal.h
+		${imgui_SOURCE_DIR}/imgui_tables.cpp
+		${imgui_SOURCE_DIR}/imgui_widgets.cpp
+		${imgui_SOURCE_DIR}/imstb_rectpack.h
+		${imgui_SOURCE_DIR}/imstb_textedit.h
+		${imgui_SOURCE_DIR}/imstb_truetype.h
+		${imgui_SOURCE_DIR}/misc/cpp/imgui_stdlib.cpp
+		${imgui_SOURCE_DIR}/misc/cpp/imgui_stdlib.h
+	PRIVATE
+		${imgui_SOURCE_DIR}/backends/imgui_impl_dx12.cpp
+		${imgui_SOURCE_DIR}/backends/imgui_impl_dx12.h
+		${imgui_SOURCE_DIR}/backends/imgui_impl_win32.cpp
+		${imgui_SOURCE_DIR}/backends/imgui_impl_win32.h
 )
-target_include_directories(${target_name} PRIVATE
-	${imgui_SOURCE_DIR}
-	${imgui_SOURCE_DIR}/backends
+target_include_directories(${target_name}
+	PUBLIC
+		${imgui_SOURCE_DIR}
+		${imgui_SOURCE_DIR}/misc/cpp
+	PRIVATE
+		${imgui_SOURCE_DIR}/backends
 )
 target_precompile_headers(${target_name} PRIVATE "Src/Pch.h")
 source_group("Gen" FILES

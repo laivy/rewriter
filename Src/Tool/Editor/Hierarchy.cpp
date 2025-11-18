@@ -7,74 +7,6 @@
 namespace
 {
 	constexpr std::wstring_view DataFileFilter{ L"데이터 파일 (.lvy)\0*.lvy\0" };
-
-	std::vector<std::wstring> GetOpenFilePath()
-	{
-		std::wstring workingDirectory(MAX_PATH, L'\0');
-		if (!::GetCurrentDirectory(workingDirectory.size(), workingDirectory.data()))
-			return {};
-
-		std::wstring buffer(MAX_PATH, L'\0');
-		OPENFILENAME ofn{};
-		ofn.lStructSize = sizeof(ofn);
-		ofn.lpstrFilter = DataFileFilter.data();
-		ofn.lpstrFile = buffer.data();
-		ofn.nMaxFile = buffer.size();
-		ofn.Flags = OFN_ALLOWMULTISELECT | OFN_FILEMUSTEXIST | OFN_EXPLORER;
-		ofn.lpstrDefExt = Stringtable::DataFileExtension.substr(1).data();
-		if (!::GetOpenFileName(&ofn))
-		{
-			::SetCurrentDirectory(workingDirectory.c_str());
-			ImGui::GetIO().ClearInputKeys();
-			return {};
-		}
-
-		std::wstring root{ buffer.substr(0, static_cast<std::size_t>(ofn.nFileOffset) - 1) };
-		std::ranges::replace(root, std::filesystem::path::preferred_separator, Stringtable::DataPathSeperator.front());
-
-		std::vector<std::wstring> filePaths;
-		const wchar_t* pos{ buffer.data() + ofn.nFileOffset };
-		do
-		{
-			std::wstring_view fileName{ pos };
-			auto& filePath{ filePaths.emplace_back() };
-			filePath = std::format(L"{}{}{}", root, Stringtable::DataPathSeperator, fileName);
-			pos += fileName.size() + 1;
-		} while (*pos);
-
-		::SetCurrentDirectory(workingDirectory.c_str());
-		ImGui::GetIO().ClearInputKeys();
-		return filePaths;
-	}
-
-	std::filesystem::path GetSaveFilePath()
-	{
-		std::wstring workingDirectory(MAX_PATH, L'\0');
-		if (!::GetCurrentDirectory(workingDirectory.size(), workingDirectory.data()))
-			return {};
-
-		std::wstring filePath(MAX_PATH, L'\0');
-		OPENFILENAME ofn{};
-		ofn.lStructSize = sizeof(ofn);
-		ofn.lpstrFilter = DataFileFilter.data();
-		ofn.lpstrFile = filePath.data();
-		ofn.nMaxFile = filePath.size();
-		ofn.Flags = OFN_OVERWRITEPROMPT | OFN_EXPLORER;
-		ofn.lpstrDefExt = Stringtable::DataFileExtension.substr(1).data();
-		if (!::GetSaveFileName(&ofn))
-		{
-			::SetCurrentDirectory(workingDirectory.c_str());
-			ImGui::GetIO().ClearInputKeys();
-			return L"";
-		}
-
-		std::erase(filePath, L'\0');
-		std::ranges::replace(filePath, std::filesystem::path::preferred_separator, Stringtable::DataPathSeperator.front());
-
-		::SetCurrentDirectory(workingDirectory.c_str());
-		ImGui::GetIO().ClearInputKeys();
-		return filePath;
-	}
 }
 
 Hierarchy::Hierarchy() :
@@ -110,6 +42,7 @@ void Hierarchy::Render()
 		DragDrop();
 		MenuBar();
 		TreeView();
+		FileDialog();
 	}
 	ImGui::End();
 }
@@ -254,9 +187,12 @@ void Hierarchy::OnMenuFileNew()
 
 void Hierarchy::OnMenuFileOpen()
 {
-	const auto filePaths{ GetOpenFilePath() };
-	for (const auto& filePath : filePaths)
-		LoadFromFile(filePath);
+	Graphics::ImGui::ImFileDialog::Open(
+		"Open Data File##Hierarchy",
+		Graphics::ImGui::ImFileDialog::Type::Open,
+		Graphics::ImGui::ImFileDialog::Target::File,
+		{ Stringtable::DataFileExtension }
+	);
 }
 
 void Hierarchy::OnMenuFileSave()
@@ -266,12 +202,6 @@ void Hierarchy::OnMenuFileSave()
 		auto root{ GetRoot(id) };
 		if (!IsModified(root->id))
 			continue;
-
-		if (root->filePath.empty())
-		{
-			root->filePath = GetSaveFilePath();
-			ImGui::GetIO().ClearInputKeys();
-		}
 
 		Resource::SaveToFile(root->id, root->filePath);
 		SetModified(root->id, false);
@@ -287,11 +217,12 @@ void Hierarchy::OnMenuFileSaveAs()
 	if (!root)
 		return;
 
-	const std::filesystem::path filePath{ GetSaveFilePath() };
-	if (filePath.empty())
-		return;
-
-	Resource::SaveToFile(root->id, filePath);
+	Graphics::ImGui::ImFileDialog::Open(
+		"Save Data File##Hierarchy/SaveAs",
+		Graphics::ImGui::ImFileDialog::Type::Save,
+		Graphics::ImGui::ImFileDialog::Target::File,
+		{ Stringtable::DataFileExtension }
+	);
 }
 
 void Hierarchy::OnMenuFileSaveAll()
@@ -300,14 +231,6 @@ void Hierarchy::OnMenuFileSaveAll()
 	{
 		if (!IsModified(root.id))
 			continue;
-
-		if (root.filePath.empty())
-		{
-			const std::filesystem::path filePath{ GetSaveFilePath() };
-			if (filePath.empty())
-				continue;
-			root.filePath = filePath;
-		}
 
 		Resource::SaveToFile(root.id, root.filePath);
 		SetModified(root.id, false);
@@ -742,6 +665,51 @@ void Hierarchy::TreeView()
 	} while (false);
 }
 
+void Hierarchy::FileDialog()
+{
+	// 파일 열기
+	if (auto path{ Graphics::ImGui::ImFileDialog::Render("Open Data File##Hierarchy") })
+	{
+		LoadFromFile(*path);
+	}
+
+	// 새 파일 생성
+	do
+	{
+		auto path{ Graphics::ImGui::ImFileDialog::Render("Save Data File##Hierarchy/New") };
+		if (!path)
+			break;
+
+		std::wstring filePath{ *path };
+		if (filePath.empty())
+			break;
+
+		std::ranges::replace(filePath, std::filesystem::path::preferred_separator, Stringtable::DataPathSeperator.front());
+
+		std::wstring name{ filePath.substr(filePath.rfind(Stringtable::DataPathSeperator) + 1) };
+		Resource::ID id{ Resource::New(name) };
+		m_roots.emplace_back(id, filePath);
+		SetModified(id, false);
+		SetOpened(id, true);
+		Delegates::OnPropertyAdded.Broadcast(id);
+	} while (false);
+
+	// 다른 이름으로 저장
+	do
+	{
+		auto path{ Graphics::ImGui::ImFileDialog::Render("Save Data File##Hierarchy/SaveAs") };
+		if (!path)
+			break;
+		if (m_selectedIDs.empty())
+			break;
+		auto root{ GetRoot(m_selectedIDs.back()) };
+		if (!root)
+			break;
+		Resource::SaveToFile(root->id, *path);
+		SetModified(root->id, false);
+	} while (false);
+}
+
 void Hierarchy::LoadFromFile(const std::filesystem::path& filePath)
 {
 	if (std::ranges::contains(m_roots, filePath, &Root::filePath))
@@ -763,16 +731,11 @@ Resource::ID Hierarchy::New(Resource::ID parentID)
 	if (parentID == Resource::InvalidID)
 	{
 		// 새로운 파일
-		std::wstring filePath{ GetSaveFilePath() };
-		if (filePath.empty())
-			return Resource::InvalidID;
-
-		std::wstring name{ filePath.substr(filePath.rfind(Stringtable::DataPathSeperator) + 1) };
-		id = Resource::New(name);
-		m_roots.emplace_back(id, filePath);
-		SetModified(id, false);
-		SetOpened(id, true);
-		Delegates::OnPropertyAdded.Broadcast(id);
+		Graphics::ImGui::ImFileDialog::Open("Save Data File##Hierarchy/New",
+			Graphics::ImGui::ImFileDialog::Type::Save,
+			Graphics::ImGui::ImFileDialog::Target::File,
+			{ Stringtable::DataFileExtension }
+		);
 	}
 	else
 	{
