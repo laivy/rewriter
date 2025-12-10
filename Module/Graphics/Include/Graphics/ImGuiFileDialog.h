@@ -9,7 +9,7 @@
 // 프로젝트
 #include "Export.h"
 
-namespace Graphics::ImGui::ImFileDialog
+namespace Graphics::ImGui::FileDialog
 {
 	enum class Type
 	{

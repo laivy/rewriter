@@ -25,10 +25,11 @@ namespace Graphics::ImGui
 	GRAPHICS_API void Begin();
 	GRAPHICS_API void End();
 
-	GRAPHICS_API ImTextureID CreateTexture(const std::filesystem::path& path);
-	GRAPHICS_API ImTextureID CreateTexture(const std::wstring& name, std::span<char> binary);
+#ifdef _TOOL
+	GRAPHICS_API ImTextureID CreateTexture(Resource::ID id);
 	GRAPHICS_API ImTextureID GetTexture(Resource::ID id);
 	GRAPHICS_API ImTextureID GetTexture(const std::wstring& name);
 	GRAPHICS_API ImVec2 GetTextureSize(ImTextureID id);
+#endif
 }
 #endif

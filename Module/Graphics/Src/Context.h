@@ -52,7 +52,7 @@ namespace Graphics
 			UINT64 fenceValue;
 			HANDLE fenceEvent;
 
-			std::unordered_map<std::wstring, Texture> textures;
+			std::unordered_map<Resource::ID, Texture> textures;
 		};
 	}
 #endif

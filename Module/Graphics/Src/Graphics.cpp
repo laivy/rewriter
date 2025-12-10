@@ -328,10 +328,6 @@ namespace Graphics
 #endif
 		sprite.width = static_cast<std::uint32_t>(size.width);
 		sprite.height = static_cast<std::uint32_t>(size.height);
-#ifdef _IMGUI
-		if (auto path{ Resource::GetPath(id) })
-			ImGui::CreateTexture(*path, binary);
-#endif
 		return sprite;
 	}
 

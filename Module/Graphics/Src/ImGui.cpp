@@ -17,8 +17,8 @@ namespace
 		if (!ctx)
 			return InvalidTexture;
 
-		auto imguiCtx{ Graphics::ImGui::Context::GetInstance() };
-		if (!imguiCtx)
+		auto ictx{ Graphics::ImGui::Context::GetInstance() };
+		if (!ictx)
 			return InvalidTexture;
 
 		Microsoft::WRL::ComPtr<ID3D12Resource> resource;
@@ -55,26 +55,26 @@ namespace
 		}
 
 		// 데이터 복사 및 GPU 업로드 대기
-		if (FAILED(imguiCtx->commandAllocator->Reset()))
+		if (FAILED(ictx->commandAllocator->Reset()))
 			return InvalidTexture;
-		if (FAILED(imguiCtx->commandList->Reset(imguiCtx->commandAllocator.Get(), nullptr)))
+		if (FAILED(ictx->commandList->Reset(ictx->commandAllocator.Get(), nullptr)))
 			return InvalidTexture;
-		::UpdateSubresources(imguiCtx->commandList.Get(), resource.Get(), uploadBuffer.Get(), 0, 0, 1, &subresource);
-		if (FAILED(imguiCtx->commandList->Close()))
+		::UpdateSubresources(ictx->commandList.Get(), resource.Get(), uploadBuffer.Get(), 0, 0, 1, &subresource);
+		if (FAILED(ictx->commandList->Close()))
 			return InvalidTexture;
 
-		const std::array<ID3D12CommandList*, 1> commandLists{ imguiCtx->commandList.Get() };
+		const std::array<ID3D12CommandList*, 1> commandLists{ ictx->commandList.Get() };
 		ctx->commandQueue->ExecuteCommandLists(static_cast<UINT>(commandLists.size()), commandLists.data());
-		if (FAILED(ctx->commandQueue->Signal(imguiCtx->fence.Get(), imguiCtx->fenceValue)))
+		if (FAILED(ctx->commandQueue->Signal(ictx->fence.Get(), ictx->fenceValue)))
 			return InvalidTexture;
-		if (imguiCtx->fence->GetCompletedValue() < imguiCtx->fenceValue)
+		if (ictx->fence->GetCompletedValue() < ictx->fenceValue)
 		{
-			if (FAILED(imguiCtx->fence->SetEventOnCompletion(imguiCtx->fenceValue, imguiCtx->fenceEvent)))
+			if (FAILED(ictx->fence->SetEventOnCompletion(ictx->fenceValue, ictx->fenceEvent)))
 				return InvalidTexture;
-			if (::WaitForSingleObject(imguiCtx->fenceEvent, INFINITE) == WAIT_FAILED)
+			if (::WaitForSingleObject(ictx->fenceEvent, INFINITE) == WAIT_FAILED)
 				return InvalidTexture;
 		}
-		++imguiCtx->fenceValue;
+		++ictx->fenceValue;
 
 		// SRV 생성
 		D3D12_RESOURCE_DESC desc{ resource->GetDesc() };
@@ -87,19 +87,19 @@ namespace
 		auto handle{ ctx->descriptorManager->Allocate(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV) };
 		ctx->d3d12Device->CreateShaderResourceView(resource.Get(), &srvDesc, handle.cpuHandle);
 
-		// 캐싱
 		Graphics::ImGui::Texture texture{};
 		texture.resource = resource;
 		texture.id = handle.gpuHandle.ptr;
 		texture.width = desc.Width;
 		texture.height = desc.Height;
-		imguiCtx->textures.emplace(L"todo", texture);
 		return texture;
 	}
 }
 
 namespace Graphics::ImGui
 {
+	std::vector<std::pair<Resource::ID, Texture>> g_holder;
+
 	ImGuiContext* GetContext()
 	{
 		return ::ImGui::GetCurrentContext();
@@ -112,6 +112,13 @@ namespace Graphics::ImGui
 
 	void Begin()
 	{
+		if (auto ictx{ Context::GetInstance() })
+		{
+			for (const auto& [id, texture] : g_holder)
+				ictx->textures[id] = texture;
+		}
+		g_holder.clear();
+
 		::ImGui_ImplDX12_NewFrame();
 		::ImGui_ImplWin32_NewFrame();
 		::ImGui::NewFrame();
@@ -132,46 +139,40 @@ namespace Graphics::ImGui
 		}
 	}
 
-	ImTextureID CreateTexture(const std::filesystem::path& path)
+#ifdef _TOOL
+	ImTextureID CreateTexture(Resource::ID id)
 	{
-		std::ifstream file{ path, std::ios::binary };
-		if (!file)
+		auto sprite{ Resource::GetSprite(id) };
+		if (!sprite)
 			return ImTextureID_Invalid;
 
-		std::vector<char> binary{ std::istreambuf_iterator<char>(file), {} };
-		return CreateTexture(path.wstring(), binary);
-	}
-
-	ImTextureID CreateTexture(const std::wstring& name, std::span<char> binary)
-	{
-		auto ictx{ Graphics::ImGui::Context::GetInstance() };
-		if (!ictx)
-			return ImTextureID_Invalid;
-
-		if (ictx->textures.contains(name))
-			return ictx->textures.at(name).id;
-
-		auto texture{ LoadTexture(binary) };
-		ictx->textures.emplace(name, texture);
+		auto texture{ LoadTexture(*sprite->binary) };
+		if (auto ictx{ Context::GetInstance() })
+		{
+			if (ictx->textures.contains(id))
+			{
+				g_holder.emplace_back(id, texture);
+				return ictx->textures.at(id).id;
+			}			
+			ictx->textures.emplace(id, texture);
+		}
 		return texture.id;
 	}
 
 	ImTextureID GetTexture(Resource::ID id)
 	{
-		auto path{ Resource::GetPath(id) };
-		if (!path)
+		auto ictx{ Context::GetInstance() };
+		if (!ictx)
 			return ImTextureID_Invalid;
-		return GetTexture(*path);
+		if (!ictx->textures.contains(id))
+			return CreateTexture(id);
+		return ictx->textures.at(id).id;
 	}
 
 	ImTextureID GetTexture(const std::wstring& name)
 	{
-		auto ictx{ Context::GetInstance() };
-		if (!ictx)
-			return ImTextureID_Invalid;
-		if (!ictx->textures.contains(name))
-			return ImTextureID_Invalid;
-		return ictx->textures.at(name).id;
+		const auto id{ Resource::Get(name) };
+		return GetTexture(id);
 	}
 
 	ImVec2 GetTextureSize(ImTextureID id)
@@ -187,5 +188,6 @@ namespace Graphics::ImGui
 		}
 		return ImVec2{ 0.0f, 0.0f };
 	}
+#endif
 }
 #endif

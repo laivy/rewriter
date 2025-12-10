@@ -356,7 +356,7 @@ void Explorer::FileTree()
 		ImGui::PushStyleVar(ImGuiStyleVar_IndentSpacing, ImGui::GetFontSize() / 2.0f);
 		[this](this auto self, const std::filesystem::path& path) -> void
 		{
-			static const auto FolderIcon{ Graphics::ImGui::CreateTexture(L"Editor/Icon/Folder.png") };
+			const auto folderIcon{ Graphics::ImGui::GetTexture(L"Editor/Config.lvy/Icon/Folder") };
 
 			bool hasSubFolder{ false };
 			for (const auto& entry : std::filesystem::directory_iterator{ path, std::filesystem::directory_options::skip_permission_denied })
@@ -372,7 +372,7 @@ void Explorer::FileTree()
 			ImGuiTreeNodeFlags flags{ ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_SpanFullWidth };
 			if (!hasSubFolder)
 				flags |= ImGuiTreeNodeFlags_Leaf;
-			const auto [isOpened, isClicked] { IconTreeNode(FolderIcon, ImVec2{ ImGui::GetFontSize(), ImGui::GetFontSize() }, reinterpret_cast<const char*>(label.c_str()), flags) };
+			const auto [isOpened, isClicked] { IconTreeNode(folderIcon, ImVec2{ ImGui::GetFontSize(), ImGui::GetFontSize() }, reinterpret_cast<const char*>(label.c_str()), flags) };
 			if (isOpened)
 			{
 				for (const auto& entry : std::filesystem::directory_iterator{ path, std::filesystem::directory_options::skip_permission_denied })
@@ -527,7 +527,7 @@ void Explorer::FileViewer()
 		if (!entry.is_directory())
 			continue;
 
-		static const auto icon{ Graphics::ImGui::CreateTexture(L"Editor/Icon/Folder.png") };
+		const auto icon{ Graphics::ImGui::GetTexture(L"Editor/Config.lvy/Icon/Folder") };
 		std::wstring name{ entry.path().filename().wstring() };
 		if (FileViewerIconButton(icon, Util::ToU8String(name)))
 			SetPath(std::filesystem::canonical(m_path / name));
@@ -540,7 +540,7 @@ void Explorer::FileViewer()
 		if (!entry.is_regular_file())
 			continue;
 
-		static const auto icon{ Graphics::ImGui::CreateTexture(L"Editor/Icon/File.png") };
+		const auto icon{ Graphics::ImGui::GetTexture(L"Editor/Config.lvy/Icon/File") };
 		std::u8string name{ entry.path().filename().u8string() };
 		FileViewerIconButton(icon, reinterpret_cast<const char*>(name.c_str()), entry.path().wstring());
 		ImGui::SameLine();

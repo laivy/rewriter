@@ -35,36 +35,6 @@ namespace
 			return Type::Sprite;
 		return Type::Folder;
 	}
-
-	std::wstring GetOpenFilePath(std::wstring_view filter)
-	{
-		std::wstring workingDirectory(MAX_PATH, L'\0');
-		if (!::GetCurrentDirectory(workingDirectory.size(), workingDirectory.data()))
-			return {};
-
-		std::wstring buffer(MAX_PATH, L'\0');
-		OPENFILENAME ofn{};
-		ofn.lStructSize = sizeof(ofn);
-		ofn.lpstrFilter = filter.data();
-		ofn.lpstrFile = buffer.data();
-		ofn.nMaxFile = buffer.size();
-		ofn.Flags = OFN_FILEMUSTEXIST | OFN_EXPLORER;
-		ofn.lpstrDefExt = Stringtable::DataFileExtension.substr(1).data();
-		if (!::GetOpenFileName(&ofn))
-		{
-			::SetCurrentDirectory(workingDirectory.c_str());
-			ImGui::GetIO().ClearInputKeys();
-			return {};
-		}
-		::SetCurrentDirectory(workingDirectory.c_str());
-		ImGui::GetIO().ClearInputKeys();
-
-		std::wstring root{ buffer.substr(0, static_cast<std::size_t>(ofn.nFileOffset) - 1) };
-		std::ranges::replace(root, std::filesystem::path::preferred_separator, Stringtable::DataPathSeperator.front());
-
-		const wchar_t* pos{ buffer.data() + ofn.nFileOffset };
-		return std::format(L"{}{}{}", root, Stringtable::DataPathSeperator, pos);
-	}
 }
 
 Inspector::Inspector() :
@@ -87,176 +57,186 @@ void Inspector::Update(float deltaSeconds)
 
 void Inspector::Render()
 {
-	bool isModified{ false };
-	if (ImGui::Begin("속성"))
+	if (!ImGui::Begin("속성"))
 	{
-		const Resource::ID id{ m_targetID };
-		if (id == Resource::InvalidID)
-		{
-			ImGui::End();
-			return;
-		}
+		ImGui::End();
+		return;
+	}
 
-		const Type type{ GetType(id) };
-		ImGui::AlignTextToFramePadding();
+	bool isModified{ false };
 
-		const float labelWidth{ ImGui::CalcTextSize("타입").x + ImGui::GetStyle().ItemSpacing.x * 2.0f };
-		ImGui::TextUnformatted("이름");
-		ImGui::SameLine(labelWidth);
-		if (auto name{ Resource::GetName(id) })
-		{
-			ImGui::SetNextItemWidth(-ImGui::GetStyle().WindowPadding.x);
-			std::string str{ Util::ToU8String(*name) };
-			if (ImGui::InputText("##name", &str, ImGuiInputTextFlags_EnterReturnsTrue))
-				isModified = Resource::SetName(id, Util::ToWString(str));
-		}
+	const Resource::ID id{ m_targetID };
+	if (id == Resource::InvalidID)
+	{
+		ImGui::End();
+		return;
+	}
 
-		ImGui::AlignTextToFramePadding();
-		ImGui::TextUnformatted("타입");
-		ImGui::SameLine(labelWidth);
+	const Type type{ GetType(id) };
+	ImGui::AlignTextToFramePadding();
+
+	const float labelWidth{ ImGui::CalcTextSize("타입").x + ImGui::GetStyle().ItemSpacing.x * 2.0f };
+	ImGui::TextUnformatted("이름");
+	ImGui::SameLine(labelWidth);
+	if (auto name{ Resource::GetName(id) })
+	{
 		ImGui::SetNextItemWidth(-ImGui::GetStyle().WindowPadding.x);
-		if (ImGui::BeginCombo("##type", Types.at(type).data()))
-		{
-			for (const auto& [key, value] : Types)
-			{
-				if (!ImGui::Selectable(value.data(), key == type))
-					continue;
+		std::string str{ Util::ToU8String(*name) };
+		if (ImGui::InputText("##name", &str, ImGuiInputTextFlags_EnterReturnsTrue))
+			isModified = Resource::SetName(id, Util::ToWString(str));
+	}
 
-				switch (key)
-				{
-				case Type::Folder:
-					Resource::Set(id, std::monostate{});
-					break;
-				case Type::Int32:
-					Resource::Set(id, 0);
-					break;
-				case Type::Float:
-					Resource::Set(id, 0.0f);
-					break;
-				case Type::String:
-					Resource::Set(id, L"");
-					break;
-				case Type::Sprite:
-					Resource::Set(id, Resource::Sprite{});
-					break;
-				default:
-					break;
-				}
-				isModified = true;
+	ImGui::AlignTextToFramePadding();
+	ImGui::TextUnformatted("타입");
+	ImGui::SameLine(labelWidth);
+	ImGui::SetNextItemWidth(-ImGui::GetStyle().WindowPadding.x);
+	if (ImGui::BeginCombo("##type", Types.at(type).data()))
+	{
+		for (const auto& [key, value] : Types)
+		{
+			if (!ImGui::Selectable(value.data(), key == type))
+				continue;
+
+			switch (key)
+			{
+			case Type::Folder:
+				Resource::Set(id, std::monostate{});
+				break;
+			case Type::Int32:
+				Resource::Set(id, 0);
+				break;
+			case Type::Float:
+				Resource::Set(id, 0.0f);
+				break;
+			case Type::String:
+				Resource::Set(id, L"");
+				break;
+			case Type::Sprite:
+				Resource::Set(id, Resource::Sprite{});
+				break;
+			default:
+				break;
 			}
-			ImGui::EndCombo();
+			isModified = true;
+		}
+		ImGui::EndCombo();
+	}
+
+	ImGui::AlignTextToFramePadding();
+	ImGui::TextUnformatted("값");
+	ImGui::SameLine(labelWidth);
+	ImGui::SetNextItemWidth(-ImGui::GetStyle().WindowPadding.x);
+	if (auto value{ Resource::GetInt(id) })
+	{
+		if (ImGui::InputInt("##value", &(*value)))
+			isModified = Resource::Set(id, *value);
+	}
+	else if (auto value{ Resource::GetFloat(id) })
+	{
+		if (ImGui::InputFloat("##value", &(*value), 0.0f, 0.0f, "%.6f"))
+			isModified = Resource::Set(id, *value);
+	}
+	else if (auto value{ Resource::GetString(id) })
+	{
+		std::string str{ Util::ToU8String(*value) };
+		if (ImGui::InputText("##value", &str))
+			isModified = Resource::Set(id, Util::ToWString(str));
+	}
+	else if (auto value{ Resource::GetSprite(id) })
+	{
+		if (ImGui::Button("파일 열기(*.png)", ImVec2{ -ImGui::GetStyle().WindowPadding.x, 0.0f }))
+		{
+			Graphics::ImGui::FileDialog::Open(
+				"OpenSpriteFile",
+				Graphics::ImGui::FileDialog::Type::Open,
+				Graphics::ImGui::FileDialog::Target::File,
+				{ L".png" }
+			);
 		}
 
-		ImGui::AlignTextToFramePadding();
-		ImGui::TextUnformatted("값");
-		ImGui::SameLine(labelWidth);
-		ImGui::SetNextItemWidth(-ImGui::GetStyle().WindowPadding.x);
-		if (auto value{ Resource::GetInt(id) })
+		static float scale{ 100.0f };
+		const auto& style{ ImGui::GetStyle() };
+		ImVec2 region{ ImGui::GetContentRegionAvail() - style.WindowPadding };
+		region.y -= ImGui::GetFrameHeight();
+		if (ImGui::BeginChild("preview", region, ImGuiChildFlags_None, ImGuiWindowFlags_HorizontalScrollbar))
 		{
-			if (ImGui::InputInt("##value", &(*value)))
-				isModified = Resource::Set(id, *value);
-		}
-		else if (auto value{ Resource::GetFloat(id) })
-		{
-			if (ImGui::InputFloat("##value", &(*value), 0.0f, 0.0f, "%.6f"))
-				isModified = Resource::Set(id, *value);
-		}
-		else if (auto value{ Resource::GetString(id) })
-		{
-			std::string str{ Util::ToU8String(*value) };
-			if (ImGui::InputText("##value", &str))
-				isModified = Resource::Set(id, Util::ToWString(str));
-		}
-		else if (auto value{ Resource::GetSprite(id) })
-		{
-			if (ImGui::Button("파일 열기(*.png)", ImVec2{ -ImGui::GetStyle().WindowPadding.x, 0.0f }))
+			ImTextureID textureID{ Graphics::ImGui::GetTexture(id) };
+			ImVec2 imageSize{ Graphics::ImGui::GetTextureSize(textureID) };
+			imageSize *= scale / 100.0f;
+
+			ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2{});
+			if (imageSize.x < region.x && imageSize.y < region.y)
 			{
-				const std::wstring filePaths{ GetOpenFilePath(L"이미지 파일 (*.png)\0*.png\0") };
-				if (!filePaths.empty())
-				{
-					std::ifstream file{ filePaths, std::ios::binary };
-					auto buffer{ std::make_shared<std::vector<char>>() };
-					buffer->assign(std::istreambuf_iterator<char>(file), {});
-					Graphics::ImGui::CreateTexture(*Resource::GetPath(id), *buffer);
-					isModified = Resource::Set(id, Resource::Sprite{ .binary = std::move(buffer) });
-				}
-			}
-
-			static float scale{ 100.0f };
-			const auto& style{ ImGui::GetStyle() };
-			ImVec2 region{ ImGui::GetContentRegionAvail() - style.WindowPadding };
-			region.y -= ImGui::GetFrameHeight();
-			if (ImGui::BeginChild("preview", region, ImGuiChildFlags_None, ImGuiWindowFlags_HorizontalScrollbar))
-			{
-				ImTextureID textureID{ Graphics::ImGui::GetTexture(id) };
-				ImVec2 imageSize{ Graphics::ImGui::GetTextureSize(textureID) };
-				imageSize *= scale / 100.0f;
-
-				ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2{});
-				if (imageSize.x < region.x && imageSize.y < region.y)
-				{
-					ImGui::Dummy(ImVec2{ 0.0f, (region.y - imageSize.y) / 2.0f });
-					ImGui::Dummy(ImVec2{ (region.x - imageSize.x) / 2.0f, 0.0f });
-					ImGui::SameLine();
-
-					const ImVec2 cursor{ ImGui::GetCursorScreenPos() };
-					auto drawList{ ImGui::GetWindowDrawList() };
-					drawList->AddRect(cursor, cursor + imageSize, ImGui::ColorConvertFloat4ToU32(style.Colors[ImGuiCol_Text]));
-				}
-				else if (imageSize.x < region.x - style.ScrollbarSize)
-				{
-					ImGui::Dummy(ImVec2{ (region.x - style.ScrollbarSize - imageSize.x) / 2.0f, 0.0f });
-					ImGui::SameLine();
-
-					const ImVec2 cursor{ ImGui::GetCursorScreenPos() };
-					auto drawList{ ImGui::GetWindowDrawList() };
-					drawList->AddLine(cursor, cursor + ImVec2{ 0.0f, imageSize.y }, ImGui::ColorConvertFloat4ToU32(style.Colors[ImGuiCol_Text]));
-					drawList->AddLine(cursor + ImVec2{ imageSize.x, 0.0f }, cursor + imageSize, ImGui::ColorConvertFloat4ToU32(style.Colors[ImGuiCol_Text]));
-				}
-				else if (imageSize.y < region.y - style.ScrollbarSize)
-				{
-					ImGui::Dummy(ImVec2{ 0.0f, (region.y - style.ScrollbarSize - imageSize.y) / 2.0f });
-
-					const ImVec2 cursor{ ImGui::GetCursorScreenPos() };
-					auto drawList{ ImGui::GetWindowDrawList() };
-					drawList->AddLine(cursor, cursor + ImVec2{ imageSize.x, 0.0f }, ImGui::ColorConvertFloat4ToU32(style.Colors[ImGuiCol_Text]));
-					drawList->AddLine(cursor + ImVec2{ 0.0f, imageSize.y }, cursor + imageSize, ImGui::ColorConvertFloat4ToU32(style.Colors[ImGuiCol_Text]));
-				}
-				if (textureID == 0)
-					ImGui::Dummy(imageSize);
-				else
-					ImGui::Image(textureID, imageSize);
-				ImGui::PopStyleVar();
-			}
-			ImGui::EndChild();
-
-			if (ImGui::BeginChild("scale", ImVec2{ -style.WindowPadding.x, ImGui::GetFrameHeight() }))
-			{
-				ImTextureID textureID{ Graphics::ImGui::GetTexture(id) };
-				const ImVec2 size{ Graphics::ImGui::GetTextureSize(textureID) };
+				ImGui::Dummy(ImVec2{ 0.0f, (region.y - imageSize.y) / 2.0f });
+				ImGui::Dummy(ImVec2{ (region.x - imageSize.x) / 2.0f, 0.0f });
 				ImGui::SameLine();
-				ImGui::AlignTextToFramePadding();
-				ImGui::Text("%.0f x %.0f", size.x, size.y);
-				ImGui::SameLine();
-				ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2{});
-				ImGui::SeparatorEx(ImGuiSeparatorFlags_Vertical);
-				ImGui::SameLine();
-				ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x);
-				ImGui::DragFloat("##scale", &scale, 1.0f, 0.1f, 500.0f, "%.0f%%");
-				ImGui::PopStyleVar();
+
+				const ImVec2 cursor{ ImGui::GetCursorScreenPos() };
+				auto drawList{ ImGui::GetWindowDrawList() };
+				drawList->AddRect(cursor, cursor + imageSize, ImGui::ColorConvertFloat4ToU32(style.Colors[ImGuiCol_Text]));
 			}
-			ImGui::EndChild();
+			else if (imageSize.x < region.x - style.ScrollbarSize)
+			{
+				ImGui::Dummy(ImVec2{ (region.x - style.ScrollbarSize - imageSize.x) / 2.0f, 0.0f });
+				ImGui::SameLine();
+
+				const ImVec2 cursor{ ImGui::GetCursorScreenPos() };
+				auto drawList{ ImGui::GetWindowDrawList() };
+				drawList->AddLine(cursor, cursor + ImVec2{ 0.0f, imageSize.y }, ImGui::ColorConvertFloat4ToU32(style.Colors[ImGuiCol_Text]));
+				drawList->AddLine(cursor + ImVec2{ imageSize.x, 0.0f }, cursor + imageSize, ImGui::ColorConvertFloat4ToU32(style.Colors[ImGuiCol_Text]));
+			}
+			else if (imageSize.y < region.y - style.ScrollbarSize)
+			{
+				ImGui::Dummy(ImVec2{ 0.0f, (region.y - style.ScrollbarSize - imageSize.y) / 2.0f });
+
+				const ImVec2 cursor{ ImGui::GetCursorScreenPos() };
+				auto drawList{ ImGui::GetWindowDrawList() };
+				drawList->AddLine(cursor, cursor + ImVec2{ imageSize.x, 0.0f }, ImGui::ColorConvertFloat4ToU32(style.Colors[ImGuiCol_Text]));
+				drawList->AddLine(cursor + ImVec2{ 0.0f, imageSize.y }, cursor + imageSize, ImGui::ColorConvertFloat4ToU32(style.Colors[ImGuiCol_Text]));
+			}
+			if (textureID == 0)
+				ImGui::Dummy(imageSize);
+			else
+				ImGui::Image(textureID, imageSize);
+			ImGui::PopStyleVar();
 		}
-		else
+		ImGui::EndChild();
+
+		if (ImGui::BeginChild("scale", ImVec2{ -style.WindowPadding.x, ImGui::GetFrameHeight() }))
 		{
-			std::array<char, 2> dummy{ "-" };
-			ImGui::BeginDisabled();
-			ImGui::InputText("##value", dummy.data(), dummy.size(), ImGuiInputTextFlags_ReadOnly);
-			ImGui::EndDisabled();
+			ImTextureID textureID{ Graphics::ImGui::GetTexture(id) };
+			const ImVec2 size{ Graphics::ImGui::GetTextureSize(textureID) };
+			ImGui::SameLine();
+			ImGui::AlignTextToFramePadding();
+			ImGui::Text("%.0f x %.0f", size.x, size.y);
+			ImGui::SameLine();
+			ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2{});
+			ImGui::SeparatorEx(ImGuiSeparatorFlags_Vertical);
+			ImGui::SameLine();
+			ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x);
+			ImGui::DragFloat("##scale", &scale, 1.0f, 0.1f, 500.0f, "%.0f%%");
+			ImGui::PopStyleVar();
 		}
+		ImGui::EndChild();
+	}
+	else
+	{
+		std::array<char, 2> dummy{ "-" };
+		ImGui::BeginDisabled();
+		ImGui::InputText("##value", dummy.data(), dummy.size(), ImGuiInputTextFlags_ReadOnly);
+		ImGui::EndDisabled();
 	}
 	ImGui::End();
 
+	if (auto path{ Graphics::ImGui::FileDialog::Render("OpenSpriteFile") })
+	{
+		std::ifstream file{ *path, std::ios::binary };
+		auto buffer{ std::make_shared<std::vector<char>>() };
+		buffer->assign(std::istreambuf_iterator<char>(file), {});
+		isModified = Resource::Set(id, Resource::Sprite{ .binary = std::move(buffer) });
+		Graphics::ImGui::CreateTexture(id);
+	}
+
 	if (isModified)
-		Delegates::OnPropertyModified.Broadcast(m_targetID);
+		Delegates::OnPropertyModified.Broadcast(id);
 }

@@ -8,8 +8,8 @@ namespace
 	{
 		std::string label;
 		bool open;
-		Graphics::ImGui::ImFileDialog::Type type; // 열기 or 저장
-		Graphics::ImGui::ImFileDialog::Target target; // 폴더 or 파일
+		Graphics::ImGui::FileDialog::Type type; // 열기 or 저장
+		Graphics::ImGui::FileDialog::Target target; // 폴더 or 파일
 		std::vector<std::filesystem::path> extensions; // 확장자(타겟이 파일인 경우에만 유효)
 
 		std::filesystem::path path; // 현재 디렉토리 경로
@@ -134,7 +134,7 @@ namespace
 			if (entry.is_directory())
 				entries.push_back(entry);
 		}
-		if (ctx.target == Graphics::ImGui::ImFileDialog::Target::File)
+		if (ctx.target == Graphics::ImGui::FileDialog::Target::File)
 		{
 			for (const auto& entry : std::filesystem::directory_iterator{ ctx.path, std::filesystem::directory_options::skip_permission_denied })
 			{
@@ -180,7 +180,7 @@ namespace
 							ctx.path = path;
 							ctx.selected.clear();
 						}
-						else if (entry.is_regular_file() && ctx.target == Graphics::ImGui::ImFileDialog::Target::File)
+						else if (entry.is_regular_file() && ctx.target == Graphics::ImGui::FileDialog::Target::File)
 						{
 							ctx.result = path;
 						}
@@ -241,20 +241,20 @@ namespace
 
 		if (ImGui::Button("확인"))
 		{
-			if (ctx.target == Graphics::ImGui::ImFileDialog::Target::Folder && std::filesystem::is_directory(ctx.selected))
+			if (ctx.target == Graphics::ImGui::FileDialog::Target::Folder && std::filesystem::is_directory(ctx.selected))
 			{
 				ctx.result = ctx.selected;
 			}
-			if (ctx.target == Graphics::ImGui::ImFileDialog::Target::File)
+			if (ctx.target == Graphics::ImGui::FileDialog::Target::File)
 			{
-				if (ctx.type == Graphics::ImGui::ImFileDialog::Type::Open)
+				if (ctx.type == Graphics::ImGui::FileDialog::Type::Open)
 				{
 					if (std::filesystem::is_regular_file(ctx.selected))
 						ctx.result = ctx.selected;
 					else if (std::filesystem::is_directory(ctx.selected))
 						ctx.path = ctx.selected;
 				}
-				else if (ctx.type == Graphics::ImGui::ImFileDialog::Type::Save)
+				else if (ctx.type == Graphics::ImGui::FileDialog::Type::Save)
 				{
 					auto result{ ctx.path / ctx.selected };
 					if (ctx.extension != L".*" && ctx.extension != result.extension())
@@ -269,7 +269,7 @@ namespace
 	}
 }
 
-namespace Graphics::ImGui::ImFileDialog
+namespace Graphics::ImGui::FileDialog
 {
 	void Open(const std::string& label, Type type, Target target, const std::vector<std::filesystem::path>& extensions)
 	{

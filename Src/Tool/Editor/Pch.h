@@ -1,17 +1,14 @@
 #pragma once
 #include "Common/Pch.h"
 
-// C/C++
+// C++ 표준 라이브러리
 #include <set>
 
-// Windows
-#include <commdlg.h>
-
-// Imgui
+// ImGui
 #include <imgui.h>
 #include <imgui_internal.h>
 #include <imgui_stdlib.h>
 
-// Project - Library
+// 프로젝트 모듈
 #include <Graphics/Graphics.h>
 #include <Resource/Resource.h>
