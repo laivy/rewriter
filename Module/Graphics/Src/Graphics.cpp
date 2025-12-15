@@ -292,7 +292,7 @@ namespace Graphics
 		Context::Destroy();
 	}
 
-	Resource::Sprite LoadSprite(Resource::ID id, std::span<char> binary)
+	Resource::Sprite LoadSprite(Resource::ID id, std::span<std::byte> binary)
 	{
 		auto ctx{ Context::GetInstance() };
 		if (!ctx || !ctx->d2dContext)
@@ -324,7 +324,7 @@ namespace Graphics
 		const D2D1_SIZE_F size{ bitmap->GetSize() };
 		Resource::Sprite sprite{};
 #ifdef _TOOL
-		sprite.binary = std::make_shared<std::vector<char>>(binary.begin(), binary.end());
+		sprite.binary.assign(binary.begin(), binary.end());
 #endif
 		sprite.width = static_cast<std::uint32_t>(size.width);
 		sprite.height = static_cast<std::uint32_t>(size.height);

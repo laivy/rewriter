@@ -348,7 +348,7 @@ namespace Resource
 		// 버전
 		tempFile.write(reinterpret_cast<const char*>(&Version), sizeof(Version));
 
-		auto recurse = [this, &tempFile](this auto self, ID id, const Property& prop)
+		auto recurse = [this, &tempFile](this auto&& self, ID id, const Property& prop)
 		{
 			// 이름
 			const auto nameSize{ static_cast<std::uint16_t>(prop.name.size()) };
@@ -379,9 +379,9 @@ namespace Resource
 				}
 				else if constexpr (std::is_same_v<T, Resource::Sprite>)
 				{
-					auto dataLength{ static_cast<std::uint32_t>(arg.binary->size()) };
+					auto dataLength{ static_cast<std::uint32_t>(arg.binary.size()) };
 					tempFile.write(reinterpret_cast<const char*>(&dataLength), sizeof(dataLength));
-					tempFile.write(reinterpret_cast<const char*>(arg.binary->data()), dataLength * sizeof(std::byte));
+					tempFile.write(reinterpret_cast<const char*>(arg.binary.data()), dataLength * sizeof(std::byte));
 				}
 			}, prop.value);
 
@@ -477,7 +477,7 @@ namespace Resource
 		Version version{};
 		file.read(reinterpret_cast<char*>(&version), sizeof(version));
 
-		auto recurse = [this, &file](this auto self, ID parentID)
+		auto recurse = [this, &file](this auto&& self, ID parentID)
 		{
 			// 이름
 			std::uint16_t nameSize{};
@@ -530,9 +530,9 @@ namespace Resource
 			{
 				std::uint32_t dataLength{};
 				file.read(reinterpret_cast<char*>(&dataLength), sizeof(dataLength));
-				std::vector<char> binary(dataLength);
-				file.read(reinterpret_cast<char*>(binary.data()), dataLength * sizeof(char));
-				const auto sprite{ m_loadSprite(id, binary) };
+				std::vector<std::byte> binary(dataLength);
+				file.read(reinterpret_cast<char*>(binary.data()), dataLength);
+				auto sprite{ m_loadSprite(id, binary) };
 				Set(id, sprite);
 				break;
 			}

@@ -15,7 +15,7 @@ namespace Graphics
 	GRAPHICS_API bool Initialize(void* hWnd);
 	GRAPHICS_API void Finalize();
 
-	GRAPHICS_API Resource::Sprite LoadSprite(Resource::ID id, std::span<char> binary);
+	GRAPHICS_API Resource::Sprite LoadSprite(Resource::ID id, std::span<std::byte> binary);
 
 	GRAPHICS_API bool Begin3D();
 	GRAPHICS_API bool End3D();

@@ -158,9 +158,21 @@ void Inspector::Render()
 		const auto& style{ ImGui::GetStyle() };
 		ImVec2 region{ ImGui::GetContentRegionAvail() - style.WindowPadding };
 		region.y -= ImGui::GetFrameHeight();
-		if (ImGui::BeginChild("preview", region, ImGuiChildFlags_None, ImGuiWindowFlags_HorizontalScrollbar))
+		do
 		{
-			ImTextureID textureID{ Graphics::ImGui::GetTexture(id) };
+			if (!ImGui::BeginChild("preview", region, ImGuiChildFlags_None, ImGuiWindowFlags_HorizontalScrollbar))
+			{
+				ImGui::EndChild();
+				break;
+			}
+
+			const ImTextureID textureID{ Graphics::ImGui::GetTexture(id) };
+			if (textureID == ImTextureID_Invalid)
+			{
+				ImGui::EndChild();
+				break;
+			}
+
 			ImVec2 imageSize{ Graphics::ImGui::GetTextureSize(textureID) };
 			imageSize *= scale / 100.0f;
 
@@ -194,13 +206,10 @@ void Inspector::Render()
 				drawList->AddLine(cursor, cursor + ImVec2{ imageSize.x, 0.0f }, ImGui::ColorConvertFloat4ToU32(style.Colors[ImGuiCol_Text]));
 				drawList->AddLine(cursor + ImVec2{ 0.0f, imageSize.y }, cursor + imageSize, ImGui::ColorConvertFloat4ToU32(style.Colors[ImGuiCol_Text]));
 			}
-			if (textureID == 0)
-				ImGui::Dummy(imageSize);
-			else
-				ImGui::Image(textureID, imageSize);
+			ImGui::Image(textureID, imageSize);
 			ImGui::PopStyleVar();
-		}
-		ImGui::EndChild();
+			ImGui::EndChild();
+		} while (false);
 
 		if (ImGui::BeginChild("scale", ImVec2{ -style.WindowPadding.x, ImGui::GetFrameHeight() }))
 		{
@@ -231,9 +240,13 @@ void Inspector::Render()
 	if (auto path{ Graphics::ImGui::FileDialog::Render("OpenSpriteFile") })
 	{
 		std::ifstream file{ *path, std::ios::binary };
-		auto buffer{ std::make_shared<std::vector<char>>() };
-		buffer->assign(std::istreambuf_iterator<char>(file), {});
-		isModified = Resource::Set(id, Resource::Sprite{ .binary = std::move(buffer) });
+		const std::size_t size{ std::filesystem::file_size(*path) };
+
+		Resource::Sprite sprite;
+		sprite.binary.resize(size);
+		file.read(reinterpret_cast<char*>(sprite.binary.data()), size);
+
+		isModified = Resource::Set(id, sprite);
 		Graphics::ImGui::CreateTexture(id);
 	}
 

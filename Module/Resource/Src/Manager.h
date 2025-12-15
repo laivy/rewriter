@@ -47,7 +47,7 @@ namespace Resource
 		bool SetName(ID id, const std::wstring& name);
 
 		template<class T>
-			requires std::is_constructible_v<Value, T>
+		requires std::is_constructible_v<Value, T>
 		bool Set(ID id, const T& value)
 		{
 			if (id >= m_properties.size())
@@ -84,7 +84,7 @@ namespace Resource
 		std::wstring GetPath(ID id) const;
 
 		template<class T>
-			requires std::is_constructible_v<Value, T>
+		requires std::is_constructible_v<Value, T>
 		std::optional<T> Get(ID id) const
 		{
 			if (id >= m_properties.size())
@@ -114,7 +114,7 @@ namespace Resource
 
 	private:
 		std::filesystem::path m_mountPath;
-		std::function<Sprite(ID, std::span<char>)> m_loadSprite;
+		std::function<Sprite(ID, std::span<std::byte>)> m_loadSprite;
 
 		std::vector<std::optional<Property>> m_properties;
 		std::unordered_map<std::wstring, ID> m_pathToID;

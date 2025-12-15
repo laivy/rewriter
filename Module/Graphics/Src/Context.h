@@ -53,6 +53,7 @@ namespace Graphics
 			HANDLE fenceEvent;
 
 			std::unordered_map<Resource::ID, Texture> textures;
+			std::vector<std::pair<Resource::ID, Texture>> textureHolder;
 		};
 	}
 #endif
