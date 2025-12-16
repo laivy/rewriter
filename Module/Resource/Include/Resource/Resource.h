@@ -1,9 +1,14 @@
 #pragma once
+// C++ 표준 라이브러리
+#include <cstddef>
 #include <filesystem>
 #include <functional>
-#include <memory>
 #include <span>
+
+// 프로젝트 모듈
 #include <Resource/Resource.h>
+
+// 프로젝트
 #include <Common/Type.h>
 #include "Export.h"
 #include "Model.h"

@@ -156,11 +156,15 @@ void Inspector::Render()
 
 		static float scale{ 100.0f };
 		const auto& style{ ImGui::GetStyle() };
-		ImVec2 region{ ImGui::GetContentRegionAvail() - style.WindowPadding };
-		region.y -= ImGui::GetFrameHeight();
+		const ImVec2 childSize{ []()
+		{
+			ImVec2 size{ ImGui::GetContentRegionAvail() - ImGui::GetStyle().WindowPadding };
+			size.y -= ImGui::GetFrameHeight();
+			return size;
+		}() };
 		do
 		{
-			if (!ImGui::BeginChild("preview", region, ImGuiChildFlags_None, ImGuiWindowFlags_HorizontalScrollbar))
+			if (!ImGui::BeginChild("preview", childSize, ImGuiChildFlags_None, ImGuiWindowFlags_HorizontalScrollbar))
 			{
 				ImGui::EndChild();
 				break;
@@ -173,40 +177,43 @@ void Inspector::Render()
 				break;
 			}
 
-			ImVec2 imageSize{ Graphics::ImGui::GetTextureSize(textureID) };
-			imageSize *= scale / 100.0f;
+			const ImVec2 textureSize{ [textureID]()
+			{
+				const auto size{ Graphics::ImGui::GetTextureSize(textureID) };
+				return size * scale / 100.0f;
+			}() };
 
 			ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2{});
-			if (imageSize.x < region.x && imageSize.y < region.y)
+			if (textureSize.x < childSize.x && textureSize.y < childSize.y)
 			{
-				ImGui::Dummy(ImVec2{ 0.0f, (region.y - imageSize.y) / 2.0f });
-				ImGui::Dummy(ImVec2{ (region.x - imageSize.x) / 2.0f, 0.0f });
+				ImGui::Dummy(ImVec2{ 0.0f, (childSize.y - textureSize.y) / 2.0f });
+				ImGui::Dummy(ImVec2{ (childSize.x - textureSize.x) / 2.0f, 0.0f });
 				ImGui::SameLine();
 
 				const ImVec2 cursor{ ImGui::GetCursorScreenPos() };
 				auto drawList{ ImGui::GetWindowDrawList() };
-				drawList->AddRect(cursor, cursor + imageSize, ImGui::ColorConvertFloat4ToU32(style.Colors[ImGuiCol_Text]));
+				drawList->AddRect(cursor, cursor + textureSize, ImGui::ColorConvertFloat4ToU32(style.Colors[ImGuiCol_Text]));
 			}
-			else if (imageSize.x < region.x - style.ScrollbarSize)
+			else if (textureSize.x < childSize.x - style.ScrollbarSize)
 			{
-				ImGui::Dummy(ImVec2{ (region.x - style.ScrollbarSize - imageSize.x) / 2.0f, 0.0f });
+				ImGui::Dummy(ImVec2{ (childSize.x - style.ScrollbarSize - textureSize.x) / 2.0f, 0.0f });
 				ImGui::SameLine();
 
 				const ImVec2 cursor{ ImGui::GetCursorScreenPos() };
 				auto drawList{ ImGui::GetWindowDrawList() };
-				drawList->AddLine(cursor, cursor + ImVec2{ 0.0f, imageSize.y }, ImGui::ColorConvertFloat4ToU32(style.Colors[ImGuiCol_Text]));
-				drawList->AddLine(cursor + ImVec2{ imageSize.x, 0.0f }, cursor + imageSize, ImGui::ColorConvertFloat4ToU32(style.Colors[ImGuiCol_Text]));
+				drawList->AddLine(cursor, cursor + ImVec2{ 0.0f, textureSize.y }, ImGui::ColorConvertFloat4ToU32(style.Colors[ImGuiCol_Text]));
+				drawList->AddLine(cursor + ImVec2{ textureSize.x, 0.0f }, cursor + textureSize, ImGui::ColorConvertFloat4ToU32(style.Colors[ImGuiCol_Text]));
 			}
-			else if (imageSize.y < region.y - style.ScrollbarSize)
+			else if (textureSize.y < childSize.y - style.ScrollbarSize)
 			{
-				ImGui::Dummy(ImVec2{ 0.0f, (region.y - style.ScrollbarSize - imageSize.y) / 2.0f });
+				ImGui::Dummy(ImVec2{ 0.0f, (childSize.y - style.ScrollbarSize - textureSize.y) / 2.0f });
 
 				const ImVec2 cursor{ ImGui::GetCursorScreenPos() };
 				auto drawList{ ImGui::GetWindowDrawList() };
-				drawList->AddLine(cursor, cursor + ImVec2{ imageSize.x, 0.0f }, ImGui::ColorConvertFloat4ToU32(style.Colors[ImGuiCol_Text]));
-				drawList->AddLine(cursor + ImVec2{ 0.0f, imageSize.y }, cursor + imageSize, ImGui::ColorConvertFloat4ToU32(style.Colors[ImGuiCol_Text]));
+				drawList->AddLine(cursor, cursor + ImVec2{ textureSize.x, 0.0f }, ImGui::ColorConvertFloat4ToU32(style.Colors[ImGuiCol_Text]));
+				drawList->AddLine(cursor + ImVec2{ 0.0f, textureSize.y }, cursor + textureSize, ImGui::ColorConvertFloat4ToU32(style.Colors[ImGuiCol_Text]));
 			}
-			ImGui::Image(textureID, imageSize);
+			ImGui::Image(textureID, textureSize);
 			ImGui::PopStyleVar();
 			ImGui::EndChild();
 		} while (false);

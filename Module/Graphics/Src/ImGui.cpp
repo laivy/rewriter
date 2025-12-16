@@ -137,6 +137,8 @@ namespace Graphics::ImGui
 		texture.width = desc.Width;
 		texture.height = desc.Height;
 
+		// 이미 텍스쳐가 있는 경우 이번 프레임에 사용되고 있을 수도 있으므로
+		// 다음 프레임 시작할 때 갱신
 		if (ictx->textures.contains(id))
 		{
 			ictx->textureHolder.emplace_back(id, texture);
@@ -152,14 +154,16 @@ namespace Graphics::ImGui
 		auto ictx{ Context::GetInstance() };
 		if (!ictx)
 			return ImTextureID_Invalid;
-		if (!ictx->textures.contains(id))
-			return CreateTexture(id);
-		return ictx->textures.at(id).id;
+		if (ictx->textures.contains(id))
+			return ictx->textures.at(id).id;
+		return CreateTexture(id);
 	}
 
 	ImTextureID GetTexture(const std::wstring& name)
 	{
 		const auto id{ Resource::Get(name) };
+		if (id == Resource::InvalidID)
+			return ImTextureID_Invalid;
 		return GetTexture(id);
 	}
 

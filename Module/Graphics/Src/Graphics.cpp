@@ -292,45 +292,6 @@ namespace Graphics
 		Context::Destroy();
 	}
 
-	Resource::Sprite LoadSprite(Resource::ID id, std::span<std::byte> binary)
-	{
-		auto ctx{ Context::GetInstance() };
-		if (!ctx || !ctx->d2dContext)
-			return {};
-
-		ComPtr<IWICImagingFactory> factory;
-		ComPtr<IWICStream> stream;
-		ComPtr<IWICBitmapDecoder> decoder;
-		ComPtr<IWICFormatConverter> converter;
-		ComPtr<IWICBitmapFrameDecode> frameDecode;
-		ComPtr<ID2D1Bitmap> bitmap;
-		if (FAILED(::CoCreateInstance(CLSID_WICImagingFactory, nullptr, CLSCTX_INPROC_SERVER, IID_PPV_ARGS(&factory))))
-			return {};
-		if (FAILED(factory->CreateStream(&stream)))
-			return {};
-		if (FAILED(stream->InitializeFromMemory(reinterpret_cast<WICInProcPointer>(binary.data()), static_cast<DWORD>(binary.size()))))
-			return {};
-		if (FAILED(factory->CreateDecoderFromStream(stream.Get(), nullptr, WICDecodeMetadataCacheOnLoad, &decoder)))
-			return {};
-		if (FAILED(factory->CreateFormatConverter(&converter)))
-			return {};
-		if (FAILED(decoder->GetFrame(0, &frameDecode)))
-			return {};
-		if (FAILED(converter->Initialize(frameDecode.Get(), GUID_WICPixelFormat32bppPBGRA, WICBitmapDitherTypeNone, nullptr, 0.0f, WICBitmapPaletteTypeMedianCut)))
-			return {};
-		if (FAILED(ctx->d2dContext->CreateBitmapFromWicBitmap(converter.Get(), bitmap.GetAddressOf())))
-			return {};
-
-		const D2D1_SIZE_F size{ bitmap->GetSize() };
-		Resource::Sprite sprite{};
-#ifdef _TOOL
-		sprite.binary.assign(binary.begin(), binary.end());
-#endif
-		sprite.width = static_cast<std::uint32_t>(size.width);
-		sprite.height = static_cast<std::uint32_t>(size.height);
-		return sprite;
-	}
-
 	bool Begin3D()
 	{
 		auto ctx{ Context::GetInstance() };
@@ -395,5 +356,44 @@ namespace Graphics
 		if (!WaitForPreviousFrame())
 			return false;
 		return true;
+	}
+
+	Resource::Sprite LoadSprite(Resource::ID id, std::span<std::byte> binary)
+	{
+		auto ctx{ Context::GetInstance() };
+		if (!ctx || !ctx->d2dContext)
+			return {};
+
+		ComPtr<IWICImagingFactory> factory;
+		ComPtr<IWICStream> stream;
+		ComPtr<IWICBitmapDecoder> decoder;
+		ComPtr<IWICFormatConverter> converter;
+		ComPtr<IWICBitmapFrameDecode> frameDecode;
+		ComPtr<ID2D1Bitmap> bitmap;
+		if (FAILED(::CoCreateInstance(CLSID_WICImagingFactory, nullptr, CLSCTX_INPROC_SERVER, IID_PPV_ARGS(&factory))))
+			return {};
+		if (FAILED(factory->CreateStream(&stream)))
+			return {};
+		if (FAILED(stream->InitializeFromMemory(reinterpret_cast<WICInProcPointer>(binary.data()), static_cast<DWORD>(binary.size()))))
+			return {};
+		if (FAILED(factory->CreateDecoderFromStream(stream.Get(), nullptr, WICDecodeMetadataCacheOnLoad, &decoder)))
+			return {};
+		if (FAILED(factory->CreateFormatConverter(&converter)))
+			return {};
+		if (FAILED(decoder->GetFrame(0, &frameDecode)))
+			return {};
+		if (FAILED(converter->Initialize(frameDecode.Get(), GUID_WICPixelFormat32bppPBGRA, WICBitmapDitherTypeNone, nullptr, 0.0f, WICBitmapPaletteTypeMedianCut)))
+			return {};
+		if (FAILED(ctx->d2dContext->CreateBitmapFromWicBitmap(converter.Get(), bitmap.GetAddressOf())))
+			return {};
+
+		const D2D1_SIZE_F size{ bitmap->GetSize() };
+		Resource::Sprite sprite{};
+#ifdef _TOOL
+		sprite.binary.assign(binary.begin(), binary.end());
+#endif
+		sprite.width = static_cast<std::uint32_t>(size.width);
+		sprite.height = static_cast<std::uint32_t>(size.height);
+		return sprite;
 	}
 }
