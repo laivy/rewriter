@@ -3,7 +3,7 @@
 
 namespace Delegates
 {
-	Delegate<int, int> OnWindowResized;
+	Delegate<Int2> OnWindowResized;
 	Delegate<Resource::ID> OnPropertyAdded;
 	Delegate<Resource::ID> OnPropertyDeleted;
 	Delegate<Resource::ID> OnPropertyModified;

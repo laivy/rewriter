@@ -22,5 +22,6 @@ namespace Graphics
 	GRAPHICS_API bool End2D();
 	GRAPHICS_API bool Present();
 
+	GRAPHICS_API void OnWindowResized(Int2 size);
 	GRAPHICS_API Resource::Sprite LoadSprite(Resource::ID id, std::span<std::byte> binary);
 }

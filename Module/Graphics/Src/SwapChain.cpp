@@ -104,6 +104,44 @@ namespace Graphics
 		return true;
 	}
 
+	bool SwapChain::Resize(Int2 size)
+	{
+		auto ctx{ Context::GetInstance() };
+		if (!ctx)
+			return false;
+
+		// 리셋
+		for (auto& frameResource : m_frameResources)
+		{
+			frameResource.backBuffer.Reset();
+			frameResource.wrappedBackBuffer.Reset();
+			frameResource.d2dBitmap.Reset();
+
+			ctx->descriptorManager->Free(frameResource.rtvHandle);
+			frameResource.rtvHandle = {};
+		}
+		ctx->d2dContext->SetTarget(nullptr);
+		ctx->d2dContext->Flush();
+		ctx->d3d11DeviceContext->OMSetRenderTargets(0, nullptr, nullptr);
+		ctx->d3d11DeviceContext->Flush();
+
+		m_viewport = CD3DX12_VIEWPORT{ 0.0f, 0.0f, static_cast<float>(size.x), static_cast<float>(size.y) };
+		m_scissorRect = D3D12_RECT{ 0, 0, static_cast<LONG>(size.x), static_cast<LONG>(size.y) };
+
+		DXGI_SWAP_CHAIN_DESC desc{};
+		if (FAILED(m_swapChain->GetDesc(&desc)))
+			return false;
+		if (FAILED(m_swapChain->ResizeBuffers(desc.BufferCount, size.x, size.y, desc.BufferDesc.Format, desc.Flags)))
+			return false;
+		m_frameIndex = m_swapChain->GetCurrentBackBufferIndex();
+
+		if (!CreateFrameResource())
+			return false;
+		if (!CreateDepthStencil())
+			return false;
+		return true;
+	}
+
 	bool SwapChain::CreateFrameResource()
 	{
 		auto ctx{ Context::GetInstance() };

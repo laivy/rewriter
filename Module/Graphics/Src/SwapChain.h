@@ -23,6 +23,8 @@ namespace Graphics
 		bool Unbind2D();
 		bool Present();
 
+		bool Resize(Int2 size);
+
 	private:
 		bool CreateFrameResource();
 		bool CreateDepthStencil();

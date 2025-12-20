@@ -9,8 +9,6 @@ public:
 
 	void Run();
 
-	Int2 GetCursorPosition() const;
-
 private:
 	static LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);
 

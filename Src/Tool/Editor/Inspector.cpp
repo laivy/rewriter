@@ -139,7 +139,7 @@ void Inspector::Render()
 	else if (auto value{ Resource::GetString(id) })
 	{
 		std::string str{ Util::ToU8String(*value) };
-		if (ImGui::InputText("##value", &str))
+		if (ImGui::InputTextMultiline("##value", &str))
 			isModified = Resource::Set(id, Util::ToWString(str));
 	}
 	else if (auto value{ Resource::GetSprite(id) })

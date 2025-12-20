@@ -358,6 +358,15 @@ namespace Graphics
 		return true;
 	}
 
+	void OnWindowResized(Int2 size)
+	{
+		if (!WaitForPreviousFrame())
+			return;
+		auto ctx{ Context::GetInstance() };
+		const bool success{ ctx->swapChain->Resize(size) };
+		assert(success);
+	}
+
 	Resource::Sprite LoadSprite(Resource::ID id, std::span<std::byte> binary)
 	{
 		auto ctx{ Context::GetInstance() };

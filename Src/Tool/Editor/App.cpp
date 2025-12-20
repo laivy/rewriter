@@ -8,7 +8,7 @@
 
 App::App() :
 	m_hWnd{ NULL },
-	m_windowSize{ 1280, 720 }
+	m_windowSize{ 1600, 900 }
 {
 	InitWindow();
 	InitApp();
@@ -44,16 +44,6 @@ void App::Run()
 	}
 }
 
-Int2 App::GetCursorPosition() const
-{
-	POINT mouse{};
-	if (!::GetCursorPos(&mouse))
-		return Int2{};
-	if (!::ScreenToClient(m_hWnd, &mouse))
-		return Int2{};
-	return Int2{ static_cast<int32_t>(mouse.x), static_cast<int32_t>(mouse.y) };
-}
-
 LRESULT App::WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
 	if (Graphics::ImGui::WndProc(hWnd, message, wParam, lParam))
@@ -75,7 +65,7 @@ LRESULT App::WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 			int height{ GET_Y_LPARAM(lParam) };
 			if (width == 0 && height == 0)
 				assert(false);
-			Delegates::OnWindowResized.Broadcast(width, height);
+			Delegates::OnWindowResized.Broadcast(Int2{ width, height });
 		}
 		return 0;
 	}
@@ -103,7 +93,6 @@ void App::InitWindow()
 	if (!::RegisterClassEx(&wcex))
 		return;
 
-	// 화면 최대 크기로 윈도우 생성
 	RECT rect{ 0, 0, m_windowSize.x, m_windowSize.y };
 	if (!::AdjustWindowRect(&rect, WS_OVERLAPPEDWINDOW, FALSE))
 		return;
@@ -132,7 +121,7 @@ void App::InitApp()
 	// 라이브러리 초기화
 	Graphics::Initialize(m_hWnd);
 	Resource::Initialize({ L"Editor", &Graphics::LoadSprite });
-	//Delegates::OnWindowResized.Bind(&Graphics::OnWindowResized);
+	Delegates::OnWindowResized.Bind(&Graphics::OnWindowResized);
 
 	// ImGui 초기화
 	ImGui::SetCurrentContext(Graphics::ImGui::GetContext());
