@@ -497,7 +497,7 @@ void Hierarchy::TreeView()
 		}
 		ImGui::EndDragDropTarget();
 	};
-	auto render = [this, &treeIDs, &multiSelectInfo, &popup, &reorder](this auto self, Resource::ID id, std::size_t index) -> void
+	auto render = [this, &treeIDs, &multiSelectInfo, &popup, &reorder](this auto&& self, Resource::ID id, std::size_t index) -> void
 	{
 		ImGui::PushID(std::to_string(id).c_str());
 		treeIDs.push_back(id);

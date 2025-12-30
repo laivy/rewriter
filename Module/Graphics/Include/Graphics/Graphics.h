@@ -8,8 +8,7 @@
 
 // 프로젝트
 #include "Export.h"
-#include "ImGui.h"
-#include "ImGuiFileDialog.h"
+#include "GraphicsImGui.h"
 
 namespace Graphics
 {
@@ -23,5 +22,5 @@ namespace Graphics
 	GRAPHICS_API bool Present();
 
 	GRAPHICS_API void OnWindowResized(Int2 size);
-	GRAPHICS_API Resource::Sprite LoadSprite(Resource::ID id, std::span<std::byte> binary);
+	GRAPHICS_API Resource::Sprite LoadSprite(std::span<std::byte> binary);
 }

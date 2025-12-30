@@ -17,6 +17,7 @@
 
 // 프로젝트
 #include "Export.h"
+#include "ImGuiFileDialog.h"
 
 namespace Graphics::ImGui
 {

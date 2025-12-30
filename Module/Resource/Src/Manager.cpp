@@ -17,7 +17,8 @@ namespace
 
 namespace Resource
 {
-	Manager::Manager()
+	Manager::Manager() :
+		m_loadSprite{ nullptr }
 	{
 		Delegates::OnInitialize.Bind(this, std::bind_front(&Manager::OnInitialize, this));
 		Delegates::OnFinalize.Bind(this, std::bind_front(&Manager::OnFinalize, this));
@@ -92,7 +93,7 @@ namespace Resource
 		if (ID parentID{ GetParent(id) }; parentID != InvalidID)
 			std::erase(m_idToEntry.at(parentID).children, id);
 
-		[this](this auto self, ID id)
+		[this](this auto&& self, ID id)
 		{
 			if (id >= m_properties.size())
 			{
@@ -532,7 +533,7 @@ namespace Resource
 				file.read(reinterpret_cast<char*>(&dataLength), sizeof(dataLength));
 				std::vector<std::byte> binary(dataLength);
 				file.read(reinterpret_cast<char*>(binary.data()), dataLength);
-				auto sprite{ m_loadSprite(id, binary) };
+				auto sprite{ m_loadSprite(binary) };
 				Set(id, sprite);
 				break;
 			}

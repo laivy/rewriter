@@ -20,7 +20,7 @@ generate_export_header(${target_name}
 set(public_sources
 	${CMAKE_CURRENT_SOURCE_DIR}/Include/${target_name}/Export.h
 	${CMAKE_CURRENT_SOURCE_DIR}/Include/${target_name}/Graphics.h
-	${CMAKE_CURRENT_SOURCE_DIR}/Include/${target_name}/ImGui.h
+	${CMAKE_CURRENT_SOURCE_DIR}/Include/${target_name}/GraphicsImGui.h
 	${CMAKE_CURRENT_SOURCE_DIR}/Include/${target_name}/ImGuiFileDialog.h
 )
 source_group("Include/${target_name}" FILES ${public_sources})
@@ -32,7 +32,7 @@ set(sources
 	${CMAKE_CURRENT_SOURCE_DIR}/Src/Descriptor.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/Src/Descriptor.h
 	${CMAKE_CURRENT_SOURCE_DIR}/Src/Graphics.cpp
-	${CMAKE_CURRENT_SOURCE_DIR}/Src/ImGui.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/Src/GraphicsImGui.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/Src/ImGuiFileDialog.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/Src/Pch.h
 	${CMAKE_CURRENT_SOURCE_DIR}/Src/SwapChain.cpp

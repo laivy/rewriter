@@ -210,22 +210,21 @@ namespace Graphics
 		if (FAILED(m_swapChain->GetDesc(&swapChainDesc)))
 			return false;
 
-		D3D12_RESOURCE_DESC desc{};
-		desc.Dimension = D3D12_RESOURCE_DIMENSION_TEXTURE2D;
-		desc.Width = swapChainDesc.BufferDesc.Width;
-		desc.Height = swapChainDesc.BufferDesc.Height;
-		desc.DepthOrArraySize = 1;
-		desc.MipLevels = 1;
-		desc.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
-		desc.SampleDesc.Count = 1;
-		desc.Flags = D3D12_RESOURCE_FLAG_ALLOW_DEPTH_STENCIL;
+		const CD3DX12_HEAP_PROPERTIES heapProp{ D3D12_HEAP_TYPE_DEFAULT };
 
-		D3D12_CLEAR_VALUE clearValue{};
-		clearValue.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
-		clearValue.DepthStencil.Depth = 1.0f;
-		clearValue.DepthStencil.Stencil = 0;
+		const auto desc{ CD3DX12_RESOURCE_DESC::Tex2D(
+			DXGI_FORMAT_D24_UNORM_S8_UINT,
+			swapChainDesc.BufferDesc.Width,
+			swapChainDesc.BufferDesc.Height,
+			1,
+			1,
+			1,
+			0,
+			D3D12_RESOURCE_FLAG_ALLOW_DEPTH_STENCIL
+		) };
 
-		CD3DX12_HEAP_PROPERTIES heapProp{ D3D12_HEAP_TYPE_DEFAULT };
+		const CD3DX12_CLEAR_VALUE clearValue{ DXGI_FORMAT_D24_UNORM_S8_UINT, 1.0f, 0 };
+
 		if (FAILED(ctx->d3d12Device->CreateCommittedResource(
 			&heapProp,
 			D3D12_HEAP_FLAG_NONE,
@@ -239,11 +238,14 @@ namespace Graphics
 
 		ctx->descriptorManager->Free(m_dsvHandle);
 		m_dsvHandle = ctx->descriptorManager->Allocate(D3D12_DESCRIPTOR_HEAP_TYPE_DSV);
+		if (!m_dsvHandle.cpuHandle.ptr)
+			return false;
 
-		D3D12_DEPTH_STENCIL_VIEW_DESC dsvDesc{};
-		dsvDesc.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
-		dsvDesc.ViewDimension = D3D12_DSV_DIMENSION_TEXTURE2D;
-		dsvDesc.Flags = D3D12_DSV_FLAG_NONE;
+		const D3D12_DEPTH_STENCIL_VIEW_DESC dsvDesc{
+			.Format = DXGI_FORMAT_D24_UNORM_S8_UINT,
+			.ViewDimension = D3D12_DSV_DIMENSION_TEXTURE2D,
+			.Flags = D3D12_DSV_FLAG_NONE
+		};
 		ctx->d3d12Device->CreateDepthStencilView(
 			m_depthStencil.Get(),
 			&dsvDesc,

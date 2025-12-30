@@ -4,7 +4,7 @@
 #include "Graphics.h"
 #include "SwapChain.h"
 #ifdef _IMGUI
-#include "../Include/Graphics/ImGui.h"
+#include "GraphicsImGui.h"
 #endif
 
 using Microsoft::WRL::ComPtr;
@@ -367,11 +367,13 @@ namespace Graphics
 		assert(success);
 	}
 
-	Resource::Sprite LoadSprite(Resource::ID id, std::span<std::byte> binary)
+	Resource::Sprite LoadSprite(std::span<std::byte> binary)
 	{
+		static const Resource::Sprite Empty{};
+
 		auto ctx{ Context::GetInstance() };
 		if (!ctx || !ctx->d2dContext)
-			return {};
+			return Empty;
 
 		ComPtr<IWICImagingFactory> factory;
 		ComPtr<IWICStream> stream;
@@ -380,26 +382,26 @@ namespace Graphics
 		ComPtr<IWICBitmapFrameDecode> frameDecode;
 		ComPtr<ID2D1Bitmap> bitmap;
 		if (FAILED(::CoCreateInstance(CLSID_WICImagingFactory, nullptr, CLSCTX_INPROC_SERVER, IID_PPV_ARGS(&factory))))
-			return {};
+			return Empty;
 		if (FAILED(factory->CreateStream(&stream)))
-			return {};
+			return Empty;
 		if (FAILED(stream->InitializeFromMemory(reinterpret_cast<WICInProcPointer>(binary.data()), static_cast<DWORD>(binary.size()))))
-			return {};
+			return Empty;
 		if (FAILED(factory->CreateDecoderFromStream(stream.Get(), nullptr, WICDecodeMetadataCacheOnLoad, &decoder)))
-			return {};
+			return Empty;
 		if (FAILED(factory->CreateFormatConverter(&converter)))
-			return {};
+			return Empty;
 		if (FAILED(decoder->GetFrame(0, &frameDecode)))
-			return {};
+			return Empty;
 		if (FAILED(converter->Initialize(frameDecode.Get(), GUID_WICPixelFormat32bppPBGRA, WICBitmapDitherTypeNone, nullptr, 0.0f, WICBitmapPaletteTypeMedianCut)))
-			return {};
+			return Empty;
 		if (FAILED(ctx->d2dContext->CreateBitmapFromWicBitmap(converter.Get(), bitmap.GetAddressOf())))
-			return {};
+			return Empty;
 
 		const D2D1_SIZE_F size{ bitmap->GetSize() };
 		Resource::Sprite sprite{};
 #ifdef _TOOL
-		sprite.binary.assign(binary.begin(), binary.end());
+		sprite.binary.append_range(binary);
 #endif
 		sprite.width = static_cast<std::uint32_t>(size.width);
 		sprite.height = static_cast<std::uint32_t>(size.height);

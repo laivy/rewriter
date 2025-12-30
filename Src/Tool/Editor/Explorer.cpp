@@ -354,7 +354,7 @@ void Explorer::FileTree()
 	{
 		ImGui::PushID(i++);
 		ImGui::PushStyleVar(ImGuiStyleVar_IndentSpacing, ImGui::GetFontSize() / 2.0f);
-		[this](this auto self, const std::filesystem::path& path) -> void
+		[this](this auto&& self, const std::filesystem::path& path) -> void
 		{
 			const auto folderIcon{ Graphics::ImGui::GetTexture(L"Editor/Config.lvy/Icon/Folder") };
 

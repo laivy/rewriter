@@ -72,7 +72,7 @@ namespace Graphics::Descriptor
 
 	void Manager::Free(const Handle& handle)
 	{
-		if (handle.cpuHandle.ptr == 0 && handle.gpuHandle.ptr == 0)
+		if (!handle.cpuHandle.ptr && !handle.gpuHandle.ptr)
 			return;
 
 		auto& heap{ m_heaps.at(handle.type) };

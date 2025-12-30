@@ -2,7 +2,6 @@
 // C++ 표준 라이브러리
 #include <cstddef>
 #include <filesystem>
-#include <functional>
 #include <span>
 
 // 프로젝트 모듈
@@ -17,10 +16,13 @@
 
 namespace Resource
 {
+	using LoadSpriteFunc = Sprite(*)(std::span<std::byte>);
+	//using LoadSpriteFunc = std::function<Sprite(ID, std::span<std::byte>)>;
+
 	struct Initializer
 	{
 		std::filesystem::path mountPath;
-		std::function<Sprite(ID, std::span<std::byte>)> loadSprite;
+		LoadSpriteFunc loadSprite;
 	};
 
 	RESOURCE_API void Initialize(const Initializer& initializer);
