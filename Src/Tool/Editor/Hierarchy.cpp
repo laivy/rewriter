@@ -402,10 +402,29 @@ void Hierarchy::TreeView()
 			if (std::ranges::any_of(m_selectedIDs, [this](auto id) { return !IsRoot(id); }))
 				break;
 
-			if (ImGui::MenuItem("새 프로퍼티", "N") || ImGui::IsKeyPressed(ImGuiKey_N))
+			if (ImGui::BeginMenu("새 프로퍼티"))
 			{
-				ImGui::CloseCurrentPopup();
-				New(id);
+				if (ImGui::MenuItem("폴더"))
+				{
+					New(id);
+				}
+				if (ImGui::MenuItem("정수"))
+				{
+					Resource::Set(New(id), 0);
+				}
+				if (ImGui::MenuItem("실수"))
+				{
+					Resource::Set(New(id), 0.0f);
+				}
+				if (ImGui::MenuItem("문자열"))
+				{
+					Resource::Set(New(id), L"");
+				}
+				if (ImGui::MenuItem("이미지"))
+				{
+					Resource::Set(New(id), Resource::Sprite{});
+				}
+				ImGui::EndMenu();
 			}
 			ImGui::Separator();
 			if (ImGui::MenuItem("저장", "S") || ImGui::IsKeyPressed(ImGuiKey_S))
@@ -435,10 +454,29 @@ void Hierarchy::TreeView()
 			if (std::ranges::any_of(m_selectedIDs, [this](auto id) { return IsRoot(id); }))
 				break;
 
-			if (ImGui::MenuItem("새 프로퍼티", "N") || ImGui::IsKeyPressed(ImGuiKey_N))
+			if (ImGui::BeginMenu("새 프로퍼티"))
 			{
-				ImGui::CloseCurrentPopup();
-				New(id);
+				if (ImGui::MenuItem("폴더"))
+				{
+					New(id);
+				}
+				if (ImGui::MenuItem("정수"))
+				{
+					Resource::Set(New(id), 0);
+				}
+				if (ImGui::MenuItem("실수"))
+				{
+					Resource::Set(New(id), 0.0f);
+				}
+				if (ImGui::MenuItem("문자열"))
+				{
+					Resource::Set(New(id), L"");
+				}
+				if (ImGui::MenuItem("이미지"))
+				{
+					Resource::Set(New(id), Resource::Sprite{});
+				}
+				ImGui::EndMenu();
 			}
 			ImGui::Separator();
 			if (ImGui::MenuItem("이름 바꾸기", "F2") || ImGui::Shortcut(ImGuiKey_F2))
