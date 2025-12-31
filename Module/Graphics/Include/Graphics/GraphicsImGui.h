@@ -1,9 +1,7 @@
 #pragma once
 #ifdef _IMGUI
 // C++ 표준 라이브러리
-#include <filesystem>
-#include <span>
-#include <string>
+#include <utility>
 
 // Windows
 #include <Windows.h>
@@ -27,10 +25,9 @@ namespace Graphics::ImGui
 	GRAPHICS_API void End();
 
 #ifdef _TOOL
-	GRAPHICS_API ImTextureID CreateTexture(Resource::ID id);
-	GRAPHICS_API ImTextureID GetTexture(Resource::ID id);
-	GRAPHICS_API ImTextureID GetTexture(const std::wstring& name);
-	GRAPHICS_API ImVec2 GetTextureSize(ImTextureID id);
+	GRAPHICS_API std::pair<ImTextureID, ImVec2> Image(Resource::ID id);
+	GRAPHICS_API std::pair<ImTextureID, ImVec2> Image(const std::wstring& path);
+	GRAPHICS_API void DeleteImage(Resource::ID id);
 #endif
 }
 #endif

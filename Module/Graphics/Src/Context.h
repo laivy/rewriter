@@ -40,8 +40,7 @@ namespace Graphics
 		{
 			Microsoft::WRL::ComPtr<ID3D12Resource> resource;
 			ImTextureID id;
-			std::uint32_t width;
-			std::uint32_t height;
+			ImVec2 size;
 		};
 
 		struct Context : Singleton<Context>
@@ -53,7 +52,6 @@ namespace Graphics
 			HANDLE fenceEvent;
 
 			std::unordered_map<Resource::ID, Texture> textures;
-			std::vector<std::pair<Resource::ID, Texture>> textureHolder;
 		};
 	}
 #endif

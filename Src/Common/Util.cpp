@@ -15,7 +15,7 @@ namespace Util
 		return str;
 	}
 
-	std::wstring Util::ToWString(std::string_view str)
+	std::wstring Util::ToU16String(std::string_view str)
 	{
 		if (str.empty())
 			return std::wstring{};

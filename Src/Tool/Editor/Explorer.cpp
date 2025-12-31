@@ -9,7 +9,7 @@ namespace
 
 	// ImGui::TreeNodeBehavior 함수 기반
 	// <펼침 버튼이 눌렸는지, 이름 부분이 눌렸는지>
-	std::pair<bool, bool> IconTreeNode(ImTextureID icon, const ImVec2& icon_size, std::string_view label, ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_None)
+	std::pair<bool, bool> TreeNode(ImTextureID tex, const ImVec2& image_size, std::string_view label, ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_None)
 	{
 		ImGuiID id = ImGui::GetID(label.data());
 
@@ -23,9 +23,9 @@ namespace
 		const ImVec2 padding = (display_frame || (flags & ImGuiTreeNodeFlags_FramePadding)) ? style.FramePadding : ImVec2(style.FramePadding.x, ImMin(window->DC.CurrLineTextBaseOffset, style.FramePadding.y));
 		const ImVec2 label_size = ImGui::CalcTextSize(label.data());
 
-		const float text_offset_x = g.FontSize + (display_frame ? padding.x * 3 : padding.x * 2) + (icon ? icon_size.x + padding.x : 0.0f); // Collapser arrow width + Spacing + icon
+		const float text_offset_x = g.FontSize + (display_frame ? padding.x * 3 : padding.x * 2) + (tex ? image_size.x + padding.x : 0.0f); // Collapser arrow width + Spacing + icon
 		const float text_offset_y = ImMax(padding.y, window->DC.CurrLineTextBaseOffset); // Latch before ItemSize changes it
-		const float text_width = g.FontSize + (label_size.x > 0.0f ? label_size.x + padding.x * 2 : 0.0f) + (icon ? icon_size.x + padding.x * 2 : 0.0f); // Include collapser and icon
+		const float text_width = g.FontSize + (label_size.x > 0.0f ? label_size.x + padding.x * 2 : 0.0f) + (tex ? image_size.x + padding.x * 2 : 0.0f); // Include collapser and icon
 
 		// We vertically grow up to current line height up the typical widget height.
 		const float frame_height = ImMax(ImMin(window->DC.CurrLineSize.y, g.FontSize + style.FramePadding.y * 2), label_size.y + padding.y * 2);
@@ -264,13 +264,16 @@ namespace
 					ImGui::RenderBullet(window->DrawList, ImVec2(text_pos.x - text_offset_x * 0.5f, text_pos.y + g.FontSize * 0.5f), text_col);
 				else if (!is_leaf)
 					ImGui::RenderArrow(window->DrawList, ImVec2(text_pos.x - text_offset_x + padding.x, text_pos.y + g.FontSize * 0.15f), text_col, is_open ? ((flags & ImGuiTreeNodeFlags_UpsideDownArrow) ? ImGuiDir_Up : ImGuiDir_Down) : ImGuiDir_Right, 0.70f);
-				if (icon)
-				{
-					ImVec2 lt{ text_pos.x - padding.x - icon_size.x, text_pos.y + (label_size.y - icon_size.y) / 2.0f };
-					ImVec2 rb{ text_pos.x - padding.x, lt.y + icon_size.y };
-					ImDrawList* drawList{ ImGui::GetWindowDrawList() };
-					drawList->AddImage(icon, lt, rb);
-				}
+
+				// 이미지
+				const ImVec2 lt{ text_pos.x - padding.x - image_size.x, text_pos.y + (label_size.y - image_size.y) / 2.0f };
+				const ImVec2 rb{ text_pos.x - padding.x, lt.y + image_size.y };
+				ImDrawList* drawList{ ImGui::GetWindowDrawList() };
+				if (tex)
+					drawList->AddImage(tex, lt, rb);
+				else
+					drawList->AddRectFilled(lt, rb, ImColor{ 0, 0, 0 });
+
 				if (g.LogEnabled)
 					ImGui::LogSetNextTextDecoration(">", NULL);
 				ImGui::RenderText(text_pos, label.data(), nullptr, false);
@@ -356,7 +359,7 @@ void Explorer::FileTree()
 		ImGui::PushStyleVar(ImGuiStyleVar_IndentSpacing, ImGui::GetFontSize() / 2.0f);
 		[this](this auto&& self, const std::filesystem::path& path) -> void
 		{
-			const auto folderIcon{ Graphics::ImGui::GetTexture(L"Editor/Config.lvy/Icon/Folder") };
+			const auto [folderIcon, _]{ Graphics::ImGui::Image(L"Editor/Config.lvy/Icon/Folder") };
 
 			bool hasSubFolder{ false };
 			for (const auto& entry : std::filesystem::directory_iterator{ path, std::filesystem::directory_options::skip_permission_denied })
@@ -372,7 +375,7 @@ void Explorer::FileTree()
 			ImGuiTreeNodeFlags flags{ ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_SpanFullWidth };
 			if (!hasSubFolder)
 				flags |= ImGuiTreeNodeFlags_Leaf;
-			const auto [isOpened, isClicked] { IconTreeNode(folderIcon, ImVec2{ ImGui::GetFontSize(), ImGui::GetFontSize() }, reinterpret_cast<const char*>(label.c_str()), flags) };
+			const auto [isOpened, isClicked] { TreeNode(folderIcon, ImVec2{ ImGui::GetFontSize(), ImGui::GetFontSize() }, reinterpret_cast<const char*>(label.c_str()), flags) };
 			if (isOpened)
 			{
 				for (const auto& entry : std::filesystem::directory_iterator{ path, std::filesystem::directory_options::skip_permission_denied })
@@ -418,7 +421,7 @@ void Explorer::AddressBar()
 		std::vector<std::filesystem::path> drives;
 		while (true)
 		{
-			size_t pos{ buffer.find(L'\0') };
+			const std::size_t pos{ buffer.find(L'\0') };
 			if (pos == 0 || pos == std::wstring::npos)
 				break;
 
@@ -428,7 +431,7 @@ void Explorer::AddressBar()
 
 		for (const auto& drive : drives)
 		{
-			if (ImGui::Selectable(reinterpret_cast<const char*>(drive.root_name().string().c_str())))
+			if (ImGui::Selectable(reinterpret_cast<const char*>(drive.root_name().u8string().c_str())))
 			{
 				SetPath(drive);
 				break;
@@ -440,13 +443,13 @@ void Explorer::AddressBar()
 	ImGui::PushStyleVarX(ImGuiStyleVar_ItemSpacing, 3.0f);
 	std::filesystem::path path;
 	std::filesystem::path currentPath;
-	for (std::size_t i{ 0 }; const auto& entry : m_path)
+	for (const auto& [i, entry] : m_path | std::views::enumerate)
 	{
 		currentPath /= entry;
 		if (entry.has_root_name() || entry.has_root_directory())
 			continue;
 
-		ImGui::PushID(i++);
+		ImGui::PushID(i);
 
 		// 폴더 이름 버튼
 		ImGui::SameLine();
@@ -500,7 +503,7 @@ void Explorer::AddressBar()
 
 void Explorer::FileViewer()
 {
-	if (!ImGui::BeginChild("FileViewer", ImVec2{}, false, ImGuiWindowFlags_HorizontalScrollbar))
+	if (!ImGui::BeginChild("FileViewer", ImVec2{}, ImGuiChildFlags_None, ImGuiWindowFlags_HorizontalScrollbar))
 	{
 		ImGui::EndChild();
 		return;
@@ -527,9 +530,9 @@ void Explorer::FileViewer()
 		if (!entry.is_directory())
 			continue;
 
-		const auto icon{ Graphics::ImGui::GetTexture(L"Editor/Config.lvy/Icon/Folder") };
+		const auto [icon, size] { Graphics::ImGui::Image(L"Editor/Config.lvy/Icon/Folder") };
 		std::wstring name{ entry.path().filename().wstring() };
-		if (FileViewerIconButton(icon, Util::ToU8String(name)))
+		if (FileViewerImageButton(icon, Util::ToU8String(name)))
 			SetPath(std::filesystem::canonical(m_path / name));
 		ImGui::SameLine();
 	}
@@ -540,9 +543,9 @@ void Explorer::FileViewer()
 		if (!entry.is_regular_file())
 			continue;
 
-		const auto icon{ Graphics::ImGui::GetTexture(L"Editor/Config.lvy/Icon/File") };
+		const auto [icon, size] { Graphics::ImGui::Image(L"Editor/Config.lvy/Icon/File") };
 		std::u8string name{ entry.path().filename().u8string() };
-		FileViewerIconButton(icon, reinterpret_cast<const char*>(name.c_str()), entry.path().wstring());
+		FileViewerImageButton(icon, reinterpret_cast<const char*>(name.c_str()), entry.path().wstring());
 		ImGui::SameLine();
 	}
 	ImGui::Spacing();
@@ -634,7 +637,7 @@ std::vector<std::string> Explorer::FileViewerSplitString(std::string_view string
 	return lines;
 }
 
-bool Explorer::FileViewerIconButton(ImTextureID icon, std::string_view label, std::wstring dragDropPayload)
+bool Explorer::FileViewerImageButton(ImTextureID tex, std::string_view label, std::wstring dragDropPayload)
 {
 	constexpr float ItemWidth{ 101.0f };
 	constexpr ImVec2 IconSize{ 64.0f, 64.0f };
@@ -689,7 +692,7 @@ bool Explorer::FileViewerIconButton(ImTextureID icon, std::string_view label, st
 		// 아이콘
 		ImGui::Dummy(ImVec2{ (ItemWidth - IconSize.x) / 2.0f, IconSize.y });
 		ImGui::SameLine();
-		ImGui::Image(icon, IconSize);
+		ImGui::Image(tex, IconSize);
 		ImGui::Spacing();
 
 		// 폴더 또는 파일 이름

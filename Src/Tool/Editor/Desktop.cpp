@@ -111,9 +111,9 @@ void Desktop::SaveConfig()
 
 	Resource::ID root{ GetOrNew(Resource::InvalidID, L"Editor/Config.lvy") };
 	Resource::ID theme{ GetOrNew(root, L"Theme") };
-	Resource::Set(theme, Util::ToWString(m_config.theme));
+	Resource::Set(theme, Util::ToU16String(m_config.theme));
 	Resource::ID font{ GetOrNew(root, L"FontName") };
-	Resource::Set(font, Util::ToWString(m_config.fontName));
+	Resource::Set(font, Util::ToU16String(m_config.fontName));
 	Resource::ID fontSize{ GetOrNew(root, L"FontSize") };
 	Resource::Set(fontSize, m_config.fontSize);
 	Resource::SaveToFile(root, L"Editor/Config.lvy");

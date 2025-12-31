@@ -26,28 +26,32 @@ App::~App()
 
 void App::Run()
 {
-	MSG msg{};
-	while (true)
+	bool done{ false };
+	while (!done)
 	{
-		if (::PeekMessage(&msg, NULL, 0, 0, PM_REMOVE))
+		MSG msg{};
+		while (::PeekMessage(&msg, NULL, 0, 0, PM_REMOVE))
 		{
 			if (msg.message == WM_QUIT)
-				break;
+			{
+				done = true;
+				continue;
+			}
 			::TranslateMessage(&msg);
 			::DispatchMessage(&msg);
 		}
-		else
-		{
-			Update();
-			Render();
-		}
+		if (done)
+			break;
+
+		Update();
+		Render();
 	}
 }
 
 LRESULT App::WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
 	if (Graphics::ImGui::WndProc(hWnd, message, wParam, lParam))
-		return 0;
+		return true;
 
 	App* app{ reinterpret_cast<App*>(::GetWindowLongPtr(hWnd, GWLP_USERDATA)) };
 	switch (message)
@@ -61,10 +65,8 @@ LRESULT App::WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 	{
 		if (wParam != SIZE_MINIMIZED)
 		{
-			int width{ GET_X_LPARAM(lParam) };
-			int height{ GET_Y_LPARAM(lParam) };
-			if (width == 0 && height == 0)
-				assert(false);
+			const int width{ GET_X_LPARAM(lParam) };
+			const int height{ GET_Y_LPARAM(lParam) };
 			Delegates::OnWindowResized.Broadcast(Int2{ width, height });
 		}
 		return 0;
@@ -78,6 +80,7 @@ LRESULT App::WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 	default:
 		break;
 	}
+
 	return ::DefWindowProc(hWnd, message, wParam, lParam);
 }
 

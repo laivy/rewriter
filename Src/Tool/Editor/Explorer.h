@@ -22,7 +22,7 @@ private:
 	void FileViewer();
 
 	std::vector<std::string> FileViewerSplitString(std::string_view string, const float width);
-	bool FileViewerIconButton(ImTextureID icon, std::string_view label, std::wstring dragDropPayload = L"");
+	bool FileViewerImageButton(ImTextureID icon, std::string_view label, std::wstring dragDropPayload = L"");
 
 	void SetPath(const std::filesystem::path& path);
 

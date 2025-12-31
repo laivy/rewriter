@@ -1,4 +1,4 @@
-﻿#include "Pch.h"
+#include "Pch.h"
 #include "App.h"
 
 int WINAPI WinMain(_In_		HINSTANCE hInstance,

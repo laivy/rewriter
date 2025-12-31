@@ -17,10 +17,10 @@ namespace
 	const std::unordered_map<Type, std::string_view> Types
 	{
 		{ Type::Folder, "폴더" },
-		{ Type::Int32, "int32" },
-		{ Type::Float, "float" },
-		{ Type::String, "string" },
-		{ Type::Sprite, "sprite" }
+		{ Type::Int32, "정수" },
+		{ Type::Float, "실수" },
+		{ Type::String, "문자열" },
+		{ Type::Sprite, "이미지" }
 	};
 
 	Type GetType(Resource::ID id)
@@ -73,22 +73,21 @@ void Inspector::Render()
 	}
 
 	const Type type{ GetType(id) };
+	const float labelOffsetX{ ImGui::CalcTextSize("타입").x + ImGui::GetStyle().ItemSpacing.x * 2.0f };
 	ImGui::AlignTextToFramePadding();
-
-	const float labelWidth{ ImGui::CalcTextSize("타입").x + ImGui::GetStyle().ItemSpacing.x * 2.0f };
 	ImGui::TextUnformatted("이름");
-	ImGui::SameLine(labelWidth);
+	ImGui::SameLine(labelOffsetX);
 	if (auto name{ Resource::GetName(id) })
 	{
 		ImGui::SetNextItemWidth(-ImGui::GetStyle().WindowPadding.x);
 		std::string str{ Util::ToU8String(*name) };
 		if (ImGui::InputText("##name", &str, ImGuiInputTextFlags_EnterReturnsTrue))
-			isModified = Resource::SetName(id, Util::ToWString(str));
+			isModified = Resource::SetName(id, Util::ToU16String(str));
 	}
 
 	ImGui::AlignTextToFramePadding();
 	ImGui::TextUnformatted("타입");
-	ImGui::SameLine(labelWidth);
+	ImGui::SameLine(labelOffsetX);
 	ImGui::SetNextItemWidth(-ImGui::GetStyle().WindowPadding.x);
 	if (ImGui::BeginCombo("##type", Types.at(type).data()))
 	{
@@ -124,7 +123,7 @@ void Inspector::Render()
 
 	ImGui::AlignTextToFramePadding();
 	ImGui::TextUnformatted("값");
-	ImGui::SameLine(labelWidth);
+	ImGui::SameLine(labelOffsetX);
 	ImGui::SetNextItemWidth(-ImGui::GetStyle().WindowPadding.x);
 	if (auto value{ Resource::GetInt(id) })
 	{
@@ -140,7 +139,7 @@ void Inspector::Render()
 	{
 		std::string str{ Util::ToU8String(*value) };
 		if (ImGui::InputTextMultiline("##value", &str))
-			isModified = Resource::Set(id, Util::ToWString(str));
+			isModified = Resource::Set(id, Util::ToU16String(str));
 	}
 	else if (auto value{ Resource::GetSprite(id) })
 	{
@@ -156,12 +155,15 @@ void Inspector::Render()
 
 		static float scale{ 100.0f };
 		const auto& style{ ImGui::GetStyle() };
-		const ImVec2 childSize{ []()
+		const ImVec2 childSize
 		{
-			ImVec2 size{ ImGui::GetContentRegionAvail() - ImGui::GetStyle().WindowPadding };
-			size.y -= ImGui::GetFrameHeight();
-			return size;
-		}() };
+			[]()
+			{
+				ImVec2 size{ ImGui::GetContentRegionAvail() - ImGui::GetStyle().WindowPadding };
+				size.y -= ImGui::GetFrameHeight();
+				return size;
+			}()
+		};
 		do
 		{
 			if (!ImGui::BeginChild("preview", childSize, ImGuiChildFlags_None, ImGuiWindowFlags_HorizontalScrollbar))
@@ -170,18 +172,14 @@ void Inspector::Render()
 				break;
 			}
 
-			const ImTextureID textureID{ Graphics::ImGui::GetTexture(id) };
-			if (textureID == ImTextureID_Invalid)
+			const auto [textureID, textureSize]
 			{
-				ImGui::EndChild();
-				break;
-			}
-
-			const ImVec2 textureSize{ [textureID]()
-			{
-				const auto size{ Graphics::ImGui::GetTextureSize(textureID) };
-				return size * scale / 100.0f;
-			}() };
+				[id]()
+				{
+					auto [tex, size] { Graphics::ImGui::Image(id) };
+					return std::make_pair(tex, size * scale / 100.0f);
+				}()
+			};
 
 			ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2{});
 			if (textureSize.x < childSize.x && textureSize.y < childSize.y)
@@ -213,15 +211,17 @@ void Inspector::Render()
 				drawList->AddLine(cursor, cursor + ImVec2{ textureSize.x, 0.0f }, ImGui::ColorConvertFloat4ToU32(style.Colors[ImGuiCol_Text]));
 				drawList->AddLine(cursor + ImVec2{ 0.0f, textureSize.y }, cursor + textureSize, ImGui::ColorConvertFloat4ToU32(style.Colors[ImGuiCol_Text]));
 			}
-			ImGui::Image(textureID, textureSize);
+			if (textureID == ImTextureID_Invalid)
+				ImGui::Dummy(textureSize);
+			else
+				ImGui::Image(textureID, textureSize);
 			ImGui::PopStyleVar();
 			ImGui::EndChild();
 		} while (false);
 
 		if (ImGui::BeginChild("scale", ImVec2{ -style.WindowPadding.x, ImGui::GetFrameHeight() }))
 		{
-			ImTextureID textureID{ Graphics::ImGui::GetTexture(id) };
-			const ImVec2 size{ Graphics::ImGui::GetTextureSize(textureID) };
+			const auto [_, size] { Graphics::ImGui::Image(id) };
 			ImGui::SameLine();
 			ImGui::AlignTextToFramePadding();
 			ImGui::Text("%.0f x %.0f", size.x, size.y);
@@ -254,7 +254,7 @@ void Inspector::Render()
 		file.read(reinterpret_cast<char*>(sprite.binary.data()), size);
 
 		isModified = Resource::Set(id, sprite);
-		Graphics::ImGui::CreateTexture(id);
+		Graphics::ImGui::DeleteImage(id);
 	}
 
 	if (isModified)

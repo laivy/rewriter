@@ -166,18 +166,18 @@ namespace
 			return false;
 
 		// ImGui 전용 D3D12 리소스 생성
-		if (auto imguiCtx{ Graphics::ImGui::Context::Instantiate() })
+		if (auto ictx{ Graphics::ImGui::Context::Instantiate() })
 		{
-			if (FAILED(ctx->d3d12Device->CreateCommandAllocator(D3D12_COMMAND_LIST_TYPE_DIRECT, IID_PPV_ARGS(&imguiCtx->commandAllocator))))
+			if (FAILED(ctx->d3d12Device->CreateCommandAllocator(D3D12_COMMAND_LIST_TYPE_DIRECT, IID_PPV_ARGS(&ictx->commandAllocator))))
 				return false;
-			if (FAILED(ctx->d3d12Device->CreateCommandList(0, D3D12_COMMAND_LIST_TYPE_DIRECT, imguiCtx->commandAllocator.Get(), nullptr, IID_PPV_ARGS(&imguiCtx->commandList))))
+			if (FAILED(ctx->d3d12Device->CreateCommandList(0, D3D12_COMMAND_LIST_TYPE_DIRECT, ictx->commandAllocator.Get(), nullptr, IID_PPV_ARGS(&ictx->commandList))))
 				return false;
-			imguiCtx->commandList->Close();
-			if (FAILED(ctx->d3d12Device->CreateFence(0, D3D12_FENCE_FLAG_NONE, IID_PPV_ARGS(&imguiCtx->fence))))
+			ictx->commandList->Close();
+			if (FAILED(ctx->d3d12Device->CreateFence(0, D3D12_FENCE_FLAG_NONE, IID_PPV_ARGS(&ictx->fence))))
 				return false;
-			imguiCtx->fenceValue = 1;
-			imguiCtx->fenceEvent = ::CreateEvent(nullptr, FALSE, FALSE, nullptr);
-			if (!imguiCtx->fenceEvent)
+			ictx->fenceValue = 1;
+			ictx->fenceEvent = ::CreateEvent(nullptr, FALSE, FALSE, nullptr);
+			if (!ictx->fenceEvent)
 				return false;
 		}
 
