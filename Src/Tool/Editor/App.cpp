@@ -86,13 +86,16 @@ LRESULT App::WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 
 void App::InitWindow()
 {
+	constexpr auto ClassName{ L"App" };
+	constexpr auto WindowName{ L"Editor" };
+
 	WNDCLASSEX wcex{};
 	wcex.cbSize = sizeof(WNDCLASSEX);
 	wcex.style = CS_VREDRAW | CS_HREDRAW;
 	wcex.lpfnWndProc = WndProc;
 	wcex.hInstance = HINST_THISCOMPONENT;
 	wcex.hCursor = ::LoadCursor(NULL, IDC_ARROW);
-	wcex.lpszClassName = WindowName;
+	wcex.lpszClassName = ClassName;
 	if (!::RegisterClassEx(&wcex))
 		return;
 

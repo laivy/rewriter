@@ -19,8 +19,6 @@ private:
 	void Render();
 
 private:
-	static constexpr auto WindowName{ L"Editor" };
-
 	HWND m_hWnd;
 	Int2 m_windowSize;
 	Timer m_timer;
