@@ -249,10 +249,11 @@ namespace
 			{
 				if (ctx.type == Graphics::ImGui::FileDialog::Type::Open)
 				{
-					if (std::filesystem::is_regular_file(ctx.selected))
-						ctx.result = ctx.selected;
-					else if (std::filesystem::is_directory(ctx.selected))
-						ctx.path = ctx.selected;
+					const auto result{ ctx.path / ctx.selected };
+					if (std::filesystem::is_regular_file(result))
+						ctx.result = result;
+					else if (std::filesystem::is_directory(result))
+						ctx.path = result;
 				}
 				else if (ctx.type == Graphics::ImGui::FileDialog::Type::Save)
 				{
