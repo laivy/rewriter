@@ -22,13 +22,11 @@ private:
 	void FileViewer();
 
 	std::vector<std::string> FileViewerSplitString(std::string_view string, const float width);
-	bool FileViewerImageButton(ImTextureID icon, std::string_view label, std::wstring dragDropPayload = L"");
+	bool FileButton(ImTextureID icon, ImVec2 imageSize, std::string_view label, std::wstring dragDropPayload = L"");
 
 	void SetPath(const std::filesystem::path& path);
 
 private:
-	static constexpr auto WindowName{ "Explorer" };
-
 	std::filesystem::path m_path;
 	bool m_addressBarScrollToRight;
 	FileViewerSelectedItem m_fileViewerSelectedItem;

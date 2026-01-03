@@ -26,25 +26,21 @@ App::~App()
 
 void App::Run()
 {
-	bool done{ false };
-	while (!done)
+	MSG msg{};
+	while (true)
 	{
-		MSG msg{};
-		while (::PeekMessage(&msg, NULL, 0, 0, PM_REMOVE))
+		if (::PeekMessage(&msg, NULL, 0, 0, PM_REMOVE))
 		{
 			if (msg.message == WM_QUIT)
-			{
-				done = true;
-				continue;
-			}
+				break;
 			::TranslateMessage(&msg);
 			::DispatchMessage(&msg);
 		}
-		if (done)
-			break;
-
-		Update();
-		Render();
+		else
+		{
+			Update();
+			Render();
+		}
 	}
 }
 
@@ -135,9 +131,9 @@ void App::InitApp()
 	io.IniFilename = "Editor/Imgui.ini";
 	for (const auto& entry : std::filesystem::directory_iterator{ L"Editor/Font" })
 	{
-		const auto& font{ entry.path() };
-		if (font.extension() == L".ttf")
-			io.Fonts->AddFontFromFileTTF(font.string().c_str(), 18.0f, nullptr, io.Fonts->GetGlyphRangesKorean());
+		const auto& path{ entry.path() };
+		if (path.extension() == L".ttf")
+			io.Fonts->AddFontFromFileTTF(reinterpret_cast<const char*>(path.u8string().c_str()), 18.0f, nullptr, io.Fonts->GetGlyphRangesKorean());
 	}
 
 	// 싱글톤 초기화
@@ -152,7 +148,7 @@ void App::InitApp()
 
 void App::Update()
 {
-	float deltaSeconds{ m_timer.Tick() };
+	const float deltaSeconds{ m_timer.Tick() };
 	if (auto desktop{ Desktop::GetInstance() })
 		desktop->Update(deltaSeconds);
 	if (auto explorer{ Explorer::GetInstance() })

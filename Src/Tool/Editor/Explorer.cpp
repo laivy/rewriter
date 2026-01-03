@@ -9,9 +9,14 @@ namespace
 
 	// ImGui::TreeNodeBehavior 함수 기반
 	// <펼침 버튼이 눌렸는지, 이름 부분이 눌렸는지>
-	std::pair<bool, bool> TreeNode(ImTextureID tex, const ImVec2& image_size, std::string_view label, ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_None)
+	std::pair<bool, bool> TreeNode(ImTextureID tex, ImVec2 image_size, std::string_view label, ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_None)
 	{
-		ImGuiID id = ImGui::GetID(label.data());
+		const ImGuiID id = ImGui::GetID(label.data());
+
+		// 이미지 가로, 세로 중 긴 쪽을 폰트 크기와 동일하게 스케일링
+		const float length{ ImGui::GetFontSize() };
+		const float image_scale{ length / std::max(image_size.x, image_size.y) };
+		image_size *= image_scale;
 
 		ImGuiWindow* window = ImGui::GetCurrentWindow();
 		if (window->SkipItems)
@@ -315,7 +320,7 @@ void Explorer::Update(float deltaSeconds)
 
 void Explorer::Render()
 {
-	if (ImGui::Begin(WindowName))
+	if (ImGui::Begin("탐색기"))
 	{
 		FileTree();
 		ImGui::BeginGroup();
@@ -356,10 +361,9 @@ void Explorer::FileTree()
 	for (int i{ 0 }; const auto& drive : drives)
 	{
 		ImGui::PushID(i++);
-		ImGui::PushStyleVar(ImGuiStyleVar_IndentSpacing, ImGui::GetFontSize() / 2.0f);
 		[this](this auto&& self, const std::filesystem::path& path) -> void
 		{
-			const auto [folderIcon, _]{ Graphics::ImGui::Image(L"Editor/Config.lvy/Icon/Folder") };
+			const auto [textureID, textureSize]{ Graphics::ImGui::Image(L"Editor/Config.lvy/Icon/Folder") };
 
 			bool hasSubFolder{ false };
 			for (const auto& entry : std::filesystem::directory_iterator{ path, std::filesystem::directory_options::skip_permission_denied })
@@ -375,7 +379,7 @@ void Explorer::FileTree()
 			ImGuiTreeNodeFlags flags{ ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_SpanFullWidth };
 			if (!hasSubFolder)
 				flags |= ImGuiTreeNodeFlags_Leaf;
-			const auto [isOpened, isClicked] { TreeNode(folderIcon, ImVec2{ ImGui::GetFontSize(), ImGui::GetFontSize() }, reinterpret_cast<const char*>(label.c_str()), flags) };
+			const auto [isOpened, isClicked] { TreeNode(textureID, textureSize, reinterpret_cast<const char*>(label.c_str()), flags) };
 			if (isOpened)
 			{
 				for (const auto& entry : std::filesystem::directory_iterator{ path, std::filesystem::directory_options::skip_permission_denied })
@@ -390,7 +394,6 @@ void Explorer::FileTree()
 				SetPath(path);
 			}
 		}(drive);
-		ImGui::PopStyleVar();
 		ImGui::PopID();
 	}
 
@@ -530,9 +533,9 @@ void Explorer::FileViewer()
 		if (!entry.is_directory())
 			continue;
 
-		const auto [icon, size] { Graphics::ImGui::Image(L"Editor/Config.lvy/Icon/Folder") };
-		std::wstring name{ entry.path().filename().wstring() };
-		if (FileViewerImageButton(icon, Util::ToU8String(name)))
+		const auto [textureID, textureSize] { Graphics::ImGui::Image(L"Editor/Config.lvy/Icon/Folder") };
+		const std::u8string name{ entry.path().filename().u8string() };
+		if (FileButton(textureID, textureSize, reinterpret_cast<const char*>(name.c_str())))
 			SetPath(std::filesystem::canonical(m_path / name));
 		ImGui::SameLine();
 	}
@@ -543,9 +546,9 @@ void Explorer::FileViewer()
 		if (!entry.is_regular_file())
 			continue;
 
-		const auto [icon, size] { Graphics::ImGui::Image(L"Editor/Config.lvy/Icon/File") };
-		std::u8string name{ entry.path().filename().u8string() };
-		FileViewerImageButton(icon, reinterpret_cast<const char*>(name.c_str()), entry.path().wstring());
+		const auto [textureID, textureSize] { Graphics::ImGui::Image(L"Editor/Config.lvy/Icon/File") };
+		const std::u8string name{ entry.path().filename().u8string() };
+		FileButton(textureID, textureSize, reinterpret_cast<const char*>(name.c_str()), entry.path().wstring());
 		ImGui::SameLine();
 	}
 	ImGui::Spacing();
@@ -569,6 +572,7 @@ std::vector<std::string> Explorer::FileViewerSplitString(std::string_view string
 			--j;
 		return j;
 	};
+
 	auto GetNextCharIndex = [](std::string_view s, std::size_t i)
 	{
 		unsigned char c{ static_cast<unsigned char>(s[i]) };
@@ -590,7 +594,7 @@ std::vector<std::string> Explorer::FileViewerSplitString(std::string_view string
 		if (width < ImGui::CalcTextSize(string.data(), string.data() + i).x)
 		{
 			// 줄 바꿈
-			std::size_t prev{ GetPrevCharIndex(string, i) };
+			const std::size_t prev{ GetPrevCharIndex(string, i) };
 			std::string_view line{ string.substr(0, prev) };
 			lines.emplace_back(line);
 
@@ -637,27 +641,35 @@ std::vector<std::string> Explorer::FileViewerSplitString(std::string_view string
 	return lines;
 }
 
-bool Explorer::FileViewerImageButton(ImTextureID tex, std::string_view label, std::wstring dragDropPayload)
+bool Explorer::FileButton(ImTextureID tex, ImVec2 imageSize, std::string_view label, std::wstring dragDropPayload)
 {
-	constexpr float ItemWidth{ 101.0f };
-	constexpr ImVec2 IconSize{ 64.0f, 64.0f };
-	constexpr float TextSpacingY{ -3.0f };
-
 	const float fontSize{ ImGui::GetFontSize() };
+	const float itemWidth{ fontSize * 5.0f };
+	const ImVec2 iconSize
+	{
+		[imageSize, fontSize]()
+		{
+			const float length{ fontSize * 4.0f };
+			const float scale{ length / std::max(imageSize.x, imageSize.y) };
+			return imageSize * scale;
+		}()
+	};
+	constexpr float textSpacingY{ -3.0f };
+
 	const ImVec2 itemSpacing{ ImGui::GetStyle().ItemSpacing };
 	const ImVec2 itemSize
 	{
-		ItemWidth,
+		itemWidth,
 		itemSpacing.y +
-		IconSize.y +
+		iconSize.y +
 		itemSpacing.y +
 		fontSize * FileViewerTextLineMax +
-		TextSpacingY * (FileViewerTextLineMax - 1) +
+		textSpacingY * (FileViewerTextLineMax - 1) +
 		itemSpacing.y
 	};
 
 	// 줄바꿈
-	if (ImGui::GetCursorPosX() + ItemWidth + itemSpacing.x > ImGui::GetContentRegionMax().x)
+	if (ImGui::GetCursorPosX() + itemWidth + itemSpacing.x > ImGui::GetContentRegionMax().x)
 		ImGui::Spacing();
 
 	ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2{ 0.0f, 0.0f });
@@ -690,23 +702,23 @@ bool Explorer::FileViewerImageButton(ImTextureID tex, std::string_view label, st
 		ImGui::Dummy(ImVec2{ itemSize.x, itemSpacing.y });
 
 		// 아이콘
-		ImGui::Dummy(ImVec2{ (ItemWidth - IconSize.x) / 2.0f, IconSize.y });
+		ImGui::Dummy(ImVec2{ (itemWidth - iconSize.x) / 2.0f, iconSize.y });
 		ImGui::SameLine();
-		ImGui::Image(tex, IconSize);
+		ImGui::Image(tex, iconSize);
 		ImGui::Spacing();
 
 		// 폴더 또는 파일 이름
-		constexpr float TextWrapWidth{ ItemWidth * 0.9f };
-		for (const auto& line : FileViewerSplitString(label, TextWrapWidth))
+		const float textWrapWidth{ itemWidth * 0.9f };
+		for (const auto& line : FileViewerSplitString(label, textWrapWidth))
 		{
 			const ImVec2 textSize{ ImGui::CalcTextSize(line.data(), line.data() + line.size()) };
-			ImGui::Dummy(ImVec2{ (ItemWidth - textSize.x) / 2.0f, textSize.y });
+			ImGui::Dummy(ImVec2{ (itemWidth - textSize.x) / 2.0f, textSize.y });
 			ImGui::SameLine();
 			ImGui::TextUnformatted(line.data(), line.data() + line.size());
 		}
 
-		ImGui::Dummy(ImVec2{ ItemWidth, itemSpacing.y });
-		endCursorPos.x = startCursorPos.x + ItemWidth;
+		ImGui::Dummy(ImVec2{ itemWidth, itemSpacing.y });
+		endCursorPos.x = startCursorPos.x + itemWidth;
 		endCursorPos.y = ImGui::GetCursorPosY();
 	}
 	ImGui::EndGroup();
@@ -736,7 +748,7 @@ bool Explorer::FileViewerImageButton(ImTextureID tex, std::string_view label, st
 	{
 		dragDropPayload.push_back(L'\0');
 		ImGui::SetDragDropPayload("EXPLORER/OPENFILE", dragDropPayload.data(), dragDropPayload.size() * sizeof(std::wstring::value_type));
-		ImGui::Text(label.data());
+		ImGui::TextUnformatted(label.data());
 		ImGui::EndDragDropSource();
 	}
 

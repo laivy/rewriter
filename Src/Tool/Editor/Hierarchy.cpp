@@ -188,7 +188,7 @@ void Hierarchy::OnMenuFileNew()
 void Hierarchy::OnMenuFileOpen()
 {
 	Graphics::ImGui::FileDialog::Open(
-		"Open Data File##Hierarchy",
+		"열기##Hierarchy",
 		Graphics::ImGui::FileDialog::Type::Open,
 		Graphics::ImGui::FileDialog::Target::File,
 		{ Stringtable::DataFileExtension }
@@ -218,7 +218,7 @@ void Hierarchy::OnMenuFileSaveAs()
 		return;
 
 	Graphics::ImGui::FileDialog::Open(
-		"Save Data File##Hierarchy/SaveAs",
+		"다른 이름으로 저장##Hierarchy/SaveAs",
 		Graphics::ImGui::FileDialog::Type::Save,
 		Graphics::ImGui::FileDialog::Target::File,
 		{ Stringtable::DataFileExtension }
@@ -706,7 +706,7 @@ void Hierarchy::TreeView()
 void Hierarchy::FileDialog()
 {
 	// 파일 열기
-	if (auto path{ Graphics::ImGui::FileDialog::Render("Open Data File##Hierarchy") })
+	if (auto path{ Graphics::ImGui::FileDialog::Render("열기##Hierarchy") })
 	{
 		LoadFromFile(*path);
 	}
@@ -714,7 +714,7 @@ void Hierarchy::FileDialog()
 	// 새 파일 생성
 	do
 	{
-		auto path{ Graphics::ImGui::FileDialog::Render("Save Data File##Hierarchy/New") };
+		auto path{ Graphics::ImGui::FileDialog::Render("저장##Hierarchy/New") };
 		if (!path)
 			break;
 
@@ -735,7 +735,7 @@ void Hierarchy::FileDialog()
 	// 다른 이름으로 저장
 	do
 	{
-		auto path{ Graphics::ImGui::FileDialog::Render("Save Data File##Hierarchy/SaveAs") };
+		auto path{ Graphics::ImGui::FileDialog::Render("다른 이름으로 저장##Hierarchy/SaveAs") };
 		if (!path)
 			break;
 		if (m_selectedIDs.empty())
@@ -769,7 +769,7 @@ Resource::ID Hierarchy::New(Resource::ID parentID)
 	if (parentID == Resource::InvalidID)
 	{
 		// 새로운 파일
-		Graphics::ImGui::FileDialog::Open("Save Data File##Hierarchy/New",
+		Graphics::ImGui::FileDialog::Open("저장##Hierarchy/New",
 			Graphics::ImGui::FileDialog::Type::Save,
 			Graphics::ImGui::FileDialog::Target::File,
 			{ Stringtable::DataFileExtension }
