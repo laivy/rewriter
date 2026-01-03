@@ -103,7 +103,9 @@ namespace Resource
 			return std::get<T>(prop->value);
 		}
 
+#ifdef _TOOL
 		bool SaveToFile(ID id, const std::filesystem::path& path) const;
+#endif
 
 	private:
 		void OnInitialize(const Initializer& initializer);

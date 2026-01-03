@@ -9,6 +9,7 @@ extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg
 
 namespace
 {
+#ifdef _TOOL
 	Graphics::ImGui::Texture CreateTexture(Resource::ID id)
 	{
 		const Graphics::ImGui::Texture Empty{};
@@ -100,6 +101,7 @@ namespace
 		texture.size.y = desc.Height;
 		return texture;
 	}
+#endif
 
 	Delegate<> OnPreBegin;
 }

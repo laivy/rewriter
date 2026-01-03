@@ -14,9 +14,19 @@ jobs:
         uses: lukka/get-cmake@latest
       - name: Setup MSVC
         uses: ilammy/msvc-dev-cmd@v1
-      - name: Configure CMake - tool
-        run: cmake --preset tool
-      - name: Build - tool-debug
-        run: cmake --build --preset tool-debug
-      - name: Build - tool-release
-        run: cmake --build --preset tool-release
+      - name: Build client-debug
+        run: |
+          cmake --preset client-debug
+          cmake --build --preset client-debug
+      - name: Build client-release
+        run: |
+          cmake --preset client-release
+          cmake --build --preset client-release
+      - name: Build tool-debug
+        run: |
+          cmake --preset tool-debug
+          cmake --build --preset tool-debug
+      - name: Build tool-release
+        run: |
+          cmake --preset tool-release
+          cmake --build --preset tool-release

@@ -1,5 +1,5 @@
 #pragma once
-#include "Common/Timer.h"
+#include <Common/Timer.h>
 
 class App : public Singleton<App>
 {
@@ -18,15 +18,8 @@ private:
 	void Update();
 	void Render();
 
-public:
-	static inline Delegate<UINT, WPARAM, LPARAM> OnKeyboardEvent;
-	static inline Delegate<UINT, int, int> OnMouseEvent;
-	static inline Delegate<int, int> OnResize;
-
-	static constexpr auto WINDOW_TITLE_NAME{ L"REWRITER" };
-	static inline HWND hWnd{ NULL };
-	static inline Int2 size{ 1920, 1080 };
-
 private:
+	HWND m_hWnd;
+	Int2 m_windowSize;
 	Timer m_timer;
 };

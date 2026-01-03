@@ -1,50 +1,92 @@
 {
-	"version": 9,
-	"cmakeMinimumRequired": {
-		"major": 3,
-		"minor": 30
-	},
-	"configurePresets": [
-		{
-			"name": "default",
-			"hidden": true,
-			"architecture": {
-				"value": "x64",
-				"strategy": "external"
-			},
-			"binaryDir": "${sourceDir}/Build/${presetName}",
-			"installDir": "${sourceDir}/Install/${presetName}",
-			"cacheVariables": {
-				"RWT_TARGET_CATEGORY": "None"
-			}
-		},
-		{
-			"name": "tool",
-			"inherits": "default",
-			"displayName": "Tool",
-			"cacheVariables": {
-				"RWT_TARGET_CATEGORY": "Tool"
-			}
-		}
-	],
-	"buildPresets": [
-		{
-			"name": "tool-debug",
-			"displayName": "Tool x64 Debug",
-			"configurePreset": "tool",
-			"targets": [
-				"Editor"
-			],
-			"configuration": "Debug"
-		},
-		{
-			"name": "tool-release",
-			"displayName": "Tool x64 Release",
-			"configurePreset": "tool",
-			"targets": [
-				"Editor"
-			],
-			"configuration": "Release"
-		}
-	]
+  "version": 9,
+  "cmakeMinimumRequired": {
+    "major": 3,
+    "minor": 30
+  },
+  "configurePresets": [
+    {
+      "name": "default",
+      "hidden": true,
+      "architecture": {
+        "value": "x64",
+        "strategy": "external"
+      },
+      "binaryDir": "${sourceDir}/Build/${presetName}",
+      "installDir": "${sourceDir}/Install/${presetName}",
+      "cacheVariables": {
+        "CMAKE_CONFIGURATION_TYPES": "Debug;Release",
+        "RWT_TARGET_CATEGORY": "None"
+      }
+    },
+    {
+      "name": "client-debug",
+      "inherits": "default",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Debug",
+        "RWT_TARGET_CATEGORY": "Client"
+      }
+    },
+    {
+      "name": "client-release",
+      "inherits": "default",
+      "displayName": "Client",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Release",
+        "RWT_TARGET_CATEGORY": "Client"
+      }
+    },
+    {
+      "name": "tool-debug",
+      "inherits": "default",
+      "displayName": "Tool",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Debug",
+        "RWT_TARGET_CATEGORY": "Tool"
+      }
+    },
+    {
+      "name": "tool-release",
+      "inherits": "default",
+      "displayName": "Tool",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Release",
+        "RWT_TARGET_CATEGORY": "Tool"
+      }
+    }
+  ],
+  "buildPresets": [
+    {
+      "name": "client-debug",
+      "displayName": "Client x64 Debug",
+      "configurePreset": "client-debug",
+      "targets": "Client",
+      "configuration": "Debug"
+    },
+    {
+      "name": "client-release",
+      "displayName": "Client x64 Release",
+      "configurePreset": "client-release",
+      "targets": "Client",
+      "configuration": "Release"
+    },
+    {
+      "name": "tool-debug",
+      "displayName": "Tool x64 Debug",
+      "configurePreset": "tool-debug",
+      "targets": [
+        "Editor"
+      ],
+      "configuration": "Debug"
+    },
+    {
+      "name": "tool-release",
+      "displayName": "Tool x64 Release",
+      "configurePreset": "tool-release",
+      "targets": [
+        "Editor"
+      ],
+      "configuration": "Release"
+    }
+  ]
 }

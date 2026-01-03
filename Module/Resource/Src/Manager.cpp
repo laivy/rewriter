@@ -317,6 +317,7 @@ namespace Resource
 		return m_idToEntry.at(id).path;
 	}
 
+#ifdef _TOOL
 	bool Manager::SaveToFile(ID id, const std::filesystem::path& path) const
 	{
 		if (id >= m_properties.size())
@@ -423,6 +424,7 @@ namespace Resource
 		std::filesystem::rename(tempFilePath, path);
 		return true;
 	}
+#endif
 
 	void Manager::OnInitialize(const Initializer& initializer)
 	{
@@ -442,7 +444,7 @@ namespace Resource
 	std::wstring Manager::NormalizePath(const std::wstring& path) const
 	{
 		constexpr auto separator{ Stringtable::DataPathSeperator.front() };
-		if (std::filesystem::path::preferred_separator == separator)
+		if (separator == std::filesystem::path::preferred_separator)
 			return path;
 
 		std::wstring result{ path };

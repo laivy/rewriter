@@ -2,6 +2,7 @@
 // C++ 표준 라이브러리
 #include <algorithm>
 #include <array>
+#include <cassert>
 #include <cstdint>
 #include <filesystem>
 #include <optional>

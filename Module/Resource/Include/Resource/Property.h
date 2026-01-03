@@ -93,5 +93,7 @@ namespace Resource
 	RESOURCE_API std::optional<Sprite> GetSprite(ID id, const std::wstring& path);
 
 	//RESOURCE_API void Unload(const ID id);
+#ifdef _TOOL
 	RESOURCE_API bool SaveToFile(const ID id, const std::filesystem::path& path);
+#endif
 }

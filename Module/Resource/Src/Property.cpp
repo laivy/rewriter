@@ -408,10 +408,12 @@ namespace Resource
 	//	Manager::GetInstance().Delete(id);
 	//}
 
+#ifdef _TOOL
 	bool SaveToFile(const ID id, const std::filesystem::path& path)
 	{
 		if (auto manager{ Manager::GetInstance() })
 			return manager->SaveToFile(id, path);
 		return false;
 	}
+#endif
 }

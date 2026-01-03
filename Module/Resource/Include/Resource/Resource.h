@@ -17,7 +17,6 @@
 namespace Resource
 {
 	using LoadSpriteFunc = Sprite(*)(std::span<std::byte>);
-	//using LoadSpriteFunc = std::function<Sprite(ID, std::span<std::byte>)>;
 
 	struct Initializer
 	{

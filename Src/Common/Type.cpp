@@ -209,8 +209,3 @@ bool RectF::Contains(const Float2& point) const
 		return true;
 	return false;
 }
-
-Matrix::Matrix() :
-	m{}
-{
-}
